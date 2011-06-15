@@ -7,4 +7,6 @@ documentation/sphinx/_build/*
 documentation/postgres_autodoc
 documentation/videos
 documentation/WEBSITE
-
+src/lib_openmolar/_version*
+.*\.pyc$
+.*~$
