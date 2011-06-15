@@ -1,0 +1,14 @@
+#!/usr/bin/env xdg-open
+
+[Desktop Entry]
+Version=1.0
+Name=OpenMolar-Server
+GenericName=Dental Practice Management Suite
+Comment=Dental Practice Management Software
+Exec=openmolar-server
+Icon=openmolar-server
+Terminal=false
+Type=Application
+MimeType=application/x-openmolar;
+Categories=Office;
+Name[en_GB]=OpenMolar-Admin

@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<book xml:id="openmolar2 documentation" xmlns="http://docbook.org/ns/docbook" version="5.0">
+    <info xml:id="book_info">
+        <title>OpenMolar 2</title>
+        <author>
+        <personname>
+            <firstname>Neil</firstname>
+            <surname>Wallace</surname>
+         </personname>
+        </author>    
+        <copyright>     
+            <year>2010</year>
+            <holder>Neil Wallace</holder>
+        </copyright>
+    </info>
+    <preface xml:id="preface">
+        <title>Foreword</title>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/openmolar_with_title.png" format="PNG" width="300px"/>
+                </imageobject>
+            </mediaobject>
+        <para>OpenMolar is Dental Practice Management Software. This book aims to provide a user guide for clinicians and dental practice staff, consequently an assumption is made of knowledge of many dental terms. A glossary is provided for non-uk dentists and staff who may find the odd term unusual.</para>
+        <para>Developers looking to extend openmolar, or System Administrators providing installation support and maintenance should familiarise themselves with the technical documentation and/or detailed API documentation which are maintained at www.openmolar.com, where updated versions of this document can also be found.</para>
+    </preface>
+
+    <chapter xml:id="chapter1">
+        <title>Introduction</title>
+        <para>Dental Practices rely heavily on database technologies to maintain valuable and sensitive data.</para>
+        <para>Dental Practices also need to apply common business tools such as double entry book-keeping, invoicing, scheduling and stock management</para>
+        <para>Openmolar aims to provide a one-stop solution for these requirements, with a plugin architecture to allow further customisation.</para>
+        <para>The application came to be when a Scottish Dentist, Neil Wallace, found himself disastisfied with both the software and service provided by a well-established provided. With limited previous programming experience, but enough to realise that open source tools would need to form the backbone of his code, he learned python, qt (the toolkit used by well known applications such as "google earth" and "skype"), and became familiar with the mysql and postgres databases.</para>
+   	<para>The 1st rendition of the application was constructed in haste, as a frontend to the schema provided by the forementioned commercial provider, however it very soon became clear that this schema was not optimal. This solution did, however, provide a very stable and customised application for his dental practice, which served well for 2 years.</para>
+	<para>In March 2011, a complete re-write of openmolar was released, with a completely redesigned schema utilising the more compliant Postgresql database. This instruction manual relates to that version.</para>
+    </chapter>
+
+    <chapter xml:id="chapter2">
+        <title>Design</title>
+        <para>As a typical installation is over a network, with different roles being performed at different terminals, the application is modular.
+There are 3 main parts, client, admin and server.</para>
+	<itemizedlist>
+	<listitem><formalpara><title>Client</title>
+	<para>The Client is a lightweight desktop frontend which connects to a remote postgresql database. It views and updates patient records, chartings, medical histories, estimates etc.</para></formalpara></listitem>
+	<listitem><formalpara><title>Admin</title>
+	<para>The Admin application allows initial configuration of your postgresql server, and can be used for a more powerful interface to the database, viewing data in it's raw form, and generating custom reports etc.</para></formalpara></listitem>
+	<listitem><formalpara><title>Server</title>
+	<para>The Server module is an XMLRPC server which keeps all connected units aware of one another's actions. Intra-client messaging can be performed. It can also be used to "lock down" the application to authorised users only.</para></formalpara></listitem>
+	</itemizedlist> 
+	<para>These Application will now be discussed in more detail</para>   
+    </chapter>
+
+    <chapter xml:id="chapter3">
+        <title>The Client - Accessing records</title>
+        <formalpara>
+            <title>Accessing records</title>
+            <para>Let's start with the most used part of the application - the "client".</para>
+            <para>This application would normally be running in multiple locations, eg. in every dental surgery, and at the reception desk.</para>
+            <para>Additionally, it may be used remotely to access records out of hours.</para> 
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_empty.png" format="PNG" width="100%"/>
+                    </imageobject>
+                </mediaobject>
+
+                Here we see the client application, with no patient loaded.
+            </para>
+      
+            <para>To access a patient's record, visit the control panel in the top left corner.      
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_control_panel.png" format="PNG" />
+                    </imageobject>
+                </mediaobject>
+             Pressing the "Find" button will launch this dialog.
+             <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_patient_finder.png" format="PNG" />
+                    </imageobject>
+                </mediaobject>
+            </para>
+            
+            If multiple matches are found, another dialog is presented.
+            <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_final_choice.png" format="PNG"  width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            You may realise at this point that the patients listed are all characters from Harry Potter! 
+            The demo database which comes with openmolar has 62 such patients.
+            <para>After making your final selection the interface loads the chosen record, and you are presented with this screen.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client.png" format="PNG"  width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            <para>
+            <emphasis>NOTE</emphasis> If you are set to "reception mode", you will be presented with a different screen by default. 
+            The reason for this should become clear soon.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_reception.png" format="PNG"  width="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+        </formalpara>
+    
+    </chapter>
+    
+    <chapter xml:id="chapter4">
+        <title>The Client - New Record</title>
+        <formalpara><title>Entering a new patient</title>
+        <para>Entering a new patient is simple.</para>
+        <para>Again, visit the control panel</para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/client_control_panel.png" format="PNG" />
+                    </imageobject>
+                </mediaobject>
+             Pressing the "new patient" button (top middle) will launch this dialog.
+            <para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_new_patient_dialog.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            Complete the fields, and a new record is created. 
+            </para>
+            <para>
+            <emphasis>NOTE</emphasis>
+            This is a good time to introduce an important concept in the application - advanced dialog features.
+            </para>
+            <para>To keep the interface as clean and simple as possible, infrequently used functions are often hidden.</para>
+            <para>An example is this dialog, where options of a patient's "preferred name" and qualifications are not shown by default, but can be accessed by extending the dialog using the advanced button</para>
+            <para>This type of feature is common within the application, hopefully allowing new users to pick up the basics quickly, whilst giving advanced users every oppurtunity to use the full power of the database</para>
+            <para>            
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_new_patient_advanced.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            Here, for example is the advanced version of that dialog.
+            </para>
+            </formalpara>
+    </chapter>
+        
+        
+        
+    <chapter xml:id="chapter5">
+        <title>The Client - Postal Addresses</title>
+        <formalpara><title>Postal Addresses</title>
+            <para>Clicking the address link in the patient details panel (left of screen) allows entering and manipulation of addresses.
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_address_dialog.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            </para>           
+            <para>If an address is shared by several patients, this information can be displayed easily</para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_address_family_members.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            
+            <para>As before this dialog has an advanced mode, which probably illustrates why some options are normally hidden!.
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_address_dialog_advanced.png" format="PNG"  width="100%"/>
+                </imageobject>
+            </mediaobject>
+            </para>
+            </formalpara>
+    </chapter>
+        
+        
+        
+    <chapter xml:id="chapter6">
+            <title>The Client - Charting</title>
+            <formalpara><title>Several charting "modes" are available.</title>
+    
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_chart_adult_complex.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_chart_adult_simple.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_chart_deciduous.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_chart_mixed.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_chart_roots_only.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+            
+    </formalpara>
+    </chapter>
+        
+        
+        
+    <chapter xml:id="chapter7">
+            <title>The Client - Treatment Planning</title>
+            <formalpara><title>Adding Treatment</title>
+            <para>Treatment can be added in one of two ways.</para>
+            <itemizedlist>
+	            <listitem>Via the charts (in the same way that static chart information is added)</listitem>
+	            <listitem>Or from the procedure codes widget (which "docks" on the right of screen)</listitem>
+	        </itemizedlist>
+	        
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_charts.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_charts_procedure_panel.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+
+            </formalpara>
+    </chapter>
+            
+    <chapter xml:id="client-estimates">
+            <title>The Client - Estimates</title>
+            <formalpara><title>The Estimates Tree</title>
+            <para>Here your treatments are shown in an itemised way.</para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_estimates.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+            <para>Of course, the procedure codes widget can still be accessed whilst on this page</para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/client_estimates_procedure_panel.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+            </formalpara>
+    </chapter>
+
+    
+    <chapter xml:id="chapter_admin1">
+            <title>Admin Application</title>
+            <para>Whilst the client provides everyday functionality, the admin application provides a deeper level of access to the database.</para>
+            <formalpara><title>Functions provided by the admin application</title>
+                <itemizedlist>
+	                <listitem>Installation of a database schema</listitem>
+	                <listitem>The Creation of a demo database (if required)</listitem>
+	                <listitem>Customisation of the database (ie. entering YOUR practice details)</listitem>
+	                <listitem>Advanced querying/editing of the database</listitem>
+	                <listitem>Export facilities (currently to excel files and/or csv)</listitem>
+	            </itemizedlist>
+	        </formalpara>
+	</chapter>
+    
+    <chapter xml:id="chapter_admin2">
+            <title>Admin Application - Get connected.</title>
+            <para>You need to tell the application where your postgres server is running.</para>
+            <para>To do this, go to edit -> preferences -> database connections</para>
+            <para>The following dialogs appear during connection...
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/common_connect_message.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            </para>
+            <para>and it's advanced version
+             <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/common_connect_advanced.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            </para>
+
+   
+    </chapter>
+
+    <chapter xml:id="chapter_admin3">
+            <title>Admin Application - installing a schema and demo database</title>
+            <formalpara><title>Installing a schema</title>
+	            <para>Click on openmolar_tools - then install schema.</para>
+	            <para><emphasis>READ ANY WARNINGS CAREFULLY - THIS ACTION WILL WIPE THE DATABASE YOU ARE CONNECTED TO.</emphasis></para>
+                 <para>
+                 <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/admin_install_schema.png" format="PNG" />
+                    </imageobject>
+                </mediaobject>
+                </para>
+            </formalpara>
+            
+            <formalpara><title>Populate with demo data</title>
+                <para>Click on openmolar_tools - then poulate with demo data
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/admin_populate_demo.png" format="PNG" />
+                </imageobject>
+            </mediaobject>
+            <emphasis>Advanced option</emphasis> you can select to populate only certain tables with data, via the advanced features of thes dialogs.
+            
+            </para>
+            <para>
+            If you accept this, the following progress dialog will appear.. time to put the kettle on.
+            </para>
+
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/screenshots/admin_populate_demo_progress.png" format="PNG" width="100%" />
+                </imageobject>
+            </mediaobject>
+            </formalpara>
+    </chapter>
+
+    <chapter xml:id="chapter_admin4">
+            <title>Admin Application - database perusal.</title>
+            <para>The admin application provides the following views of the database</para>
+            <formalpara><title>A table view</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/admin_table_viewer.png" format="PNG" width="100%" />
+                    </imageobject>
+                </mediaobject>
+                <para>Data edited here is committed to the database with immediate effect. <emphasis>use with caution!</emphasis></para>
+            </formalpara>
+                
+            <formalpara><title>A syntax highlighted sql query tool.</title>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/admin_query_tool.png" format="PNG" width="100%" />
+                    </imageobject>
+                </mediaobject>
+                 <para>for simple queries.....</para>
+
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/screenshots/admin_query_tool_long_query.png" format="PNG" width="100%" />
+                    </imageobject>
+                </mediaobject>
+                <para>and more advanced queries.</para>
+                <para><emphasis>NOTE</emphasis> 
+                - tables created with this tool can be exported.. see the export dropdown in the top right of the shot.</para>
+            </formalpara>
+            
+
+    </chapter>
+    
+    <index xml:id="index">    </index>
+
+</book>

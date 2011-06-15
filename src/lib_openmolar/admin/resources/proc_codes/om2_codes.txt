@@ -1,0 +1,92 @@
+--01xx|Examinations
+0101|Exam(Routine)
+0102|Exam(Extensive)
+0103|Consultation
+
+--02xx|Diagnosis
+0201|small
+0202|bitewings
+0203|medium
+0204|panoral
+
+--03xx|Prevention
+0300|Scale & Polish
+0301|Extended Scale & Polish
+
+--04xx|Plastic Restorations
+0400|Amalgam 1 surface|(tooth,surfaces)
+0401|Amalgam 2 surfaces|(tooth,surfaces)
+0402|Amalgam 3 surfaces|(tooth,surfaces)
+0403|Amalgam 4 or more surfaces|(tooth,surfaces)
+0410|Composite 1 surface|(tooth,surfaces)
+0411|Composite 2 surfaces|(tooth,surfaces)
+0412|Composite 3 surfaces|(tooth,surfaces)
+0413|Composite 4 or more surfaces|(tooth,surfaces)
+0420|Glass Ionomer 1 surface|(tooth,surfaces)
+0421|Glass Ionomer 2 or more surfaces|(tooth,surfaces)
+0430|Other 1 surface|(tooth,surfaces,description)
+0431|Other 2 surfaces|(tooth,surfaces,description)
+0432|Other 3 surfaces|(tooth,surfaces,description)
+0433|Other 4 or more surfaces|(tooth,surfaces,description)
+0440|Pin Retention|(tooth)
+
+--05xx|Crowns
+0500|PJC|(tooth)
+0501|Porcelain/Precious Metal|(tooth)
+0502|Porcelain/Non-Precious Metal|(tooth)
+0510|Gold Shell|(tooth)
+0511|Gold 3/4 crown|(tooth)
+0512|Gold reverse 3/4 crown|(tooth)
+0513|Gold 7/8 crown|(tooth)
+0520|Resin Crown|(tooth)
+0530|Opalite Crown|(tooth)
+0532|3M Lava Crown|(tooth)
+0590|Other Crown|(tooth,description)
+
+--06xx|Inlays/Onlays
+0600|Porcelain Inlay|(tooth,surfaces)
+0601|Porcelain Onlay|(tooth,surfaces)
+0610|Gold Inlay|(tooth,surfaces)
+0611|Gold Onlay|(tooth,surfaces)
+0690|Other Inlay|(tooth,surfaces,description)
+0691|Other Onlay|(tooth,surfaces,description)
+
+--07xx|Removable Prosthetics
+0700|Full/Full Acrylic Dentures
+0701|Full Upper Acrylic Denture
+0702|Full Lower Acrylic Denture
+0710|Full/Full metal-based Dentures
+0711|Full Upper metal-based Denture
+0712|Full Lower metal-based Denture
+0720|Partial Upper Acrylic Denture|(pontics)
+0721|Partial Lower Acrylic Denture|(pontics)
+0730|Partial Upper metal-based Denture|(pontics)
+0731|Partial Lower metal-based Denture|(pontics)
+0750|Partial Upper Flexible Denture|(pontics,description)
+0751|Partial Lower Flexible Denture|(pontics,description)
+0770|Other Upper Denture|(pontics,description)
+0771|Other Lower Denture|(pontics,description)
+0780|Special Tray
+0781|Occlusal Registration
+0782|Try-in of denture
+0783|Repeat Try-in of denture
+
+--08xx|Fixed Prosthetics
+0800|2 Unit Bridge|(teeth,pontics)
+0801|3 Unit Bridge|(teeth,pontics)
+0802|4 Unit Bridge|(teeth,pontics)
+
+--09xx|Implants
+0900|Ankylos implant|(teeth, description)
+
+--10xx|Surgery
+1000|Extraction|(teeth)
+ 
+--11xx|Orthodontics
+1100|Removable Appliance(description)
+
+--12xx|Other
+1200|Other Treatment|(description)
+
+
+

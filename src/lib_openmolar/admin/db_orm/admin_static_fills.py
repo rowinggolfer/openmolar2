@@ -1,0 +1,129 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+###############################################################################
+##                                                                           ##
+##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##                                                                           ##
+##  This program is free software: you can redistribute it and/or modify     ##
+##  it under the terms of the GNU General Public License as published by     ##
+##  the Free Software Foundation, either version 3 of the License, or        ##
+##  (at your option) any later version.                                      ##
+##                                                                           ##
+##  This program is distributed in the hope that it will be useful,          ##
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of           ##
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            ##
+##  GNU General Public License for more details.                             ##
+##                                                                           ##
+##  You should have received a copy of the GNU General Public License        ##
+##  along with this program.  If not, see <http://www.gnu.org/licenses/>.    ##
+##                                                                           ##
+###############################################################################
+
+'''
+Provides a SchemaGenerator and DemoGenerator for static_fills table
+'''
+from random import randint
+from PyQt4 import QtSql
+
+from lib_openmolar.admin import table_schema
+from lib_openmolar.common import common_db_orm
+
+from lib_openmolar.common import SETTINGS
+
+
+SCHEMA = '''
+ix SERIAL,
+patient_id INTEGER NOT NULL REFERENCES patients(ix),
+tooth SMALLINT NOT NULL,
+surfaces VARCHAR(5) NOT NULL,
+material fill_material_type NOT NULL,
+comment VARCHAR(80),
+date_charted DATE NOT NULL DEFAULT CURRENT_DATE,
+CONSTRAINT pk_static_fills PRIMARY KEY (ix),
+CONSTRAINT static_fills_surface_rule CHECK (surfaces~'^[MODBL]*$')
+'''
+
+TABLENAME = "static_fills"
+
+
+class SchemaGenerator(table_schema.TableSchema):
+    '''
+    A custom object which lays out the schema for this table.
+    '''
+    def __init__(self):
+        table_schema.TableSchema.__init__(self, "static_fills", SCHEMA)
+        self.comment = _(
+'''data for known fillings present in the patients mouth''')
+
+
+class DemoGenerator(object):
+    def __init__(self, database=None):
+        q_query= QtSql.QSqlQuery(
+            "select min(ix), max(ix) from patients", database)
+        if q_query.first():
+            self.min_patient_id = q_query.value(0).toInt()[0]
+            self.max_patient_id = q_query.value(1).toInt()[0]
+        else:
+            self.min_patient_id, self.max_patient_id = 0,0
+
+        self.length = (self.max_patient_id - self.min_patient_id) * 8
+
+        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record.remove(self.record.indexOf('date_charted'))
+
+    def fill_list(self):
+        for val in self.backteeth_fill_list():
+            yield val
+        for val in self.frontteeth_fill_list():
+            yield val
+
+    def backteeth_fill_list(self):
+        SURFACES = ("MO","O","B","OB","DO","MOD", "MODL", "MOB", "MODB", "MODBL")
+        MATERIALS = ("AM", "AM", "CO", "GL", "GO", "PO")
+        TEETH = SETTINGS.upper_back + SETTINGS.lower_back
+        randno = len(TEETH) -1
+        for i in range(4):
+            tooth = TEETH[randint(0, randno)]
+            surfaces = SURFACES[randint(0, len(SURFACES)-1)]
+            material = MATERIALS[randint(0, len(MATERIALS)-1)]
+            fill = (tooth, surfaces, material)
+            yield fill
+
+    def frontteeth_fill_list(self):
+        SURFACES = ("MO","M","B","D","MOB","DOB", "OL", "L", "DB", "MB")
+        MATERIALS = ("CO", "CO", "CO", "GL", "GO")
+        TEETH = SETTINGS.upper_front + SETTINGS.lower_front
+        randno = len(TEETH) -1
+        for i in range(4):
+            tooth = TEETH[randint(0, randno)]
+            surfaces = SURFACES[randint(0, len(SURFACES)-1)]
+            material = MATERIALS[randint(0, len(MATERIALS)-1)]
+            fill = (tooth, surfaces, material)
+
+            yield fill
+
+    def demo_queries(self):
+        '''
+        return a list of queries to populate a demo database
+        '''
+        for patient in xrange(self.min_patient_id, self.max_patient_id+1):
+            for tooth, fill, material in self.fill_list():
+                self.record.clearValues()
+                #set values, or allow defaults
+                self.record.setValue('patient_id', patient)
+                self.record.setValue('surfaces', fill)
+                self.record.setValue('material', material)
+                self.record.setValue('tooth', tooth)
+                self.record.setValue('comment', "generated by demo_installer")
+
+                yield self.record.insert_query
+
+if __name__ == "__main__":
+    from lib_openmolar.admin.connect import AdminConnection
+    sc = AdminConnection()
+    sc.connect()
+
+    builder = DemoGenerator(sc)
+    queries = builder.demo_queries()
+    print queries.next()

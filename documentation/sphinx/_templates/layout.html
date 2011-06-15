@@ -1,0 +1,25 @@
+{% extends "!layout.html" %}
+
+
+{# update static links in the relbar #}
+{% block rootrellink %}
+    <li><a href={{ pathto('index') }}>Docs Home </a> &raquo;</li>
+    
+    {%- if 'technical' in pagename %} 
+        {%- if hasdoc('technical/classes/classindex') %}
+        <li class="right"><a title="{{ _('All Classes') }}" href="{{ pathto('technical/classes/classindex') }}"">Class Index</a> |</li>
+        {%- endif %}
+    {%- endif %}
+    {{ super() }}
+    
+{% endblock %}
+
+
+{%- block sidebarlogo %}
+  {%- if logo %}
+  <p class="logo"><a href="{{ pathto('index') }}">
+    <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo"/>
+  </a></p>
+  {%- endif %}
+{%- endblock %}
+

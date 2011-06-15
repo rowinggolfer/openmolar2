@@ -1,0 +1,10 @@
+documentation/docbook/html
+documentation/docbook/pdf
+documentation/epydoc/html
+documentation/sphinx/technical/classes
+documentation/sphinx/technical/classes/*
+documentation/sphinx/_build/*
+documentation/postgres_autodoc
+documentation/videos
+documentation/WEBSITE
+
