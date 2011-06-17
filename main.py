@@ -28,8 +28,8 @@ import gettext
 import os
 import subprocess
 import sys
+from optparse import OptionParser
 
-from PyQt4 import QtGui, QtCore
 
 lang = os.environ.get("LANG")
 if lang:
@@ -43,77 +43,76 @@ else:
     print "no language environment found"
     gettext.install('openmolar', unicode=True)
 
-def run_admin():
-    print "running admin app as process %s"%(
-    subprocess.Popen(["python", "admin_app.py"]).pid)
 
-def run_client():
-    print "running client app as process %s"%(
-    subprocess.Popen(["python", "client_app.py"]).pid)
+class Parser(OptionParser):
+    def __init__(self):
+        OptionParser.__init__(self)
 
-def run():
-    '''
-    main function
-    '''
-    from lib_openmolar.common.dialogs import BaseDialog
+        self.add_option("-a", "--admin",
+                        dest = "admin",
+                        action="store_true", default=False,
+                        help = _("open the admin appliation")
+                        )
 
-    class ChoiceDialog(BaseDialog):
-        def __init__(self, parent=None):
-            super (ChoiceDialog, self).__init__(parent)
-            self.setWindowTitle(_("OpenMolar2 Control Panel"))
-            self.setMinimumSize(300, 200)
-            message = u"%s<br />%s"% (
-            _("Please select which application to run."),
-            _("Or be brave, and run both!"))
+        self.add_option("-c", "--client",
+                        dest = "client",
+                        action="store_true", default=False,
+                        help = _("open the admin appliation"),
+                        )
 
-            label = QtGui.QLabel(message)
-            label.setMinimumHeight(50)
-            label.setAlignment(QtCore.Qt.AlignCenter)
+        self.add_option("--install-demo",
+                        dest = "install_demo",
+                        action="store_true", default=False,
+                        help = "install a demo database",
+                        )
 
-            self.client_checkbox = QtGui.QCheckBox(_("Client"), self)
-            self.admin_checkbox = QtGui.QCheckBox(_("Admin Tools"), self)
+        self.add_option("--test-suite",
+                        dest = "test_suite",
+                        action="store_true", default=False,
+                        help = "run the code test suite",
+                        )
 
-            self.insertWidget(label)
-            self.insertWidget(self.client_checkbox)
-            self.insertWidget(self.admin_checkbox)
-
-            self.client_checkbox.toggled.connect(self._check)
-            self.admin_checkbox.toggled.connect(self._check)
-
-        def _check(self):
-            '''
-            if user has selected one or both guis.. enable the apply button
-            '''
-            self.enableApply(self.client_checkbox.isChecked() or
-                self.admin_checkbox.isChecked())
-
-    app = QtGui.QApplication(sys.argv)
-    dl = ChoiceDialog()
-    if dl.exec_():
-        if dl.admin_checkbox.isChecked():
-            run_admin()
-        if dl.client_checkbox.isChecked():
-            run_client()
-    else:
-        sys.exit(app.closeAllWindows())
-    app.closeAllWindows()
-    app = None
-    sys.exit()
-
-if __name__ == "__main__":
+def change_dir():
     def determine_path ():
         """Borrowed from wxglade.py"""
-        try:
-            root = __file__
-            if os.path.islink (root):
-                root = os.path.realpath (root)
-            retarg = os.path.dirname (os.path.abspath (root))
-            return retarg
-        except:
-            print "I'm sorry, but something is wrong."
-            print "There is no __file__ variable. Please contact the author."
-            sys.exit ()
+        root = __file__
+        if os.path.islink (root):
+            root = os.path.realpath (root)
+        retarg = os.path.dirname (os.path.abspath (root))
+        return retarg
 
     os.chdir(os.path.join(determine_path(), "src"))
-    print sys.path
-    run()
+
+def main():
+    '''
+    entry point of the entire openmolar suite
+    '''
+    change_dir()
+
+    parser  = Parser()
+    options, args = parser.parse_args()
+
+    if parser.values == parser.defaults:
+        import options_gui
+        if options_gui.main(parser):
+            parser  = Parser()
+        options, args = parser.parse_args()
+
+    if options.admin:
+        print "running admin app as process %s"%(
+        subprocess.Popen(["python", "admin_app.py"]).pid)
+
+    if options.client:
+        print "running client app as process %s"%(
+        subprocess.Popen(["python", "client_app.py"]).pid)
+
+    if options.install_demo:
+        print "install a demo db"
+
+    if options.test_suite:
+        print "running test suite as process %s"%(
+        subprocess.Popen(["python", "test_suite.py"]).pid)
+
+
+if __name__ == "__main__":
+    main()

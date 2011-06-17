@@ -29,8 +29,8 @@ class BaseDialog(QtGui.QDialog):
     slots connected to accept and reject
     has a VBoxlayout - accessed by self.layout
     '''
-    def __init__(self, parent=None):
-        super(BaseDialog, self).__init__(parent)
+    def __init__(self, parent=None, remove_stretch=False):
+        QtGui.QDialog.__init__(self, parent)
 
         self.button_box = QtGui.QDialogButtonBox(self)
         self.button_box.setOrientation(QtCore.Qt.Horizontal)
@@ -55,6 +55,9 @@ class BaseDialog(QtGui.QDialog):
         self.layout.addItem(self.spacer)
         self.layout.addWidget(self.button_box)
         self.insertpoint_offset = 2
+
+        if remove_stretch:
+            self.remove_spacer()
 
     def sizeHint(self):
         return self.minimumSizeHint()

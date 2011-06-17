@@ -26,9 +26,10 @@ from lib_openmolar.common.dialogs import BaseDialog
 class ExtendableDialog(BaseDialog):
     '''
     builds on BaseDialog, adding an area for advanced options
+    unlike BaseDialog.. this dialog has no spacer item by default
     '''
-    def __init__(self, parent=None):
-        super(ExtendableDialog, self).__init__(parent)
+    def __init__(self, parent=None, remove_stretch=True):
+        super(ExtendableDialog, self).__init__(parent, remove_stretch)
 
         self.button_box.setCenterButtons(False)
 
@@ -41,8 +42,6 @@ class ExtendableDialog(BaseDialog):
         self.button_box.addButton(self.more_but, self.button_box.HelpRole)
 
         self.setOrientation(QtCore.Qt.Vertical)
-
-        self.remove_spacer() # BaseDialog's spacer is a pity.
 
         frame = QtGui.QFrame(self)
         layout = QtGui.QVBoxLayout(frame)
