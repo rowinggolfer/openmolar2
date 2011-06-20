@@ -36,7 +36,7 @@ def get_test_modules():
         for file_ in files:
             if re.match("test.*\.py$", file_):
                 module = __import__(re.sub("\.py$", "", file_))
-                yield module            
+                yield module
 
 def get_tests():
     '''
@@ -47,11 +47,11 @@ def get_tests():
     for mod in get_test_modules():
         for name in dir(mod):
             obj = getattr(mod, name)
-            
+
             # look for all subclasses of TestCase
             if (inspect.isclass(obj) and unittest.TestCase in obj.mro()):
                 yield unittest.TestLoader().loadTestsFromTestCase(obj)
-        
+
 def main():
     '''
     entry point for the application
@@ -59,13 +59,14 @@ def main():
     test_suite = unittest.TestSuite()
     for test in get_tests():
         test_suite.addTest(test)
-    
-    test_runner = unittest.TextTestRunner(verbosity=2) 
+
+    test_runner = unittest.TextTestRunner(verbosity=2)
     result = test_runner.run(test_suite)
     return not result.wasSuccessful()
-    
+
 if __name__ == "__main__":
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    sys.exit(main())
-    
+    main()
+    raw_input("press enter to exit")
+    sys.exit()

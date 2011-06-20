@@ -28,49 +28,85 @@ import gettext
 import os
 import subprocess
 import sys
-from optparse import OptionParser
+import optparse
+
+VERSION = 0.4
+
+gettext.install('openmolar', unicode=True)
 
 
-lang = os.environ.get("LANG")
-if lang:
-    try:
-        lang1 = gettext.translation('openmolar', languages=[lang,])
-        lang1.install(unicode=True)
-    except IOError:
-        print "%s not found, using default"% lang
-        gettext.install('openmolar', unicode=True)
-else:
-    print "no language environment found"
-    gettext.install('openmolar', unicode=True)
+class MyOption(optparse.Option):
+    '''
+    a very minor tweak to the default option class,
+    adding an attribute which is used if the options gui is called
+    '''
+    ADVANCED = False
+    OPTION = False
 
 
-class Parser(OptionParser):
+class Parser(optparse.OptionParser):
     def __init__(self):
-        OptionParser.__init__(self)
+        from lib_openmolar import _version
 
-        self.add_option("-a", "--admin",
+        optparse.OptionParser.__init__(self,
+            prog="openmolar2",
+            version="%s~hg%s"%(VERSION, _version.revision_number),
+            option_class=MyOption
+            )
+
+        option = self.add_option("-a", "--admin",
                         dest = "admin",
                         action="store_true", default=False,
-                        help = _("open the admin appliation")
+                        help = _("launch the admin application")
                         )
 
-        self.add_option("-c", "--client",
+        option = self.add_option("-c", "--client",
                         dest = "client",
                         action="store_true", default=False,
-                        help = _("open the admin appliation"),
+                        help = _("launch the client application"),
                         )
 
-        self.add_option("--install-demo",
+        option = self.add_option("-i", "--install-demo",
                         dest = "install_demo",
                         action="store_true", default=False,
-                        help = "install a demo database",
+                        help = "install a demo database (in default location)",
                         )
+        option.ADVANCED = True
 
-        self.add_option("--test-suite",
+        option = self.add_option("-s", "--test-suite",
                         dest = "test_suite",
                         action="store_true", default=False,
-                        help = "run the code test suite",
+                        help = "run the test suite",
                         )
+        option.ADVANCED = True
+
+        option = self.add_option("-t", "--terminal",
+                        dest = "terminal",
+                        action="store_true", default=False,
+            help = "run all chosen processes in terminals (gnome-terminal)"
+                       )
+        option.ADVANCED = True
+        option.OPTION = True
+
+    @property
+    def needs_more(self):
+        '''
+        add a property which will be true if user has specified
+        arguments which will do nothing
+        '''
+        options, args = self.parse_args()
+
+        needs_more = True
+        for option in self.option_list:
+            dest = option.dest
+            if dest is None or option.OPTION:
+                continue
+
+            changed = self.defaults[dest]  != options.__dict__[dest]
+            print dest, changed
+            needs_more = needs_more and not changed
+
+        return needs_more
 
 def change_dir():
     def determine_path ():
@@ -82,6 +118,7 @@ def change_dir():
         return retarg
 
     os.chdir(os.path.join(determine_path(), "src"))
+    sys.path.insert(0, ".")
 
 def main():
     '''
@@ -90,28 +127,45 @@ def main():
     change_dir()
 
     parser  = Parser()
-    options, args = parser.parse_args()
 
-    if parser.values == parser.defaults:
+    if parser.needs_more:
         import options_gui
         if options_gui.main(parser):
             parser  = Parser()
-        options, args = parser.parse_args()
+    options, args = parser.parse_args()
+
+    if options.terminal:
+        print "processess will be in separate terminals"
+        term_prefix = ["gnome-terminal", "-x"]
+    else:
+        term_prefix = []
 
     if options.admin:
         print "running admin app as process %s"%(
-        subprocess.Popen(["python", "admin_app.py"]).pid)
+        subprocess.Popen(term_prefix +
+            ["python", "admin_app.py"]).pid)
 
     if options.client:
         print "running client app as process %s"%(
-        subprocess.Popen(["python", "client_app.py"]).pid)
+        subprocess.Popen(term_prefix +
+            ["python", "client_app.py"]).pid)
 
     if options.install_demo:
-        print "install a demo db"
+        print "install a demo db - process id %s"% (
+
+        #I might have to do something like this??
+
+        #subprocess.Popen(term_prefix +
+        #    ["gksu", "-u", "postgres",
+        #    "python admin_app.py --install-demo"]).pid)
+
+        subprocess.Popen(term_prefix +
+            ["python", "admin_app.py", "--install-demo"]).pid)
 
     if options.test_suite:
         print "running test suite as process %s"%(
-        subprocess.Popen(["python", "test_suite.py"]).pid)
+        subprocess.Popen(term_prefix +
+            ["python", "test_suite.py"]).pid)
 
 
 if __name__ == "__main__":

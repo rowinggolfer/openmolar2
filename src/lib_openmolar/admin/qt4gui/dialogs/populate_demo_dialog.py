@@ -100,8 +100,8 @@ class PopulateDemoDialog(ExtendableDialog):
             print args
         self.emit(QtCore.SIGNAL("Advise"), *args)
 
-    def exec_(self):
-        if not ExtendableDialog.exec_(self):
+    def exec_(self, check_first=True):
+        if check_first and not ExtendableDialog.exec_(self):
             return (False, "")
         dbname = self.connection.databaseName()
 

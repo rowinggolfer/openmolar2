@@ -24,18 +24,60 @@ import copy, sys
 from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.dialogs import ExtendableDialog
 
-class AdvancedWidget(QtGui.QTextEdit):
+
+class OptionWidget(QtGui.QWidget):
+    def __init__(self, option, parent=None):
+        QtGui.QWidget.__init__(self, parent)
+
+        self.option = option
+
+        if option.help:
+            cb_text = option.help
+        else:
+            cb_text = self.cli_text
+
+        self.check_box = QtGui.QCheckBox(cb_text, self)
+        self.check_box.setChecked(self.cli_text in sys.argv)
+
+        layout = QtGui.QHBoxLayout(self)
+        layout.addWidget(self.check_box)
+
+        self.toggled.connect(self.action)
+
+    @property
+    def toggled(self):
+        return self.check_box.toggled
+
+    @property
+    def cli_text(self):
+        return self.option.get_opt_string()
+
+    def action(self, value):
+        cli_text = self.cli_text
+        if value:
+            sys.argv.append(cli_text)
+        else:
+            sys.argv.remove(cli_text)
+
+        print sys.argv
+
+class OptionsWidget(QtGui.QScrollArea):
     def __init__(self, parent=None):
-        QtGui.QTextEdit.__init__(self, parent)
-        self.setStyleSheet("background-color: black; color: white")
-        self.setFont(QtGui.QFont("courier"))
+        QtGui.QScrollArea.__init__(self, parent)
+
+        self.options_frame = QtGui.QWidget()
+        layout = QtGui.QVBoxLayout(self.options_frame)
+        layout.setMargin(0)
+        layout.addStretch(0)
+
+        self.setWidget(self.options_frame)
+        self.setWidgetResizable(True)
+
+    def add_widget(self, widget):
+        self.options_frame.layout().insertWidget(0, widget)
 
     def sizeHint(self):
         return QtCore.QSize(200,150)
-
-    def setText(self, text):
-        QtGui.QTextEdit.setText(self, u"%s\n\n%s"% (
-        _("OpenMolar should be started with the following parameters"), text))
 
 class ChoiceDialog(ExtendableDialog):
     def __init__(self, parser, parent=None):
@@ -47,35 +89,50 @@ class ChoiceDialog(ExtendableDialog):
         '''
         ExtendableDialog.__init__(self, parent, remove_stretch=False)
 
+        self.parser = parser
         self.sys_argv_init = sys.argv[:]
 
         self.setWindowTitle(_("OpenMolar2 Control Panel"))
         self.setMinimumSize(300, 200)
-        message = _("Please supply some parameters for openmolar")
+
+        message = _("Openmolar should be started with parameters"
+                    " "
+                    "yet none were supplied."
+                    "\n"
+                    "This is why you are seeing this screen, which"
+                    " ""is primarily intended for developer use only."
+                    "\n\n"
+                    "Please supply some parameters for openmolar.")
+        button = QtGui.QPushButton(_("CLI useage"))
 
         label = QtGui.QLabel(message)
-        label.setMinimumHeight(50)
-        label.setAlignment(QtCore.Qt.AlignCenter)
+        label.setWordWrap(True)
 
-        self.insertWidget(label)
+        header = QtGui.QWidget()
+        layout = QtGui.QHBoxLayout(header)
+        layout.addWidget(label)
+        layout.addWidget(button)
 
-        i = -1
+
+        standard_widg = OptionsWidget()
+        advanced_widg = OptionsWidget()
+
+        self.insertWidget(header)
+        self.insertWidget(standard_widg)
+        self.add_advanced_widget(advanced_widg)
+
         for option in parser.option_list:
-            i += 1
-            if option.get_opt_string() == "--help":
+            if option.get_opt_string() in ("--help", "--version"):
                 continue
-            check_box = QtGui.QCheckBox(option.get_opt_string(), self)
-            check_box.toggled.connect(self._check)
-            if option.help:
-                check_box.setToolTip(option.help)
 
-            self.insertWidget(check_box)
+            option_widget = OptionWidget(option, self)
 
-        self.advanced_widget = AdvancedWidget()
-        self.add_advanced_widget(self.advanced_widget)
-        self.advanced_widget.setText(parser.format_help())
+            parent = advanced_widg if option.ADVANCED else standard_widg
+            parent.add_widget(option_widget)
 
-        self.set_advanced_but_text(_("command line options"))
+            option_widget.toggled.connect(self._check)
+
+        button.clicked.connect(self.show_cli_text)
 
     def sizeHint(self):
         return QtCore.QSize(400,300)
@@ -84,14 +141,16 @@ class ChoiceDialog(ExtendableDialog):
         '''
         if user has selected one or both guis.. enable the apply button
         '''
-        cli_text = str(self.sender().text())
-        if value:
-            sys.argv.append(cli_text)
-        else:
-            sys.argv.remove(cli_text)
+        self.enableApply(not self.parser.needs_more)
 
-        self.enableApply(len(self.sys_argv_init) != len(sys.argv))
+    def show_cli_text(self):
+        message = self.parser.format_help()
 
+        mb = QtGui.QMessageBox(self)
+        mb.setWindowTitle(_("CLI useage"))
+        mb.setFont(QtGui.QFont("courier"))
+        mb.setInformativeText(message)
+        mb.show()
 
 def main(parser):
     app = QtGui.QApplication(sys.argv)
@@ -106,6 +165,7 @@ def main(parser):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser()
-    parser.add_option("--admin")
-    options, args = parser.parse_args()
+    parser.needs_more = False
+    option = parser.add_option("--admin")
+    option.ADVANCED = False
     print main(parser)

@@ -1,1 +1,1 @@
-__all__ = ["common", "client", "admin"]
+__all__ = ["common", "client", "admin", "_version"]

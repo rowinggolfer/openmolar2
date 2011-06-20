@@ -261,8 +261,7 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
 
                     if q_query.lastError().isValid():
                         error = q_query.lastError().text()
-                        QtGui.QApplication.instance().emit(
-                            QtCore.SIGNAL("Query Error"), error)
+                        self.emit_(QtCore.SIGNAL("Query Error"), error)
                         log(error)
                         break
 
@@ -270,19 +269,34 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
                     progress = int(number_of_queries_executed /
                     total_number_of_queries * 100)
 
-                    QtGui.QApplication.instance().emit(
-                        QtCore.SIGNAL("demo progress"), module, progress)
+                    self.emit_(QtCore.SIGNAL("demo progress"),
+                                module, progress)
+
                 else: #some modules have no queries
-                    QtGui.QApplication.instance().emit(
-                        QtCore.SIGNAL("demo progress"), module, 100)
+                    self.emit_(QtCore.SIGNAL("demo progress"), module, 100)
 
             except Exception as e:
-                QtGui.QApplication.instance().emit(
-                    QtCore.SIGNAL("Query Error"),
+                self.emit_(QtCore.SIGNAL("Query Error"),
                     '''Error installing demo data from module %s<hr />%s'''% (
                         module.__name__, e))
+                log('CRITICAL ERROR')
+                log('\tERROR INSTALLING DATA from module %s'% module.__name__)
+                log('\t%s'% e)
 
-        QtGui.QApplication.instance().emit(QtCore.SIGNAL("demo install complete"))
+        self.emit_(QtCore.SIGNAL("demo install complete"))
+
+        log("DEMO INSTALL COMPLETE")
+        return True
+
+    def emit_(self, *args):
+        '''
+        emit signals but be wary of case when there is no gui
+        (ie. when install demo is called from CLI)
+        '''
+        if QtGui.QApplication.instance() is None:
+            return
+        QtGui.QApplication.instance().emit(*args)
+
 
 if __name__ == "__main__":
     import gettext
