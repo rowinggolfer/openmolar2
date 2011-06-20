@@ -34,10 +34,11 @@ class OptionWidget(QtGui.QWidget):
         if option.help:
             cb_text = option.help
         else:
-            cb_text = self.cli_text
+            cb_text = self.long_opt
 
         self.check_box = QtGui.QCheckBox(cb_text, self)
-        self.check_box.setChecked(self.cli_text in sys.argv)
+        self.check_box.setChecked(
+            self.short_opt in sys.argv or self.long_opt in sys.argv)
 
         layout = QtGui.QHBoxLayout(self)
         layout.addWidget(self.check_box)
@@ -49,18 +50,32 @@ class OptionWidget(QtGui.QWidget):
         return self.check_box.toggled
 
     @property
-    def cli_text(self):
-        return self.option.get_opt_string()
-
+    def long_opt(self):
+        try:
+            return self.option._long_opts[0]
+        except IndexError:
+            return None
+            
+    @property
+    def short_opt(self):
+        try:
+            return self.option._short_opts[0]
+        except IndexError:
+            return None
+        
     def action(self, value):
-        cli_text = self.cli_text
         if value:
-            sys.argv.append(cli_text)
-        else:
-            sys.argv.remove(cli_text)
-
-        print sys.argv
-
+            if self.short_opt is not None:
+                sys.argv.append(self.short_opt)
+            else:
+                sys.argv.append(self.long_opt)
+        else:        
+            for cli_text in (self.short_opt, self.long_opt):
+                try:
+                    sys.argv.remove(cli_text)
+                except ValueError:
+                    pass
+        
 class OptionsWidget(QtGui.QScrollArea):
     def __init__(self, parent=None):
         QtGui.QScrollArea.__init__(self, parent)
