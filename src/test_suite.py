@@ -30,7 +30,7 @@ def get_test_modules():
     '''
     get all modules in "unit_tests" directory
     '''
-    unittest_dir = os.path.join(".","tests","unit_tests")
+    unittest_dir = os.path.join(".","tests")
     for root, dir_, files in os.walk(unittest_dir):
         sys.path.insert(0, root)
         for file_ in files:

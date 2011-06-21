@@ -1,0 +1,13 @@
+
+[Desktop Entry]
+Version=1.0
+Name=OpenMolar2
+GenericName=Dental Practice Management Suite
+Comment=Dental Practice Management Software
+Exec=openmolar2-client
+Icon=openmolar
+Terminal=false
+Type=Application
+MimeType=application/x-openmolar;
+Categories=Office;
+Name[en_GB]=OpenMolar2

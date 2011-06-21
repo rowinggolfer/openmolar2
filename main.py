@@ -143,12 +143,12 @@ def main():
     if options.admin:
         print "running admin app as process %s"%(
         subprocess.Popen(term_prefix +
-            ["python", "admin_app.py"]).pid)
+            ["python", "openmalar-admin"]).pid)
 
     if options.client:
         print "running client app as process %s"%(
         subprocess.Popen(term_prefix +
-            ["python", "client_app.py"]).pid)
+            ["python", "openmolar-client"]).pid)
 
     if options.install_demo:
         print "install a demo db - process id %s"% (

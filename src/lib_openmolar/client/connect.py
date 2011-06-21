@@ -134,6 +134,8 @@ class ClientConnection(DatabaseConnection):
             q_query.addBindValue(value)
 
         if not q_query.exec_():
+            print "BAD QUERY?"
+            print query
             self.emit_caught_error(q_query.lastError())
         matches = []
         while q_query.next():
@@ -240,8 +242,8 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    #values = {"sname":"POTTA", "soundex_sname":True}
-    #print cc.get_matchlist(values)
+    values = {"sname":"POTTA", "soundex_sname":True}
+    print cc.get_matchlist(values)
 
     #values = {"addr":"RUE"}
     #print cc.get_address_matchmodel(values).rowCount()

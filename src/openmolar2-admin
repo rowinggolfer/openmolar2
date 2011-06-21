@@ -118,6 +118,18 @@ def create_demo_user():
     child.logfile = sys.stdout
     child.expect(pexpect.EOF, timeout=None)
 
+def install_fuzzy_match(db="openmolar_demo"):
+    '''
+    this function needs work to provide the soundex functions.
+    '''
+
+    print "="*80
+    print "WARNING - manual installation of soundex function required"
+    print "drop to a terminal and excute this"
+    print "psql -d openmolar_demo < ",
+    print "/usr/share/postgresql/8.4/contrib/fuzzystrmatch.sql"
+    print "="*80
+
 def initiate_demo_database():
     '''
     deletes any existing openmolar_demo database on this machine
@@ -130,9 +142,12 @@ def initiate_demo_database():
     delete_demo_database()
     delete_demo_user()
     create_demo_database()
+    install_fuzzy_match()
     create_demo_user()
     layout_tables()
     populate_demo()
+
+
 
 if __name__ == "__main__":
     if "--install-demo" in sys.argv:
