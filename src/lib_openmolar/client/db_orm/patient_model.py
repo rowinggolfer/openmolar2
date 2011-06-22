@@ -240,13 +240,6 @@ The behaviour of this object is very much like a dictionary.
         '''
         return self["treatment_model"]
 
-    @property
-    def treatment_items(self):
-        '''
-        a list of treatment items currently stored
-        '''
-        return self.treatment_model.treatment_items
-
     def get(self, key, fallback=None):
         '''
         PatientModel.get(self, key, fallback=None)

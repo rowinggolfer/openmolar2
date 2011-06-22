@@ -95,16 +95,20 @@ class ChartsPage(QtGui.QWidget):
 
     def treatment_page_chart_treatment_added(self, treatment_item):
         '''
-        handles a signal from the estimates page that an item has been added
+        handles a signal from the treatment page that an item has been added
+        (via a method other than the chart itself)
+        this updates the chart
         '''
-
-        print "adding the following to the tx plan chart", treatment_item
-        print treatment_item.tooth
+        #print "adding the following to the tx plan chart"
+        #print treatment_item
+        #print treatment_item.tooth
 
         tooth = self.treatment.tooth_from_ref(treatment_item.tooth)
 
         tooth_data = client_widgets.ToothData(tooth)
         tooth_data.from_treatment_item(treatment_item)
+
+        #print tooth_data
         self.treatment.add_data(tooth_data)
 
         self.treatment.model_changed()

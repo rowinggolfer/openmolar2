@@ -103,7 +103,7 @@ class DemoGenerator(object):
         self.record.setValue('qualifications', "BDS")
         self.record.setValue('status', "active")
         self.record.setValue('modified_by', "demo_installer")
-        self.record.setValue('avatar_id', 3)
+        self.record.setValue('avatar_id', 2)
 
         yield self.record.insert_query
         self.record.clearValues()
@@ -120,7 +120,7 @@ class DemoGenerator(object):
         self.record.setValue('qualifications', "BDS, DipOrth")
         self.record.setValue('status', "active")
         self.record.setValue('modified_by', "demo_installer")
-        self.record.setValue('avatar_id', 2)
+        self.record.setValue('avatar_id', 3)
 
         yield self.record.insert_query
         self.record.clearValues()

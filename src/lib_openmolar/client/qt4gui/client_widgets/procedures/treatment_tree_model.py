@@ -22,7 +22,8 @@
 
 from PyQt4 import QtGui, QtCore
 
-HORIZONTAL_HEADERS = ("Code", "Description", "No.", "details", "Px dent", "Tx dent",
+HORIZONTAL_HEADERS = ("Code", "Description", "No.", "details",
+"Px dent", "Tx dent",
 "Completed", "Invoiced", "Fee Scale", "Fee", "Patient Fee" )
 
 
@@ -88,9 +89,10 @@ class TreeItem(object):
 class TreatmentTreeModel(QtCore.QAbstractItemModel):
     '''
     a model to display treatment items
+    This is purely a display vessel for :doc:`TreatmentModel`
     '''
     def __init__(self, parent=None):
-        super(TreatmentTreeModel, self).__init__(parent)
+        QtCore.QAbstractItemModel.__init__(self, parent)
         self.clear()
         self.setupModelData()
 
@@ -179,8 +181,9 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
         if SETTINGS.current_patient is None:
             treatment_items = []
         else:
-            treatment_items = SETTINGS.current_patient.treatment_items
-        for treatment_item in sorted(treatment_items):
+            model = SETTINGS.current_patient.treatment_model
+            treatment_items = sorted(model.treatment_items)
+        for treatment_item in treatment_items:
             category = treatment_item.category
             if not self.parents.has_key(category):
                 newparent = TreeItem(None, category, self.rootItem)
@@ -192,39 +195,6 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
             newItem = TreeItem(treatment_item, "", parentItem)
             parentItem.appendChild(newItem)
         self.endResetModel()
-
-    def searchModel(self, person):
-        '''
-        get the modelIndex for a given appointment
-        '''
-        def searchNode(node):
-            '''
-            a function called recursively, looking at all nodes beneath node
-            '''
-            for child in node.childItems:
-                if person == child.treatment_item:
-                    index = self.createIndex(child.row(), 0, child)
-                    return index
-
-                if child.childCount() > 0:
-                    result = searchNode(child)
-                    if result:
-                        return result
-
-        retarg = searchNode(self.parents[0])
-        print retarg
-        return retarg
-
-    def find_code(self, code):
-        app = None
-        for treatment_item in self.treatment_items:
-            if treatment_item.code == code:
-                app = treatment_item
-                break
-        if app != None:
-            index = self.searchModel(app)
-            return (True, index)
-        return (False, None)
 
 class _TestDialog(QtGui.QDialog):
     def __init__(self, model, parent=None):

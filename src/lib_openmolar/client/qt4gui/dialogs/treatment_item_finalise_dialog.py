@@ -28,16 +28,16 @@ from lib_openmolar.common.dialogs import ExtendableDialog
 from lib_openmolar.client.qt4gui import client_widgets
 
 
-class ProcCodeFinaliseDialog(ExtendableDialog):
+class TreatmentItemFinaliseDialog(ExtendableDialog):
     def __init__(self, parent=None):
         '''
-        when some procedure codes are added from the ProcCodeWidget,
-        extra information is sometime required before applying it
+        when a :doc:`TreatmentItem` is added,
+        this dialog attempts to validate it.
+        (ie.. is the item aware who prescribed it?
+        if applicable - which tooth it relates to? etc. )
         '''
         ExtendableDialog.__init__(self, parent)
         self.setWindowTitle(_("Additional Information is Required"))
-        #self.enableApply()
-        #self.save_on_exit = True
 
         self.top_label = QtGui.QLabel(_("Additional Information is Required"))
         self.top_label.setAlignment(QtCore.Qt.AlignCenter)
@@ -50,7 +50,7 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
 
         teeth_needed_label = QtGui.QLabel()
         teeth_needed_label.setMinimumWidth(120)
-        teeth_needed_label.setText(_("Which tooth does this code relate to?"))
+        teeth_needed_label.setText(_("Which tooth is being treated?"))
         teeth_needed_label.setWordWrap(True)
 
         self.chosen_teeth_label = QtGui.QLabel("-")
@@ -96,6 +96,17 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
         layout.addWidget(self.chosen_pontics_label,1,0)
         layout.addWidget(self.pontics_chart,0,1,2,1)
 
+        ## a combo box for prescribing clinician
+        self.px_clinician_frame = QtGui.QFrame()
+
+        label = QtGui.QLabel(_("Who is prescribing this treatment?"))
+
+        self.px_dent_cb = QtGui.QComboBox()
+
+        layout = QtGui.QHBoxLayout(self.px_clinician_frame)
+        layout.addWidget(label)
+        layout.addWidget(self.px_dent_cb)
+
         ## a line edit for description
         self.description_frame = QtGui.QFrame()
         description_label = QtGui.QLabel(_("Description of item"))
@@ -107,6 +118,7 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
         layout.addWidget(self.description_line_edit)
 
         self.insertWidget(self.top_label)
+        self.insertWidget(self.px_clinician_frame)
         self.insertWidget(self.chart_frame)
         self.insertWidget(self.pontics_frame)
         self.insertWidget(self.surfaces_frame)
@@ -137,6 +149,7 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
         self.tooth.clear()
         self.treatment_item = None
         self.description_line_edit.setText("")
+        self.px_dent_cb.setCurrentIndex(-1)
         self.update_widgets()
 
     def showExtension(self, extend):
@@ -173,6 +186,14 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
     def set_known_teeth(self, key):
         self.dent_key = key
 
+    @property
+    def chosen_px_clinician(self):
+        i = self.px_dent_cb.currentIndex()
+        model = self.px_dent_cb.model()
+        index = model.index(i)
+        practitioner = model.data(index, QtCore.Qt.UserRole)
+        return practitioner.id
+
     def get_info(self, treatment_item):
         self.clear()
         self.top_label.setText(
@@ -189,12 +210,26 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
 
         self.description_frame.setVisible(treatment_item.description_required)
 
+        if treatment_item.px_clinician is None:
+            self.px_clinician_frame.show()
+            practitioners = SETTINGS.practitioners
+            try:
+                index = practitioners.index(SETTINGS.current_practitioner)
+            except ValueError:
+                index = -1
+
+            self.px_dent_cb.setModel(practitioners.dentists_model)
+            self.px_dent_cb.setCurrentIndex(index)
+        else:
+            self.px_clinician_frame.hide()
+
         self.info_list = ["hello world"]
 
         while True:
             if not self.exec_():
                 break
 
+            treatment_item.set_px_clinician(self.chosen_px_clinician)
             treatment_item.set_teeth(self.chart.selected_teeth)
             treatment_item.set_pontics(self.pontics_chart.selected_teeth)
 
@@ -221,16 +256,18 @@ class ProcCodeFinaliseDialog(ExtendableDialog):
         return False
 
 if __name__ == "__main__":
-    
-    
 
     from lib_openmolar.common.common_db_orm import TreatmentItem
+    from lib_openmolar.client.connect import ClientConnection
 
     app = QtGui.QApplication([])
 
+    cc = ClientConnection()
+    cc.connect()
+
     item = TreatmentItem("D03")  #3 surface amalgam
 
-    dl = ProcCodeFinaliseDialog()
+    dl = TreatmentItemFinaliseDialog()
     dl.get_info(item)
 
     print item

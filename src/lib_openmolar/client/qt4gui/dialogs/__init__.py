@@ -4,6 +4,7 @@ from new_patient_dialog import NewPatientDialog
 from edit_patient_dialog import EditPatientDialog
 from address_dialogs.address_dialog import AddressDialog
 from save_discard_cancel_dialog import SaveDiscardCancelDialog
+from treatment_item_finalise_dialog import TreatmentItemFinaliseDialog
 
 
 __all__ = [ "NewBpeDialog",
@@ -13,4 +14,5 @@ __all__ = [ "NewBpeDialog",
             "EditPatientDialog",
             "AddressDialog",
             "SaveDiscardCancelDialog"
+            "TreatmentItemFinaliseDialog"
         ]

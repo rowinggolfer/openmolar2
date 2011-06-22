@@ -108,7 +108,8 @@ class HygTreatmentDialog(BaseDialog):
         ti = TreatmentItem(self.proc_code)
         practitioner = self.chosen_practitioner
         if practitioner.is_hygienist:
-            ti.set_px_clinician(SETTINGS.current_patient.current_contracted_dentist.id)
+            ti.set_px_clinician(
+                SETTINGS.current_patient.current_contracted_dentist.id)
         ti.set_tx_clinician(practitioner.id)
         ti.set_cmp_date(self.date)
         return ti

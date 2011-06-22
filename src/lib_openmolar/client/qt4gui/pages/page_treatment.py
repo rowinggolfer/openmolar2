@@ -25,8 +25,7 @@ from PyQt4 import QtCore, QtGui
 from lib_openmolar.client.qt4gui.client_widgets.procedures.treatment_tree_model \
     import TreatmentTreeModel
 
-from lib_openmolar.client.qt4gui.dialogs.proc_code_finalise \
-    import ProcCodeFinaliseDialog
+from lib_openmolar.client.qt4gui.dialogs import TreatmentItemFinaliseDialog
 
 from lib_openmolar.common import common_db_orm
 
@@ -40,10 +39,10 @@ class TreatmentPage(QtGui.QWidget):
         self.label.setWordWrap(True)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.model = TreatmentTreeModel(self)
+        self.tree_model = TreatmentTreeModel(self)
         self.tree_view = QtGui.QTreeView()
         self.tree_view.setAlternatingRowColors(True)
-        self.tree_view.setModel(self.model)
+        self.tree_view.setModel(self.tree_model)
 
         self.show_fee_widget_button = QtGui.QPushButton(_("Procedure Codes"))
 
@@ -52,7 +51,7 @@ class TreatmentPage(QtGui.QWidget):
         layout.addWidget(self.tree_view)
         layout.addWidget(self.show_fee_widget_button)
 
-        self.proc_code_finalise_dialog = ProcCodeFinaliseDialog(self)
+        self.treatment_item_finalise_dialog = TreatmentItemFinaliseDialog(self)
 
         self.clear()
         self.connect_signals()
@@ -77,7 +76,7 @@ class TreatmentPage(QtGui.QWidget):
         '''
         self.emit(QtCore.SIGNAL("Show Fee Widget"))
 
-    def add_treatment_item(self, treatment_item):
+    def add_treatment_item(self, treatment_item, from_chart=False):
         '''
         adds a treatment item
         '''
@@ -86,31 +85,32 @@ class TreatmentPage(QtGui.QWidget):
             self.Advise(_("No Patient Loaded"))
             return
 
-        patient.treatment_model.add_treatment_item(treatment_item)
-        self.model.update_treatments()
-        self.tree_view.expandAll()
-        for i in range(self.model.columnCount()):
-            self.tree_view.resizeColumnToContents(i)
-        self.Advise(u"%s %s"%(_("added to treatment plan"), treatment_item))
-
-    def proc_code_selected(self, proc_code):
-        treatment_item = common_db_orm.TreatmentItem(proc_code)
-        if treatment_item.further_info_needed:
+        while not patient.treatment_model.add_treatment_item(treatment_item):
+            dl = self.treatment_item_finalise_dialog
             if self.patient:
-                self.proc_code_finalise_dialog.set_known_teeth(
-                    self.patient.dent_key)
-            if not self.proc_code_finalise_dialog.get_info(treatment_item):
+                dl.set_known_teeth(self.patient.dent_key)
+            if not dl.get_info(treatment_item):
                 return
 
-        #pseudo code is
-        # if treatment item is a chart item
-        # convert to a tooth_data object (for rendering on the chart)
-        # and pass to the charts page
+        self.tree_model.update_treatments()
+        self.tree_view.expandAll()
+        for i in range(self.tree_model.columnCount()):
+            self.tree_view.resizeColumnToContents(i)
 
-        if treatment_item.is_tooth:
+        self.Advise(u"%s %s"%(_("added to treatment plan"), treatment_item))
+
+        if not from_chart and treatment_item.is_tooth:
             self.emit(QtCore.SIGNAL("chart treatment added"), treatment_item)
 
-        treatment_item.set_px_clinician(SETTINGS.current_practitioner)
+    def proc_code_selected(self, proc_code):
+        '''
+        a raw procedure code has been selected
+        (from the :doc:`ProcCodeWidget`)
+        convert to a :doc:`TreatmentItem`, validate and pass to
+        :func:`add_treatment_item`
+        '''
+        treatment_item = common_db_orm.TreatmentItem(proc_code)
+
         self.add_treatment_item(treatment_item)
 
     def chart_treatment_added(self, tooth_data, plan_or_cmp):
@@ -120,23 +120,18 @@ class TreatmentPage(QtGui.QWidget):
         proc_code = tooth_data.proc_code
         if proc_code == None:
             QtGui.QMessageBox.warning(self, "error",
-            "unable to add to estimate... code not found")
+            "unable to add to treatment plan... code not found")
             return
         treatment_item = common_db_orm.TreatmentItem(proc_code)
         treatment_item.set_tooth(tooth_data.tooth.ref)
         treatment_item.set_surfaces(tooth_data.surfaces)
-        treatment_item.set_px_clinician(SETTINGS.current_practitioner)
 
-        valid, errors = treatment_item.check_valid()
-        if not valid:
-            self.Advise("Invalid item!<hr />%s"% errors)
-        else:
-            self.add_treatment_item(treatment_item)
+        self.add_treatment_item(treatment_item, from_chart=True)
 
     def clear(self):
         self.patient = None
         self.label.setText("no patient loaded")
-        self.model.clear()
+        self.tree_model.clear()
 
     def load_patient(self):
         patient = SETTINGS.current_patient

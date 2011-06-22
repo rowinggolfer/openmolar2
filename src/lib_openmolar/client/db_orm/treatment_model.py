@@ -35,7 +35,6 @@ from lib_openmolar.common import common_db_orm
 class TreatmentModel(object):
     def __init__(self, patient_id):
         '''
-        :param database: :doc:`ClientConnection`
         :param patient_id: integer
         '''
         self.patient_id = patient_id
@@ -74,7 +73,7 @@ where patient_id = ?
     @property
     def treatment_items(self):
         '''
-        returns a list of all treatment items in the model
+        returns a list of all :doc:`TreatmentItem` in the model
         '''
         return self._treatment_items
 
@@ -91,8 +90,12 @@ where patient_id = ?
     def add_treatment_item(self, treatment_item):
         '''
         add a :doc:`TreatmentItem` Object
+        returns True if the TreatmentItem is valid, else False
         '''
-        self._treatment_items.append(treatment_item)
+        if treatment_item.is_valid:
+            self._treatment_items.append(treatment_item)
+            return True
+        return False
 
     def commit_changes(self):
         if not self.isDirty:

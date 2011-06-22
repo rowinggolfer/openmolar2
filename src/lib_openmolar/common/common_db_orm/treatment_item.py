@@ -76,21 +76,6 @@ class TreatmentItem(object):
             self.code = param
 
         ## copy some properties from the underlying code
-        self.type = self.code.type
-        self.is_tooth = self.code.is_tooth
-        self.is_fill = self.code.is_fill
-        self.is_crown = self.code.is_crown
-        self.is_bridge = self.code.is_bridge
-        self.is_prosthetics = self.code.is_prosthetics
-        self.is_root = self.code.is_root
-        self.category = self.code.category
-        self.description = self.code.description
-        self.further_info_needed = self.code.further_info_needed
-        self.pontics_required = self.code.pontics_required
-        self.total_span = self.code.total_span
-        self.surfaces_required = self.code.surfaces_required
-        self.no_surfaces = self.code.no_surfaces
-        self.description_required = self.code.description_required
         #self.pontics_required = self.code.pontics_required
 
         self._px_clinician = None
@@ -153,7 +138,67 @@ class TreatmentItem(object):
         '''
         returns True if this code is a tooth treatment
         '''
-        return (self.code.tooth_required or self.tooth != None)
+        return (self.code.tooth_required and self.tooth is None)
+
+    @property
+    def type(self):
+        return self.code.type
+
+    @property
+    def is_tooth(self):
+        return self.code.is_tooth
+
+    @property
+    def is_fill(self):
+        return self.code.is_fill
+
+    @property
+    def is_crown(self):
+        return self.code.is_crown
+
+    @property
+    def is_bridge(self):
+        return self.code.is_bridge
+
+    @property
+    def is_prosthetics(self):
+        return self.code.is_prosthetics
+
+    @property
+    def is_root(self):
+        return self.code.is_root
+
+    @property
+    def category(self):
+        return self.code.category
+
+    @property
+    def description(self):
+        return self.code.description
+
+    @property
+    def further_info_needed(self):
+        return self.code.further_info_needed
+
+    @property
+    def pontics_required(self):
+        return self.code.pontics_required
+
+    @property
+    def total_span(self):
+        return self.code.total_span
+
+    @property
+    def surfaces_required(self):
+        return self.code.surfaces_required and self.surfaces == ""
+
+    @property
+    def no_surfaces(self):
+        return self.code.no_surfaces
+
+    @property
+    def description_required(self):
+        return self.code.description_required
 
     def set_tooth(self, tooth):
         '''
@@ -370,7 +415,7 @@ class TreatmentItem(object):
         ix = q_query.value(0).toInt()[0]
 
         if self.is_tooth:
-            record = common_db_orm.InsertableRecord(database, "treatment_teeth")
+            record = InsertableRecord(database, "treatment_teeth")
 
             record.setValue("treatment_id", ix)
 
@@ -399,7 +444,7 @@ class TreatmentItem(object):
                 q_query.first()
                 ix = q_query.value(0).toInt()[0]
 
-                record = common_db_orm.InsertableRecord(database, "treatment_fills")
+                record = InsertableRecord(database, "treatment_fills")
 
                 record.setValue("tooth_tx_id", ix)
                 record.setValue("surfaces", self.surfaces)

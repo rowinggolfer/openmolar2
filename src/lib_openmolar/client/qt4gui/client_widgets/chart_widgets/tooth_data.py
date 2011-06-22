@@ -41,29 +41,59 @@ class ToothData(object):
     Root = 2
     Comment = 3
 
-    #attributes when data is a filling
-    surfaces = ''
-    material = ''
-    _draw_surfaces = None #private attribute
-
-    #attributes when data is a crown
-    crown_type = ''
-    technition = ''
-
-    #attributes when data is a root
-    has_rct = False
-    root_type = ''
-
-    #common to all types
-    comment = ''
-    proc_code = None
-    svg = None
-
     def __init__(self, tooth=None):
         self.tooth = tooth
         self.in_database = False
         self.error_message = ""
         self.type = self.Filling #default "type" is a Filling
+
+        #attributes when data is a filling
+        self._surfaces = ''
+        self._material = ''
+        self._draw_surfaces = None #private attribute
+
+        #attributes when data is a crown
+        self._crown_type = ''
+        self._technition = ''
+
+        #attributes when data is a root
+        self.has_rct = False
+        selfroot_type = ''
+
+        #common to all types
+        self._comment = ''
+        self.proc_code = None
+        self.svg = None
+
+
+    @property
+    def surfaces(self):
+        return self._surfaces
+
+    @property
+    def material(self):
+        return self._material
+
+    def set_material(self, material):
+        self._material = material
+
+    @property
+    def crown_type(self):
+        return self._crown_type
+
+    @property
+    def technition(self):
+        return self._technition
+
+    def set_technition(self, technition):
+        self._technition = technition
+
+    @property
+    def comment(self):
+        return self._comment
+
+    def set_comment(self, comment):
+        self._comment = comment
 
     @property
     def is_valid(self):
@@ -79,7 +109,7 @@ class ToothData(object):
     def set_crown_type(self, crown_type):
         if not self.type == self.Crown:
             raise ToothDataError("This is not a crown")
-        self.crown_type = crown_type
+        self._crown_type = crown_type
 
     def set_root_type(self, root_type):
         if not self.type == self.Root:
@@ -89,7 +119,7 @@ class ToothData(object):
     def set_surfaces(self, surfaces):
         if not self.type == self.Filling:
             raise ToothDataError("This is not a filling")
-        self.surfaces = surfaces
+        self._surfaces = surfaces
 
     @property
     def draw_surfaces(self):
@@ -152,7 +182,7 @@ class ToothData(object):
         takes "MOD,CO" and converts it to a property
         '''
         try:
-            surfaces, self.material = arg.split(",")
+            surfaces, self._material = arg.split(",")
             self.set_surfaces(surfaces)
         except TypeError:
             pass
@@ -216,14 +246,14 @@ class ToothData(object):
             raise ToothDataError("one or more invalid filling surface")
         if len(set(surf)) != len(surf):
             raise ToothDataError("duplicate surfaces found")
-        self.surfaces = surf
+        self._surfaces = surf
         try:
             material = input_list[1]
             if not material in SETTINGS.allowed_fill_materials:
                 raise IndexError
-            self.material = material
+            self._material = material
         except IndexError:
-            self.material = self.tooth.default_material
+            self._material = self.tooth.default_material
 
         return "%s,%s"% (self.surfaces, self.material)
 
@@ -233,7 +263,7 @@ class ToothData(object):
         surfs = input_list[0].split("/")
         input_list[0] = surfs[0]
         if len(surfs) > 1:
-            self.surfaces = surfs[1]
+            self._surfaces = surfs[1]
         if input_list[0] != "CR":
             raise ToothDataError(
             "bad crown input, format is CR[/surfaces],[type]")
@@ -245,7 +275,7 @@ class ToothData(object):
         except IndexError:
             crown_type = SETTINGS.allowed_crown_types[-1]
 
-        self.crown_type = unicode(crown_type)
+        self._crown_type = unicode(crown_type)
 
     def parse_root_input(self, input):
         input_list = input.split(",")
@@ -285,6 +315,17 @@ class ToothData(object):
     @property
     def fill_material(self):
         return self.material
+
+
+    def __repr__(self):
+        if self.Filling:
+            return "ToothData Instance %s %s"% (
+                self.tooth.short_name, self.surfaces)
+        if self.Crown:
+            return "ToothData Instance %s %s"% (
+                self.tooth.short_name, self.type)
+        else:
+            return "ToothData Instance %s"% self.tooth.short_name
 
 
 if __name__ == "__main__":

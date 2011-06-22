@@ -257,7 +257,7 @@ class ChartWidgetBase(QtGui.QWidget):
             prop = tooth_data.ToothData(root)
             prop.set_type(prop.Root)
             prop.set_root_type(root_record.description)
-            prop.comment = root_record.comment
+            prop.set_comment(root_record.comment)
             prop.in_database = True
             self.add_property(prop)
 
@@ -272,8 +272,8 @@ class ChartWidgetBase(QtGui.QWidget):
             prop = tooth_data.ToothData(tooth)
             prop.set_type(prop.Crown)
             prop.set_crown_type(crown_record.crown_type)
-            prop.technition = crown_record.technition
-            prop.comment = crown_record.comment
+            prop.set_technition(crown_record.technition)
+            prop.set_comment(crown_record.comment)
             prop.in_database = True
             self.add_property(prop)
 
@@ -287,8 +287,8 @@ class ChartWidgetBase(QtGui.QWidget):
         if tooth:
             prop = tooth_data.ToothData(tooth)
             prop.set_surfaces(fill_record.surfaces)
-            prop.material = fill_record.material
-            prop.comment = fill_record.comment
+            prop.set_material(fill_record.material)
+            prop.set_comment(fill_record.comment)
             prop.in_database = True
             self.add_property(prop)
 
@@ -302,7 +302,7 @@ class ChartWidgetBase(QtGui.QWidget):
         if tooth:
             prop = tooth_data.ToothData(tooth)
             prop.set_type(prop.Comment)
-            prop.comment = record.text
+            prop.set_comment(record.text)
             prop.in_database = True
             self.add_property(prop)
 
