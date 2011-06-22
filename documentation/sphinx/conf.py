@@ -18,8 +18,8 @@ import sys, os, subprocess
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
 for folder in (
-    '../../lib_openmolar', 
-    '../../'
+    '../../src/lib_openmolar', 
+    '../../src/'
     ): 
    sys.path.insert(0, os.path.abspath(folder))
 
@@ -53,7 +53,7 @@ copyright = u'2010-2011, Neil Wallace'
 # built documents.
 #
 # The short X.Y version.
-version = '0.9'
+version = '1.2'
 # The full version, including alpha/beta/rc tags.
 release = version+".0~hg%s"% _version.revision_number
 

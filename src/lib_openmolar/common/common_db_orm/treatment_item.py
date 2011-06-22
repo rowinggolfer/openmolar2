@@ -291,6 +291,12 @@ class TreatmentItem(object):
         if self.pontics_required and self.pontics == []:
             errors.append(_("No Pontics Selected"))
 
+        if self.px_clinician is None:
+            errors.append(_("Unknown Prescribing Clinician"))
+
+        if self.is_completed and self.tx_clinician is None:
+            errors.append(_("Who Performed this treatment?"))
+
         if self.is_bridge:
             expected_span = str(self.total_span)
             n = re.match("\d+", expected_span)

@@ -323,7 +323,7 @@ class PatientInterface(QtGui.QWidget):
         '''
         if not self.pt:
             return
-        dl = NewBpeDialog(self)
+        dl = dialogs.NewBpeDialog(self)
         if dl.exec_():
             self.pt.refresh_bpe()
             self.summary_page.bpe_widget.set_values(self.pt.current_bpe)
@@ -332,7 +332,7 @@ class PatientInterface(QtGui.QWidget):
         '''
         raises a dialog showing all bpes for the current patient
         '''
-        dl = ListBpeDialog(self)
+        dl = dialogs.ListBpeDialog(self)
         dl.exec_()
 
     def new_patient(self):

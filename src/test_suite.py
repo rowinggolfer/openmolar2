@@ -69,4 +69,4 @@ if __name__ == "__main__":
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     main()
     raw_input("press enter to exit")
-    sys.exit()
+    

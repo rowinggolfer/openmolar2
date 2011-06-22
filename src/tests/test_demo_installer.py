@@ -20,15 +20,13 @@
 ##                                                                           ##
 ###############################################################################
 
-import os, sys
+import os, sys, unittest
 
 lib_openmolar_path = os.path.abspath("../") 
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
 import admin_app
-
-import unittest
         
 class TestCase(unittest.TestCase):
     def setUp(self):

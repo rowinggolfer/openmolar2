@@ -150,7 +150,7 @@ if "ADMIN" in packages:
         )
         
     
-#setup client
+#setup 
 if "CLIENT" in packages:
 
     if os.path.isfile("MANIFEST"):
@@ -195,6 +195,27 @@ if "CLIENT" in packages:
                      ],
         scripts = ['src/openmolar2-client'],
         )
+
+    
+#setup command_center
+if "STARTUP" in packages:
+
+    if os.path.isfile("MANIFEST"):
+        os.unlink("MANIFEST")
+        
+    mod_manifest()
+
+    setup(
+        name = 'openmolar-startup',
+        version = VERSIONS.get("STARTUP", "UNKNOWN"),
+        description = DESCRIPTION + ' - script to start the application',
+        author = AUTHOR,
+        author_email = EMAIL,
+        url = URL,
+        license = LICENSE,
+        scripts = ['src/openmolar2'],
+        )
+    
         
 if os.path.isfile("MANIFEST"):
     os.unlink("MANIFEST")
