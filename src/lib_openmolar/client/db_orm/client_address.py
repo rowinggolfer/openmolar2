@@ -153,10 +153,12 @@ class AddressObjects(object):
     '''
     instantiating this class
     grabs a list of AddressObject python objects
-    object = AddressDB(QtSql.QSqlDatabase, serialno)
+    object = AddressDB(QtSql.QSqlDatabase, patient_id)
     addresses = object.records
     '''
     def __init__(self, patient_id):
+
+        #: a pointer to the id of the :doc:`PatientModel`
         self.patient_id = patient_id
         self.get_records()
 
@@ -229,13 +231,16 @@ class AddressObjects(object):
             print q_query.lastError().text()
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         is_dirty = False
         for i in range(len(self.record_list)):
             is_dirty = is_dirty or self.is_dirty_record(i)
         return is_dirty
 
     def changes_html(self):
+        '''
+        an html representation of any changes to the object since __init__
+        '''
         changes = "<body><div align='center'>"
         for i in range(len(self.record_list)):
             edited = self.record_list[i]
@@ -297,6 +302,9 @@ class AddressObjects(object):
         return result
 
     def details_html(self):
+        '''
+        an html representation of this object
+        '''
         full_html = u""
         i = 0
         for record in self.record_list:
@@ -314,6 +322,15 @@ class AddressObjects(object):
         return full_html
 
     def who_else_lives_here(self, address_id):
+        '''
+        polls the database to get details of who else lives here now, or in the
+        past.
+
+        returns 2 lists. ([present occupants],[past occupants])
+        the lists are in the form
+        ["Mr John Smith 10/10/1964", "Mrs.... "]
+        '''
+
         past_list, present_list = [], []
 
         present_query = '''select title, first_name, last_name, dob from patients
@@ -353,9 +370,9 @@ if __name__ == "__main__":
     obj = AddressObjects(1)
     addresses = obj.records
 
-    print obj.isDirty
+    print obj.is_dirty
     addresses[0].setValue('addr1', "The Gables")
-    print obj.isDirty
+    print obj.is_dirty
     print obj.details_html()
     print obj.changes_html()
 

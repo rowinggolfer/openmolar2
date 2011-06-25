@@ -25,6 +25,9 @@ import re
 from PyQt4 import QtGui, QtCore
 
 class ToothDataError(Exception):
+    '''
+    a custom exception
+    '''
     def __init__(self, value):
         self.value = value
     def __str__(self):
@@ -36,35 +39,57 @@ class ToothData(object):
     NOTE - filled surfaces are stored as MODBL -
     so I and P surfaces are translated if used for user interaction
     '''
+    #:
     Filling = 0
+    #:
     Crown = 1
+    #:
     Root = 2
+    #:
     Comment = 3
 
-    def __init__(self, tooth=None):
-        self.tooth = tooth
+    def __init__(self, tooth):
+        '''
+        :param: :doc:`ChartTooth`
+
+        '''
+        self._tooth = tooth
+        #:
         self.in_database = False
+        #:
         self.error_message = ""
-        self.type = self.Filling #default "type" is a Filling
+
+        #: default is :attr:`Filling`
+        self.type = self.Filling
 
         #attributes when data is a filling
         self._surfaces = ''
         self._material = ''
-        self._draw_surfaces = None #private attribute
+        self._surfaces_to_draw = None #private attribute
 
         #attributes when data is a crown
         self._crown_type = ''
         self._technition = ''
 
         #attributes when data is a root
+        #:
         self.has_rct = False
-        selfroot_type = ''
+        #:
+        self.root_type = ''
 
         #common to all types
         self._comment = ''
+        #:
         self.proc_code = None
+        #:
         self.svg = None
 
+    @property
+    def tooth(self):
+        '''
+        returns the :doc:`ChartTooth` associated with this data
+        '''
+        return self._tooth
 
     @property
     def surfaces(self):
@@ -122,10 +147,16 @@ class ToothData(object):
         self._surfaces = surfaces
 
     @property
-    def draw_surfaces(self):
-        # a "mirrored" version of surfaces, allowing for quadrant
-        if self._draw_surfaces:
-            return self._draw_surfaces
+    def surfaces_to_draw(self):
+        '''
+        this value is the surfaces mirrored to allow quadrant agnostic
+        values.
+
+        essentially this converts the surfaces to what they would be if the
+        tooth were in the upper right quadrant.
+        '''
+        if self._surfaces_to_draw:
+            return self._surfaces_to_draw
 
         #only do this once.
         ds = self.surfaces[:]
@@ -134,11 +165,14 @@ class ToothData(object):
         if self.tooth.quadrant in (3,4):  #mirror up/down
             ds = ds.replace("B","b").replace("L","B").replace("b","L")
 
-        self._draw_surfaces = ds
+        self._surfaces_to_draw = ds
         return ds
 
     @property
     def brush(self):
+        '''
+        a QtGui.QBrush instance
+        '''
         if self.type == self.Filling:
             return QtGui.QApplication.instance().palette().buttonText()
         else:
@@ -159,6 +193,9 @@ class ToothData(object):
 
     @property
     def text(self):
+        '''
+        a human readable description of this data
+        '''
         text = "unknown item!"
         if self.type == self.Filling:
             text = "%s,%s"% (self.display_surfaces, self.material)
@@ -177,12 +214,14 @@ class ToothData(object):
 
         return text
 
-    def from_fill_string(self, arg):
+    def from_fill_string(self, fill_string):
         '''
+        :param: fill_string (string)
+
         takes "MOD,CO" and converts it to a property
         '''
         try:
-            surfaces, self._material = arg.split(",")
+            surfaces, self._material = fill_string.split(",")
             self.set_surfaces(surfaces)
         except TypeError:
             pass
@@ -191,6 +230,9 @@ class ToothData(object):
 
     def from_user_input(self, input, find_code=True):
         '''
+        :param: input (QString)
+        :kword: find_code (bool)
+
         this input has come from a line edit.. so has to be checked for sanity
         '''
 
@@ -326,8 +368,3 @@ class ToothData(object):
                 self.tooth.short_name, self.type)
         else:
             return "ToothData Instance %s"% self.tooth.short_name
-
-
-if __name__ == "__main__":
-    prop = ToothData()
-    print dir(prop)

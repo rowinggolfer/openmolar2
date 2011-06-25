@@ -34,6 +34,7 @@ class ExtendableDialog(BaseDialog):
         self.button_box.setCenterButtons(False)
 
         icon = QtGui.QIcon.fromTheme("go-down")
+        #: a pointer to the Advanced button
         self.more_but = QtGui.QPushButton(icon, "&Advanced")
         self.more_but.setFlat(True)
 

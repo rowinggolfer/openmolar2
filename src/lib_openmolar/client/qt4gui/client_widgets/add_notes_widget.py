@@ -38,6 +38,7 @@ class AddNotesWidget(QtGui.QWidget):
         QtGui.QWidget.__init__(self, parent)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
 
+        #: a pointer to the :doc:`CompletionTextEdit` component
         self.text_edit = widgets.CompletionTextEdit(self)
         save_but = QtGui.QPushButton(_("&Save"), self)
         save_but.setSizePolicy(QtGui.QSizePolicy.Preferred,
@@ -53,14 +54,14 @@ class AddNotesWidget(QtGui.QWidget):
     def minimumSizeHint(self):
         '''
         overwrite the base class method
-            return QtCore.QSize(200,50)
+        return QtCore.QSize(200,50)
         '''
         return QtCore.QSize(200,50)
 
     def sizeHint(self):
         '''
         overwrite the base class method
-            return QtCore.QSize(500,120)
+        return QtCore.QSize(500,120)
         '''
         return QtCore.QSize(500, 120)
 

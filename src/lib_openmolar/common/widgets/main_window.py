@@ -43,7 +43,10 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         #####          setup menu and headers                              ####
 
+        #: a pointer to the :doc:`DockAwareToolBar`
         self.main_toolbar = DockAwareToolBar()
+        
+        #: a pointer to the :doc:`DockableMenuBar`
         self.menubar = DockableMenuBar(self)
 
         ## the menu bar needs this action adding
@@ -64,20 +67,26 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         ####          setup a statusbar with a label                       ####
 
+        #: a pointer to the QtGui.QStatusBar
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
+        
+        #: a pointer to the label in the statusbar
         self.status_label = QtGui.QLabel()
         self.statusbar.addPermanentWidget(self.status_label)
 
+        #: a pointer to the File menu 
         self.menu_file = QtGui.QMenu(_("&File"), self)
         self.menubar.addMenu(self.menu_file)
 
+        #: a pointer to the Edit menu         
         self.menu_edit = QtGui.QMenu(_("&Edit"), self)
         self.menubar.addMenu(self.menu_edit)
 
-        self.menu_view = self.menubar.menu_view #QtGui.QMenu(_("&View"), self)
-        #self.menubar.addMenu(self.menu_view)
-
+        #: a pointer to the View menu of :attr:`menubar`
+        self.menu_view = self.menubar.menu_view
+        
+        #: a pointer to the Help menu
         self.menu_help = QtGui.QMenu(_("&Help"), self)
         self.menubar.addMenu(self.menu_help)
 
@@ -85,6 +94,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         icon = QtGui.QIcon.fromTheme("application-exit")
 
+        #: a pointer to the quit qaction
         self.action_quit = QtGui.QAction(icon, _("Quit"), self)
 
         self.menu_file.addSeparator()
@@ -93,37 +103,45 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         ####         edit menu                                             ####
 
         icon = QtGui.QIcon.fromTheme("preferences-desktop")
+        #: a pointer to the preferences qAction
         self.action_preferences = QtGui.QAction(icon, _("&Preferences"), self)
 
         self.menu_edit.addAction(self.action_preferences)
 
         ####         view menu                                             ####
-
+        
+        #: a pointer to the toggleViewAction of :attr:`main_toolbar`
         self.action_show_toolbar = self.main_toolbar.toggleViewAction()
         self.action_show_toolbar.setText(_("Show &ToolBar"))
 
+        #: a pointer to the show statusbar qaction
         self.action_show_statusbar = QtGui.QAction(_("Show Status&bar"), self)
         self.action_show_statusbar.setCheckable(True)
         self.action_show_statusbar.setChecked(True)
-
+        
+        #: a pointer to the toolbar default view qaction
         self.action_toolbar_opt4 = QtGui.QAction(_("Default View"), self)
         self.action_toolbar_opt4.setData(QtCore.Qt.ToolButtonFollowStyle)
 
+        #: a pointer to the toolbar icon only view qaction
         self.action_toolbar_opt0 = QtGui.QAction(_("Icon Only"), self)
         self.action_toolbar_opt0.setData(QtCore.Qt.ToolButtonIconOnly)
 
+        #: a pointer to the toolbar text only view qaction
         self.action_toolbar_opt1 = QtGui.QAction(_("Text Only"), self)
         self.action_toolbar_opt1.setData(QtCore.Qt.ToolButtonTextOnly)
 
+        #: a pointer to the toolbar text beside icon view qaction
         self.action_toolbar_opt2 = QtGui.QAction(_("Text Beside Icon"), self)
         self.action_toolbar_opt2.setData(QtCore.Qt.ToolButtonTextBesideIcon)
 
+        #: a pointer to the toolbar text under icon view qaction
         self.action_toolbar_opt3 = QtGui.QAction(_("Text Under Icon"), self)
         self.action_toolbar_opt3.setData(QtCore.Qt.ToolButtonTextUnderIcon)
 
         icon = QtGui.QIcon.fromTheme("view-fullscreen")
-        self.action_fullscreen = QtGui.QAction(icon,
-            _("FullScreen Mode"), self)
+        #: a pointer to the fullscreen mode qaction
+        self.action_fullscreen = QtGui.QAction(icon, _("FullScreen Mode"), self)
         self.action_fullscreen.setCheckable(True)
         self.action_fullscreen.setShortcut("f11")
 
@@ -146,13 +164,18 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         ####         about menu                                            ####
 
         icon = QtGui.QIcon.fromTheme("help-about")
+        #: a pointer to the about qaction
         self.action_about = QtGui.QAction(icon, _("About"), self)
 
+        #: a pointer to the about qt qaction
         self.action_about_qt = QtGui.QAction(icon, _("About Qt"), self)
 
+        #: a pointer to the license qaction
         self.action_license = QtGui.QAction(icon, _("License"), self)
 
         icon = QtGui.QIcon.fromTheme("help", QtGui.QIcon("icons/help.png"))
+        
+        #: a pointer to the help qaction
         self.action_help = QtGui.QAction(icon, _("Help"), self)
 
         self.menu_help.addAction(self.action_about)
@@ -169,6 +192,11 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.connect_default_signals()
 
     def connect_default_signals(self):
+        '''
+        this function connects the triggered signals from the default menu
+        it should not need to be called, as it is called during the 
+        :func:`__init__`
+        ''' 
         self.connect(self.action_quit, QtCore.SIGNAL("triggered()"),
         QtGui.QApplication.instance().closeAllWindows)
 
@@ -192,6 +220,11 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.action_help.triggered.connect(self.show_help)
 
     def resizeEvent(self, event):
+        '''
+        this function is overwritten so that the advisor popup can be 
+        put in the correct place
+        '''
+        QtGui.QMainWindow.resizeEvent(self, event)
         self.setBriefMessageLocation()
 
     def setBriefMessageLocation(self):
@@ -233,6 +266,9 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         return added
 
     def loadSettings(self):
+        '''
+        load settings from QtCore.QSettings. 
+        '''
         settings = QtCore.QSettings()
         #Qt settings
         self.restoreGeometry(settings.value("geometry").toByteArray())
@@ -252,6 +288,9 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
             self.menubar.toggleViewAction.setChecked(True)
 
     def saveSettings(self):
+        '''
+        save settings from QtCore.QSettings
+        '''
         settings = QtCore.QSettings()
         #Qt settings
         settings.setValue("geometry", self.saveGeometry())

@@ -23,6 +23,9 @@
 from PyQt4 import QtGui
 
 class PluginError(Exception):
+    '''
+    A custom exception
+    '''
     def __init__(self, value="Unknown"):
         self.value = value
     def __str__(self):
@@ -33,20 +36,33 @@ class Plugin(object):
 This class should be inherited by any class to be added to openmolar2.
 Several key methods should be overwritten.
     '''
-
+    
+    #:
     SIMPLE = 0
+    
+    #:
     FEE_SCALE = 1
-
+    
+    #:
     TYPES = (0, 1)
-
+    
+    #:
     name = "Unspecified"
+    
+    #:
     authors = "unknown"
+    
+    #:
     version = "None"
 
+    #: 
     is_signed = False
+    
+    #:
     is_active = False
 
-    hot_pluggable = True #can be installed without app restart
+    #: can this be installed without app restart?
+    is_hot_pluggable = True 
 
     def __init__(self, plugin_type=SIMPLE):
         '''

@@ -32,7 +32,6 @@ from lib_openmolar.common.common_db_orm.editable_field import EditableField
 from lib_openmolar.common import common_db_orm
 
 
-
 pencil = '''<img height='20' width='20'
 align='right' alt ='edit Patient' src='qrc:/icons/pencil.png' />'''
 
@@ -46,20 +45,48 @@ class DuckPatient(object):
     a duck type of the Patient Record
     '''
     def __init__(self):
+        #:
         self.patient_id = None
+
+        #:
         self.title = ""
+
+        #:
         self.last_name = ""
+
+        #:
         self.first_name = ""
+
+        #:
         self.preferred_name = ""
+
+        #:
         self.correspondence_name = ""
+
+        #:
         self.sex = "M"
+
+        #:
         self.dob = QtCore.QDate(1900,1,1)
+
+        #:
         self.status = "Active"
+
+        #:
         self.modified_by = ""
+
+        #:
         self.time_stamp = None
 
     @property
     def full_name(self):
+        '''
+        returns the :attr:`correspondence_name` (if it exists)
+        or "%s %s %s"% (title, fname, sname)
+        ..note::
+            appends the :attr:`preferred_name` (if it exists)
+
+        '''
         if self.correspondence_name != "":
             return self.correspondence_name
         fn = u'%s %s %s'% (self.title, self.first_name, self.last_name)
@@ -71,12 +98,15 @@ class DuckPatient(object):
         return u"patient - %s"% self.full_name
 
 class PatientDB(QtSql.QSqlRecord):
-    def __init__(self, serialno):
-        self.patient_id = serialno
+    def __init__(self, patient_id):
+
+        #:
+        self.patient_id = patient_id
+
         query = 'SELECT * from %s WHERE ix = ?'% TABLENAME
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         if not q_query.next():
             raise PatientNotFoundError
@@ -89,11 +119,11 @@ class PatientDB(QtSql.QSqlRecord):
             QtSql.QSqlQuery.__init__(self.orig, record)
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         return self != self.orig
 
     def commit_changes(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return
         changes, values = "", []
         for i in range(self.count()):
@@ -224,7 +254,8 @@ class PatientDB(QtSql.QSqlRecord):
 
 class NewPatientDB(PatientDB, common_db_orm.InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database, TABLENAME)
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database,
+            TABLENAME)
         self.patient_id = None
         self.orig = None
 
@@ -244,6 +275,6 @@ if __name__ == "__main__":
 
 
     print object.full_name
-    print "dirty object?", object.isDirty
+    print "dirty object?", object.is_dirty
     object.setValue('title', 'Ms')
-    print "dirty object?", object.isDirty
+    print "dirty object?", object.is_dirty

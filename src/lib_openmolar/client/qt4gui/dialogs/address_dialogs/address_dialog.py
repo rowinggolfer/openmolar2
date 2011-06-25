@@ -43,16 +43,17 @@ from lib_openmolar.client.qt4gui.dialogs.address_dialogs.components import (
 
 
 class AddressDialog(ExtendableDialog):
-    def __init__(self, addressDB, chosen=0, parent=None):
+    def __init__(self, address_obj, chosen=0, parent=None):
         '''
-        2 arguments
-            1. an client_address.AddressDB instance
-            2. the chosen index (optional, assumed to be 0)
-            3. parent widget(optional)
+        :param: address_obj (:doc:`AddressObject` )
+        :kword: chosen - the chosen index
+        :kword: parent widget QtGui.QWidget or None
         '''
         super(AddressDialog, self).__init__(parent)
         self.setWindowTitle(_("Edit Addresses"))
-        self.addresses = addressDB.records
+        
+        #a pointer to the records stored in the :doc:`AddressObject`
+        self.addresses = address_obj.records
 
         self.value_store_dict = {}
 
@@ -186,5 +187,5 @@ if __name__ == "__main__":
     dl = AddressDialog(address_db)
     dl.exec_()
 
-    if address_db.isDirty:
+    if address_db.is_dirty:
         QtGui.QMessageBox.information(dl, "info", "changes made")

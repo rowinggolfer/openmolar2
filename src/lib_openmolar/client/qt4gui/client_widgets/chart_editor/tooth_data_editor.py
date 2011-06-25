@@ -87,7 +87,7 @@ class ToothDataEditor(QtGui.QWidget):
         self.emit(QtCore.SIGNAL("Advise"), *args)
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         return self.line_edit.text() != ""
 
     def minimumSizeHint(self):
@@ -169,7 +169,7 @@ class ToothDataEditor(QtGui.QWidget):
         self.crowns_combo_box.setCurrentIndex(0)
 
     def apply_edits(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return True
         return self.add_property_to_current_tooth()
 

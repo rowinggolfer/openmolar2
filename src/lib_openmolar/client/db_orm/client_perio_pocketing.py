@@ -52,9 +52,10 @@ class NewPerioPocketingRecord(common_db_orm.InsertableRecord):
 
 class PerioPocketingDB(object):
     '''
-    class to get static chart information
+    class to get static chart information about perio pocketing
     '''
-    def __init__(self, serialno):
+    def __init__(self, patient_id):
+        #: the underlying list of QSqlRecords
         self.record_list = []
 
         query = '''select checked_date, tooth, values, comment, checked_by
@@ -62,7 +63,7 @@ class PerioPocketingDB(object):
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         while q_query.next():
             record = q_query.record()

@@ -24,6 +24,12 @@
 import re
 
 class Messages(object):
+    '''
+    this is simply a holder for a few translatable messages displayed to the 
+    user.
+    It's a class so to ensure that gettext is initiated before the messages
+    are constructed.
+    '''
     def __init__(self):
         pass
 
@@ -49,6 +55,5 @@ class Messages(object):
 messages = Messages()
 
 if __name__ == "__main__":
-    
     
     print messages.welcome_html()

@@ -26,6 +26,7 @@ from lib_openmolar.client import classes
 from lib_openmolar.client.scripts import dent_key
 from lib_openmolar.client.qt4gui.colours import colours
 
+from lib_openmolar.client.db_orm import TreatmentModel
 from lib_openmolar.client.db_orm.client_practitioner import Practitioners
 from lib_openmolar.client.db_orm.client_staff_members import StaffMembers
 from lib_openmolar.client.db_orm.client_users import Users
@@ -33,6 +34,9 @@ from lib_openmolar.client.db_orm.client_users import Users
 import inspect, os, sys, traceback, zipfile, zipimport
 
 class SettingsError(Exception):
+    '''
+    A custom exception
+    '''
     def __init__(self, value="Unknown"):
         self.value = value
     def __str__(self):
@@ -43,13 +47,16 @@ class Settings(settings.CommonSettings):
     def __init__(self):
         settings.CommonSettings.__init__(self)
 
+        #: a reference to a :doc:`TeethPresentDecoder`
         self.tooth_decoder = dent_key.TeethPresentDecoder()
 
+        #: who is using the system
         self.user = "UNKNOWN"
+
+        #: a pointer to the :doc:`ClientConnection` in use
         self.database = None
 
-        self._last_known_address = None
-
+        #: an enumeration of chart styles
         self.chart_styles = (
             (_("Mixed"), 1),
             (_("Deciduous"), 2),
@@ -60,10 +67,13 @@ class Settings(settings.CommonSettings):
             (_("Perio Chart"), 6),
             )
 
+        #: initially this is "Adult Complex"
         self.default_chart_style = 4
 
-        self.visible_chart_rows = (1,2) #only adult rows, as per style 4
+        #: only adult rows, as per style 4
+        self.visible_chart_rows = (1,2)
 
+        #: colours for fillings
         self.fill_materials = (
             ("?", colours.UNKNOWN),
             ("AM", colours.AMALGAM),
@@ -73,19 +83,21 @@ class Settings(settings.CommonSettings):
             ("GO", colours.GOLD)
             )
 
+        #: a reference to the :doc:`ClientMainWindow` for plugin use
+        self.mainui = None
+
+        #: locations of directories where plugins reside
+        self.PLUGIN_DIRS = []
 
         self._plugins = []
         self._fee_scales = []
-
-        self.PLUGIN_DIRS = []
-
         self._current_patient = None
         self._current_practitioner = None
         self._practitioners = None
+        self._treatment_model = None
         self._staff = None
         self._users = None
-
-        self.mainui = None
+        self._last_known_address = None
 
     @property
     def users(self):
@@ -105,6 +117,11 @@ class Settings(settings.CommonSettings):
             self._staff = StaffMembers()
         return self._staff
 
+    @property
+    def treatment_model(self):
+        if self._treatment_model is None:
+            self._treatment_model = TreatmentModel()
+        return self._treatment_model
 
     def get_pluggable_classes(self, module):
         '''

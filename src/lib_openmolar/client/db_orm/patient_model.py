@@ -30,8 +30,6 @@ from PyQt4 import QtCore, QtSql
 from lib_openmolar.client.db_orm import *
 
 
-
-
 class PatientModel(object):
     '''
 This very important class represents the full patient record.
@@ -39,28 +37,30 @@ This very important class represents the full patient record.
 The behaviour of this object is very much like a dictionary.
     '''
     _dict = {}
-    def __init__(self, serialno):
-        self["patient"] = PatientDB(serialno)
-        self["addresses"] = AddressObjects(serialno)
-        self["telephone"] = TelephoneDB(serialno)
-        self["teeth_present"] = TeethPresentDB(serialno)
-        self["static_fills"] = StaticFillsDB(serialno)
-        self["static_crowns"] = StaticCrownsDB(serialno)
-        self["static_roots"] = StaticRootsDB(serialno)
-        self["static_comments"] = StaticCommentsDB(serialno)
-        self["notes_clinical"] = None #NotesClinicalDB(serialno)
-        self["notes_clerical"] = NotesClericalDB(serialno)
-        self["memo_clinical"] = MemoClinicalDB(serialno)
-        self["memo_clerical"] = MemoClericalDB(serialno)
-        self["treatment_model"] = TreatmentModel(serialno)
-        self["perio_bpe"] = PerioBpeDB(serialno)
-        self["perio_pocketing"] = PerioPocketingDB(serialno)
-        self["contracted_practitioners"] = ContractedPractitionerDB(serialno)
 
-        self.patient_id = serialno
+    def __init__(self, patient_id):
+        self["patient"] = PatientDB(patient_id)
+        self["addresses"] = AddressObjects(patient_id)
+        self["telephone"] = TelephoneDB(patient_id)
+        self["teeth_present"] = TeethPresentDB(patient_id)
+        self["static_fills"] = StaticFillsDB(patient_id)
+        self["static_crowns"] = StaticCrownsDB(patient_id)
+        self["static_roots"] = StaticRootsDB(patient_id)
+        self["static_comments"] = StaticCommentsDB(patient_id)
+        self["notes_clinical"] = NotesClinicalDB(patient_id)
+        self["notes_clerical"] = NotesClericalDB(patient_id)
+        self["memo_clinical"] = MemoClinicalDB(patient_id)
+        self["memo_clerical"] = MemoClericalDB(patient_id)
+        self["treatment_model"] = SETTINGS.treatment_model
+        SETTINGS.treatment_model.load_patient(patient_id)
+        self["perio_bpe"] = PerioBpeDB(patient_id)
+        self["perio_pocketing"] = PerioPocketingDB(patient_id)
+        self["contracted_practitioners"] = ContractedPractitionerDB(patient_id)
+
+        self.patient_id = patient_id
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         '''
         A Boolean.
         If True, then the record differs from the database state
@@ -69,7 +69,7 @@ The behaviour of this object is very much like a dictionary.
         for att in ("patient", "addresses", "teeth_present",
         "static_fills", 'static_crowns', 'static_roots', 'static_comments',
         'memo_clinical', 'memo_clerical', 'treatment_model'):
-            if self[att].isDirty:
+            if self[att].is_dirty:
                 dirty = True
                 break
         return dirty
@@ -84,7 +84,7 @@ The behaviour of this object is very much like a dictionary.
         for att in ("patient", "addresses", "teeth_present",
         "static_fills", 'static_crowns', 'static_roots', 'static_comments',
         'memo_clinical', 'memo_clerical', 'treatment_model'):
-            if self[att].isDirty:
+            if self[att].is_dirty:
                 changes.append(att)
         return changes
 
@@ -181,9 +181,6 @@ The behaviour of this object is very much like a dictionary.
         '''
         returns an html representation of the *clinical* notes
         '''
-        if self['notes_clinical'] is None:
-            self["notes_clinical"] = NotesClinicalDB(self.patient_id)
-
         return self['notes_clinical'].to_html()
 
     @property
@@ -238,7 +235,7 @@ The behaviour of this object is very much like a dictionary.
         '''
         A pointer to the relevant ..class: TreatmentModel
         '''
-        return self["treatment_model"]
+        return SETTINGS.treatment_model
 
     def get(self, key, fallback=None):
         '''

@@ -81,10 +81,14 @@ def singleton(cls):
 class CommonSettings(object):
     def __init__(self):
 
+        #: the system dictionary
         self.DICT_LOCATION = "/usr/share/dict/words"
 
+        #: a pointer to the instance of :doc:`OMTypes`
         self.OM_TYPES = om_types.OMTypes()
 
+        #: an array of 16 columns, and 4 rows
+        #: see :doc:`../../misc/tooth_notation`
         self.TOOTH_GRID = (
         ( 0,  0,  0, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74,  0,  0,  0),
         ( 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16),
@@ -92,13 +96,23 @@ class CommonSettings(object):
         ( 0,  0,  0, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75,  0,  0,  0,)
         )
 
+        #: a tuple of upper back teeth ids
         self.upper_back  = ( 1, 2, 3, 4, 5,12,13,14,15,16,65,66,73,74)
+
+        #: a tuple of upper lower teeth ids
         self.lower_back  = (17,18,19,20,21,28,29,30,31,32,84,83,76,75)
+
+        #: a tuple of upper front teeth ids
         self.upper_front = ( 6, 7, 8, 9,10,11,67,68,69,70,71,72)
+
+        #: a tuple of lower front teeth ids
         self.lower_front = (22,23,24,25,26,27,82,81,80,79,78,77)
 
+        #: a tuple of deciduous teeth ids
         self.DECIDUOUS = self.TOOTH_GRID[0] + self.TOOTH_GRID[3]
 
+        #: a dictionary to convert from id to shortname
+        #: example TOOTHGRID_SHORTNAMES[8] returns 'ur1'
         self.TOOTHGRID_SHORTNAMES = {8:'ur1', 7:'ur2',
         6:'ur3', 5:'ur4', 4:'ur5',
         3:'ur6', 2:'ur7', 1:'ur8',
@@ -118,6 +132,8 @@ class CommonSettings(object):
         80:'lra', 81:'lrb', 82:'lrc',
         83:'lrd', 84:'lre'}
 
+        #: a dictionary to convert from id to longname
+        #: example TOOTHGRID_SHORTNAMES[8] returns 'upper right 1'
         self.TOOTHGRID_LONGNAMES =  {8:'upper right 1', 7:'upper right 2',
         6:'upper right 3', 5:'upper right 4', 4:'upper right 5',
         3:'upper right 6', 2:'upper right 7', 1:'upper right 8',
@@ -137,6 +153,8 @@ class CommonSettings(object):
         80:'lower right a', 81:'lower right b', 82:'lower right c',
         83:'lower right d', 84:'lower right e'}
 
+        #: put persistant local settings in here..
+        #: they are pickled and stored in QtCore.QSettings for the application
         self.PERSISTANT_SETTINGS = {} ## these survive a log out!
 
         #initiate some placeholders

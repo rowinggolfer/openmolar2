@@ -32,14 +32,18 @@ from lib_openmolar.common import common_db_orm
 TABLENAME = "clerical_memos"
 
 class MemoClericalDB(common_db_orm.InsertableRecord):
-    def __init__(self, serialno):
-        self.patient_id = serialno
+    def __init__(self, patient_id):
+
+        #:
+        self.patient_id = patient_id
+
+        #:
         self.exists_in_db = True
 
         query = 'SELECT * from %s WHERE patient_id = ? limit 1'% TABLENAME
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
 
         if not q_query.next(): # no memos exist.
@@ -52,7 +56,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
         QtSql.QSqlQuery.__init__(self.orig, record)
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         return self != self.orig
 
     @property
@@ -60,7 +64,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
         return self.value("memo").toString()
 
     def commit_changes(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return
 
         self.setValue("checked_by", SETTINGS.user)

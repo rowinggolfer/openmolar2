@@ -134,10 +134,6 @@ class PatientInterface(QtGui.QWidget):
         self.connect(app, QtCore.SIGNAL("treatment item generated"),
             self.treatment_page.add_treatment_item)
 
-        self.connect(self.treatment_page,
-            QtCore.SIGNAL("chart treatment added"),
-            self.charts_page.treatment_page_chart_treatment_added)
-
         self.connect(self.details_browser,
             QtCore.SIGNAL("Edit Patient Details"), self.edit_patient)
         self.connect(self.details_browser,
@@ -256,7 +252,7 @@ class PatientInterface(QtGui.QWidget):
         dl = dialogs.EditPatientDialog(pt, self)
         if dl.exec_():
             dl.apply()
-            if pt.isDirty:
+            if pt.is_dirty:
                 if pt.commit_changes():
                     self.refresh_patient()
 
@@ -469,7 +465,7 @@ class PatientInterface(QtGui.QWidget):
         if self.pt == None:
             return True
         self.update_patient()
-        if self.pt.isDirty:
+        if self.pt.is_dirty:
             if not self.save_patient(True):
                 return False
         return True
@@ -484,7 +480,7 @@ class PatientInterface(QtGui.QWidget):
         if self.pt == None:
             return
         self.update_patient()
-        if self.pt.isDirty:
+        if self.pt.is_dirty:
             message = "You have unsaved changes to record %s"% (
                 self.pt.patient_id)
 

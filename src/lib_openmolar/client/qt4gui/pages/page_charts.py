@@ -33,8 +33,12 @@ class ChartsPage(QtGui.QWidget):
 
         self.patient = None
         self.static = client_widgets.StaticChartWidget(None, self)
-        self.treatment = client_widgets.TreatmentChartWidget(None, self)
-        self.completed = client_widgets.CompletedChartWidget(None, self)
+
+        tx_model = SETTINGS.treatment_model.tooth_tx_plan_model
+        self.treatment = client_widgets.TreatmentChartWidget(tx_model, self)
+
+        tx_model = SETTINGS.treatment_model.tooth_tx_cmp_model
+        self.completed = client_widgets.CompletedChartWidget(tx_model, self)
 
         self.tooth_data_editor = client_widgets.ToothDataEditor(self)
 
@@ -92,26 +96,6 @@ class ChartsPage(QtGui.QWidget):
 
     def _add_treatment(self, prop, plan_or_cmp):
         self.emit(QtCore.SIGNAL("add treatment"), prop, plan_or_cmp)
-
-    def treatment_page_chart_treatment_added(self, treatment_item):
-        '''
-        handles a signal from the treatment page that an item has been added
-        (via a method other than the chart itself)
-        this updates the chart
-        '''
-        #print "adding the following to the tx plan chart"
-        #print treatment_item
-        #print treatment_item.tooth
-
-        tooth = self.treatment.tooth_from_ref(treatment_item.tooth)
-
-        tooth_data = client_widgets.ToothData(tooth)
-        tooth_data.from_treatment_item(treatment_item)
-
-        #print tooth_data
-        self.treatment.add_data(tooth_data)
-
-        self.treatment.model_changed()
 
     def known_teeth_changed(self, key):
         '''

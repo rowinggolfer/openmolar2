@@ -351,7 +351,7 @@ class ChartTooth(object):
             if prop.type == prop.Crown:
                 self.crowns.append(prop)
                 continue
-            surfaces, material = prop.draw_surfaces, prop.material
+            surfaces, material = prop.surfaces_to_draw, prop.material
 
             brush, shape = None, None
 

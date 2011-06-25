@@ -34,6 +34,7 @@ class PractitionerListModel(QtCore.QAbstractListModel):
     '''
     def __init__(self, practitioners, parent=None):
         QtCore.QAbstractListModel.__init__(self, parent)
+        #:
         self.practitioners = practitioners
 
     def rowCount(self, index):
@@ -58,9 +59,14 @@ class PractitionerListModel(QtCore.QAbstractListModel):
         return QtCore.QVariant()
 
 class AvatarWidget(QtSvg.QSvgWidget):
+    '''
+    A QtSvg.QSvgWidget, which appears differently if it :attr:`is_active`
+    '''
     def __init__(self, parent=None):
         QtSvg.QSvgWidget.__init__(self, parent)
         #self.setMouseTracking(True)
+        
+        #:
         self.is_active = False
         self.setMaximumSize(self.sizeHint())
 
@@ -90,6 +96,9 @@ class PractitionerObject(QtSql.QSqlRecord):
 
     @property
     def user(self):
+        '''
+        all practitioners are also users (ie. exist in SETTINGS.users
+        '''
         if self._user == None:
             uid = self.value("user_id").toInt()[0]
             self._user = SETTINGS.users[uid]

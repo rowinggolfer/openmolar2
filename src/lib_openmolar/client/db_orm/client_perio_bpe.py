@@ -53,9 +53,10 @@ class NewPerioBPERecord(common_db_orm.InsertableRecord):
 
 class PerioBpeDB(object):
     '''
-    class to get static chart information
+    class to get BPE information
     '''
-    def __init__(self, serialno):
+    def __init__(self, patient_id):
+        #: the underlying list of QSqlRecords
         self.record_list = []
 
         query = '''select checked_date, values, comment, checked_by
@@ -63,7 +64,7 @@ class PerioBpeDB(object):
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
@@ -72,9 +73,10 @@ class PerioBpeDB(object):
     @property
     def records(self):
         '''
-        returns a list of all records (type QtSql.QSqlRecords) found
+        yields all BPE scores as tuples
+        (date (qdate), checked_by (str), values (str), comment (str))
         '''
-        records = []
+
         for record in self.record_list:
             yield ( record.value("checked_date").toDate(),
                     record.value("checked_by").toString(),
@@ -83,6 +85,9 @@ class PerioBpeDB(object):
 
     @property
     def current_bpe(self):
+        '''
+        returns the most recently recorded BPE score
+        '''
         if self.record_list == []:
             return None
         current = self.record_list[0]

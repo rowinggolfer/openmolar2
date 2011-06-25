@@ -145,6 +145,16 @@ class TreatmentItem(object):
         return self.code.type
 
     @property
+    def is_chartable(self):
+        '''
+        a bool indicating whether this treatment item can be represented
+        on a dental chart.
+        example, an examination is not, but a filling in the UR5 is
+        '''
+        ##TODO this is NOT enough logic here yet!!
+        return self.is_tooth
+
+    @property
     def is_tooth(self):
         return self.code.is_tooth
 
@@ -213,7 +223,7 @@ class TreatmentItem(object):
         TreatmentItem.set_teeth(self, [int, int...])
             all ints should comply with openmolar's tooth notation
         '''
-        print "setting teeth", teeth
+        #print "setting teeth", teeth
         if self.allow_multiple_teeth:
             self.teeth = teeth
 
@@ -224,7 +234,6 @@ class TreatmentItem(object):
         ..note::
             an exception will be raised if surfaces are invalid
         '''
-        print "setting surfaces", surfaces
         if self.surfaces_required:
             surf = surfaces.replace("I","O")
             surf = surf.replace("P","L")
@@ -239,7 +248,7 @@ class TreatmentItem(object):
         TreatmentItem.set_pontics(self, [int, int...])
             all ints should comply with openmolar's tooth notation
         '''
-        print "setting pontics %s"% pontics
+        #print "setting pontics %s"% pontics
         if self.pontics_required:
             self.pontics = pontics
 

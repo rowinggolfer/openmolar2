@@ -85,7 +85,8 @@ class TreatmentPage(QtGui.QWidget):
             self.Advise(_("No Patient Loaded"))
             return
 
-        while not patient.treatment_model.add_treatment_item(treatment_item):
+        while not patient.treatment_model.add_treatment_item(
+                                        treatment_item, charted=from_chart):
             dl = self.treatment_item_finalise_dialog
             if self.patient:
                 dl.set_known_teeth(self.patient.dent_key)
@@ -98,9 +99,6 @@ class TreatmentPage(QtGui.QWidget):
             self.tree_view.resizeColumnToContents(i)
 
         self.Advise(u"%s %s"%(_("added to treatment plan"), treatment_item))
-
-        if not from_chart and treatment_item.is_tooth:
-            self.emit(QtCore.SIGNAL("chart treatment added"), treatment_item)
 
     def proc_code_selected(self, proc_code):
         '''

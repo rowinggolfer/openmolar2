@@ -26,24 +26,33 @@ gets records from the users table
 import os
 from PyQt4 import QtCore, QtGui, QtSql, QtSvg
 
-def new_svg(username, location):
-    gen = QtSvg.QSvgGenerator()
-    gen.setFileName(location)
-    gen.setTitle("test svg")
-    gen.setSize(QtCore.QSize(50,50))
-    gen.setViewBox(QtCore.QRect(0,0,50,50))
+class GeneratedSvg(QtSvg.QSvgGenerator):
+    '''
+    Creates an svg from text, saving to a location given at __init__
+    '''
+    def __init__(self, text, save_location):
+        '''
+        :param: text to be rendered
+        :param: filepath to write to
+        '''
+        QtSvg.QSvgGenerator.__init__(self)
+        
+        self.setFileName(save_location)
+        self.setTitle("mock svg")
+        self.setSize(QtCore.QSize(50,50))
+        self.setViewBox(QtCore.QRect(0,0,50,50))
 
-    painter = QtGui.QPainter()
-    painter.begin(gen)
-    #painter.fillRect(gen.viewBox(), QtGui.QColor("blue"))
-    painter.drawEllipse(gen.viewBox().adjusted(3,3,-3,-3))
-    font = painter.font()
-    font.setPointSize(20)
-    painter.setFont(font)
-    painter.drawText(gen.viewBox(),
-                     QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap,
-                     username)
-    painter.end()
+        painter = QtGui.QPainter()
+        painter.begin(self)
+        #painter.fillRect(gen.viewBox(), QtGui.QColor("blue"))
+        painter.drawEllipse(self.viewBox().adjusted(4,4,-4,-4))
+        font = painter.font()
+        font.setPointSize(14)
+        painter.setFont(font)
+        painter.drawText(self.viewBox(),
+                         QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap,
+                         text)
+        painter.end()
 
 class UserObject(QtSql.QSqlRecord):
     def __init__(self, record):
@@ -74,6 +83,7 @@ class UserObject(QtSql.QSqlRecord):
     def svg_filepath(self):
         '''
         returns the location of the file holding the users svg data
+        if user has  no svg data, a :doc:`GeneratedSvg` is created
         '''
         if self._svg_filepath is None:
             loc = str(QtCore.QDir.tempPath())
@@ -86,7 +96,7 @@ class UserObject(QtSql.QSqlRecord):
                     f.writeData(svg_data)
             else:
                 if f.open(QtCore.QIODevice.WriteOnly):
-                    new_svg(self.abbrv_name, f.fileName())
+                    GeneratedSvg(self.abbrv_name, f.fileName())
 
             self._svg_filepath = f.fileName()
         return self._svg_filepath

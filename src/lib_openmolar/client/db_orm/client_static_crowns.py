@@ -55,16 +55,16 @@ class StaticCrownsDB(object):
     '''
     class to get static chart information
     '''
-    def __init__(self, serialno):
+    def __init__(self, patient_id):
 
-        self.record_list, self.orig_record_list = [], []
+        self.record_list, self._orig_record_list = [], []
 
         query = '''select tooth, type, technition, comment
         from %s where patient_id=?'''% TABLENAME
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
@@ -78,7 +78,7 @@ class StaticCrownsDB(object):
 
             #self.record_list.append(record)
             self.record_list.append(new)
-            self.orig_record_list.append(orig)
+            self._orig_record_list.append(orig)
 
     @property
     def records(self):
@@ -88,11 +88,11 @@ class StaticCrownsDB(object):
         return self.record_list
 
     def is_dirty_record(self, i):
-        return self.record_list[i] != self.orig_record_list[i]
+        return self.record_list[i] != self._orig_record_list[i]
 
     @property
-    def isDirty(self):
-        if len(self.record_list) != len(self.orig_record_list):
+    def is_dirty(self):
+        if len(self.record_list) != len(self._orig_record_list):
             return True
         is_dirty = False
         for i in range(len(self.record_list)):
@@ -100,10 +100,10 @@ class StaticCrownsDB(object):
         return is_dirty
 
     def commit_changes(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return
         for record in self.record_list:
-            if not record in self.orig_record_list:
+            if not record in self._orig_record_list:
                 query, values = record.insert_query
 
                 q_query = QtSql.QSqlQuery(SETTINGS.database)
@@ -140,6 +140,6 @@ if __name__ == "__main__":
     object = StaticCrownsDB(1)
     restorations = object.records
 
-    print object.isDirty
+    print object.is_dirty
     restorations[0].setValue('type', "LAVA")
-    print object.isDirty
+    print object.is_dirty

@@ -30,28 +30,44 @@ from PyQt4 import QtCore, QtSql
 
 
 class NotesClericalDB(object):
-    def __init__(self, serialno):
-        self.patient_id = serialno
-        self.notes_list = []
+    def __init__(self, patient_id):
+        #:
+        self.patient_id = patient_id
+
+        #:
+        self.exists_in_db = True
+
+        self._records = None
+
+    def get_records(self):
+        '''
+        get the records from the database
+        '''
+        self._records = []
 
         query = '''SELECT * from notes_clerical WHERE patient_id = ?
         ORDER BY open_time'''
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(self.patient_id)
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
-            self.notes_list.append(record)
+            self._records.append(record)
 
     @property
     def records(self):
         '''
         returns a list of all records (type QtSql.QSqlRecords) found
         '''
-        return self.notes_list
+        if self._records is None:
+            self.get_records()
+        return self._records
 
     def to_html(self):
+        '''
+        returns the notes in html form
+        '''
         html =  u'''<div align='center'><table width='100%%' border='1'>
         <tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
         '''% (_("Date"), _("Author"), _("Action"), _("notes"))

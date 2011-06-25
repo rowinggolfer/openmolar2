@@ -32,14 +32,17 @@ from lib_openmolar.common import common_db_orm
 TABLENAME = "teeth_present"
 
 class TeethPresentDB(common_db_orm.InsertableRecord):
-    def __init__(self, serialno):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database, TABLENAME)
-        self.patient_id = serialno
+    def __init__(self, patient_id):
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database,
+            TABLENAME)
+
+        #:
+        self.patient_id = patient_id
         query = '''SELECT * from %s WHERE patient_id = ?
         order by ix desc limit 1'''% TABLENAME
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         q_query.next()
         record = q_query.record()
@@ -50,11 +53,11 @@ class TeethPresentDB(common_db_orm.InsertableRecord):
         QtSql.QSqlQuery.__init__(self.orig, record)
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         return self != self.orig
 
     def commit_changes(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return
         changes, values = "", []
         for i in range(self.count()):

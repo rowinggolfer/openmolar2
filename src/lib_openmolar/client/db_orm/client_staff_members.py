@@ -26,10 +26,16 @@ gets records from the staff table
 
 from PyQt4 import QtCore, QtGui, QtSql, QtSvg
 
-class AvatarWidget(QtSvg.QSvgWidget):
+class StaffAvatarWidget(QtSvg.QSvgWidget):
+    '''
+    A QtSvg.QSvgWidget, which appears differently if it :attr:`is_active`
+    '''
+    
     def __init__(self, parent=None):
         QtSvg.QSvgWidget.__init__(self, parent)
         #self.setMouseTracking(True)
+        
+        #:
         self.is_active = False
         self.setMaximumSize(self.sizeHint())
 
@@ -68,7 +74,7 @@ class StaffObject(QtSql.QSqlRecord):
     @property
     def avatar_widget(self):
         if self._avatar == None:
-            self._avatar = AvatarWidget()
+            self._avatar = StaffAvatarWidget()
             self._avatar.load(self.value("svg_data").toByteArray())
             self._avatar.setToolTip(self.toHtml())
         return self._avatar

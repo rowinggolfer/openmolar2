@@ -21,9 +21,7 @@
 ###############################################################################
 
 '''
-Provides the TreatmentWrapper Class -
-which uses the virtual treatment table
-(a view over several tables)
+Provides the TreatmentModel Class
 '''
 
 from PyQt4 import QtCore, QtSql
@@ -31,21 +29,42 @@ from PyQt4 import QtCore, QtSql
 from lib_openmolar.common.settings import om_types
 from lib_openmolar.common import common_db_orm
 
+from lib_openmolar.client.qt4gui.client_widgets import ToothDataModel
+from lib_openmolar.client.qt4gui.client_widgets import ToothData
 
 class TreatmentModel(object):
-    def __init__(self, patient_id):
+    def __init__(self):
+        '''
+        instanciates with no params
+        '''
+        #:a pointer to the treatment plan :doc:`ToothDataModel`
+        self.tooth_tx_plan_model = ToothDataModel()
+
+        #:a pointer to the treatment completed :doc:`ToothDataModel`
+        self.tooth_tx_cmp_model = ToothDataModel()
+
+    def load_patient(self, patient_id):
         '''
         :param patient_id: integer
         '''
+        #:
         self.patient_id = patient_id
         self.get_records()
+
+    def clear(self):
+        '''
+        reset this model
+        '''
+        self.tooth_tx_cmp_model.clear()
+        self.tooth_tx_cmp_model.clear()
+        self._treatment_items = []
 
     def get_records(self):
         '''
         pulls all treatment items in the database
         (for the patient with the id specified at class initiation)
         '''
-        self._treatment_items = []
+        self.clear()
 
         ## long query - only time will tell if this is a performance hit
         query =    '''select
@@ -68,7 +87,7 @@ where patient_id = ?
             record = q_query.record()
 
             treatment_item = common_db_orm.TreatmentItem(record)
-            self.add_treatment_item(treatment_item)
+            self.add_treatment_item(treatment_item, charted=False)
 
     @property
     def treatment_items(self):
@@ -78,7 +97,7 @@ where patient_id = ?
         return self._treatment_items
 
     @property
-    def isDirty(self):
+    def is_dirty(self):
         '''
         will return True if the model differs from that in the database
         '''
@@ -87,18 +106,43 @@ where patient_id = ?
             dirty = dirty or not treatment_item.in_database
         return dirty
 
-    def add_treatment_item(self, treatment_item):
+    def add_treatment_item(self, treatment_item, charted=False):
         '''
         add a :doc:`TreatmentItem` Object
         returns True if the TreatmentItem is valid, else False
         '''
         if treatment_item.is_valid:
             self._treatment_items.append(treatment_item)
+
+            if not charted and treatment_item.is_chartable:
+                self.add_to_chart_model(treatment_item)
             return True
         return False
 
+    def add_to_chart_model(self, treatment_item):
+        '''
+        represent the treatment_item on the charts page somehow.
+        '''
+        print "add_to_chart_model called", treatment_item
+
+        if treatment_item.is_completed:
+            model = self.tooth_cmp_plan_model
+        else:
+            model = self.tooth_tx_plan_model
+
+        ## this is a bit of a hack!
+        tooth = model.views[0].tooth_from_ref(treatment_item.tooth)
+        print "tooth", tooth
+        tooth_data = ToothData(tooth)
+
+        tooth_data.from_treatment_item(treatment_item)
+
+        print "tooth data", tooth_data
+        model.add_property(tooth_data)
+        model.endResetModel()
+
     def commit_changes(self):
-        if not self.isDirty:
+        if not self.is_dirty:
             return
         print "treatment model, commiting changes"
         result = True
@@ -117,8 +161,6 @@ where patient_id = ?
 
 if __name__ == "__main__":
 
-
-
     from lib_openmolar.client.connect import ClientConnection
     from lib_openmolar.client.db_orm import PatientModel
 
@@ -134,7 +176,7 @@ if __name__ == "__main__":
 
     SETTINGS.set_current_patient(pt)
 
-    print obj.isDirty
+    print obj.is_dirty
     ti = common_db_orm.TreatmentItem("D01")
     ti.set_px_clinician(1)
     ti.set_tooth(3)
@@ -143,7 +185,7 @@ if __name__ == "__main__":
     print "adding", ti
     print ti.in_database
     obj.add_treatment_item(ti)
-    print obj.isDirty
+    print obj.is_dirty
     print obj.commit_changes()
 
 

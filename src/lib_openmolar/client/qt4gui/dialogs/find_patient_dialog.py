@@ -201,9 +201,9 @@ class FindPatientDialog(ExtendableDialog):
         self.search_values["soundex_sname"] = self.sname_le.isChecked()
         self.search_values["soundex_fname"] = self.fname_le.isChecked()
 
-        serialno, result = sname.toInt()
-        if result and serialno > 0:
-            self._emit_result(serialno)
+        patient_id, result = sname.toInt()
+        if result and patient_id > 0:
+            self._emit_result(patient_id)
         else:
             matches = SETTINGS.database.get_matchlist(self.search_values)
 

@@ -32,7 +32,8 @@ TABLENAME = "contracted_practitioners"
 
 class NewContractedPractitionerRecord(common_db_orm.InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database, TABLENAME)
+        common_db_orm.InsertableRecord.__init__(self,
+            SETTINGS.database, TABLENAME)
 
     @property
     def comment(self):
@@ -54,7 +55,7 @@ class ContractedPractitionerDB(object):
     '''
     class to get contracted practitioner info
     '''
-    def __init__(self, serialno):
+    def __init__(self, patient_id):
         self.record_list = []
 
         query = '''select ix, practitioner_id,
@@ -64,7 +65,7 @@ class ContractedPractitionerDB(object):
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        q_query.addBindValue(serialno)
+        q_query.addBindValue(patient_id)
         q_query.exec_()
         while q_query.next():
             record = q_query.record()

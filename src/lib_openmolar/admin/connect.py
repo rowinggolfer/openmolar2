@@ -159,23 +159,23 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
                 log("")
             return result
 
-        def apply_queries(object, removal=False):
+        def apply_queries(klass, removal=False):
             '''
-            we have our object, now apply it's queries
+            we have our klass, now apply it's queries
             this is subroutined to limit the number of cascades of
             types and foreign keys
             '''
             if removal:
                 rem_create_message = "removing"
-                queries = object.removal_queries
+                queries = klass.removal_queries
             else:
                 rem_create_message = "creating"
-                queries =   object.creation_queries
+                queries =   klass.creation_queries
 
-            if type(object) == om_types.OMType:
-                log_name = "type %s"% object.name
+            if type(klass) == om_types.OMType:
+                log_name = "type %s"% klass.name
             else:
-                log_name = "table %s"% object.tablename
+                log_name = "table %s"% klass.tablename
 
             log_message = "%s %s - requires %d "% (rem_create_message,
                 log_name, len(queries))
@@ -192,23 +192,23 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
         result, message = True, _("UNABLE TO LAYOUT TABLES")
 
         #######################################################################
-        ## iterate over all the objects in the ORM                           ##
+        ## iterate over all the klasse in the ORM                           ##
         ## note - the order is important!                                    ##
         ## types first, then be wary of foreign keys                         ##
         #######################################################################
 
-        objects = SETTINGS.OM_TYPES.values()
+        klasses = SETTINGS.OM_TYPES.values()
 
         for module in ADMIN_MODULES:
-            objects.append(module.SchemaGenerator())
+            klasses.append(module.SchemaGenerator())
 
-        objects.reverse()
-        for object in objects:
-            result = result and apply_queries(object, removal=True)
+        klasses.reverse()
+        for klass in klasses:
+            result = result and apply_queries(klass, removal=True)
 
-        objects.reverse()
-        for object in objects:
-            result = result and apply_queries(object) ## create
+        klasses.reverse()
+        for klass in klasses:
+            result = result and apply_queries(klass) ## create
 
         log("CREATING FUNCTIONS")
         exec_queries(om_views.FUNCTION_SQLS)

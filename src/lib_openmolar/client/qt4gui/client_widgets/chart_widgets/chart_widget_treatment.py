@@ -64,12 +64,6 @@ class TreatmentChartWidget(chart_widget_base.ChartWidgetBase):
         self.add_key_press_function(
             QtCore.Qt.Key_F5, self.complete_treatment)
 
-    def add_data(self, tooth_data):
-        '''
-        add a tooth_data object to the chart
-        '''
-        self.tooth_data_model.add_property(tooth_data)
-
     def complete_treatment(self):
         tooth = self.current_tooth
         QtGui.QMessageBox.information(self, "info",

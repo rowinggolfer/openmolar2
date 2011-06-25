@@ -33,13 +33,19 @@ class ChartRoot(teeth.ChartTooth):
     '''
     def __init__(self, univ_number, model):
         teeth.ChartTooth.__init__(self, univ_number, model)
-        self.is_root = True
-        self.opacity = 0.2
-        shortname = self.short_name
 
+        #: a boolean so that it's clear this is a ChartRoot,
+        #: not the parent class ChartTooth
+        self.is_root = True
+
+        #: this variable determines the opacity of any painting
+        self.opacity = 0.2
+
+        shortname = self.short_name
         if not self.is_rightside:
             shortname = "%s%s%s"% (shortname[0], "r", shortname[2:])
 
+        #: a reference to a QtSvg.QSvgRenderer with the correct svg
         self.svg_renderer = QtSvg.QSvgRenderer(":teeth/%s.svg"% shortname)
 
     def draw_structure(self, painter):
@@ -106,13 +112,19 @@ class ChartRoot(teeth.ChartTooth):
 
     @property
     def svg(self):
+        '''
+        returns an appropriate svg or None
+        (in which case self.svg_renderer is used)
+
+        presently, I only have an SVG for an implant.
+        '''
         if self.is_implant:
             if self.is_upper:
                 return ":implants/upper_implant.svg"
             else:
                 return ":implants/lower_implant.svg"
         if self.has_rct:
-            return ":implants/lower_implant.svg"
+            pass
 
         return None
 
@@ -154,7 +166,8 @@ if __name__ == "__main__":
 
     ids = [1,16,17,32]
     for rect in rects:
-        root = ChartRoot(ids[rects.index(rect)], model)
+        id = ids[rects.index(rect)]
+        root = ChartRoot(id, model)
         root.set_rect(rect)
         roots.append(root)
 
