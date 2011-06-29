@@ -45,8 +45,8 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         ## chart
         self.chart_frame = QtGui.QFrame()
         self.chart = client_widgets.ChartWidgetBase()
-        #self.chart.setStyle(self.chart.ROOTS_STYLE)
-        self.chart.setStyle(self.chart.MIXED_STYLE)
+        #self.chart.setStyle(self.chart.CHART_STYLE_ROOTS)
+        self.chart.setStyle(self.chart.CHART_STYLE_MIXED)
 
         teeth_needed_label = QtGui.QLabel()
         teeth_needed_label.setMinimumWidth(120)
@@ -79,8 +79,8 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         ## pontics chart
         self.pontics_frame = QtGui.QFrame()
         self.pontics_chart = client_widgets.ChartWidgetBase()
-        #self.chart.setStyle(self.chart.ROOTS_STYLE)
-        self.pontics_chart.setStyle(self.pontics_chart.MIXED_STYLE)
+        #self.chart.setStyle(self.chart.CHART_STYLE_ROOTS)
+        self.pontics_chart.setStyle(self.pontics_chart.CHART_STYLE_MIXED)
 
         teeth_needed_label = QtGui.QLabel()
         teeth_needed_label.setMinimumWidth(120)
@@ -235,7 +235,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
             tooth = self.chart.current_tooth
             if tooth:
-                treatment_item.set_tooth(tooth.ref)
+                treatment_item.set_tooth(tooth.tooth_id)
             treatment_item.set_surfaces(self.tooth.filledSurfaces)
             treatment_item.set_description(
                 unicode(self.description_line_edit.text()))
@@ -271,3 +271,5 @@ if __name__ == "__main__":
     dl.get_info(item)
 
     print item
+    print item.surfaces
+    print item.material

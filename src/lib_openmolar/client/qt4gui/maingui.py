@@ -206,7 +206,7 @@ class ClientMainWindow(BaseMainWindow):
 
         #Qt settings
 
-        # self.SETTINGS is a python dict of non qt-specific settings.
+        # SETTINGS is a python dict of non qt-specific settings.
         # unfortunately.. QVariant.toPyObject can't recreate a dictionary
         # so best to pickle this
         pickled_dict = cPickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
@@ -279,14 +279,14 @@ def main():
     '''
     main entry point for lib_openmolar.client
     '''
+    SETTINGS.VERBOSE = "-v" in sys.argv
+
     app = RestorableApplication("openmolar-client")
-    app.SETTINGS = SETTINGS
     ui = ClientMainWindow()
     ui.show()
     app.exec_()
     app = None
 
 if __name__ == "__main__":
-
 
     sys.exit(main())

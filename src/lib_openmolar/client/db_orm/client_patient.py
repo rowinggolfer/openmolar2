@@ -83,7 +83,7 @@ class DuckPatient(object):
         '''
         returns the :attr:`correspondence_name` (if it exists)
         or "%s %s %s"% (title, fname, sname)
-        ..note::
+        .. note::
             appends the :attr:`preferred_name` (if it exists)
 
         '''

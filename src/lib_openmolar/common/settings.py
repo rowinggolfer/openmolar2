@@ -25,33 +25,6 @@ objects of admin and client applications
 ##                                                                           ##
 ###############################################################################
 
-
-###############################################################################
-##                                                                           ##
-##  I have chosen to use the following numbering system a the core reference ##
-##  to teeth.                                                                ##
-##                                                                           ##
-##    the notation is as follows.                                            ##
-##                                                                           ##
-##    ADULT (this is the same as the universal numering system               ##
-##                                                                           ##
-##    1  2  3  4  5  6  7  8  | 9  10 11 12 13 14 15 16                      ##
-##    _________________________________________________________              ##
-##    32 31 30 29 28 27 26 25 | 24 23 22 21 20 19 18 17                      ##
-##                                                                           ##
-##    DECIDUOUS (UNS)                    (OPENMOLAR)                         ##
-##                                                                           ##
-##    A B C D E | F G H I J              65 66 67 68 69 | 70 71 72 73 74     ##
-##    _____________________              _______________________________     ##
-##    T S R Q P | O N M L K              85 84 83 82 81 | 80 79 78 76 75     ##
-##                                                                           ##
-##    It holds the advantage of being only 1 byte per tooth (!)              ##
-##    For presentation to the user,                                          ##
-##    This is translated to various other formats via use of dictionary.     ##
-##                                                                           ##
-##                                                                           ##
-###############################################################################
-
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
@@ -79,89 +52,123 @@ def singleton(cls):
 
 
 class CommonSettings(object):
-    def __init__(self):
 
-        #: the system dictionary
-        self.DICT_LOCATION = "/usr/share/dict/words"
+    #: determines how much is output to the terminal
+    VERBOSE = True
 
-        #: a pointer to the instance of :doc:`OMTypes`
-        self.OM_TYPES = om_types.OMTypes()
+    #: the system dictionary
+    DICT_LOCATION = "/usr/share/dict/words"
 
-        #: an array of 16 columns, and 4 rows
-        #: see :doc:`../../misc/tooth_notation`
-        self.TOOTH_GRID = (
+    #: an array of 16 columns, and 4 rows
+    #: see :doc:`../../misc/tooth_notation`
+    TOOTH_GRID = (
         ( 0,  0,  0, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74,  0,  0,  0),
         ( 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16),
         (32, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17),
         ( 0,  0,  0, 84, 83, 82, 81, 80, 79, 78, 77, 76, 75,  0,  0,  0,)
         )
 
-        #: a tuple of upper back teeth ids
-        self.upper_back  = ( 1, 2, 3, 4, 5,12,13,14,15,16,65,66,73,74)
+    #: a tuple of upper back teeth ids
+    upper_back  = ( 1, 2, 3, 4, 5,12,13,14,15,16,65,66,73,74)
 
-        #: a tuple of upper lower teeth ids
-        self.lower_back  = (17,18,19,20,21,28,29,30,31,32,84,83,76,75)
+    #: a tuple of upper lower teeth ids
+    lower_back  = (17,18,19,20,21,28,29,30,31,32,84,83,76,75)
 
-        #: a tuple of upper front teeth ids
-        self.upper_front = ( 6, 7, 8, 9,10,11,67,68,69,70,71,72)
+    #: a tuple of upper front teeth ids
+    upper_front = ( 6, 7, 8, 9,10,11,67,68,69,70,71,72)
 
-        #: a tuple of lower front teeth ids
-        self.lower_front = (22,23,24,25,26,27,82,81,80,79,78,77)
+    #: a tuple of lower front teeth ids
+    lower_front = (22,23,24,25,26,27,82,81,80,79,78,77)
 
-        #: a tuple of deciduous teeth ids
-        self.DECIDUOUS = self.TOOTH_GRID[0] + self.TOOTH_GRID[3]
+    #: a tuple of deciduous teeth ids
+    DECIDUOUS = TOOTH_GRID[0] + TOOTH_GRID[3]
 
-        #: a dictionary to convert from id to shortname
-        #: example TOOTHGRID_SHORTNAMES[8] returns 'ur1'
-        self.TOOTHGRID_SHORTNAMES = {8:'ur1', 7:'ur2',
-        6:'ur3', 5:'ur4', 4:'ur5',
-        3:'ur6', 2:'ur7', 1:'ur8',
-        9:'ul1', 10:'ul2', 11:'ul3',
-        12:'ul4', 13:'ul5', 14:'ul6',
-        15:'ul7', 16:'ul8', 24:'ll1',
-        23:'ll2', 22:'ll3', 21:'ll4',
-        20:'ll5', 19:'ll6', 18:'ll7',
-        17:'ll8', 25:'lr1', 26:'lr2',
-        27:'lr3', 28:'lr4', 29:'lr5',
-        30:'lr6', 31:'lr7', 32:'lr8',
-        69:'ura', 68:'urb', 67:'urc',
-        66:'urd', 65:'ure', 70:'ula',
-        71:'ulb', 72:'ulc', 73:'uld',
-        74:'ule', 79:'lla', 78:'llb',
-        77:'llc', 76:'lld', 75:'lle',
-        80:'lra', 81:'lrb', 82:'lrc',
-        83:'lrd', 84:'lre'}
+    #: a dictionary to convert from id to shortname
+    #: example TOOTHGRID_SHORTNAMES[8] returns 'ur1'
+    TOOTHGRID_SHORTNAMES = {
+            8:'ur1', 7:'ur2',
+            6:'ur3', 5:'ur4', 4:'ur5',
+            3:'ur6', 2:'ur7', 1:'ur8',
+            9:'ul1', 10:'ul2', 11:'ul3',
+            12:'ul4', 13:'ul5', 14:'ul6',
+            15:'ul7', 16:'ul8', 24:'ll1',
+            23:'ll2', 22:'ll3', 21:'ll4',
+            20:'ll5', 19:'ll6', 18:'ll7',
+            17:'ll8', 25:'lr1', 26:'lr2',
+            27:'lr3', 28:'lr4', 29:'lr5',
+            30:'lr6', 31:'lr7', 32:'lr8',
+            69:'ura', 68:'urb', 67:'urc',
+            66:'urd', 65:'ure', 70:'ula',
+            71:'ulb', 72:'ulc', 73:'uld',
+            74:'ule', 79:'lla', 78:'llb',
+            77:'llc', 76:'lld', 75:'lle',
+            80:'lra', 81:'lrb', 82:'lrc',
+            83:'lrd', 84:'lre'
+            }
 
-        #: a dictionary to convert from id to longname
-        #: example TOOTHGRID_SHORTNAMES[8] returns 'upper right 1'
-        self.TOOTHGRID_LONGNAMES =  {8:'upper right 1', 7:'upper right 2',
-        6:'upper right 3', 5:'upper right 4', 4:'upper right 5',
-        3:'upper right 6', 2:'upper right 7', 1:'upper right 8',
-        9:'upper left 1', 10:'upper left 2', 11:'upper left 3',
-        12:'upper left 4', 13:'upper left 5', 14:'upper left 6',
-        15:'upper left 7', 16:'upper left 8', 24:'lower left 1',
-        23:'lower left 2', 22:'lower left 3', 21:'lower left 4',
-        20:'lower left 5', 19:'lower left 6', 18:'lower left 7',
-        17:'lower left 8', 25:'lower right 1', 26:'lower right 2',
-        27:'lower right 3', 28:'lower right 4', 29:'lower right 5',
-        30:'lower right 6', 31:'lower right 7', 32:'lower right 8',
-        69:'upper right a', 68:'upper right b', 67:'upper right c',
-        66:'upper right d', 65:'upper right e', 70:'upper left a',
-        71:'upper left b', 72:'upper left c', 73:'upper left d',
-        74:'upper left e', 79:'lower left a', 78:'lower left b',
-        77:'lower left c', 76:'lower left d', 75:'lower left e',
-        80:'lower right a', 81:'lower right b', 82:'lower right c',
-        83:'lower right d', 84:'lower right e'}
+    #: a dictionary to convert from id to longname
+    #: example TOOTHGRID_SHORTNAMES[8] returns 'upper right 1'
+    TOOTHGRID_LONGNAMES =  {
+            8:'upper right 1', 7:'upper right 2',
+            6:'upper right 3', 5:'upper right 4', 4:'upper right 5',
+            3:'upper right 6', 2:'upper right 7', 1:'upper right 8',
+            9:'upper left 1', 10:'upper left 2', 11:'upper left 3',
+            12:'upper left 4', 13:'upper left 5', 14:'upper left 6',
+            15:'upper left 7', 16:'upper left 8', 24:'lower left 1',
+            23:'lower left 2', 22:'lower left 3', 21:'lower left 4',
+            20:'lower left 5', 19:'lower left 6', 18:'lower left 7',
+            17:'lower left 8', 25:'lower right 1', 26:'lower right 2',
+            27:'lower right 3', 28:'lower right 4', 29:'lower right 5',
+            30:'lower right 6', 31:'lower right 7', 32:'lower right 8',
+            69:'upper right a', 68:'upper right b', 67:'upper right c',
+            66:'upper right d', 65:'upper right e', 70:'upper left a',
+            71:'upper left b', 72:'upper left c', 73:'upper left d',
+            74:'upper left e', 79:'lower left a', 78:'lower left b',
+            77:'lower left c', 76:'lower left d', 75:'lower left e',
+            80:'lower right a', 81:'lower right b', 82:'lower right c',
+            83:'lower right d', 84:'lower right e'
+            }
 
-        #: put persistant local settings in here..
-        #: they are pickled and stored in QtCore.QSettings for the application
-        self.PERSISTANT_SETTINGS = {} ## these survive a log out!
+    #: put persistant local settings in here..
+    #: they are pickled and stored in QtCore.QSettings for the application
+    #: meaning these survive a log out!
+    PERSISTANT_SETTINGS = {}
+
+    def __init__(self):
+
+        #: a pointer to the instance of :doc:`OMTypes`
+        self.OM_TYPES = om_types.OMTypes()
 
         #initiate some placeholders
         self._proc_codes = None
         self._pydate_format = None
         self._qdate_format = None
         self._rev_toothgrid_shortnames = {}
+
+    def log(self, *args):
+        '''
+        a function to output to terminal if application is launched in
+        verbose mode
+        '''
+        if not self.VERBOSE:
+            return
+        for arg in args:
+            print str(arg),
+        print
+
+    def debug_log(self, *args):
+        '''
+        a debug log. the main reason for the existence of this is I can
+        put SETTINGS.debug_log("blah", "blah") all over the codebase
+        and clean it up quickly
+        '''
+        print
+        print "=" *30, " DEBUG  ", "=" *30
+        for arg in args:
+            print str(arg),
+        print
+        print "=" *70
+        print
 
     @property
     def REV_TOOTHGRID_SHORTNAMES(self):
@@ -244,7 +251,7 @@ class CommonSettings(object):
         load only when required
         '''
         if self._proc_codes == None:
-            self._proc_codes = classes.ProcedureCodes()
+            self._proc_codes = classes.ProcedureCodesInstance()
         return self._proc_codes
 
     @property

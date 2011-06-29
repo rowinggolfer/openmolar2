@@ -31,8 +31,8 @@ class ChartRoot(teeth.ChartTooth):
     '''
     custom class which holds data about a root
     '''
-    def __init__(self, univ_number, model):
-        teeth.ChartTooth.__init__(self, univ_number, model)
+    def __init__(self, tooth_id, model):
+        teeth.ChartTooth.__init__(self, tooth_id, model)
 
         #: a boolean so that it's clear this is a ChartRoot,
         #: not the parent class ChartTooth
@@ -104,11 +104,11 @@ class ChartRoot(teeth.ChartTooth):
 
     @property
     def properties(self):
-        return self.data_model.get_root_info(self.ref)
+        return self.data_model.get_root_info(self.tooth_id)
 
     @property
     def perio_properties(self):
-        return self.data_model.get_perio_data(self.ref)
+        return self.data_model.get_perio_data(self.tooth_id)
 
     @property
     def svg(self):
@@ -148,8 +148,8 @@ if __name__ == "__main__":
         for root in roots:
             root.draw_structure(painter)
 
-    import tooth_data_model
-    model = tooth_data_model.ToothDataModel()
+    import chart_data_model
+    model = chart_data_model.ChartDataModel()
 
     app = QtGui.QApplication([])
     widg = QtGui.QWidget()

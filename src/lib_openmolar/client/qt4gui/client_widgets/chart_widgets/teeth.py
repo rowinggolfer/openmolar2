@@ -26,21 +26,29 @@ import re
 
 from PyQt4 import QtGui, QtCore
 
+from lib_openmolar.client.classes import Tooth
 from lib_openmolar.client.qt4gui.colours import colours
 
 
-class ChartTooth(object):
+class ChartTooth(Tooth):
     '''
-    custom class which holds data about a tooth
+    custom class which acts as a view to the data stored in
+    :doc:`ChartDataModel` for a tooth
     '''
-    def __init__(self, univ_number, model):
-        self.ref = univ_number
+    def __init__(self, tooth_id, model):
+        '''
+        :param: int (should conform to :doc:`../../misc/tooth_notation`)
+        :param: :doc:`ChartDataModel`
+
+        '''
+        Tooth.__init__(self, tooth_id)
+        self.data_model = model
+
         self.rect = QtCore.QRectF()
         self.under_mouse = False
         self.is_selected = False
         self.is_root = False
         self.is_present = True
-        self.data_model = model
         self.fill_shapes = []
         self.fill_shapes_current = True
         self.crowns = []
@@ -50,31 +58,26 @@ class ChartTooth(object):
 
     def __repr__(self):
         return "tooth om_id=%d, shortname='%s' longname='%s' root='%s'"% (
-            self.ref, self.short_name, self.long_name, self.is_root)
+            self.tooth_id, self.short_name, self.long_name, self.is_root)
 
     def __cmp__(self, other):
         try:
-            return cmp( "%s%s"%(self.ref, self.is_root),
-                    "%s%s"%(other.ref, other.is_root))
+            return cmp( "%s%s"%(self.tooth_id, self.is_root),
+                    "%s%s"%(other.tooth_id, other.is_root))
         except AttributeError:
             return -1
 
-    def set_data_model(self, model):
-        self.data_model = model
-        if self.root:
-            self.root.set_data_model(model)
-
     @property
     def has_properties(self):
-        return self.data_model.has_properties(self.ref)
+        return self.data_model.has_properties(self.tooth_id)
 
     @property
     def properties(self):
-        return self.data_model.get_properties(self.ref)
+        return self.data_model.get_properties(self.tooth_id)
 
     @property
     def restorations(self):
-        return self.data_model.get_restorations(self.ref)
+        return self.data_model.get_restorations(self.tooth_id)
 
     def set_ignore(self, boolean):
         self.ignore = boolean
@@ -94,6 +97,9 @@ class ChartTooth(object):
             self.root.toggle_is_present()
 
     def add_property(self, prop):
+        '''
+        convience method to add data to the underlying model
+        '''
         self.data_model.add_property(prop)
         self.data_model.endResetModel()
 
@@ -129,81 +135,27 @@ class ChartTooth(object):
         return prop_str
 
     @property
-    def long_name(self):
-        return SETTINGS.TOOTHGRID_LONGNAMES.get(self.ref, "???")
-
-    @property
-    def short_name(self):
-        return SETTINGS.TOOTHGRID_SHORTNAMES.get(self.ref, "???")
-
-    @property
-    def is_deciduous(self):
-        return (self.ref !=0 and self.ref in SETTINGS.DECIDUOUS)
-
-    @property
-    def is_upper(self):
-        return (self.ref in SETTINGS.TOOTH_GRID[0] or
-            self.ref in SETTINGS.TOOTH_GRID[1])
-
-    @property
-    def is_lower(self):
-        return not self.is_upper
-
-    @property
-    def is_backtooth(self):
-        return self.ref in SETTINGS.back_teeth
-
-    @property
-    def is_fronttooth(self):
-        return self.ref in SETTINGS.front_teeth
-
-    @property
-    def is_rightside(self):
-        for row in SETTINGS.TOOTH_GRID:
-            if self.ref in row and row.index(self.ref) < 8:
-                return True
-        return False
-
-    @property
-    def default_material(self):
-        if self.is_backtooth:
-            return "AM"
-        else:
-            return "CO"
-
-    @property
-    def quadrant(self):
-        '''
-        property declaring which quadrant the tooth is in 1,2,3,4
-        '''
-        if self.is_upper:
-            quad = 1 if self.is_rightside else 2
-        else:
-            quad = 4 if self.is_rightside else 3
-        return quad
-
-    @property
     def ref_next(self):
         '''
         returns the next tooth in a forward direction
         (eg if return is pressed)
         '''
-        if self.ref == 32:
+        if self.tooth_id == 32:
             return 1
-        if self.ref == 84:
+        if self.tooth_id == 84:
             return 65
-        return self.ref + 1
+        return self.tooth_id + 1
 
     @property
     def ref_prev(self):
         '''
         returns the next tooth in a backward direction
         '''
-        if self.ref == 1:
+        if self.tooth_id == 1:
             return 32
-        if self.ref == 65:
+        if self.tooth_id == 65:
             return 84
-        return self.ref - 1
+        return self.tooth_id - 1
 
     @property
     def ref_left(self):
@@ -232,8 +184,8 @@ class ChartTooth(object):
         '''
         found = False
         for row in SETTINGS.visible_chart_rows:
-            if self.ref in SETTINGS.TOOTH_GRID[row]:
-                index = SETTINGS.TOOTH_GRID[row].index(self.ref)
+            if self.tooth_id in SETTINGS.TOOTH_GRID[row]:
+                index = SETTINGS.TOOTH_GRID[row].index(self.tooth_id)
                 found = True
                 break
 
@@ -242,14 +194,14 @@ class ChartTooth(object):
             return
 
         if row == SETTINGS.visible_chart_rows[-1]:
-            return self.ref
+            return self.tooth_id
 
         i = SETTINGS.visible_chart_rows.index(row)
         row_down = SETTINGS.visible_chart_rows[i+1]
 
         new_val = SETTINGS.TOOTH_GRID[row_down][index]
         if new_val == 0:
-            return self.ref
+            return self.tooth_id
         return new_val
 
     @property
@@ -259,8 +211,8 @@ class ChartTooth(object):
         '''
         found = False
         for row in reversed(SETTINGS.visible_chart_rows):
-            if self.ref in SETTINGS.TOOTH_GRID[row]:
-                index = SETTINGS.TOOTH_GRID[row].index(self.ref)
+            if self.tooth_id in SETTINGS.TOOTH_GRID[row]:
+                index = SETTINGS.TOOTH_GRID[row].index(self.tooth_id)
                 found = True
                 break
 
@@ -269,14 +221,14 @@ class ChartTooth(object):
             return
 
         if row == SETTINGS.visible_chart_rows[0]:
-            return self.ref
+            return self.tooth_id
 
         i = SETTINGS.visible_chart_rows.index(row)
         row_up = SETTINGS.visible_chart_rows[i-1]
 
         new_val = SETTINGS.TOOTH_GRID[row_up][index]
         if new_val == 0:
-            return self.ref
+            return self.tooth_id
         return new_val
 
     @property
@@ -344,11 +296,11 @@ class ChartTooth(object):
     def init_restoration_shapes(self):
         # check to see whether this LONG procedure is necessary
         if self.fill_shapes_current:
-            return
+            pass
         self.fill_shapes = []
         self.crowns = []
         for prop in self.restorations:
-            if prop.type == prop.Crown:
+            if prop.type == prop.CROWN:
                 self.crowns.append(prop)
                 continue
             surfaces, material = prop.surfaces_to_draw, prop.material
@@ -514,7 +466,7 @@ class ChartTooth(object):
             if shape:
                 self.fill_shapes.append((shape, brush))
             else:
-                print "shape error! '%s'"% surfaces
+                SETTINGS.log ("shape error! '%s'"% surfaces)
 
         self.fill_shapes_current = True
 
@@ -611,7 +563,7 @@ if __name__ == "__main__":
 
     teeth = []
 
-    model = chart_widgets.ToothDataModel()
+    model = chart_widgets.ChartDataModel()
 
     rects = [
         widg.rect().adjusted(0,0,-widg.width()/2, -widg.height()/2),
@@ -628,10 +580,12 @@ if __name__ == "__main__":
         teeth.append(tooth)
 
     for fill in ("ODB,CO", "B,GL", "DL,AM", "OL,CO"):
-        for tooth in teeth:
-            prop = chart_widgets.ToothData(tooth)
+        for tooth_id in ids:
+            prop = chart_widgets.ToothData(tooth_id)
             prop.from_fill_string(fill)
-            tooth.add_property(prop)
+            model.add_property(prop)
+
+    #model.endResetModel()
 
     widg.paintEvent = paintEvent
     widg.show()

@@ -20,42 +20,14 @@
 ##                                                                           ##
 ###############################################################################
 
-
-###############################################################################
-##                                                                           ##
-##  I have chosen to use the following numbering system a the core reference ##
-##  to teeth.                                                                ##
-##                                                                           ##
-##    the notation is as follows.                                            ##
-##                                                                           ##
-##    ADULT (this is the same as the universal numering system               ##
-##                                                                           ##
-##    1  2  3  4  5  6  7  8  | 9  10 11 12 13 14 15 16                      ##
-##    _________________________________________________________              ##
-##    32 31 30 29 28 27 26 25 | 24 23 22 21 20 19 18 17                      ##
-##                                                                           ##
-##    DECIDUOUS (UNS)                    (OPENMOLAR)                         ##
-##                                                                           ##
-##    A B C D E | F G H I J              65 66 67 68 69 | 70 71 72 73 74     ##
-##    _____________________              _______________________________     ##
-##    T S R Q P | O N M L K              85 84 83 82 81 | 80 79 78 76 75     ##
-##                                                                           ##
-##    It holds the advantage of being only 1 byte per tooth (!)              ##
-##    For presentation to the user,                                          ##
-##    This is translated to various other formats via use of dictionary.     ##
-##                                                                           ##
-##                                                                           ##
-###############################################################################
-
 from __future__ import division
 
 from PyQt4 import QtGui, QtCore
 
-
 import chart_widget_base
 import perio_data
 
-class StaticChartWidget(chart_widget_base.ChartWidgetBase):
+class ChartWidgetStatic(chart_widget_base.ChartWidgetBase):
     '''
     ChartWidget as used on the summary page
     '''
@@ -217,7 +189,9 @@ class _TestDialog(QtGui.QDialog):
         self.setWindowTitle("ChartWidgetStatic Tester")
         self.label = QtGui.QLabel()
 
-        self.chart = StaticChartWidget(model)
+        self.model = model
+        self.chart = ChartWidgetStatic(self.model)
+
         self.connect(self.chart, QtCore.SIGNAL("selection changed"),
             self.sig_catcher)
         self.connect(self.chart, QtCore.SIGNAL("DoubleClicked"),
@@ -237,7 +211,7 @@ class _TestDialog(QtGui.QDialog):
         layout.addWidget(self.chart)
         layout.addWidget(but_frame)
 
-        self.populate_fills()
+        self.model.load_test_data()
 
     def but_clicked(self):
         self.chart.setStyle(self.sender().enum)
@@ -250,22 +224,6 @@ class _TestDialog(QtGui.QDialog):
         self.label.setText(tooth_name)
 
     def populate_fills(self):
-        #- two ways to add a filling
-        self.chart.add_fill_from_string(5, "MO,AM")
-
-        #-- let's add a few (at random)
-        for fill in ("MOD,CO", "B,GL", "DO,AM", "O,GO", "B,PO"):
-            self.chart.add_fill_from_string(self.randint(1,32), fill)
-
-        self.chart.add_perio_data(3, perio_data.PerioData.POCKETING, (3,6,4,4,5,6))
-        self.chart.add_perio_data(4, perio_data.PerioData.POCKETING, (5,8,6,4,5,6))
-        self.chart.add_perio_data(5, perio_data.PerioData.POCKETING, (3,6,4,4,5,6))
-        self.chart.add_perio_data(6, perio_data.PerioData.POCKETING, (1,4,2,4,5,6))
-
-        self.chart.add_perio_data(19, perio_data.PerioData.POCKETING, (3,6,4,4,5,6))
-        self.chart.add_perio_data(20, perio_data.PerioData.POCKETING, (5,8,6,4,5,6))
-        self.chart.add_perio_data(21, perio_data.PerioData.POCKETING, (3,6,4,4,5,6))
-        self.chart.add_perio_data(22, perio_data.PerioData.POCKETING, (1,4,2,4,5,6))
 
         self.tp_line_edit = QtGui.QLineEdit()
         self.tp_line_edit.setReadOnly(True)
@@ -290,7 +248,7 @@ class _TestDialog(QtGui.QDialog):
 if __name__ == "__main__":
     from lib_openmolar.client.qt4gui import client_widgets
 
-    model = client_widgets.ToothDataModel()
+    model = client_widgets.ChartDataModel()
     app = QtGui.QApplication([])
     dl = _TestDialog(model)
     dl.exec_()

@@ -55,7 +55,7 @@ class PatientInterface(QtGui.QWidget):
         self.history_page = pages.HistoryPage(self)
 
         # summary_page shares the "model" of the static chart
-        model = self.charts_page.static.tooth_data_model
+        model = self.charts_page.static.chart_data_model
         self.summary_page = pages.SummaryPage(model, self)
 
         self.options_widget = client_widgets.PatientInterfaceOptionsWidget(self)
@@ -416,7 +416,7 @@ class PatientInterface(QtGui.QWidget):
             ):
                 page.load_patient()
 
-        self.summary_page.summary_chart.tooth_data_model.endResetModel()
+        self.summary_page.summary_chart.chart_data_model.endResetModel()
         self.apply_mode()
 
     def load_patient(self, patient_id, called_via_history = False):
@@ -426,6 +426,8 @@ class PatientInterface(QtGui.QWidget):
         '''
         if not self.ok_to_leave_record:
             return
+        self.clear()
+
         self.Advise(u"%s<br />%d"% (_("Loading Record Number"), patient_id))
         QtGui.QApplication.instance().setOverrideCursor(QtCore.Qt.WaitCursor)
 

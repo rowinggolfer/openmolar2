@@ -55,7 +55,11 @@ class StaticFillsDB(object):
     class to get static chart information
     '''
     def __init__(self, patient_id):
-        self.record_list, self._orig_record_list = [], []
+        #:
+        self.patient_id = patient_id
+        #:
+        self.record_list = []
+        self._orig_record_list = []
 
         query = '''select tooth, surfaces, material, comment
         from %s where patient_id=?'''% TABLENAME
@@ -113,14 +117,14 @@ class StaticFillsDB(object):
                     SETTINGS.database.emit_caught_error(q_query.lastError())
 
 
-    def add_filling_records(self, fill_list, patient_id):
+    def add_filling_records(self, fill_list):
         '''
         fill_list is a generator of ToothData types
         '''
         for fill in fill_list:
             new = FillRecord()
-            new.setValue("patient_id", patient_id)
-            new.setValue("tooth", fill.tooth.ref)
+            new.setValue("patient_id", self.patient_id)
+            new.setValue("tooth", fill.tooth_id)
             new.setValue("material", fill.material)
             new.setValue("surfaces", fill.surfaces)
             new.setValue("comment", fill.comment)
@@ -130,7 +134,7 @@ class StaticFillsDB(object):
 
 if __name__ == "__main__":
 
-    class duck(object):
+    class Duck(object):
         def __init__(self):
             pass
 
@@ -148,20 +152,22 @@ if __name__ == "__main__":
     print "%d records.. let's add two more"% len(object.records)
 
 
-    tooth = duck()
-    tooth.ref=1
-    duckfill = duck()
+    tooth = Duck()
+    tooth.tooth_id = 1
+    duckfill = Duck()
+    duckfill.tooth_id = tooth.tooth_id
     duckfill.tooth = tooth
     duckfill.material = "AM"
     duckfill.surfaces = "MOD"
     duckfill.comment = "I'm new!"
 
-    duckfill2 = duck()
+    duckfill2 = Duck()
+    duckfill2.tooth_id = tooth.tooth_id
     duckfill2.tooth = tooth
     duckfill2.material = "CO"
     duckfill2.surfaces = "MOD"
     duckfill2.comment = "I am also new"
-    object.add_filling_records([duckfill, duckfill2], 1)
+    object.add_filling_records([duckfill, duckfill2])
 
     print "%d records"% len(object.records)
 

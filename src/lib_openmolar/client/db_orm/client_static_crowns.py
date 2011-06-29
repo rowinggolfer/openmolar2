@@ -56,8 +56,11 @@ class StaticCrownsDB(object):
     class to get static chart information
     '''
     def __init__(self, patient_id):
-
-        self.record_list, self._orig_record_list = [], []
+        #:
+        self.patient_id = patient_id
+        #:
+        self.record_list = []
+        self._orig_record_list = []
 
         query = '''select tooth, type, technition, comment
         from %s where patient_id=?'''% TABLENAME
@@ -115,14 +118,14 @@ class StaticCrownsDB(object):
                     SETTINGS.database.emit_caught_error(q_query.lastError())
 
 
-    def add_crown_records(self, crown_list, patient_id):
+    def add_crown_records(self, crown_list):
         '''
         crown_list is a generator of ToothData types
         '''
         for data in crown_list:
             new = CrownRecord()
-            new.setValue("patient_id", patient_id)
-            new.setValue("tooth", data.tooth.ref)
+            new.setValue("patient_id", self.patient_id)
+            new.setValue("tooth", data.tooth_id)
             new.setValue("type", data.crown_type)
             new.setValue("technition", data.technition)
             new.setValue("comment", data.comment)
@@ -137,9 +140,9 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    object = StaticCrownsDB(1)
+    obj = StaticCrownsDB(1)
     restorations = object.records
 
-    print object.is_dirty
+    print obj.is_dirty
     restorations[0].setValue('type', "LAVA")
-    print object.is_dirty
+    print obj.is_dirty

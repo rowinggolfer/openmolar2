@@ -32,13 +32,17 @@ class ChartsPage(QtGui.QWidget):
         super(ChartsPage, self).__init__(parent)
 
         self.patient = None
-        self.static = client_widgets.StaticChartWidget(None, self)
+        self.static = client_widgets.ChartWidgetStatic(None, self)
 
-        tx_model = SETTINGS.treatment_model.tooth_tx_plan_model
-        self.treatment = client_widgets.TreatmentChartWidget(tx_model, self)
+        #: a pointer to the :doc:`ChartDataModel` of the static chart
+        self.static_chart_model = self.static.chart_data_model
+
+        self.tx_pl_model = SETTINGS.treatment_model.tooth_tx_plan_model
+        self.treatment = client_widgets.ChartWidgetTreatment(
+            self.tx_pl_model, self)
 
         tx_model = SETTINGS.treatment_model.tooth_tx_cmp_model
-        self.completed = client_widgets.CompletedChartWidget(tx_model, self)
+        self.completed = client_widgets.ChartWidgetCompleted(tx_model, self)
 
         self.tooth_data_editor = client_widgets.ToothDataEditor(self)
 
@@ -118,8 +122,8 @@ class ChartsPage(QtGui.QWidget):
         '''
         sending_chart = self.sender()
         tooth = sending_chart.current_tooth
-        if tooth:
-            self.static.set_current_tooth(tooth.ref)
+        if tooth is not None:
+            self.static.set_current_tooth(tooth.tooth_id)
         self.current_tooth_changed(self.static)
 
     def current_tooth_changed(self, sending_chart=None):
@@ -156,33 +160,32 @@ class ChartsPage(QtGui.QWidget):
 
     def load_patient(self):
         patient = SETTINGS.current_patient
-        self.clear()
         self.patient = patient
         for chart in (self.static, self.completed, self.treatment):
             chart.set_known_teeth(patient.dent_key)
 
-        self.static.add_data(patient.static_chart_data)
-        self.static.add_perio_records(patient.perio_data)
+        self.static_chart_model.add_data(patient.static_chart_data)
+        self.static_chart_model.add_perio_records(patient.perio_data)
+
 
     def update_patient(self):
+        '''
+        push any edits into the db_orm
+        '''
         if not self.patient:
             return
 
-        new_fillings = self.static.tooth_data_model.get_new_fillings()
-        self.patient["static_fills"].add_filling_records(new_fillings,
-            self.patient.patient_id)
+        new_fillings = self.static.chart_data_model.get_new_fillings()
+        self.patient["static_fills"].add_filling_records(new_fillings)
 
-        new_crowns = self.static.tooth_data_model.get_new_crowns()
-        self.patient["static_crowns"].add_crown_records(new_crowns,
-            self.patient.patient_id)
+        new_crowns = self.static.chart_data_model.get_new_crowns()
+        self.patient["static_crowns"].add_crown_records(new_crowns)
 
-        new_roots = self.static.tooth_data_model.get_new_roots()
-        self.patient["static_roots"].add_root_records(new_roots,
-            self.patient.patient_id)
+        new_roots = self.static.chart_data_model.get_new_roots()
+        self.patient["static_roots"].add_root_records(new_roots)
 
-        new_comments = self.static.tooth_data_model.get_new_comments()
-        self.patient["static_comments"].add_comment_records(new_comments,
-            self.patient.patient_id)
+        new_comments = self.static.chart_data_model.get_new_comments()
+        self.patient["static_comments"].add_comment_records(new_comments)
 
 if __name__ == "__main__":
 

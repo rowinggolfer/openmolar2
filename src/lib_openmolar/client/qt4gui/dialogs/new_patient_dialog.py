@@ -64,7 +64,7 @@ class NewPatientDialog(ExtendableDialog):
         self.enableApply()
         self.set_accept_button_text(_("Create New Record"))
 
-        self.patient = NewPatientDB(SETTINGS.database)
+        self.patient = NewPatientDB()
         self.patient.setValue("modified_by", SETTINGS.user)
         self.patient.setValue("status", "active")
         self.patient.remove(self.patient.indexOf("time_stamp"))

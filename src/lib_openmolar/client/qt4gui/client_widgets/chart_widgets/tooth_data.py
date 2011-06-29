@@ -23,6 +23,8 @@
 import re
 
 from PyQt4 import QtGui, QtCore
+from lib_openmolar.client.classes import Tooth
+
 
 class ToothDataError(Exception):
     '''
@@ -37,30 +39,39 @@ class ToothData(object):
     '''
     a custom object which holds information about a filling, crown or comment
     NOTE - filled surfaces are stored as MODBL -
-    so I and P surfaces are translated if used for user interaction
+    so I and P surfaces are translated if used for user interaction.
+
+    This class can be displayed by a variety of views, namely
+    :doc:`ChartWidgetBase` (and it's ancestors)
+    or :doc:`ToothDataEditor`
     '''
     #:
-    Filling = 0
+    FILLING = 0
     #:
-    Crown = 1
+    CROWN = 1
     #:
-    Root = 2
+    ROOT = 2
     #:
-    Comment = 3
+    COMMENT = 3
 
-    def __init__(self, tooth):
+    #: default is None
+    type = None
+
+    def __init__(self, tooth_id):
         '''
-        :param: :doc:`ChartTooth`
+        :param: int
+
+        .. note::
+            tooth id should comply with :doc:`../../misc/tooth_notation`
 
         '''
-        self._tooth = tooth
+        #:
+        self.tooth_id = tooth_id
+        self._tooth = None
         #:
         self.in_database = False
         #:
         self.error_message = ""
-
-        #: default is :attr:`Filling`
-        self.type = self.Filling
 
         #attributes when data is a filling
         self._surfaces = ''
@@ -87,8 +98,10 @@ class ToothData(object):
     @property
     def tooth(self):
         '''
-        returns the :doc:`ChartTooth` associated with this data
+        the :doc:`Tooth` for this data
         '''
+        if self._tooth is None:
+            self._tooth = Tooth(self.tooth_id)
         return self._tooth
 
     @property
@@ -122,29 +135,48 @@ class ToothData(object):
 
     @property
     def is_valid(self):
-        if self.type == self.Filling:
+        if self.type == self.FILLING:
             return self.surfaces != ""
-        elif self.type == self.Crown:
+        elif self.type == self.CROWN:
             return self.crown_type !=""
         return False
 
     def set_type(self, type):
         self.type = type
 
+    @property
+    def is_fill(self):
+        return self.type == self.FILLING
+
+    @property
+    def is_crown(self):
+        return self.type == self.CROWN
+
+    @property
+    def is_root(self):
+        return self.type == self.ROOT
+
+    @property
+    def is_comment(self):
+        return self.type == self.COMMENT
+
     def set_crown_type(self, crown_type):
-        if not self.type == self.Crown:
+        if not self.is_crown:
             raise ToothDataError("This is not a crown")
         self._crown_type = crown_type
 
     def set_root_type(self, root_type):
-        if not self.type == self.Root:
+        if not self.is_root:
             raise ToothDataError("This is not a root")
         self.root_type = root_type
 
     def set_surfaces(self, surfaces):
-        if not self.type == self.Filling:
+        if not self.is_fill:
             raise ToothDataError("This is not a filling")
         self._surfaces = surfaces
+
+    def set_material(self, material):
+        self._material = material
 
     @property
     def surfaces_to_draw(self):
@@ -173,20 +205,20 @@ class ToothData(object):
         '''
         a QtGui.QBrush instance
         '''
-        if self.type == self.Filling:
+        if self.is_fill:
             return QtGui.QApplication.instance().palette().buttonText()
         else:
             return QtGui.QApplication.instance().palette().dark()
 
     @property
     def icon(self):
-        if self.type == self.Filling:
+        if self.is_fill:
             return QtGui.QIcon(":icons/filling.png")
-        elif self.type == self.Root:
+        elif self.is_root:
             return QtGui.QIcon(":icons/root.png")
-        elif self.type == self.Crown:
+        elif self.is_crown:
             return QtGui.QIcon(":icons/crown.png")
-        elif self.type == self.Comment:
+        elif self.is_comment:
             return QtGui.QIcon(":icons/openmolar.png")
 
         return QtGui.QIcon(":icons/openmolar.png")
@@ -197,19 +229,19 @@ class ToothData(object):
         a human readable description of this data
         '''
         text = "unknown item!"
-        if self.type == self.Filling:
+        if self.type == self.FILLING:
             text = "%s,%s"% (self.display_surfaces, self.material)
-        elif self.type == self.Crown:
+        elif self.type == self.CROWN:
             # lookup the crown in known types.. else give it straight
             crown_dict = SETTINGS.OM_TYPES["crowns"].readable_dict
             text = crown_dict.get(self.crown_type, self.crown_type)
-        elif self.type == self.Root:
+        elif self.type == self.ROOT:
             if self.has_rct:
                 text = _("Root Treated")
             else:
                 root_dict = SETTINGS.OM_TYPES["root_description"].readable_dict
                 text = root_dict.get(self.root_type, self.root_type)
-        elif self.type == self.Comment:
+        elif self.type == self.COMMENT:
             return self.comment
 
         return text
@@ -228,10 +260,9 @@ class ToothData(object):
         except ValueError:
             pass
 
-    def from_user_input(self, input, find_code=True):
+    def from_user_input(self, input):
         '''
         :param: input (QString)
-        :kword: find_code (bool)
 
         this input has come from a line edit.. so has to be checked for sanity
         '''
@@ -255,6 +286,7 @@ class ToothData(object):
         '''
         this input has come from a procedure code
         '''
+        print "DEPRECATED FUNCTION CALLED - use treatment item instead"
         self.proc_code = code
         shortcut = SETTINGS.PROCEDURE_CODES.convert_to_user_shortcut(code)
         self.from_user_input(shortcut, False)
@@ -265,18 +297,32 @@ class ToothData(object):
         (which is a class generated by a dialog which adds necessary data to
         a procedure code)
         '''
+        self.proc_code = treatment_item.code
         if treatment_item.is_fill:
-            self.proc_code = treatment_item.code
-            input = QtCore.QString(treatment_item.surfaces)
-            self.parse_fill_input(input)
-        else:
-            self.from_proc_code(treatment_item.code)
+            self.set_type(self.FILLING)
+            self.set_surfaces(treatment_item.surfaces)
+            fill_materials = {
+                "composite":"CO",
+                "glass":"GL",
+                "amalgam":"AM",
+                "gold":"GO",
+                "porcelain":"PO"}
+            self.set_material(fill_materials.get(treatment_item.material))
 
+        elif treatment_item.is_crown:
+            self.set_type(self.CROWN)
+
+        elif treatment_item.is_root:
+            self.set_type(self.ROOT)
+
+        SETTINGS.debug_log("ToothData - converted from treatment item",
+            "\n", self)
 
     def parse_fill_input(self, input, decode=True):
         input_list = input.split(",")
 
         surf = input_list[0]
+
         if decode:
             if self.tooth.is_upper:
                 surf = surf.replace("L","X") #garbage entered.. ensure error fires
@@ -284,10 +330,13 @@ class ToothData(object):
             if self.tooth.is_fronttooth:
                 surf = surf.replace("O","X") #garbage entered.. ensure error fires
                 surf = surf.replace("I","O")
+
         if not re.match("[MODBL]{1,5}$", surf):
             raise ToothDataError("one or more invalid filling surface")
+
         if len(set(surf)) != len(surf):
             raise ToothDataError("duplicate surfaces found")
+
         self._surfaces = surf
         try:
             material = input_list[1]
@@ -309,7 +358,7 @@ class ToothData(object):
         if input_list[0] != "CR":
             raise ToothDataError(
             "bad crown input, format is CR[/surfaces],[type]")
-        self.set_type(self.Crown)
+        self.set_type(self.CROWN)
         try:
             crown_type = input_list[1]
             if not crown_type in SETTINGS.allowed_crown_types:
@@ -324,7 +373,7 @@ class ToothData(object):
         if input_list[0] != "R":
             raise ToothDataError("bad root input, format is R,[type]")
 
-        self.set_type(self.Root)
+        self.set_type(self.ROOT)
         try:
             root_type = input_list[1]
             if not root_type in SETTINGS.allowed_root_types:
@@ -337,7 +386,7 @@ class ToothData(object):
         self.root_type = unicode(root_type)
 
     def parse_comment_input(self, input):
-        self.set_type(self.Comment)
+        self.set_type(self.COMMENT)
         self.comment = unicode(input).strip("#")
 
     @property
@@ -360,11 +409,11 @@ class ToothData(object):
 
 
     def __repr__(self):
-        if self.Filling:
-            return "ToothData Instance %s %s"% (
-                self.tooth.short_name, self.surfaces)
-        if self.Crown:
-            return "ToothData Instance %s %s"% (
-                self.tooth.short_name, self.type)
-        else:
-            return "ToothData Instance %s"% self.tooth.short_name
+        if self.is_fill:
+            return "ToothData FILLING tooth_id=%s surfaces=%s material =%s"% (
+                self.tooth_id, self.surfaces, self.material)
+        if self.is_crown:
+            return "ToothData CROWN tooth_id=%s type=%s"% (
+                self.tooth_id, self.type)
+
+        return "ToothData Instance tooth_id=%s"% self.tooth_id

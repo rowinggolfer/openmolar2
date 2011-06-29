@@ -79,7 +79,7 @@ methods and attributes
 
     return output
 
-def get_classes(module):
+def get_class_names(module):
     '''
     Args:
         module (module object)
@@ -93,16 +93,8 @@ def get_classes(module):
     for name in dir(module):
         obj = getattr(module, name)
         if (inspect.isclass(obj) and
-        obj.__module__ == module.__name__ and
-        obj.__name__[0] != "_"):
-            yield obj
-
-def get_class_names(module):
-    '''
-    returns the classes name (rather than the object itself)
-    '''
-    for klass in get_classes(module):
-        yield klass.__name__
+        (obj.__module__ == module.__name__ and obj.__name__[0] != "_")):
+            yield name
 
 def get_modules(folder):
     '''
@@ -187,6 +179,6 @@ if __name__ == "__main__":
 
     folder = sys.argv[1]
     if not os.path.isdir(folder):
-        sys.exit('%s is nota directory'% folder)
+        sys.exit('%s is not a directory'% folder)
 
     main()

@@ -23,7 +23,7 @@
 import re
 
 from PyQt4 import QtGui, QtCore
-
+from lib_openmolar.client.classes import Tooth
 
 
 class PerioDataError(Exception):
@@ -45,10 +45,17 @@ class PerioData(object):
 
     type = POCKETING
 
-    def __init__(self, tooth=None):
+    def __init__(self, tooth_id):
         self._data = None
-        self.tooth = tooth
+        self.tooth_id = tooth_id
         self.in_database = False
+        self._tooth = None
+
+    @property
+    def tooth(self):
+        if self._tooth is None:
+            self._tooth = Tooth(self.tooth_id)
+        return self._tooth
 
     def __repr__(self):
         return "perio_data for %s Type %s Values%s"% (
@@ -101,7 +108,7 @@ class PerioData(object):
         return text
 
 if __name__ == "__main__":
-    data = PerioData()
+    data = PerioData(1)
     print dir(data)
 
     data.set_values((1,2,3,4,5,6))

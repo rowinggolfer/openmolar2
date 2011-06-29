@@ -23,16 +23,14 @@
 
 from PyQt4 import QtCore, QtGui
 
-
 from lib_openmolar.client.qt4gui.client_widgets import chart_widgets
 
 import tooth_data_list_widget
 import chart_line_edit
 import chart_editor_tooth
 
-from lib_openmolar.client.qt4gui.client_widgets.procedures import crown_codes_model
-
-
+from lib_openmolar.client.qt4gui.client_widgets.procedures import \
+    crown_codes_model
 
 class ToothDataEditor(QtGui.QWidget):
     '''
@@ -41,19 +39,27 @@ class ToothDataEditor(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
+        #:
         self.current_tooth = None
+        #:
         self.tooth_label = QtGui.QLabel("")
         self.tooth_label.setAlignment(QtCore.Qt.AlignCenter)
+        #:
         self.line_edit = chart_line_edit.ChartLineEdit(self)
-        self.tooth_data_list_widget = tooth_data_list_widget.ToothDataListWidget()
+        #: a pointer to the :doc:`ToothDataListWidget`
+        self.tooth_data_list_widget = \
+            tooth_data_list_widget.ToothDataListWidget()
 
+        #: a pointer to the :doc:`ToothEditor`
         self.tooth_editor = chart_editor_tooth.ToothEditor(self)
 
+        #: populated with SETTINGS.OM_TYPES["root_description"].selections
         self.roots_combo_box = QtGui.QComboBox()
         self.roots_combo_box.addItem(_("ROOTS"))
         root_list = SETTINGS.OM_TYPES["root_description"].selections
         self.roots_combo_box.addItems(root_list)
 
+        #: populated with :doc:`CrownCodesModel`
         self.crowns_combo_box = QtGui.QComboBox()
         self.crowns_combo_box.setModel(crown_codes_model.CrownCodesModel())
 
@@ -109,7 +115,7 @@ class ToothDataEditor(QtGui.QWidget):
     def add_property_to_current_tooth(self):
         if not self.current_tooth:
             return
-        prop = chart_widgets.ToothData(self.current_tooth)
+        prop = chart_widgets.ToothData(self.current_tooth.tooth_id)
 
         try:
             prop.from_user_input(self.line_edit.trimmed_text)
@@ -150,7 +156,7 @@ class ToothDataEditor(QtGui.QWidget):
             index = model.index(index)
             chosen_crown = model.data(index, QtCore.Qt.UserRole)
             print chosen_crown
-            prop = chart_widgets.ToothData(self.current_tooth)
+            prop = chart_widgets.ToothData(self.current_tooth.tooth_id)
             prop.from_proc_code(chosen_crown)
             self.current_tooth.add_property(prop)
             self.tooth_data_list_widget.setTooth(self.current_tooth)
@@ -248,8 +254,6 @@ if __name__ == "__main__":
     def sig_catcher(*args):
         print args, dl.sender()
 
-    
-    
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     obj = ToothDataEditor(dl)

@@ -60,7 +60,7 @@ class Parser(optparse.OptionParser):
                         action="store_true", default=False,
                         help = "install a demo database (in default location)",
                         )
-                
+
         option = self.add_option("-t", "--terminal",
                         dest = "terminal",
                         action="store_true", default=True,
@@ -68,15 +68,27 @@ class Parser(optparse.OptionParser):
                                 "(gnome-terminal)\n"
                                 "True by default"
                        )
-        
+
         option = self.add_option("-n", "--no-terminal",
                         dest = "terminal",
                         action="store_false",
                         help = "do not run all chosen processes in terminals\n"
                                "(overrides -t)"
                        )
-        
-    
+
+        option = self.add_option("-s", "--test-suite",
+                        dest = "tests",
+                        action="store_true", default=False,
+                        help = _("run the test suite"),
+                        )
+
+        option = self.add_option("-v", "--verbose",
+                        dest = "verbose",
+                        action="store_true", default=False,
+                        help = _("verbose output (useful for debugging)"),
+                        )
+
+
 def change_dir():
     def determine_path ():
         """Borrowed from wxglade.py"""
@@ -100,22 +112,33 @@ def main():
     options, args = parser.parse_args()
     if parser.values == parser.defaults:
         parser.print_help()
-        sys.exit("nothing to do")    
-        
+        sys.exit("nothing to do")
+
+    prefixes, suffixes = [], []
+
     if options.terminal:
-        term_prefix = ["gnome-terminal", "-x"]
-    else:
-        term_prefix = []
+        prefixes += ["gnome-terminal", "-x"]
+
+    if options.verbose:
+        suffixes += ["-v"]
 
     if options.admin:
         print "running admin app as process %s"%(
-        subprocess.Popen(term_prefix +
-            ["python", "admin_app.py"]).pid)
+        subprocess.Popen(
+            prefixes + ["python", "admin_app.py"] + suffixes
+            ).pid)
 
     if options.client:
         print "running client app as process %s"%(
-        subprocess.Popen(term_prefix +
-            ["python", "client_app.py"]).pid)
+        subprocess.Popen(
+            prefixes + ["python", "client_app.py"] + suffixes
+            ).pid)
+
+    if options.tests:
+        print "running test suite as process %s"%(
+        subprocess.Popen(
+            prefixes + ["python", "test_suite.py"] + suffixes
+            ).pid)
 
     if options.install_demo:
         print "install a demo db - process id %s"% (
@@ -126,9 +149,10 @@ def main():
         #    ["gksu", "-u", "postgres",
         #    "python admin_app.py --install-demo"]).pid)
 
-        subprocess.Popen(term_prefix +
-            ["python", "admin_app.py", "--install-demo"]).pid)
+        subprocess.Popen(
+            prefixes + ["python", "admin_app.py", "--install-demo"] + suffixes
+            ).pid)
 
-    
+
 if __name__ == "__main__":
     main()

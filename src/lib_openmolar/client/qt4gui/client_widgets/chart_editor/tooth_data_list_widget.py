@@ -82,45 +82,44 @@ class ToothDataListWidget(QtGui.QListView):
         self.model().setTooth(tooth)
 
 if __name__ == "__main__":
-    
-    
 
-    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets.teeth import ChartTooth
+    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets.teeth \
+        import ChartTooth
     from lib_openmolar.client.qt4gui.client_widgets.chart_widgets.tooth_data \
         import ToothData
-    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets.tooth_data_model \
-        import ToothDataModel
+    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets.chart_data_model \
+        import ChartDataModel
 
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
 
-    object = ToothDataListWidget()
+    obj = ToothDataListWidget()
 
-    model = ToothDataModel()
+    model = ChartDataModel()
     tooth = ChartTooth(1, model)
 
-    prop = ToothData(tooth)
+    prop = ToothData(1)
     prop.from_fill_string("MOD,GL")
     tooth.add_property(prop)
 
-    prop = ToothData(tooth)
-    prop.set_type(prop.Crown)
+    prop = ToothData(1)
+    prop.set_type(prop.CROWN)
     prop.set_crown_type("LAVA")
     tooth.add_property(prop)
 
-    prop = ToothData(tooth)
-    prop.set_type(prop.Root)
+    prop = ToothData(1)
+    prop.set_type(prop.ROOT)
     prop.set_root_type("IM")
     tooth.add_property(prop)
 
-    prop = ToothData(tooth)
-    prop.set_type(prop.Comment)
-    prop.comment = "I am a comment"
+    prop = ToothData(1)
+    prop.set_type(prop.COMMENT)
+    prop.set_comment("I am a comment")
     tooth.add_property(prop)
 
-    object.setTooth(tooth)
+    obj.setTooth(tooth)
 
     layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(object)
+    layout.addWidget(obj)
     dl.exec_()
 

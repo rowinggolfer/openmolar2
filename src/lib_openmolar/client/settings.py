@@ -150,14 +150,14 @@ class Settings(settings.CommonSettings):
             full_path = os.path.join(str(plugin_dir), file_)
 
             if file_.endswith(".py"):
-                print "NAKED PLUGIN FOUND", full_path
+                self.log("NAKED PLUGIN FOUND", full_path)
                 if self.PERSISTANT_SETTINGS.get("compile_plugins", False):
                     module = file_.replace('.py','')
                     mod = __import__(module)
                     yield mod
                 else:
-                    print 'NOT COMPILING',
-                    print "(as you have naked plugins disabled)"
+                    self.log ('NOT COMPILING',
+                        "(as you have naked plugins disabled)")
             elif zipfile.is_zipfile(full_path):
                 module = file_.replace('.zip','')
                 try:
@@ -165,7 +165,7 @@ class Settings(settings.CommonSettings):
                     mod = z.load_module(module)
                     yield mod
                 except (zipimport.ZipImportError, zipfile.BadZipfile) as e:
-                    print "incompatible plugin", filepath
+                    self.log ("incompatible plugin", filepath)
 
     def get_plugins(self, plugin_dir):
         '''
@@ -191,27 +191,25 @@ class Settings(settings.CommonSettings):
         for line in readable_ex:
             message += "%s\n" % line
 
-        print message
-
-
+        selt.log (message)
 
     def load_plugins(self):
         '''
         this function is called by the client application to load plugins
         '''
-        print "loading plugins..."
+        self.log ("loading plugins...")
         i = 0
         for plugin_dir in self.PLUGIN_DIRS:
-            print "looking in", plugin_dir, "for plugins"
+            self.log ("looking in", plugin_dir, "for plugins")
 
             try:
                 i += self.get_plugins(plugin_dir)
 
             except Exception as e:
-                print "Exception loading plugin"
+                self.log ("Exception loading plugin")
                 self.verbose_exception()
 
-        print i, "plugin(s) loaded"
+        self.log (str(i), "plugin(s) loaded")
 
     @property
     def allowed_fill_materials(self):
@@ -305,7 +303,7 @@ class Settings(settings.CommonSettings):
         '''
         installs a fee_scale (of type BasePlugin)
         '''
-        print "installing fee_scale", fee_scale
+        self.log ("installing fee_scale", fee_scale)
         self._fee_scales.append(fee_scale)
 
     @property

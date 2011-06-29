@@ -41,11 +41,11 @@ from lib_openmolar.client.qt4gui.dialogs.xray_treatment_dialog \
 
 
 class SummaryPage(QtGui.QWidget):
-    def __init__(self, tooth_data_model, parent = None):
+    def __init__(self, chart_data_model, parent = None):
         super(SummaryPage, self).__init__(parent)
 
-        self.summary_chart = client_widgets.SummaryChartWidget(
-            tooth_data_model, self)
+        self.summary_chart = client_widgets.ChartWidgetSummary(
+            chart_data_model, self)
         self.summary_chart.setMaximumHeight(220)
 
         self.summary_line_edit = client_widgets.SummaryLineEdit(self)
@@ -154,8 +154,8 @@ class SummaryPage(QtGui.QWidget):
         '''
         sending_chart = self.sender()
         tooth = sending_chart.current_tooth
-        if tooth:
-            self.summary_chart.set_current_tooth(tooth.ref)
+        if tooth is not None:
+            self.summary_chart.set_current_tooth(tooth.tooth_id)
 
     def clear_static(self):
         '''
@@ -167,7 +167,6 @@ class SummaryPage(QtGui.QWidget):
 
     def load_patient(self):
         patient = SETTINGS.current_patient
-        self.clear()
         self.notes_browser.setHtml(patient.notes_summary_html)
         self.treatment_summary.setHtml(patient.treatment_summary_html)
 
@@ -214,8 +213,8 @@ class SummaryPage(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets import ToothDataModel
-    model = ToothDataModel()
+    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets import ChartDataModel
+    model = ChartDataModel()
 
     app = QtGui.QApplication([])
     from lib_openmolar.client.connect import ClientConnection

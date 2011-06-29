@@ -96,7 +96,6 @@ class ReceptionPage(QtGui.QWidget):
 
     def load_patient(self):
         patient = SETTINGS.current_patient
-        self.clear()
         self.notes_browser.setHtml(patient.notes_reception_html)
         self.summary_line_edit.setText(patient.clerical_memo)
         self.appointment_model.set_patient(patient.patient_id)

@@ -22,7 +22,7 @@
 
 import os, sys
 
-lib_openmolar_path = os.path.abspath("../") 
+lib_openmolar_path = os.path.abspath("../../") 
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 

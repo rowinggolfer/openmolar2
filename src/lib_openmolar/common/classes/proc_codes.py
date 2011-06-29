@@ -36,38 +36,38 @@ from lib_openmolar.common import qrc_resources
 from PyQt4 import QtCore
 
 class ProcCode(object):
-    '''
-    a custom data object of high importance to the openmolar application
-    this is the object sent to the application when user selects a code
-    from the procedure code widget.
-
-    ProcCodes are ALWAYS initiated at application startup
-    when the ProcedureCodes object is created.
-
-    Their properties are obtained by decoding the file
-    resources/proc_codes/om_codes.txt
-    (which is actually stored as a QResources, so editing the file will only
-    take effect once QResources are refreshed)
-    '''
+    #:
     SIMPLE = 0
+    #:
     TOOTH = 1
+    #:
     ROOT = 2
+    #:
     FILL = 3
+    #:
     CROWN = 4
+    #:
     BRIDGE = 5
+    #:
     PROSTHETICS = 6
+    #:
     OTHER = 7
 
     def __init__(self, cat, cat_no):
+        #:
         self.cat_no = cat_no
+        #:
         self.category = cat.strip()
 
+        #:
         self.type = self.SIMPLE
 
+        #:
         self.code = None
 
         self._description_required = False
 
+        #:
         self.description = ""
 
         self._surfaces_required = False
@@ -75,7 +75,7 @@ class ProcCode(object):
         self._pontics_required = False
         self._no_pontics = 0
         self._no_surfaces = ""
-        self._total_span = 0
+        self._total_span = "0"
         self._allowed_pontics = None
 
     @property
@@ -129,7 +129,6 @@ class ProcCode(object):
     @property
     def no_surfaces(self):
         return self._no_surfaces
-
 
     @property
     def multi_tooth(self):
@@ -213,6 +212,19 @@ class ProcCode(object):
                 self._no_surfaces = re.search("\d+\+?", item).group()
 
     @property
+    def material(self):
+        if "amalgam" in self.description.lower():
+            return "amalgam"
+        if "composite" in self.description.lower():
+            return "composite"
+        if "gold" in self.description.lower():
+            return "gold"
+        if "glass" in self.description.lower():
+            return "glass"
+        return "unknown"
+            
+
+    @property
     def further_info_needed(self):
         return (self.tooth_required or
             self.surfaces_required or
@@ -249,15 +261,6 @@ class ProcCode(object):
         except AttributeError as e:
             return -1
 
-def _singleton(cls):
-    instances = {}
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
-
-@_singleton
 class ProcedureCodes(object):
     '''
     this dictionary like object stores all the hard-coded treatment codes
@@ -392,11 +395,15 @@ def test_main():
     def get_result():
         user_input = str(le.text().toAscii().toUpper())
 
+        if user_input == "EXIT":
+            app.closeAllWindows()
+
         proc_code = procedure_codes.convert_user_shortcut(user_input)
         result_label.setText("%s"% proc_code)
 
-        print "which converts back as",
-        print procedure_codes.convert_to_user_shortcut(proc_code)
+        if proc_code:
+            print "which converts back as",
+            print procedure_codes.convert_to_user_shortcut(proc_code)
 
 
     from PyQt4 import QtGui
@@ -419,17 +426,28 @@ def test_main():
     dl.show()
     app.exec_()
 
+
+def _singleton(cls):
+    instances = {}
+    def getinstance():
+        if cls not in instances:
+            instances[cls] = cls()
+        return instances[cls]
+    return getinstance
+
+@_singleton
+class ProcedureCodesInstance(ProcedureCodes):
+    pass
+
 if __name__ == "__main__":
-    procedure_codes = ProcedureCodes()
-    #for code in procedure_codes:
-    #    print code
+    procedure_codes = ProcedureCodesInstance()
+    for code in procedure_codes:
+        print code
 
     #for code in procedure_codes.exam_codes:
     #    print code
 
-
     test_main()
-
 
     while False:
         print "=" * 40

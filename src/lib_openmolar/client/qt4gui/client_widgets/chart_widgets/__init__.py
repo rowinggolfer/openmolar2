@@ -1,20 +1,20 @@
 from chart_widget_base import ChartWidgetBase
-from chart_widget_completed import CompletedChartWidget
-from chart_widget_static import StaticChartWidget
-from chart_widget_summary import SummaryChartWidget
-from chart_widget_treatment import TreatmentChartWidget
+from chart_widget_completed import ChartWidgetCompleted
+from chart_widget_static import ChartWidgetStatic
+from chart_widget_summary import ChartWidgetSummary
+from chart_widget_treatment import ChartWidgetTreatment
 
 from tooth_data import ToothData, ToothDataError
-from tooth_data_model import ToothDataModel
+from chart_data_model import ChartDataModel
 
 __all__ = [ "ChartWidgetBase",
-            "CompletedChartWidget",
-            "StaticChartWidget",
-            "SummaryChartWidget",
-            "TreatmentChartWidget",
+            "ChartWidgetCompleted",
+            "ChartWidgetStatic",
+            "ChartWidgetSummary",
+            "ChartWidgetTreatment",
             "ToothData",
             "ToothDataError",
-            "ToothDataModel"
+            "ChartDataModel"
             ]
 
 

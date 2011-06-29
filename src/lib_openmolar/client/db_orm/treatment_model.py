@@ -29,7 +29,7 @@ from PyQt4 import QtCore, QtSql
 from lib_openmolar.common.settings import om_types
 from lib_openmolar.common import common_db_orm
 
-from lib_openmolar.client.qt4gui.client_widgets import ToothDataModel
+from lib_openmolar.client.qt4gui.client_widgets import ChartDataModel
 from lib_openmolar.client.qt4gui.client_widgets import ToothData
 
 class TreatmentModel(object):
@@ -37,11 +37,13 @@ class TreatmentModel(object):
         '''
         instanciates with no params
         '''
-        #:a pointer to the treatment plan :doc:`ToothDataModel`
-        self.tooth_tx_plan_model = ToothDataModel()
+        #:a pointer to the treatment plan :doc:`ChartDataModel`
+        self.tooth_tx_plan_model = ChartDataModel()
 
-        #:a pointer to the treatment completed :doc:`ToothDataModel`
-        self.tooth_tx_cmp_model = ToothDataModel()
+        #:a pointer to the treatment completed :doc:`ChartDataModel`
+        self.tooth_tx_cmp_model = ChartDataModel()
+
+        self._treatment_items = []
 
     def load_patient(self, patient_id):
         '''
@@ -55,6 +57,7 @@ class TreatmentModel(object):
         '''
         reset this model
         '''
+        SETTINGS.log("clearing treatment_model")
         self.tooth_tx_cmp_model.clear()
         self.tooth_tx_cmp_model.clear()
         self._treatment_items = []
@@ -64,8 +67,6 @@ class TreatmentModel(object):
         pulls all treatment items in the database
         (for the patient with the id specified at class initiation)
         '''
-        self.clear()
-
         ## long query - only time will tell if this is a performance hit
         query =    '''select
 treatments.ix, patient_id, parent_id, om_code, description,
@@ -123,23 +124,21 @@ where patient_id = ?
         '''
         represent the treatment_item on the charts page somehow.
         '''
-        print "add_to_chart_model called", treatment_item
-
         if treatment_item.is_completed:
-            model = self.tooth_cmp_plan_model
+            chartmodel = self.tooth_cmp_plan_model
         else:
-            model = self.tooth_tx_plan_model
+            chartmodel = self.tooth_tx_plan_model
 
-        ## this is a bit of a hack!
-        tooth = model.views[0].tooth_from_ref(treatment_item.tooth)
-        print "tooth", tooth
-        tooth_data = ToothData(tooth)
 
+        tooth_data = ToothData(treatment_item.tooth)
         tooth_data.from_treatment_item(treatment_item)
 
-        print "tooth data", tooth_data
-        model.add_property(tooth_data)
-        model.endResetModel()
+        chartmodel.add_property(tooth_data)
+        chartmodel.endResetModel()
+
+        print "="*80
+        print "added",treatment_item
+        print "to", chartmodel
 
     def commit_changes(self):
         if not self.is_dirty:
@@ -187,5 +186,7 @@ if __name__ == "__main__":
     obj.add_treatment_item(ti)
     print obj.is_dirty
     print obj.commit_changes()
+
+    print obj.tooth_tx_plan_model
 
 

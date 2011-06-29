@@ -57,22 +57,20 @@ class TeethPresentDB(common_db_orm.InsertableRecord):
         return self != self.orig
 
     def commit_changes(self):
+
         if not self.is_dirty:
             return
-        changes, values = "", []
-        for i in range(self.count()):
-            if self.field(i) != self.orig.field(i):
-                changes += "%s = ?,"% self.field(i).name()
-                values.append(self.field(i).value())
-
-        changes = changes.rstrip(",")
-        #query = "UPDATE teeth_present set %s WHERE patient_id=?"% changes
-        query, values = self.insert_query
+        query = self.insert_query[0]
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
-        for value in values:
-            q_query.addBindValue(value)
+
+        for i in range(self.count()):
+            if self.field(i).name() != "ix":
+                #values.append(self.field(i).value())
+
+                q_query.addBindValue(self.field(i).value())
+
         q_query.exec_()
         if not q_query.lastError().isValid():
             QtSql.QSqlQuery.__init__(self.orig, self) # update self.orig

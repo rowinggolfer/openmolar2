@@ -32,45 +32,69 @@ from PyQt4 import QtSql, QtCore
 from lib_openmolar.common.classes import proc_codes
 from insertable_record import InsertableRecord
 
-PROCEDURE_CODES = proc_codes.ProcedureCodes()
+PROCEDURE_CODES = proc_codes.ProcedureCodesInstance()
+
+class TreatmentItemException(Exception):
+    '''
+    a custom exception raised by treatment item errors
+    '''
+    def __init__(self, value="unknown"):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 class TreatmentItem(object):
     '''
-    this custom data object represents an item of treatment.
-    the underlying procedure code can be accessed with TreatmentItem.code
+    .. note::
+        this custom data object represents an item of treatment.
+        the underlying procedure code can be accessed with TreatmentItem.code
+
+    raises a :doc:`TreatmentItemException` if errors are encountered
     '''
+    #:
     SIMPLE = proc_codes.ProcCode.SIMPLE
+    #:
     TOOTH = proc_codes.ProcCode.TOOTH
+    #:
     ROOT = proc_codes.ProcCode.ROOT
+    #:
     FILL = proc_codes.ProcCode.FILL
+    #:
     CROWN = proc_codes.ProcCode.CROWN
+    #:
     BRIDGE = proc_codes.ProcCode.BRIDGE
+    #:
     PROSTHETICS = proc_codes.ProcCode.PROSTHETICS
+    #:
     OTHER = proc_codes.ProcCode.OTHER
 
     def __init__(self, param):
         '''
-
         *overloaded function*
 
-        TreatmentItem.__init__(self, QtSql.QSqlRecord)
-            will load values from the Record
+        :param: QSql.QSqlrecord
 
-        TreatmentItem.__init__(self, string)
-            string should be of the form "A01"
-            ie. uniquely identify a proc code
+        will load values from the Record
 
-        TreatmentItem.__init__(self, ProcCode)
-            pass in a :class:`ProcCode` object directly
+        :param: string
+
+        string should be of the form "A01"
+        ie. uniquely identify a proc code
+
+        :param: :class:`ProcCode`
+
+        pass in a :doc:`ProcCode` object directly
         '''
 
         if type(param) == QtSql.QSqlRecord:
             self.qsql_record = param
             param = str(param.value("om_code").toString())
         else:
+            #:
             self.qsql_record = None
 
         if type(param) == types.StringType:
+            #:
             self.code = PROCEDURE_CODES[param]
         else:
             self.code = param
@@ -81,11 +105,18 @@ class TreatmentItem(object):
         self._px_clinician = None
         self._tx_clinician = None
         self._cmp_date = None
+
+        #:
         self.user_description = ""
+        #:
         self.is_completed = False
+        #:
         self.tooth = None
+        #:
         self.pontics = []
+        #:
         self.teeth = []
+        #:
         self.surfaces = ""
 
         if self.in_database:
@@ -96,9 +127,9 @@ class TreatmentItem(object):
         An extension of __init__, loading data from the database
         when initiated by a QSqlRecord.
         '''
-
+        SETTINGS.log("converting QsqlRecord to TreatmentItem")
         self.set_tooth(self.qsql_record.value("tooth").toInt()[0])
-        self.set_surfaces(str(self.qsql_record.value("surfaces").toString()))
+        self.surfaces = str(self.qsql_record.value("surfaces").toString())
         self.set_completed(self.qsql_record.value("completed").toBool())
         self.set_px_clinician(self.qsql_record.value("px_clinician").toInt()[0])
         tx_clinician, valid = self.qsql_record.value("tx_clinician").toInt()
@@ -108,28 +139,27 @@ class TreatmentItem(object):
         if tx_date:
             self.set_cmp_date(tx_date)
 
-    def set_cmp_date(self, arg):
+    def set_cmp_date(self, date):
         '''
-        TreatmentItem.set_cmp_date(self, date)
-            sets the item as completed, on date date
+        :param: date
+
+        sets the item as completed, on date date
         '''
         self.set_completed()
-        self._cmp_date = arg
+        self._cmp_date = date
 
     @property
     def in_database(self):
         '''
         returns true if the item is in the database
-        if it is, then it will have a valid qsql_record.
+        if it is, then it will have a valid :attr:`qsql_record` .
         '''
         return self.qsql_record != None
 
     @property
     def cmp_date(self):
         '''
-        (date) TreatmentItem.cmp_date
-        ..note::
-            date the item was completed (returns None if tx incomplete)
+        date the item was completed (returns None if tx incomplete)
         '''
         return self._cmp_date
 
@@ -187,6 +217,10 @@ class TreatmentItem(object):
         return self.code.description
 
     @property
+    def material(self):
+        return self.code.material
+
+    @property
     def further_info_needed(self):
         return self.code.further_info_needed
 
@@ -212,16 +246,18 @@ class TreatmentItem(object):
 
     def set_tooth(self, tooth):
         '''
-        TreatmentItem.set_tooth(self, int)
-            int should comply with openmolar's tooth notation
+        :param: tooth_id (int)
+
+        int should comply with :doc:`../../misc/tooth_notation`
         '''
         if self.tooth_required:
             self.tooth = tooth
 
     def set_teeth(self, teeth):
         '''
-        TreatmentItem.set_teeth(self, [int, int...])
-            all ints should comply with openmolar's tooth notation
+        :param: [int, int, int...]
+
+        ints should comply with :doc:`../../misc/tooth_notation`
         '''
         #print "setting teeth", teeth
         if self.allow_multiple_teeth:
@@ -229,24 +265,30 @@ class TreatmentItem(object):
 
     def set_surfaces(self, surfaces):
         '''
-        TreatmentItem.set_surfaces(self, string)
-            set the surfaces for a restoration
-        ..note::
+        :param: surfaces(string)
+
+        set the surfaces for a restoration
+        .. note::
             an exception will be raised if surfaces are invalid
+
         '''
         if self.surfaces_required:
             surf = surfaces.replace("I","O")
             surf = surf.replace("P","L")
 
-            if not re.match("[MODBL]{1,5}$", surf) or len(set(surf)) != len(surf):
-                raise Exception("INVALID SURFACES", surfaces)
+            if (not re.match("[MODBL]{1,5}$", surf) or
+            len(set(surf)) != len(surf)):
+                raise TreatmentItemException("INVALID SURFACES '%s'"% surfaces)
             else:
                 self.surfaces = surf
+        else:
+            print "NOT SETTING SURFACES"
 
     def set_pontics(self, pontics):
         '''
-        TreatmentItem.set_pontics(self, [int, int...])
-            all ints should comply with openmolar's tooth notation
+        :param: list of pontics [int, int, int...]
+
+        ints should comply with :doc:`../../misc/tooth_notation`
         '''
         #print "setting pontics %s"% pontics
         if self.pontics_required:
@@ -254,69 +296,78 @@ class TreatmentItem(object):
 
     def set_description(self, description):
         '''
-        TreatmentItem.set_description(self, string)
+        :param: string
+
         '''
         self.user_description = description
 
 
-    def set_completed(self, arg=True):
+    def set_completed(self, completed=True):
         '''
-        TreatmentItem.set_completed(self, arg=True)
+        :kword: completed=bool
         '''
-        self.is_completed = arg
+        self.is_completed = completed
 
-    def set_px_clinician(self, arg):
+    def set_px_clinician(self, clinician_id):
         '''
-        TreatmentItem.set_px_clinician(self, int)
-        ..note::
+        :param: clinician_id (int)
+
+        .. note::
             who prescribed this treatment
             int should be the unique id of a clinician
         '''
-        self._px_clinician = arg
+        self._px_clinician = clinician_id
 
-    def set_tx_clinician(self, arg):
+    def set_tx_clinician(self, clinician_id):
         '''
-        TreatmentItem.set_tx_clinician(self, int)
-        ..note:
-            who performed this treatment
+        :param: clinician_id (int)
+
+        .. note::
+            who prescribed this treatment
             int should be the unique id of a clinician
         '''
-        self._tx_clinician = arg
+        self._tx_clinician = clinician_id
 
     @property
     def px_clinician(self):
         '''
-        (int) TreatmentItem.px_clinician
-        (the unique id of a clinician who prescribed the treatment)
+        the unique id of a clinician who prescribed the treatment
         '''
         return self._px_clinician
 
     @property
     def tx_clinician(self):
         '''
-        (int) TreatmentItem.px_clinician
-        (the unique id of a clinician who performed the treatment)
+        the unique id of a clinician who performed the treatment
         '''
         return self._tx_clinician
 
     @property
     def allow_multiple_teeth(self):
         '''
-        (bool) TreatmentItem.allow_multiple_teeth
         True if this treatment can related to multiple teeth
 
-        ..note::
+        .. note::
             an example would be a periodontal splint
         '''
         return self.is_bridge or self.is_prosthetics
 
     @property
-    def bridge_span(self):
+    def required_span(self):
         '''
-        (int) TreatmentItem.bridge_span
+        how many units should this be if it is to be a bridge?
+        returns an integer or None
+        '''
+        expected_span = str(self.total_span)
+        n = re.match("\d+", expected_span)
+        if n:
+            return int(n.group())
 
+    @property
+    def entered_span(self):
         '''
-        print "checking bridge span", self.pontics, self.teeth
+        returns the entered total span of a bridge (if this is a bridge)
+        '''
         return len(self.pontics) + len(self.teeth)
 
     @property
@@ -325,9 +376,7 @@ class TreatmentItem(object):
 
     def check_valid(self):
         '''
-        TreatmentItem.check_valid(self)
-
-        returns a tuple (valid, errors),
+        a tuple (valid, errors),
         where valid is a boolean, and errors a list of errors
 
         check to see that the item has all the attributes required by the
@@ -352,18 +401,14 @@ class TreatmentItem(object):
             errors.append(_("Who Performed this treatment?"))
 
         if self.is_bridge:
-            expected_span = str(self.total_span)
-            n = re.match("\d+", expected_span)
-            if n:
-                span_no = int(n.group())
-                entered_span = self.bridge_span
+            entered, required = self.entered_span, self.required_span
+            if not ( entered == required or
+            ("+" in self.total_span and entered_span > required)):
 
-                if not (span_no == entered_span or
-                ("+" in expected_span and entered_span > span_no)):
-                    errors.append(u"%s (%s %s - %s %s)"% (
-                        _("Incorrect Bridge Span"),
-                        expected_span, _("units required"),
-                        entered_span, _("entered")))
+                errors.append(u"%s (%s %s - %s %s)"% (
+                    _("Incorrect Bridge Span"),
+                    required, _("units required"),
+                    entered, _("entered")))
 
         if self.surfaces_required:
             expected_surfaces = self.no_surfaces
@@ -476,27 +521,24 @@ class TreatmentItem(object):
 
 
     def __repr__(self):
-        return u"TreatmentItem '%s' completed=%s in_db=%s date=%s"% (
-            self.code, self.is_completed, self.in_database, self.cmp_date)
+        item = '''TreatmentItem
+        code='%s'
+        completed='%s' date='%s'
+        in_db='%s'
+        type='%s'
+        tooth='%s' surfaces = '%s'
+        '''% (
+                self.code,
+                self.is_completed, self.cmp_date,
+                self.in_database,
+                self.type,
+                self.tooth, self.surfaces
+                )
+        return item
 
     def __cmp__(self, other):
         try:
             return cmp(self.code, other.code)
         except AttributeError as e:
             return -1
-
-def _test_module():
-    '''
-    the test for this module
-    '''
-    from lib_openmolar.common import SETTINGS
-
-    for proc_code in SETTINGS.PROCEDURE_CODES:
-        item = TreatmentItem(proc_code)
-        print item, item.check_valid()
-        #print "   in database?", item.in_database
-
-if __name__ == "__main__":
-
-    _test_module()
 

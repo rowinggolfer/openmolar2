@@ -20,44 +20,17 @@
 ##                                                                           ##
 ###############################################################################
 
-
-###############################################################################
-##                                                                           ##
-##  I have chosen to use the following numbering system a the core reference ##
-##  to teeth.                                                                ##
-##                                                                           ##
-##    the notation is as follows.                                            ##
-##                                                                           ##
-##    ADULT (this is the same as the universal numering system               ##
-##                                                                           ##
-##    1  2  3  4  5  6  7  8  | 9  10 11 12 13 14 15 16                      ##
-##    _________________________________________________________              ##
-##    32 31 30 29 28 27 26 25 | 24 23 22 21 20 19 18 17                      ##
-##                                                                           ##
-##    DECIDUOUS (UNS)                    (OPENMOLAR)                         ##
-##                                                                           ##
-##    A B C D E | F G H I J              65 66 67 68 69 | 70 71 72 73 74     ##
-##    _____________________              _______________________________     ##
-##    T S R Q P | O N M L K              85 84 83 82 81 | 80 79 78 76 75     ##
-##                                                                           ##
-##    It holds the advantage of being only 1 byte per tooth (!)              ##
-##    For presentation to the user,                                          ##
-##    This is translated to various other formats via use of dictionary.     ##
-##                                                                           ##
-##                                                                           ##
-###############################################################################
-
 from __future__ import division
 
 from PyQt4 import QtGui, QtCore
 import chart_widget_base
 
-class TreatmentChartWidget(chart_widget_base.ChartWidgetBase):
+class ChartWidgetTreatment(chart_widget_base.ChartWidgetBase):
     '''
     ChartWidget as used on the summary page
     '''
     def __init__(self, model=None, parent=None):
-        super(TreatmentChartWidget, self).__init__(model, parent)
+        super(ChartWidgetTreatment, self).__init__(model, parent)
 
         self.treatment_addition_cat = "Treatment"
 
@@ -65,10 +38,13 @@ class TreatmentChartWidget(chart_widget_base.ChartWidgetBase):
             QtCore.Qt.Key_F5, self.complete_treatment)
 
     def complete_treatment(self):
+
+        print self.chart_data_model
+
         tooth = self.current_tooth
         QtGui.QMessageBox.information(self, "info",
-        "complete treatment on %s" %tooth.long_name)
-        return tooth.ref
+            "complete treatment on %s" %tooth.long_name)
+        return tooth.tooth_id
 
     def draw_tooth(self, tooth, painter):
         '''
@@ -83,7 +59,11 @@ class TreatmentChartWidget(chart_widget_base.ChartWidgetBase):
 if __name__ == "__main__":
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
-    object = TreatmentChartWidget(None, dl)
+
+    model = SETTINGS.treatment_model.tooth_tx_plan_model
+    model.load_test_data()
+
+    object = ChartWidgetTreatment(model, dl)
 
     layout = QtGui.QVBoxLayout(dl)
     layout.addWidget(object)

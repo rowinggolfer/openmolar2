@@ -140,7 +140,7 @@ The behaviour of this object is very much like a dictionary.
         '''
         sets the ..func::`dent_key` for this patient
         '''
-        self["teeth_present"].setValue("ix", self.patient_id)
+        self["teeth_present"].setValue("patient_id", self.patient_id)
         self["teeth_present"].setValue("dent_key", key)
         self["teeth_present"].setValue("checked_date",
             QtCore.QDate.currentDate())
@@ -268,4 +268,5 @@ if __name__ == "__main__":
     print "contracted practitioners", obj["contracted_practitioners"].records
     print "Perio Data", obj.perio_data
     print "Age Years", obj.age_years
+
 

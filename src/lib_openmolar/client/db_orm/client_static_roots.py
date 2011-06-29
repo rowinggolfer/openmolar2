@@ -53,7 +53,11 @@ class StaticRootsDB(object):
     class to get static chart information
     '''
     def __init__(self, patient_id):
-        self.record_list, self._orig_record_list = [], []
+        #:
+        self.patient_id = patient_id
+        #:
+        self.record_list = []
+        self._orig_record_list = []
 
         query = '''select tooth, description, has_rct, comment
         from %s where patient_id=?'''% TABLENAME
@@ -110,14 +114,14 @@ class StaticRootsDB(object):
                     print q_query.lastError().text()
                     SETTINGS.database.emit_caught_error(q_query.lastError())
 
-    def add_root_records(self, data_list, patient_id):
+    def add_root_records(self, data_list):
         '''
-        crown_list is a generator of ToothData types
+        data_list is a generator of ToothData types
         '''
         for data in data_list:
             new = RootRecord()
-            new.setValue("patient_id", patient_id)
-            new.setValue("tooth", data.tooth.ref)
+            new.setValue("patient_id", self.patient_id)
+            new.setValue("tooth", data.tooth_id)
             new.setValue("has_rct", data.has_rct)
             new.setValue("description", data.root_type)
             new.setValue("comment", data.comment)

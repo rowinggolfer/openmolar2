@@ -26,19 +26,19 @@ from PyQt4 import QtGui, QtCore
 
 import chart_widget_static
 
-class SummaryChartWidget(chart_widget_static.StaticChartWidget):
+class ChartWidgetSummary(chart_widget_static.ChartWidgetStatic):
     '''
     ChartWidget as used on the summary page
     '''
     def __init__(self, model, parent=None):
-        chart_widget_static.StaticChartWidget.__init__(self, model, parent)
+        chart_widget_static.ChartWidgetStatic.__init__(self, model, parent)
         self.focused = True
 
 if __name__ == "__main__":
 
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
-    object = SummaryChartWidget({1:[]}, dl)
+    object = ChartWidgetSummary({1:[]}, dl)
     object.add_fill_from_string(1, "MOD,AM")
 
     layout = QtGui.QVBoxLayout(dl)

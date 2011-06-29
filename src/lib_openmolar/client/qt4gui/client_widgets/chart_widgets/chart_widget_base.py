@@ -21,29 +21,8 @@
 ###############################################################################
 
 '''
-OpenMolar Tooth Notation
-------------------------
-
-I have chosen to use the following numbering system a the core reference
-to teeth.
-
-the notation is as follows.
-
-ADULT (this is the same as the universal numering system
-
-1  2  3  4  5  6  7  8    9 10 11 12 13 14 15 16
-32 31 30 29 28 27 26 25   24 23 22 21 20 19 18 17
-
-DECIDUOUS (UNS)                    (OPENMOLAR)
-
-A B C D E  F G H I J              65 66 67 68 69  70 71 72 73 74
-T S R Q P  O N M L K              85 84 83 82 81  80 79 78 76 75
-
-It holds the advantage of being only 1 byte per tooth (!)
-For presentation to the user,
-This is translated to various other formats via use of dictionary,
-accessible via Settings.
-
+this module provides the ChartWidgetBase class, which is inherited by all
+other charts.
 '''
 
 from __future__ import division
@@ -55,7 +34,7 @@ from PyQt4 import QtGui, QtCore
 import teeth
 import roots
 
-import tooth_data_model
+import chart_data_model
 
 from lib_openmolar.client.qt4gui.client_widgets.chart_widgets import tooth_data
 
@@ -66,14 +45,20 @@ class ChartWidgetBase(QtGui.QWidget):
     a custom widget to show a standard UK dental chart
     allows for user navigation with mouse and/or keyboard
     '''
-
-    MIXED_STYLE = 1
-    DECIDUOUS_STYLE = 2
-    SIMPLE_STYLE = 3
-    COMPLEX_STYLE = 4
-    COMPLEX_STYLE_PLUS = 4.5
-    ROOTS_STYLE = 5
-    PERIO_STYLE = 6
+    #:
+    CHART_STYLE_MIXED = 1
+    #:
+    CHART_STYLE_DECIDUOUS = 2
+    #:
+    CHART_STYLE_SIMPLE = 3
+    #:
+    CHART_STYLE_COMPLEX = 4
+    #:
+    CHART_STYLE_COMPLEX_PLUS = 4.5
+    #:
+    CHART_STYLE_ROOTS = 5
+    #:
+    CHART_STYLE_PERIO = 6
 
     def __init__(self, model=None, parent=None):
         super(ChartWidgetBase, self).__init__(parent)
@@ -83,31 +68,44 @@ class ChartWidgetBase(QtGui.QWidget):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
 
         self.setMinimumSize(self.minimumSizeHint())
+        #:
         self.show_LR = True
+        #:
         self.show_selected = False
+        #:
         self.setMouseTracking(True)
+        #:
         self.draw_deciduous = True
+        #:
         self.draw_permanent = True
+        #:
         self.draw_roots = False
+        #:
         self.draw_perio = False
-        self.inner_percentage = 0.6 #relative width of the inner rows
-        self.teeth = {}  #populated during resize event
+        #:relative width of the inner rows
+        self.inner_percentage = 0.6
+        #: populated during resize event
+        self.teeth = {}
         self._current_tooth = None
+        #:
         self.focused = False
-
+        #:
         self.borderX = 4    #shadow border width
+        #:
         self.borderY = 4
-
+        #:
         self.key_press_dict = {}
 
         if model is None:
-            model = tooth_data_model.ToothDataModel()
-        self.tooth_data_model = model
-        self.tooth_data_model.register_view(self)
+            model = chart_data_model.ChartDataModel()
+        #: the relevant :doc:`ChartDataModel`
+        self.chart_data_model = model
+        self.chart_data_model.register_view(self)
 
         self.init_teeth_and_roots()
         self.setStyle(SETTINGS.default_chart_style)
 
+        #:
         self.allow_multi_select = True
 
     def minimumSizeHint(self):
@@ -124,20 +122,20 @@ class ChartWidgetBase(QtGui.QWidget):
         self.update()
 
     def setStyle(self, enum):
-        if enum == self.DECIDUOUS_STYLE:
+        if enum == self.CHART_STYLE_DECIDUOUS:
             self.deciduous_style()
-        elif enum == self.MIXED_STYLE:
+        elif enum == self.CHART_STYLE_MIXED:
             self.mixed_style()
-        elif enum == self.SIMPLE_STYLE:
+        elif enum == self.CHART_STYLE_SIMPLE:
             self.simple_style()
-        elif enum == self.COMPLEX_STYLE:
+        elif enum == self.CHART_STYLE_COMPLEX:
             self.complex_style()
-        elif enum == self.COMPLEX_STYLE_PLUS:
+        elif enum == self.CHART_STYLE_COMPLEX_PLUS:
             self.complex_style()
             self.draw_perio = True
-        elif enum == self.ROOTS_STYLE:
+        elif enum == self.CHART_STYLE_ROOTS:
             self.roots_style()
-        elif enum == self.PERIO_STYLE:
+        elif enum == self.CHART_STYLE_PERIO:
             self.perio_style()
         else:
             print "unknown chart style called!!"
@@ -146,7 +144,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.update()
 
     def deciduous_style(self):
-        self._style = self.DECIDUOUS_STYLE
+        self._style = self.CHART_STYLE_DECIDUOUS
         SETTINGS.visible_chart_rows = (0,3)
         self.draw_deciduous = True
         self.draw_permanent = False
@@ -155,7 +153,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0.2 #relative width of the inner rows
 
     def mixed_style(self):
-        self._style = self.MIXED_STYLE
+        self._style = self.CHART_STYLE_MIXED
         SETTINGS.visible_chart_rows = (0,1,2,3)
         self.draw_deciduous = True
         self.draw_permanent = True
@@ -164,7 +162,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0.6 #relative width of the inner rows
 
     def simple_style(self):
-        self._style = self.MIXED_STYLE
+        self._style = self.CHART_STYLE_MIXED
         SETTINGS.visible_chart_rows = (1,2)
         self.draw_deciduous = False
         self.draw_permanent = True
@@ -173,7 +171,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0.8 #relative width of the inner rows
 
     def complex_style(self):
-        self._style = self.COMPLEX_STYLE
+        self._style = self.CHART_STYLE_COMPLEX
         SETTINGS.visible_chart_rows = (1,2)
         self.draw_deciduous = False
         self.draw_permanent = True
@@ -182,7 +180,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0.5 #relative width of the inner rows
 
     def roots_style(self):
-        self._style = self.ROOTS_STYLE
+        self._style = self.CHART_STYLE_ROOTS
         SETTINGS.visible_chart_rows = (1,2)
         self.draw_deciduous = False
         self.draw_permanent = False
@@ -191,7 +189,7 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0.1 #relative width of the inner rows
 
     def perio_style(self):
-        self._style = self.PERIO_STYLE
+        self._style = self.CHART_STYLE_PERIO
         SETTINGS.visible_chart_rows = (1,2)
         self.draw_deciduous = False
         self.draw_permanent = False
@@ -200,13 +198,16 @@ class ChartWidgetBase(QtGui.QWidget):
         self.inner_percentage = 0 #relative width of the inner rows
 
     def clear(self):
+        '''
+        refreshes the chart (and underlying data model)
+        '''
         self.set_current_tooth(None)
         for tooth in self.iterate_teeth():
             tooth.set_is_present(True)
             tooth.is_selected = False
             if tooth.root:
                 tooth.root.set_is_present(True)
-        self.tooth_data_model.clear()
+        self.chart_data_model.clear()
         self.update()
 
     def add_key_press_function(self, key, function):
@@ -221,9 +222,9 @@ class ChartWidgetBase(QtGui.QWidget):
             for col in range(len(SETTINGS.TOOTH_GRID[row])): # number of teeth!
                 tooth_id = SETTINGS.TOOTH_GRID[row][col]
                 if tooth_id != 0:
-                    tooth = teeth.ChartTooth(tooth_id, self.tooth_data_model)
+                    tooth = teeth.ChartTooth(tooth_id, self.chart_data_model)
                     if row in (1,2):  #adult teeth have roots
-                        root = roots.ChartRoot(tooth_id, self.tooth_data_model)
+                        root = roots.ChartRoot(tooth_id, self.chart_data_model)
                         tooth.root = root
                     self.teeth[tooth_id] = tooth
 
@@ -245,121 +246,9 @@ class ChartWidgetBase(QtGui.QWidget):
                 i += 1
         self.update()
 
-
-    def add_root(self, root_record):
-        '''
-        add root data from the database orm
-        root_record is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_roots for details
-        '''
-        root = self.teeth.get(root_record.tooth_id)
-        if root:
-            prop = tooth_data.ToothData(root)
-            prop.set_type(prop.Root)
-            prop.set_root_type(root_record.description)
-            prop.set_comment(root_record.comment)
-            prop.in_database = True
-            self.add_property(prop)
-
-    def add_crown(self, crown_record):
-        '''
-        add crown from the database orm
-        crown is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_crowns for details
-        '''
-        tooth = self.teeth.get(crown_record.tooth_id)
-        if tooth:
-            prop = tooth_data.ToothData(tooth)
-            prop.set_type(prop.Crown)
-            prop.set_crown_type(crown_record.crown_type)
-            prop.set_technition(crown_record.technition)
-            prop.set_comment(crown_record.comment)
-            prop.in_database = True
-            self.add_property(prop)
-
-    def add_fill(self, fill_record):
-        '''
-        add fill from the database orm
-        fill is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_fills for details
-        '''
-        tooth = self.teeth.get(fill_record.tooth_id)
-        if tooth:
-            prop = tooth_data.ToothData(tooth)
-            prop.set_surfaces(fill_record.surfaces)
-            prop.set_material(fill_record.material)
-            prop.set_comment(fill_record.comment)
-            prop.in_database = True
-            self.add_property(prop)
-
-    def add_comment(self, record):
-        '''
-        add comment from the database orm
-        fill is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_comments for details
-        '''
-        tooth = self.teeth.get(record.tooth_id)
-        if tooth:
-            prop = tooth_data.ToothData(tooth)
-            prop.set_type(prop.Comment)
-            prop.set_comment(record.text)
-            prop.in_database = True
-            self.add_property(prop)
-
-    def add_fill_from_string(self, tooth_id, input):
-        '''
-        allows the addition of a fill in the form "MOD,CO"
-        '''
-        tooth = self.teeth.get(tooth_id)
-        if tooth:
-            prop = tooth_data.ToothData(tooth)
-            prop.from_fill_string(input)
-            self.add_property(prop)
-
-    def add_property(self, prop):
-        '''
-        add a property (of type tooth_data.ToothData)
-        '''
-        self.tooth_data_model.add_property(prop)
-
-    def add_data(self, data_list):
-        for record, data_type in data_list:
-            if data_type == 'fill':
-                self.add_fill(record)
-            elif data_type == 'crown':
-                self.add_crown(record)
-            elif data_type == 'root':
-                self.add_root(record)
-            elif data_type == 'comment':
-                self.add_comment(record)
-            else:
-                print "chart - add_data - unknown data type", record
-
-    def add_perio_property(self, prop):
-        '''
-        add a property (of type PerioData)
-        '''
-        self.tooth_data_model.add_perio_property(prop)
-
-    def add_perio_records(self, records):
-        '''
-        add records from database
-        '''
-        for record, type in records:
-            if type == "pocket":
-                tooth, values = record
-                self.add_perio_data(tooth, perio_data.PerioData.POCKETING, values)
-
-    def add_perio_data(self, tooth_id, type_, values):
-        root = self.teeth.get(tooth_id)
-        prop = perio_data.PerioData(root)
-        prop.set_type(type_)
-        prop.set_values(values)
-        self.add_perio_property(prop)
-
     def tooth_from_ref(self, ref):
         for tooth in self.iterate_teeth():
-            if tooth.ref == ref:
+            if tooth.tooth_id == ref:
                 return tooth
 
     def choose_teeth(self):
@@ -426,7 +315,7 @@ class ChartWidgetBase(QtGui.QWidget):
         selected = []
         for tooth in self.iterate_teeth():
             if tooth.is_selected:
-                selected.append(tooth.ref)
+                selected.append(tooth.tooth_id)
         if not selected:
             self.set_current_tooth(None)
         return selected
@@ -580,10 +469,10 @@ class ChartWidgetBase(QtGui.QWidget):
 
         min_selected = min(current_selection)
         max_selected = max(current_selection)
-        if next_tooth.ref < min_selected:
-            newly_selected += range(min_selected, next_tooth.ref, -1)
-        if next_tooth.ref > max_selected:
-            newly_selected += range(next_tooth.ref, max_selected, -1)
+        if next_tooth.tooth_id < min_selected:
+            newly_selected += range(min_selected, next_tooth.tooth_id, -1)
+        if next_tooth.tooth_id > max_selected:
+            newly_selected += range(next_tooth.tooth_id, max_selected, -1)
 
         for ref in newly_selected:
             tooth = self.tooth_from_ref(ref)
@@ -782,7 +671,7 @@ class ChartWidgetBase(QtGui.QWidget):
 
     def draw_selections(self, tooth, painter):
         if (not self.isEnabled() or tooth.ignore or
-        tooth.is_root and self._style != self.ROOTS_STYLE):
+        tooth.is_root and self._style != self.CHART_STYLE_ROOTS):
             return
 
         if tooth == self._current_tooth:
@@ -798,7 +687,7 @@ class ChartWidgetBase(QtGui.QWidget):
         if not self.focused:
             c.setAlpha(100)
 
-        include_root = not self._style == self.MIXED_STYLE
+        include_root = not self._style == self.CHART_STYLE_MIXED
 
         pen = QtGui.QPen(c, pen_width)
         painter.setPen(pen)

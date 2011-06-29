@@ -103,14 +103,14 @@ class StaticCommentsDB(object):
                     print q_query.lastError().text()
                     SETTINGS.database.emit_caught_error(q_query.lastError())
 
-    def add_comment_records(self, data_list, patient_id):
+    def add_comment_records(self, data_list):
         '''
         crown_list is a generator of ToothData types
         '''
         for data in data_list:
             new = CommentRecord()
-            new.setValue("patient_id", patient_id)
-            new.setValue("tooth", data.tooth.ref)
+            new.setValue("patient_id", self.patient_id)
+            new.setValue("tooth", data.tooth_id)
             new.setValue("comment", data.comment)
             new.setValue("checked_by", SETTINGS.user)
             new.remove(new.indexOf('checked_date'))
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    object = StaticCommentsDB(1)
-    for record in object.records:
+    obj = StaticCommentsDB(1)
+    for record in obj.records:
         print record.tooth_id,
         print record.comment
