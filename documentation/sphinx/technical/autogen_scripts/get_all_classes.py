@@ -8,7 +8,18 @@ the directory (given as sys.argv[1])
 import inspect
 import os, sys
 
-KLASS_OUTDIR = "/home/neil/openmolar/hg_openmolar/documentation/sphinx/technical/classes"
+def determine_path ():
+    """Borrowed from wxglade.py"""
+    root = __file__
+    if os.path.islink (root):
+        root = os.path.realpath (root)
+    retarg = os.path.dirname (os.path.abspath (root))
+    return retarg
+
+path_ = determine_path()
+   
+technical_path = os.path.split(path_)[0]
+KLASS_OUTDIR = os.path.join(technical_path, "classes")
 KLASS_SUBDIR = os.path.join(KLASS_OUTDIR, "classes")
 
 if not os.path.exists(KLASS_OUTDIR):
