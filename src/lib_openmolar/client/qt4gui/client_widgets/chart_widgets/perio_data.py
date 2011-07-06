@@ -91,7 +91,7 @@ class PerioData(object):
 
     @property
     def brush(self):
-        if self.type == self.Filling:
+        if self.type == self.FILLING:
             return QtGui.QApplication.instance().palette().buttonText()
         else:
             return QtGui.QApplication.instance().palette().dark()

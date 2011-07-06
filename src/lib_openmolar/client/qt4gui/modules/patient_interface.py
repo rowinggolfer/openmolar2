@@ -238,9 +238,12 @@ class PatientInterface(QtGui.QWidget):
 
     def tab_index_changed(self, i):
         self.options_widget.tab_index_changed(i)
-        if self.tab_widget.widget(i) == self.notes_page:
+        page = self.tab_widget.widget(i)
+        if page == self.notes_page:
             self.notes_page.load_patient()
-        elif self.tab_widget.widget(i) == self.history_page:
+        elif page == self.treatment_page:
+            self.treatment_page.load_patient()
+        elif page == self.history_page:
             self.history_page.load_patient()
 
     def edit_patient(self):

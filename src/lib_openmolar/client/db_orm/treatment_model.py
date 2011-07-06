@@ -51,6 +51,8 @@ class TreatmentModel(object):
         '''
         #:
         self.patient_id = patient_id
+
+        self.clear()
         self.get_records()
 
     def clear(self):
@@ -68,6 +70,9 @@ class TreatmentModel(object):
         (for the patient with the id specified at class initiation)
         '''
         ## long query - only time will tell if this is a performance hit
+
+        if not self.patient_id:
+            return
         query =    '''select
 treatments.ix, patient_id, parent_id, om_code, description,
 completed, comment, px_clinician, tx_clinician, tx_date, added_by,
@@ -141,6 +146,9 @@ where patient_id = ?
         print "to", chartmodel
 
     def commit_changes(self):
+        '''
+        push all changes to the database
+        '''
         if not self.is_dirty:
             return
         print "treatment model, commiting changes"
@@ -155,7 +163,6 @@ where patient_id = ?
         '''
         Commit the item to the database
         '''
-
         return item.commit_to_db(SETTINGS.database)
 
 if __name__ == "__main__":

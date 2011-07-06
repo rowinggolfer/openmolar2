@@ -131,7 +131,7 @@ class ChartDataModel(object):
         which are NOT in the database (ie have been added by client)
         '''
         for prop in self.data:
-            if (prop.type == prop.Filling and not prop.in_database):
+            if (prop.type == prop.FILLING and not prop.in_database):
                 yield prop
 
     def get_new_crowns(self):
