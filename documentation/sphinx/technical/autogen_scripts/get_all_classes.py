@@ -116,14 +116,15 @@ def get_modules(folder):
     '''
     for root, dir_, files in os.walk(folder, followlinks=True):
         sys.path.insert(0, root)
-        for file in files:
-            if file.endswith(".py"):
-                module = file.replace('.py','')
+        for file_ in files:
+            if file_.endswith(".py"):
+                module = file_.replace('.py','')
                 if module in sys.modules.keys():
                     #print module, "already imported"
                     sys.modules.pop(module)
+                    
                 mod = __import__(module)
-                yield mod
+                yield mod 
 
 def write_index(index_files):
     '''
