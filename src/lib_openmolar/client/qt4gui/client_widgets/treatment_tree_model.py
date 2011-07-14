@@ -93,17 +93,12 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
     '''
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
-        self.clear()
-        self.setupModelData()
 
     def columnCount(self, parent=None):
         if parent and parent.isValid():
             return parent.internalPointer().columnCount()
         else:
             return len(HORIZONTAL_HEADERS)
-
-    def clear(self):
-        self.setupModelData()
 
     def update_treatments(self):
         '''
@@ -179,6 +174,7 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
         self.parents = {0 : self.rootItem}
 
         if SETTINGS.current_patient is None:
+            SETTINGS.log("TreatmentTreeModel - no patient")
             treatment_items = []
         else:
             model = SETTINGS.current_patient.treatment_model

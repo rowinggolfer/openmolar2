@@ -9,7 +9,7 @@ from lib_openmolar.client.qt4gui.client_widgets.statusbar_widget import StatusBa
 from lib_openmolar.client.qt4gui.client_widgets.summary_line_edit import SummaryLineEdit
 from lib_openmolar.client.qt4gui.client_widgets.plugin_options_widget import PluginOptionsWidget
 from lib_openmolar.client.qt4gui.client_widgets.plugins_directory_widget import PluginsDirectoryWidget
-
+from lib_openmolar.client.qt4gui.client_widgets.treatment_tree_model import TreatmentTreeModel
 
 #subpackages
 from lib_openmolar.client.qt4gui.client_widgets.chart_editor import *

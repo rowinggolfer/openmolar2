@@ -22,8 +22,6 @@
 
 
 from PyQt4 import QtCore, QtGui
-from lib_openmolar.client.qt4gui.client_widgets.procedures.treatment_tree_model \
-    import TreatmentTreeModel
 
 from lib_openmolar.client.qt4gui.dialogs import TreatmentItemFinaliseDialog
 
@@ -39,10 +37,9 @@ class TreatmentPage(QtGui.QWidget):
         self.label.setWordWrap(True)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
 
-        self.tree_model = TreatmentTreeModel(self)
         self.tree_view = QtGui.QTreeView()
         self.tree_view.setAlternatingRowColors(True)
-        self.tree_view.setModel(self.tree_model)
+        self.tree_view.setModel(SETTINGS.treatment_model.tree_model)
 
         self.show_fee_widget_button = QtGui.QPushButton(_("Procedure Codes"))
 
@@ -93,9 +90,8 @@ class TreatmentPage(QtGui.QWidget):
             if not dl.get_info(treatment_item):
                 return
 
-        self.tree_model.update_treatments()
         self.tree_view.expandAll()
-        for i in range(self.tree_model.columnCount()):
+        for i in range(patient.treatment_model.tree_model.columnCount()):
             self.tree_view.resizeColumnToContents(i)
 
         self.Advise(u"%s %s"%(_("added to treatment plan"), treatment_item))
@@ -129,7 +125,7 @@ class TreatmentPage(QtGui.QWidget):
     def clear(self):
         self.patient = None
         self.label.setText("no patient loaded")
-        self.tree_model.clear()
+        SETTINGS.treatment_model.clear()
 
     def load_patient(self):
         patient = SETTINGS.current_patient

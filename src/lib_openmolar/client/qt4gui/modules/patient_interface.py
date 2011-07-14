@@ -420,6 +420,7 @@ class PatientInterface(QtGui.QWidget):
                 page.load_patient()
 
         self.summary_page.summary_chart.chart_data_model.endResetModel()
+        self.pt.treatment_model.update_views()
         self.apply_mode()
 
     def load_patient(self, patient_id, called_via_history = False):

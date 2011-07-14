@@ -38,10 +38,10 @@ class Parser(optparse.OptionParser):
     def __init__(self):
         from lib_openmolar import _version
 
+        self.version_str = "%s~hg%s"% (VERSION, _version.revision_number)
         optparse.OptionParser.__init__(self,
             prog="openmolar2",
-            version="%s~hg%s"%(VERSION, _version.revision_number),
-            )
+            version=self.version_str)
 
         option = self.add_option("-a", "--admin",
                         dest = "admin",
@@ -121,6 +121,7 @@ def main():
 
     if options.verbose:
         suffixes += ["-v"]
+        print "Running openmolar version %s"% (parser.version_str)
 
     if options.admin:
         print "running admin app as process %s"%(

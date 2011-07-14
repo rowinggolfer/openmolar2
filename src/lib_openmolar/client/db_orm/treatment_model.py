@@ -31,12 +31,16 @@ from lib_openmolar.common import common_db_orm
 
 from lib_openmolar.client.qt4gui.client_widgets import ChartDataModel
 from lib_openmolar.client.qt4gui.client_widgets import ToothData
+from lib_openmolar.client.qt4gui.client_widgets import TreatmentTreeModel
+
 
 class TreatmentModel(object):
     def __init__(self):
         '''
         instanciates with no params
         '''
+        self.tree_model = TreatmentTreeModel()
+
         #:a pointer to the treatment plan :doc:`ChartDataModel`
         self.tooth_tx_plan_model = ChartDataModel()
 
@@ -60,9 +64,10 @@ class TreatmentModel(object):
         reset this model
         '''
         SETTINGS.log("clearing treatment_model")
-        self.tooth_tx_cmp_model.clear()
-        self.tooth_tx_cmp_model.clear()
         self._treatment_items = []
+        self.tooth_tx_plan_model.clear()
+        self.tooth_tx_cmp_model.clear()
+        self.tree_model.update_treatments()
 
     def get_records(self):
         '''
@@ -122,7 +127,11 @@ where patient_id = ?
 
             if not charted and treatment_item.is_chartable:
                 self.add_to_chart_model(treatment_item)
+
+            self.tree_model.update_treatments()
             return True
+
+        SETTINGS.log("invalid tratment item %s"% treatment_item)
         return False
 
     def add_to_chart_model(self, treatment_item):
@@ -130,10 +139,9 @@ where patient_id = ?
         represent the treatment_item on the charts page somehow.
         '''
         if treatment_item.is_completed:
-            chartmodel = self.tooth_cmp_plan_model
+            chartmodel = self.tooth_tx_cmp_model
         else:
             chartmodel = self.tooth_tx_plan_model
-
 
         tooth_data = ToothData(treatment_item.tooth)
         tooth_data.from_treatment_item(treatment_item)
@@ -141,9 +149,14 @@ where patient_id = ?
         chartmodel.add_property(tooth_data)
         chartmodel.endResetModel()
 
-        print "="*80
-        print "added",treatment_item
-        print "to", chartmodel
+    def update_views(self):
+        '''
+        this should be called after adding to the model
+        update all submodels (treeview, charts etc.)
+        '''
+        self.tree_model.update_treatments()
+        self.tooth_tx_cmp_model.endResetModel()
+        self.tooth_tx_plan_model.endResetModel()
 
     def commit_changes(self):
         '''

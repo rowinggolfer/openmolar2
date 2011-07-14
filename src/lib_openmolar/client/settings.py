@@ -269,12 +269,15 @@ class Settings(settings.CommonSettings):
         this means other modules can always access this important object
         '''
         self._current_patient = patient
+        self.log("setting current patient - %s"% patient)
 
     @property
     def current_patient(self):
         '''
         a pointer to the currently loaded patient
         '''
+        #raise Exception, "current_patient called"
+        self.log("returning current patient - %s"% self._current_patient)
         return self._current_patient
 
     def install_plugin(self, plugin):
