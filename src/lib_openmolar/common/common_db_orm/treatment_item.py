@@ -121,6 +121,9 @@ class TreatmentItem(object):
 
         if self.in_database:
             self._from_record()
+        else:
+            if SETTINGS.current_practitioner:
+                self.set_px_clinician(SETTINGS.current_practitioner.id)
 
     def _from_record(self):
         '''
@@ -182,7 +185,7 @@ class TreatmentItem(object):
         example, an examination is not, but a filling in the UR5 is
         '''
         ##TODO this is NOT enough logic here yet!!
-        return self.is_tooth
+        return self.code.is_chartable
 
     @property
     def is_tooth(self):
@@ -281,8 +284,6 @@ class TreatmentItem(object):
                 raise TreatmentItemException("INVALID SURFACES '%s'"% surfaces)
             else:
                 self.surfaces = surf
-        else:
-            print "NOT SETTING SURFACES"
 
     def set_pontics(self, pontics):
         '''
@@ -316,6 +317,8 @@ class TreatmentItem(object):
             who prescribed this treatment
             int should be the unique id of a clinician
         '''
+        assert type(clinician_id) == types.IntType, (
+            "invalid id for set_px_clinician")
         self._px_clinician = clinician_id
 
     def set_tx_clinician(self, clinician_id):
@@ -461,6 +464,7 @@ class TreatmentItem(object):
         q_query.exec_()
 
         if q_query.lastError().isValid():
+            SETTINGS.log(query)
             error = q_query.lastError()
             database.emit_caught_error(error)
             return False

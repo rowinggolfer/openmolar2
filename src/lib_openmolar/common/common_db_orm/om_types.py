@@ -29,9 +29,16 @@ class OMType(object):
     custom postgres data type creator
     '''
     def __init__(self, name):
+        #:
         self.name = name
+
+        #:
         self.allowed_values = []
+
+        #:
         self.readable_dict = {}
+
+        self._default = None
 
     def allow(self, val, readable):
         self.allowed_values.append(val)
@@ -43,9 +50,23 @@ class OMType(object):
         values as required for combobox selection
         '''
         selections = []
-        for val in self.allowed_values:
+        for val in sorted(self.allowed_values):
             selections.append(self.readable_dict[val])
         return selections
+
+    @property
+    def default(self):
+        '''
+        the value to use as a default
+        returns None by default
+        '''
+        return self._default
+
+    def set_default(self, default):
+        assert default in self.allowed_values, (
+            "%s is not in allowed values for this type"% default)
+
+        self._default = default
 
     @property
     def creation_queries(self):
@@ -76,20 +97,20 @@ class OMType(object):
         return self.translation_dict.get(val, val)
 
     def __repr__(self):
-        return u"OMType object - %s"% (self.creation_queries)
-'''
-cb = QtGui.QComboBox()
-    ## second item is accessed as 'data', and is the true field value
-    cb.addItem(_('Male'), 'M')
-    cb.addItem(_('Female'), 'F')
-'''
+        return u"OMType object - %s %s default=%s"% (
+            self.name, self.allowed_values, self.default)
 
-class OMTypes(dict):
+class OMTypes(object):
     '''
     a container for the custom data types used in openmolar
     '''
+    _dict = {}
+    __getitem__ = _dict.__getitem__
+    __setitem__ = _dict.__setitem__
+    values = _dict.values
+    get = _dict.get
+
     def __init__(self):
-        super(OMTypes, self).__init__()
 
         new_type = OMType("sex_type")
         new_type.allow(u'M', _('Male'))
@@ -104,6 +125,7 @@ class OMTypes(dict):
         new_type.allow(u'casual', _('Casual'))
         new_type.allow(u'deceased', _('Deceased'))
         new_type.allow(u'moved away', _('Moved Away'))
+        new_type.set_default("unknown")
         self["pt_status"] = new_type
 
         new_type = OMType("address_type")
@@ -113,6 +135,7 @@ class OMTypes(dict):
         new_type.allow(u'care_of', _('c/o'))
         new_type.allow(u'student_accomodation', _('Student Accomodation'))
         new_type.allow(u'other', _('Other'))
+        new_type.set_default("home")
         self["address"] = new_type
 
         new_type = OMType("mailing_pref_type")
@@ -120,6 +143,7 @@ class OMTypes(dict):
         new_type.allow(u'dont_use', _('Do Not Use!'))
         new_type.allow(u'duplicate', _('Copy all mail to this address also'))
         new_type.allow(u'other', _('Other'))
+        new_type.set_default("default")
         self["mailing_pref"] = new_type
 
         new_type = OMType("telephone_type")
@@ -127,9 +151,11 @@ class OMTypes(dict):
         new_type.allow(u'work', _('Work'))
         new_type.allow(u'mobile', _('Mobile'))
         new_type.allow(u'other', _('Other'))
+        new_type.set_default("home")
         self["telephone"] = new_type
 
         new_type = OMType("root_description_type")
+        new_type.allow(u'normal', "")
         new_type.allow(u'UNKNOWN', _('Unknown status'))
         new_type.allow(u'TM', _('Missing'))
         new_type.allow(u'RT', _('Root Treated'))
@@ -147,6 +173,8 @@ class OMTypes(dict):
         new_type.allow(u'IM', _('Titanium Implant'))
         new_type.allow(u'IM_OT', _('Other Implant'))
         new_type.allow(u'OT', _('Other Root Type'))
+        new_type.set_default("normal")
+
         self["root_description"] = new_type
 
         new_type = OMType("fill_material_type")
@@ -160,20 +188,28 @@ class OMTypes(dict):
         new_type.allow(u'DR', _('Dressing'))
         new_type.allow(u'PR', _('Preventive Resin'))
         new_type.allow(u'OT', _('Other Material'))
+        new_type.set_default("OT")
         self["fill_material"] = new_type
 
-        #note the default of 'other' is placed at the end of the list
+        #note - these MUST be matched in the proc-codes resource file
         new_type = OMType("crown_type")
         new_type.allow(u'PJ', _('Porcelain Jacket Crown'))
         new_type.allow(u'PV', _('Porcelain Veneer'))
         new_type.allow(u'V1', _('Porcelain / Precious Metal'))
         new_type.allow(u'V2', _('Porcelain / Non Precious Metal'))
         new_type.allow(u'GO', _('Gold'))
+        new_type.allow(u'A1', _('Precious Metal Crown'))
+        new_type.allow(u'A2', _('Non-precious Metal Crown'))
         new_type.allow(u'TEMP', _('Temporary Crown'))
-        new_type.allow(u'LA', _('3M Lava'))
+        new_type.allow(u'SS', _('Stainless Steel'))
+        new_type.allow(u'LAVA', _('3M Lava'))
         new_type.allow(u'OPAL', _('Opalite'))
+        new_type.allow(u'FORT', _('Fortress'))
+        new_type.allow(u'E-MAX', _('E-Max'))
+        new_type.allow(u'EVER', _('Everest'))
         new_type.allow(u'SR', _('Resin'))
         new_type.allow(u'OT', _('Other'))
+        new_type.set_default("OT")
         self["crowns"] = new_type
 
         new_type = OMType("notes_clinical_type")
@@ -181,6 +217,7 @@ class OMTypes(dict):
         new_type.allow(u'diagnosis', _('Diagnosis'))
         new_type.allow(u'recommendation', _('Recommendation'))
         new_type.allow(u'treatment', _('Treatment'))
+        new_type.set_default("observation")
         self["notes_clinical"] = new_type
 
         new_type = OMType("notes_clerical_type")
@@ -189,6 +226,7 @@ class OMTypes(dict):
         new_type.allow(u'printing', _('Printing'))
         new_type.allow(u'invoice', _('Invoice'))
         new_type.allow(u'appointment', _('Appointment'))
+        new_type.set_default("observation")
         self["notes_clerical"] = new_type
 
         new_type = OMType("procedure_info_type")
@@ -200,6 +238,7 @@ class OMTypes(dict):
         new_type.allow(u'any_sextant', _('Please select any Sextant'))
         new_type.allow(u'posterior_sextant', _('Please select a Posterior Sextant'))
         new_type.allow(u'anterior_sextant', _('Please select an Anterior Sextant'))
+        new_type.set_default("any_tooth")
         self["procedure_info"] = new_type
 
         new_type = OMType("diary_type")
@@ -244,7 +283,6 @@ class OMTypes(dict):
         new_type.allow(u'root', _("root"))
         new_type.allow(u'tooth', _("tooth"))
         self["tx_chart_type"] = new_type
-
 
 
 if __name__ == "__main__":

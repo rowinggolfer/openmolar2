@@ -82,6 +82,7 @@ crown|F20|Resin Crown|
 crown|F30|Opalite Crown|
 crown|F32|3M Lava Crown|
 crown|F33|Ivoclar e-max Crown|
+crown|F34|Fortress Crown|
 crown|F40|Stainless Steel Crown|
 crown|F50|Temporary Crown|
 tooth|F51|Crown Recement
@@ -159,7 +160,7 @@ simple|I80|Sectioning of Bridge
 --Jxx|Implants
 root|J00|Other implant|description
 simple|J10|Assessment for Implants
-root|J11|Implant Planning
+simple|J11|Implant Planning
 root|J20|Implant (Titanium)|description
 root|J21|Ankylos implant
 root|J30|Healing Cap

@@ -10,3 +10,5 @@ documentation/WEBSITE
 documentation/sphinx/images
 .*\.pyc$
 .*~$
+experimental/
+experimental/*

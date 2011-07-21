@@ -98,6 +98,6 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 	      
 publish:
-	rsync -av .build/html/ amazon:rg_website/openmolar2/sphinx/
+	rsync -av _build/html/ amazon:rg_website/openmolar2/sphinx/
 	rsync -avk videos/* amazon:rg_website/openmolar2/sphinx/videos/
 	

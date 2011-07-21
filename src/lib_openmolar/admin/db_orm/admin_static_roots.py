@@ -35,7 +35,6 @@ ix SERIAL,
 patient_id INTEGER NOT NULL REFERENCES patients(ix),
 tooth SMALLINT NOT NULL,
 description root_description_type,
-has_rct BOOL NOT NULL DEFAULT FALSE,
 comment VARCHAR(80),
 checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
 checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
@@ -65,7 +64,6 @@ class DemoGenerator(object):
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
-        self.record.remove(self.record.indexOf('has_rct'))
 
     def demo_queries(self):
         '''

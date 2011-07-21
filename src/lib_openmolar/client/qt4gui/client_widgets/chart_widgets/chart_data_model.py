@@ -305,7 +305,10 @@ class ChartDataModel(object):
         self.add_perio_data(22, perio_data.PerioData.POCKETING, (1,4,2,4,5,6))
 
     def __repr__(self):
-        return "ChartDataModel for %s"% self.views
+        message = "ChartDataModel for views %s"%self.views
+        for data in self.data:
+            message += "\n\t%s"% data
+        return message
 
 if __name__ == "__main__":
     obj = ChartDataModel()

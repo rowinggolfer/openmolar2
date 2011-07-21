@@ -79,6 +79,16 @@ class ProcCode(object):
         self._allowed_pontics = None
 
     @property
+    def is_chartable(self):
+        '''
+        can this procedure be displayed on a dental chart?
+        note::
+            this needs more work!
+
+        '''
+        return self.type in (self.FILL, self.CROWN, self.ROOT)
+
+    @property
     def is_fill(self):
         return self.type == self.FILL
 
@@ -213,16 +223,29 @@ class ProcCode(object):
 
     @property
     def material(self):
+        if not self.is_fill:
+            return
         if "amalgam" in self.description.lower():
-            return "amalgam"
+            return "AM"
         if "composite" in self.description.lower():
-            return "composite"
+            return "CO"
         if "gold" in self.description.lower():
-            return "gold"
+            return "GO"
         if "glass" in self.description.lower():
-            return "glass"
-        return "unknown"
-            
+            return "GL"
+        if "porc" in self.description.lower():
+            return "PO"
+        return "OT"
+
+    @property
+    def crown_type(self):
+        '''
+        the code expected by a :doc:`ToothData` object so that an item
+        of this type can be drawn correctly
+        '''
+        if not self.is_crown:
+            return
+        return "GO"
 
     @property
     def further_info_needed(self):
@@ -253,7 +276,7 @@ class ProcCode(object):
 
     def __str__(self):
         return  u"%s %s %s"% (
-            self.category.ljust(28), self.code, self.description)
+            self.category.ljust(28), self.code, self.description.ljust(40))
 
     def __cmp__(self, other):
         try:
@@ -442,12 +465,16 @@ class ProcedureCodesInstance(ProcedureCodes):
 if __name__ == "__main__":
     procedure_codes = ProcedureCodesInstance()
     for code in procedure_codes:
-        print code
-
+        print code,
+        if code.is_chartable:
+            print "chart = %s"% procedure_codes._charting_dict[code.code]
+        else:
+            print
     #for code in procedure_codes.exam_codes:
     #    print code
 
-    test_main()
+    if False:
+        test_main()
 
     while False:
         print "=" * 40

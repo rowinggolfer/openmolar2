@@ -38,8 +38,8 @@ from lib_openmolar.common.widgets import (
     PreferencesDialog)
 
 from lib_openmolar.client.qt4gui import client_widgets
-from lib_openmolar.client.qt4gui.modules.patient_interface import PatientInterface
-from lib_openmolar.client.qt4gui.modules.diary_interface import DiaryInterface
+from lib_openmolar.client.qt4gui.interfaces import PatientInterface
+from lib_openmolar.client.qt4gui.interfaces import DiaryInterface
 
 class ClientMainWindow(BaseMainWindow):
     def __init__(self, parent=None):
@@ -128,7 +128,13 @@ class ClientMainWindow(BaseMainWindow):
                 _("Connection Error"), error), 2)
 
     def set_users(self):
-        self.status_widget.set_users(SETTINGS.users)
+        self.status_widget.set_users()
+
+    def user1_changed(self, user):
+        SETTINGS.set_user1(user)
+
+    def user2_changed(self, user):
+        SETTINGS.set_user2(user)
 
     def disconnect_server(self, shutting_down=False):
         '''
@@ -182,6 +188,12 @@ class ClientMainWindow(BaseMainWindow):
 
         self.connect(self.status_widget, QtCore.SIGNAL("mode changed"),
             self.patient_interface.apply_mode)
+
+        self.connect(self.status_widget, QtCore.SIGNAL("user1 changed"),
+            self.user1_changed)
+
+        self.connect(self.status_widget, QtCore.SIGNAL("user2 changed"),
+            self.user2_changed)
 
         self.action_connect.triggered.connect(self.choose_connection)
 

@@ -1,6 +1,9 @@
 ##anything that is chartable needs to be represented here...
 ##this is so that treatments entered on the chart can be matched
 ##to an om code.
+
+C50|FS
+
 D01|[MODBL]{1},AM
 D02|[MODBL]{2},AM
 D03|[MODBL]{3},AM
@@ -15,8 +18,22 @@ D30|[MODBL]{1},OT
 D31|[MODBL]{2},OT
 D32|[MODBL]{3},OT
 D33|[MODBL]{4,5},OT
-E01|RT
-E20|PX
+D40|PRR
+D50|TR/M
+D51|TR/D
+D70|.*,PR.*
+
+E00|(R,)?RT,OT
+E01|(R,)?RT
+E20|(R,)?PX
+E30|R,RG
+E40|R,PULPOT
+E41|R,PULPECT
+E50|R,#INS
+E51|R,#POST
+
+
+#These must match the values in om_types! 
 F00|CR,OT
 F01|CR,PJ
 F02|CR,V1
@@ -27,20 +44,39 @@ F12|CR/MODB,GO
 F15|CR,A1
 F16|CR,A2
 F20|CR,SR
-F30|CR,OP
-F32|CR,LA
-F33|CR,EM
+F30|CR,OPAL
+F32|CR,LAVA
+F33|CR,E-MAX
+F34|CR,FORT
 F40|CR,SS
 F50|CR,TEMP
+
+#these don't match the values in om_types.
 F51|CR,RC
 F60|CR,C1
 F61|CR,C2
 F62|CR,C3
+F63|CR,C4
 F70|CR,PR
 F71|CR,RE
 F72|CR,UF
-G00|[MODBL]{1,5},PO
-G10|[MODBL]{1,5},GO
-G90|[MODBL]{1,5},OT
 
+
+G00|IN/[MODBL]{1,5},OT
+G10|IN/[MODBL]{1,5},GO
+G11|ON/[MODBL]{1,5},GO
+G20|IN/[MODBL]{1,5},PO
+G21|ON/[MODBL]{1,5},PO
+G30|IN/[MODBL]{1,5},CO
+G31|ON/[MODBL]{1,5},CO
+G40|(CR,)?PV
+G50|(CR,)?CV
+
+J00|(R,)?IM,OT
+J20|(R,)?IM(,TI)?
+J21|(R,)?IM,ANK
+J30|(R,)?IM,HC
+J31|(R,)?IM,HC
+J40|(R,)?IM,FA
+J41|(R,)?IM,BA
 

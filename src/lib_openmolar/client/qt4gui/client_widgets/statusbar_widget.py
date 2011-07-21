@@ -33,10 +33,11 @@ class StatusBarWidget(QtGui.QWidget):
     a layout of comboBoxes for seting the current users
     and "mode" which determines
     whether to default to the surgery or reception page on load
-    emits signals
-    -user1 changed (int)
-    -user2 changed (int)
-    -mode changed (int)
+    emits signals::
+        self.emit(QtCore.SIGNAL("user1 changed"), cb_index)
+        self.emit(QtCore.SIGNAL("user2 changed"), cb_index)
+        self.emit(QtCore.SIGNAL("mode changed"), cb_index)
+
     '''
     def __init__(self, parent=None):
         super(StatusBarWidget, self).__init__(parent)
@@ -80,23 +81,29 @@ class StatusBarWidget(QtGui.QWidget):
         SETTINGS.PERSISTANT_SETTINGS["mode"] = cb_index
         self.emit(QtCore.SIGNAL("mode changed"), cb_index)
 
-    def set_users(self, users):
+    def set_users(self):
         self.user1_combo_box.clear()
-        self.user1_combo_box.addItems(users.abbrv_name_list)
+        self.user1_combo_box.addItems(SETTINGS.users.abbrv_name_list)
 
         self.user2_combo_box.clear()
-        self.user2_combo_box.addItems(["-"] + users.abbrv_name_list)
+        self.user2_combo_box.addItems(["-"] + SETTINGS.users.abbrv_name_list)
 
     def emit_user1(self, cb_index):
-        self.emit(QtCore.SIGNAL("user1 changed"), cb_index)
+        if cb_index == -1:
+            return
+        self.emit(QtCore.SIGNAL("user1 changed"),
+            SETTINGS.users.user_from_abbrv_name_list_index(cb_index))
 
     def emit_user2(self, cb_index):
-        self.emit(QtCore.SIGNAL("user2 changed"), cb_index)
+        if cb_index == -1:
+            return
+        self.emit(QtCore.SIGNAL("user2 changed"),
+            SETTINGS.users.user_from_abbrv_name_list_index(cb_index))
 
 
 if __name__ == "__main__":
-    
-    
+
+    from lib_openmolar import client
 
     app = QtGui.QApplication([])
     sw = StatusBarWidget()

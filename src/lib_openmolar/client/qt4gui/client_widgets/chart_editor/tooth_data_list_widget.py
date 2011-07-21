@@ -99,6 +99,7 @@ if __name__ == "__main__":
     tooth = ChartTooth(1, model)
 
     prop = ToothData(1)
+    prop.set_type(prop.FILLING)
     prop.from_fill_string("MOD,GL")
     tooth.add_property(prop)
 

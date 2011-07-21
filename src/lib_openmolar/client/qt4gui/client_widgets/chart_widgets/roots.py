@@ -58,8 +58,6 @@ class ChartRoot(teeth.ChartTooth):
         for property in self.properties:
             if property.root_type.startswith("IM"):
                 pass
-            elif property.has_rct:
-                pass
             else:
                 option = QtGui.QTextOption(QtCore.Qt.AlignCenter)
                 painter.setPen(QtGui.QPen(QtCore.Qt.black))
@@ -74,21 +72,17 @@ class ChartRoot(teeth.ChartTooth):
 
     @property
     def has_rct(self):
-        has_rct = False
         for property in self.properties:
-            if property.has_rct:
-                has_rct = True
-                break
-        return has_rct
+            if property.root_type == "RT":
+                return True
+        return False
 
     @property
     def is_implant(self):
-        is_implant = False
         for property in self.properties:
             if property.root_type.startswith("IM"):
-                is_implant = True
-                break
-        return is_implant
+                return True
+        return False
 
     def draw_svg(self,  painter):
         if not self.is_rightside:

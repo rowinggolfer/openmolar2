@@ -32,16 +32,20 @@ class ChartsPage(QtGui.QWidget):
         super(ChartsPage, self).__init__(parent)
 
         self.patient = None
+
+        #:
         self.static = client_widgets.ChartWidgetStatic(None, self)
 
         #: a pointer to the :doc:`ChartDataModel` of the static chart
         self.static_chart_model = self.static.chart_data_model
 
         self.tx_pl_model = SETTINGS.treatment_model.tooth_tx_plan_model
+        #:
         self.treatment = client_widgets.ChartWidgetTreatment(
             self.tx_pl_model, self)
 
         tx_model = SETTINGS.treatment_model.tooth_tx_cmp_model
+        #:
         self.completed = client_widgets.ChartWidgetCompleted(tx_model, self)
 
         self.tooth_data_editor = client_widgets.ToothDataEditor(self)
@@ -164,7 +168,7 @@ class ChartsPage(QtGui.QWidget):
         for chart in (self.static, self.completed, self.treatment):
             chart.set_known_teeth(patient.dent_key)
 
-        self.static_chart_model.add_data(patient.static_chart_data)
+        self.static_chart_model.add_data(patient.static_chart_records)
         self.static_chart_model.add_perio_records(patient.perio_data)
 
 

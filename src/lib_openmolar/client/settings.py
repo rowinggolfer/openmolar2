@@ -53,6 +53,12 @@ class Settings(settings.CommonSettings):
         #: who is using the system
         self.user = "UNKNOWN"
 
+        #: who is logged in as user1
+        self.user1 = None
+
+        #: and assistant
+        self.user2 = None
+
         #: a pointer to the :doc:`ClientConnection` in use
         self.database = None
 
@@ -191,7 +197,7 @@ class Settings(settings.CommonSettings):
         for line in readable_ex:
             message += "%s\n" % line
 
-        selt.log (message)
+        self.log (message)
 
     def load_plugins(self):
         '''
@@ -248,6 +254,18 @@ class Settings(settings.CommonSettings):
         except IndexError:
             return "?month?"
 
+    def set_user1(self, user):
+        SETTINGS.log("setting user1 as %s"% user)
+        self.user1 = user
+        try:
+            practitioner = self.practitioners.practitioner_from_user(user)
+            self.set_current_practitioner(practitioner)
+        except SettingsError:
+            print "unable to set %s as practitioner"% user
+
+    def set_user2(self, user):
+        self.user2 = user
+
     @property
     def current_practitioner(self):
         return self._current_practitioner
@@ -258,6 +276,7 @@ class Settings(settings.CommonSettings):
         this means other modules can always access this important object
         '''
         if not practitioner in self.practitioners:
+            self._current_practitioner = None
             raise SettingsError, \
                 "An attempt was made to set a non-valid practitioner"
         self._current_practitioner = practitioner
@@ -276,8 +295,6 @@ class Settings(settings.CommonSettings):
         '''
         a pointer to the currently loaded patient
         '''
-        #raise Exception, "current_patient called"
-        self.log("returning current patient - %s"% self._current_patient)
         return self._current_patient
 
     def install_plugin(self, plugin):

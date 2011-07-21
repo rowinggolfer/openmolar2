@@ -30,18 +30,25 @@ from lib_openmolar.common.common_db_orm.treatment_item import TreatmentItem
 
 from lib_openmolar.client.connect import ClientConnection
 from lib_openmolar.client.db_orm.patient_model import PatientModel
+from lib_openmolar.client.qt4gui.client_widgets import ToothData
+
 
 import unittest
 
 class TestCase(unittest.TestCase):
     def setUp(self):
-        ClientConnection().connect()
-        self.pt = PatientModel(2)
+        #ClientConnection().connect()
+        #pt = PatientModel(2)
+        #SETTINGS.set_current_patient(pt)
+        pass
 
     def tearDown(self):
         pass
 
-    def test_proc_codes(self):
+    def spawn_all_proc_code_tis(self):
+        '''
+        create all treatment items generated from procedure codes
+        '''
         for proc_code in SETTINGS.PROCEDURE_CODES:
             item = TreatmentItem(proc_code)
             item.set_px_clinician(1)
@@ -50,32 +57,38 @@ class TestCase(unittest.TestCase):
             if item.tooth_required:
                 item.set_tooth([7])
             if item.surfaces_required:
-                fill, surfs = "MODBL","" 
+                fill, surfs = "MODBL",""
                 for char in fill:
                     surfs += char
                     try:
-                        item.set_surfaces(surfs)  
+                        item.set_surfaces(surfs)
                     except TreatmentItemException:
                         pass
             if item.pontics_required:
                 continue
-                
+
                 ##TODO - this is busted!
                 if item.is_bridge:
                     pontics = [2,3,4,5,6]
                     i = 0
                     while i < 5 and item.entered_span < item.required_span:
-                        i += 1 
+                        i += 1
                         item.set_pontics(pontics[:i])
                 elif item.is_prosthetics:
                     item.set_pontics([3,4])
-                     
-            
-            
-                        
-                        
+
+            yield item
+
+    def test_proc_codes(self):
+        for item in self.spawn_all_proc_code_tis():
             valid, errors = item.check_valid()
-            self.assertTrue(valid, "%s %s"% (proc_code, errors))
+            self.assertTrue(valid, "%s %s"% (item, errors))
+
+    def test_proc_codes_are_chartable(self):
+        for item in self.spawn_all_proc_code_tis():
+            if item.is_chartable:
+                td = ToothData(item.tooth)
+                td.from_treatment_item(item)
 
 
 if __name__ == "__main__":

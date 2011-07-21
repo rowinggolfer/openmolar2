@@ -102,7 +102,7 @@ The behaviour of this object is very much like a dictionary.
         return self["contracted_practitioners"].current_contracted_dentist
 
     @property
-    def static_chart_data(self):
+    def static_chart_records(self):
         '''
         returns all data needed about teeth in the static chart
         see also ..func::`dent_key`

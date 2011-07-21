@@ -82,11 +82,8 @@ class ToothData(object):
         self._crown_type = ''
         self._technition = ''
 
-        #attributes when data is a root
-        #:
-        self.has_rct = False
-        #:
         self.root_type = ''
+        '''attributes when data is a root'''
 
         #common to all types
         self._comment = ''
@@ -236,13 +233,10 @@ class ToothData(object):
             crown_dict = SETTINGS.OM_TYPES["crowns"].readable_dict
             text = crown_dict.get(self.crown_type, self.crown_type)
         elif self.type == self.ROOT:
-            if self.has_rct:
-                text = _("Root Treated")
-            else:
-                root_dict = SETTINGS.OM_TYPES["root_description"].readable_dict
-                text = root_dict.get(self.root_type, self.root_type)
+            root_dict = SETTINGS.OM_TYPES["root_description"].readable_dict
+            text = root_dict.get(self.root_type, self.root_type)
         elif self.type == self.COMMENT:
-            return self.comment
+            text = self.comment
 
         return text
 
@@ -254,6 +248,7 @@ class ToothData(object):
         '''
         try:
             surfaces, self._material = fill_string.split(",")
+            self.set_type(self.FILLING)
             self.set_surfaces(surfaces)
         except TypeError:
             pass
@@ -267,6 +262,8 @@ class ToothData(object):
         this input has come from a line edit.. so has to be checked for sanity
         '''
 
+        SETTINGS.debug_log("from_user_input", input)
+
         if input.startsWith("CR"):
             self.parse_crown_input(input)
         elif input.startsWith("R"):
@@ -278,9 +275,7 @@ class ToothData(object):
         else:
             input = self.parse_fill_input(input)
 
-        if find_code:
-            self.proc_code = \
-                SETTINGS.PROCEDURE_CODES.convert_user_shortcut(input)
+        self.proc_code = SETTINGS.PROCEDURE_CODES.convert_user_shortcut(input)
 
     def from_proc_code(self, code):
         '''
@@ -289,7 +284,7 @@ class ToothData(object):
         print "DEPRECATED FUNCTION CALLED - use treatment item instead"
         self.proc_code = code
         shortcut = SETTINGS.PROCEDURE_CODES.convert_to_user_shortcut(code)
-        self.from_user_input(shortcut, False)
+        self.from_user_input(shortcut)
 
     def from_treatment_item(self, treatment_item):
         '''
@@ -301,22 +296,20 @@ class ToothData(object):
         if treatment_item.is_fill:
             self.set_type(self.FILLING)
             self.set_surfaces(treatment_item.surfaces)
-            fill_materials = {
-                "composite":"CO",
-                "glass":"GL",
-                "amalgam":"AM",
-                "gold":"GO",
-                "porcelain":"PO"}
-            self.set_material(fill_materials.get(treatment_item.material))
+            self.set_material(treatment_item.material)
 
         elif treatment_item.is_crown:
             self.set_type(self.CROWN)
+            self.set_crown_type(self.proc_code.crown_type)
 
         elif treatment_item.is_root:
             self.set_type(self.ROOT)
-
-        SETTINGS.debug_log("ToothData - converted from treatment item",
-            "\n", self)
+            self.set_root_type("unknown")
+            #TODO - this should be more comprehensive
+        else:
+            SETTINGS.log("unknown ToothData type during from_treatment_item")
+            raise ToothDataError("unable to create ToothData from %s"% (
+                treatment_item))
 
     def parse_fill_input(self, input, decode=True):
         input_list = input.split(",")
@@ -337,6 +330,7 @@ class ToothData(object):
         if len(set(surf)) != len(surf):
             raise ToothDataError("duplicate surfaces found")
 
+        self.set_type(self.FILLING)
         self._surfaces = surf
         try:
             material = input_list[1]
@@ -378,7 +372,6 @@ class ToothData(object):
             root_type = input_list[1]
             if not root_type in SETTINGS.allowed_root_types:
                 raise IndexError
-            self.has_rct = root_type == "RT"
 
         except IndexError:
             root_type = SETTINGS.allowed_root_types[-1]
@@ -410,7 +403,7 @@ class ToothData(object):
 
     def __repr__(self):
         if self.is_fill:
-            return "ToothData FILLING tooth_id=%s surfaces=%s material =%s"% (
+            return "ToothData FILLING tooth_id=%s surfaces=%s material=%s"% (
                 self.tooth_id, self.surfaces, self.material)
         if self.is_crown:
             return "ToothData CROWN tooth_id=%s type=%s"% (

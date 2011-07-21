@@ -45,23 +45,41 @@ class PatientInterface(QtGui.QWidget):
         self._proc_code_dock_widget = None #initialise if needed.
 
         self.control_panel = client_widgets.ControlPanel(self)
+        '''a pointer to the :doc:`ControlPanel`'''
+
         self.details_browser = client_widgets.DetailsBrowser(self)
+        '''a pointer to the :doc:`DetailsBrowser`'''
 
         self.reception_page = pages.ReceptionPage(self)
+        '''a pointer to the :doc:`ReceptionPage`'''
+
         self.charts_page = pages.ChartsPage(self)
+        '''a pointer to the :doc:`ChartsPage`'''
+
         self.treatment_page = pages.TreatmentPage(self)
+        '''a pointer to the :doc:`TreatmentPage`'''
+
         self.notes_page = pages.NotesPage(self)
+        '''a pointer to the :doc:`NotesPage`'''
+
         self.estimates_page = pages.EstimatesPage(self)
+        '''a pointer to the :doc:`EstimatesPage`'''
+
         self.history_page = pages.HistoryPage(self)
+        '''a pointer to the :doc:`HistoryPage`'''
 
         # summary_page shares the "model" of the static chart
         model = self.charts_page.static.chart_data_model
         self.summary_page = pages.SummaryPage(model, self)
+        '''a pointer to the :doc:`SummaryPage`'''
 
         self.options_widget = client_widgets.PatientInterfaceOptionsWidget(self)
+        '''a pointer to the :doc:`PatientInterfaceOptionsWidget`'''
+
         self.options_widget.tab_index_changed(0)
 
         self.tab_widget = QtGui.QTabWidget(self)
+        '''a pointer to the TabWidget'''
         self.tab_widget.tabBar().setFocusPolicy(QtCore.Qt.NoFocus)
         self.tab_widget.addTab(self.reception_page, _("Reception"))
         self.tab_widget.addTab(self.summary_page, _("Summary"))

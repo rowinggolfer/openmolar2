@@ -120,7 +120,7 @@ class StaticCrownsDB(object):
 
     def add_crown_records(self, crown_list):
         '''
-        crown_list is a generator of ToothData types
+        crown_list is a generator of :doc:`CrownRecord` types
         '''
         for data in crown_list:
             new = CrownRecord()

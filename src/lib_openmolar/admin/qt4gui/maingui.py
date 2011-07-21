@@ -641,10 +641,10 @@ class AdminMainWindow(BaseMainWindow):
         qsettings = QtCore.QSettings()
 
         #python dict of settings
-        dict = str(qsettings.value("settings_dict").toString())
-        if dict:
+        dict_ = str(qsettings.value("settings_dict").toString())
+        if dict_:
             try:
-                SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict)
+                SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
             except Exception as e:
                 print "exception caught loading python settings...", e
 

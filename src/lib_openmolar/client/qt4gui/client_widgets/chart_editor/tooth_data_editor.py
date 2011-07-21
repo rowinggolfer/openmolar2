@@ -53,11 +53,14 @@ class ToothDataEditor(QtGui.QWidget):
         #: a pointer to the :doc:`ToothEditor`
         self.tooth_editor = chart_editor_tooth.ToothEditor(self)
 
-        #: populated with SETTINGS.OM_TYPES["root_description"].selections
+
         self.roots_combo_box = QtGui.QComboBox()
+        '''populated with :doc:`OMTypes` ["root_description"].selections'''
         self.roots_combo_box.addItem(_("ROOTS"))
         root_list = SETTINGS.OM_TYPES["root_description"].selections
         self.roots_combo_box.addItems(root_list)
+
+
 
         #: populated with :doc:`CrownCodesModel`
         self.crowns_combo_box = QtGui.QComboBox()
@@ -114,12 +117,13 @@ class ToothDataEditor(QtGui.QWidget):
 
     def add_property_to_current_tooth(self):
         if not self.current_tooth:
+            SETTINGS.log("not adding property.. no current tooth selected")
             return
-        prop = chart_widgets.ToothData(self.current_tooth.tooth_id)
+        tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)
 
         try:
-            prop.from_user_input(self.line_edit.trimmed_text)
-            self.current_tooth.add_property(prop)
+            tooth_data.from_user_input(self.line_edit.trimmed_text)
+            self.current_tooth.add_property(tooth_data)
             self.tooth_data_list_widget.setTooth(self.current_tooth)
 
             try:
@@ -128,8 +132,11 @@ class ToothDataEditor(QtGui.QWidget):
 
                 ## this signal is eventually caught by the
                 ## estimates page.chart_treatment_added
-                self.emit(QtCore.SIGNAL("add treatment"), prop, plan_or_cmp)
+                self.emit(QtCore.SIGNAL("add treatment"), tooth_data, plan_or_cmp)
 
+            except IndexError:
+                #model has no views?
+                pass
             except AttributeError:
                 #static or summary charts don't have treatment_added
                 pass
@@ -254,9 +261,16 @@ if __name__ == "__main__":
     def sig_catcher(*args):
         print args, dl.sender()
 
+    from lib_openmolar.client.qt4gui.client_widgets.chart_widgets import \
+        teeth, chart_data_model
+
+    model = chart_data_model.ChartDataModel()
+    tooth = teeth.ChartTooth(1, model)
+
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     obj = ToothDataEditor(dl)
+    obj.setTooth(tooth)
 
     dl.connect(obj, QtCore.SIGNAL("Code Selected"), sig_catcher)
 

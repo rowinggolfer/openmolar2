@@ -130,8 +130,10 @@ class TreatmentPage(QtGui.QWidget):
     def load_patient(self):
         patient = SETTINGS.current_patient
         self.patient = patient
-
-        self.label.setText(u"Treatments for %s"% patient.full_name)
+        if patient:
+            self.label.setText(u"Treatments for %s"% patient.full_name)
+        else:
+            self.clear()
 
     def update_patient(self):
         if not self.patient:

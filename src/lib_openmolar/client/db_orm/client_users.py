@@ -36,7 +36,7 @@ class GeneratedSvg(QtSvg.QSvgGenerator):
         :param: filepath to write to
         '''
         QtSvg.QSvgGenerator.__init__(self)
-        
+
         self.setFileName(save_location)
         self.setTitle("mock svg")
         self.setSize(QtCore.QSize(50,50))
@@ -60,6 +60,13 @@ class UserObject(QtSql.QSqlRecord):
         self._svg_filepath = None
         self._avatar_resource = None
         self._icon = None
+
+    @property
+    def id(self):
+        '''
+        returns the database ix for this user
+        '''
+        return self.value("ix").toInt()[0]
 
     @property
     def abbrv_name(self):
@@ -148,6 +155,17 @@ class Users(object):
                 abbrv_names.append(user.abbrv_name)
         return abbrv_names
 
+    def user_from_abbrv_name_list_index(self, index):
+        '''
+        the equivalent of abbrv_name_list[i]
+        '''
+        i = 0
+        for user in self:
+            if user.is_active:
+                if i == index:
+                    return user
+                i += 1
+
     def __setitem__(self, key, val):
         self._order[self._no] = key
         self._dict[key] = val
@@ -179,7 +197,7 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    for member in cc.users:
+    for member in SETTINGS.users:
         print member.toHtml()
         print member.avatar_resource
         print member.is_active

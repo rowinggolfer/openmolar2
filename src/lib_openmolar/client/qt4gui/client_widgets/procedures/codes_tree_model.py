@@ -21,12 +21,8 @@
 ###############################################################################
 
 from PyQt4 import QtGui, QtCore
-
-
-
 HORIZONTAL_HEADERS = ("Codes",)
 # see below
-
 
 class TreeItem(object):
     '''
@@ -59,27 +55,35 @@ class TreeItem(object):
             if column == 0:
                 return u"%s (%s)"% (
                 self.proc_code.description, self.proc_code.code)
+
+            ## the rest of this is debug stuff for this very important
+            ## data set
+
             elif column == 1:
                 return "Y" if self.proc_code.further_info_needed else "N"
             elif column == 2:
+                return "Y" if self.proc_code.is_chartable else "N"
+            elif column == 3:
+                return self.proc_code.material
+            elif column == 4:
+                return self.proc_code.crown_type
+            elif column == 5:
                 if self.proc_code.description_required:
                     return "Y"
-            elif column == 3:
+            elif column == 6:
                 if self.proc_code.tooth_required:
                     return "Y"
-            elif column == 4:
+            elif column == 7:
                 if self.proc_code.multi_tooth:
                     return "Y"
-            elif column == 5:
+            elif column == 8:
                 if self.proc_code.surfaces_required:
                     return self.proc_code.no_surfaces
-            elif column == 6:
+            elif column == 9:
                 if self.proc_code.pontics_required:
                     return "Y %s"% self.proc_code.no_pontics
-            elif column == 7:
+            elif column == 10:
                 return self.proc_code.total_span
-
-
 
         return QtCore.QVariant()
 
@@ -288,13 +292,13 @@ if __name__ == "__main__":
     ## for this test code.. the model displays a lot more information
     ## to help put logic into the treatment codes
 
-    HORIZONTAL_HEADERS = ("Codes", "INFO?", "description?","tooth?",
-    "multi tooth?", "surfaces", "pontics?", "span")
-
-
+    from lib_openmolar import client
+    HORIZONTAL_HEADERS = ("Codes", "NEEDS INFO?", "is chartable",
+    "material","crown_type",
+    "needs description?","needs a tooth?",
+    "is multi tooth?", "needs surfaces?", "pontics?", "span")
 
     app = QtGui.QApplication([])
-
 
     model = ProcCodeTreeModel()
     dl = _TestDialog(model)

@@ -163,8 +163,8 @@ class OM1Importer(Importer):
         VALUES (?, ?, ?, ?, ?)'''
 
         ps_query_root = '''INSERT INTO static_roots
-        (patient_id, tooth, description, has_rct, comment,
-        checked_by) VALUES (?, ?, ?, ?, ?, ?)'''
+        (patient_id, tooth, description, comment,
+        checked_by) VALUES (?, ?, ?, ?, ?)'''
 
         ps_query_super = '''INSERT INTO static_supernumerary
         (patient_id, mesial_neighbour, comment,
@@ -294,7 +294,6 @@ class OM1Importer(Importer):
                         psql_query.addBindValue(mysql_query.value(0))
                         psql_query.addBindValue(om_tooth)
                         psql_query.addBindValue(val)
-                        psql_query.addBindValue(val=="RT")
                         psql_query.addBindValue(comment)
                         psql_query.addBindValue("imported")
 

@@ -65,7 +65,7 @@ class AvatarWidget(QtSvg.QSvgWidget):
     def __init__(self, parent=None):
         QtSvg.QSvgWidget.__init__(self, parent)
         #self.setMouseTracking(True)
-        
+
         #:
         self.is_active = False
         self.setMaximumSize(self.sizeHint())
@@ -214,6 +214,16 @@ class Practitioners(object):
             if self[i] == practitioner:
                 return i
         return -1
+
+    def practitioner_from_user(self, user):
+        '''
+        if :doc:`UserObject` is a practitioner, this function will return them
+        '''
+        if not user:
+            return
+        for practitioner in self:
+            if practitioner.user.id == user.id:
+                return practitioner
 
     @property
     def model(self):

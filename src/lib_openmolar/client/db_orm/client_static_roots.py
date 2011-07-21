@@ -59,7 +59,7 @@ class StaticRootsDB(object):
         self.record_list = []
         self._orig_record_list = []
 
-        query = '''select tooth, description, has_rct, comment
+        query = '''select tooth, description, comment
         from %s where patient_id=?'''% TABLENAME
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
@@ -122,7 +122,6 @@ class StaticRootsDB(object):
             new = RootRecord()
             new.setValue("patient_id", self.patient_id)
             new.setValue("tooth", data.tooth_id)
-            new.setValue("has_rct", data.has_rct)
             new.setValue("description", data.root_type)
             new.setValue("comment", data.comment)
             new.setValue("checked_by", SETTINGS.user)

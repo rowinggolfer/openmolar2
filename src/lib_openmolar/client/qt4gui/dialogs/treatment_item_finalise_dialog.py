@@ -210,16 +210,17 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
         self.description_frame.setVisible(treatment_item.description_required)
 
+        practitioners = SETTINGS.practitioners
+        try:
+            index = practitioners.index(SETTINGS.current_practitioner)
+        except ValueError:
+            index = -1
+        self.px_dent_cb.setModel(practitioners.dentists_model)
+        self.px_dent_cb.setCurrentIndex(index)
+
+
         if treatment_item.px_clinician is None:
             self.px_clinician_frame.show()
-            practitioners = SETTINGS.practitioners
-            try:
-                index = practitioners.index(SETTINGS.current_practitioner)
-            except ValueError:
-                index = -1
-
-            self.px_dent_cb.setModel(practitioners.dentists_model)
-            self.px_dent_cb.setCurrentIndex(index)
         else:
             self.px_clinician_frame.hide()
 
