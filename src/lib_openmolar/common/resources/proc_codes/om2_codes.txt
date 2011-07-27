@@ -34,7 +34,7 @@ simple|C13|Multi visit non surgical therapy
 simple|C20|Custom Periodontal Therapy|description
 teeth|C30|Periodontal Splinting|teeth(1+){tooth_range(1..33)}
 teeth|C40|Periodontal Surgery|teeth(1+){tooth_range(1..33)}
-fill|C50|Fissure Sealant|surfaces(1)
+fill|C50|Fissure Sealant
 tooth|C60|Recountouring Tooth to Prevent Food Trapping
 
 --Dxx|Restorations

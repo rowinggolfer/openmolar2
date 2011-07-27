@@ -134,7 +134,8 @@ class ProcCode(object):
 
     @property
     def surfaces_required(self):
-        return self._surfaces_required
+        return (self._surfaces_required and
+            not "fissure sealant" in self.description)
 
     @property
     def no_surfaces(self):
@@ -225,6 +226,8 @@ class ProcCode(object):
     def material(self):
         if not self.is_fill:
             return
+        if "fissure sealant" in self.description.lower():
+            return "FS"
         if "amalgam" in self.description.lower():
             return "AM"
         if "composite" in self.description.lower():

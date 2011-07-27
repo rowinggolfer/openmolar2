@@ -48,7 +48,11 @@ class StaticCommentsDB(object):
     class to get static chart information
     '''
     def __init__(self, patient_id):
-        self._record_list, self._orig_record_list = [], []
+        #:
+        self.patient_id = patient_id
+        #:
+        self.record_list = []
+        self._orig_record_list = []
 
         query = 'select tooth, comment from %s where patient_id=?'% TABLENAME
 
@@ -67,7 +71,7 @@ class StaticCommentsDB(object):
             QtSql.QSqlQuery.__init__(orig, record)
 
             #self.record_list.append(record)
-            self._record_list.append(new)
+            self.record_list.append(new)
             self._orig_record_list.append(orig)
 
     @property
@@ -75,14 +79,14 @@ class StaticCommentsDB(object):
         '''
         returns a list of all records (type QtSql.QSqlRecords) found
         '''
-        return self._record_list
+        return self.record_list
 
     def is_dirty_record(self, i):
         return self.records[i] != self._orig_record_list[i]
 
     @property
     def is_dirty(self):
-        if len(self._record_list) != len(self._orig_record_list):
+        if len(self.record_list) != len(self._orig_record_list):
             return True
         is_dirty = False
         for i in range(len(self.records)):
@@ -99,7 +103,9 @@ class StaticCommentsDB(object):
                 q_query.prepare(query)
                 for value in values:
                     q_query.addBindValue(value)
-                if not q_query.exec_():
+                if q_query.exec_():
+                    self._orig_record_list.append(record)
+                else:
                     print q_query.lastError().text()
                     SETTINGS.database.emit_caught_error(q_query.lastError())
 
@@ -116,6 +122,9 @@ class StaticCommentsDB(object):
             new.remove(new.indexOf('checked_date'))
 
             self.record_list.append(new)
+
+            data.in_database = True
+
 
 if __name__ == "__main__":
 

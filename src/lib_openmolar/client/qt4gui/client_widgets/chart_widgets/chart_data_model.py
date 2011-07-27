@@ -291,7 +291,7 @@ class ChartDataModel(object):
         self.add_fill_from_string(5, "MO,AM")
 
         #-- let's add a few (at random)
-        for fill in ("MOD,CO", "B,GL", "DO,AM", "O,GO", "B,PO"):
+        for fill in ("MOD,CO", "B,GL", "DO,AM", "O,GO", "B,PO", "FS"):
             self.add_fill_from_string(randint(1,32), fill)
 
         self.add_perio_data(3, perio_data.PerioData.POCKETING, (3,6,4,4,5,6))

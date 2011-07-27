@@ -303,12 +303,13 @@ class ChartTooth(Tooth):
             if prop.type == prop.CROWN:
                 self.crowns.append(prop)
                 continue
+
             surfaces, material = prop.surfaces_to_draw, prop.material
 
             brush, shape = None, None
 
             #--set filling color
-            if material == "CO":
+            if material in ("CO", "FS"):
                 brush = colours.COMPOSITE
             elif material == "GL":
                 brush = colours.GLASS
@@ -322,7 +323,9 @@ class ChartTooth(Tooth):
                 print "unhanded material colour", material
 
             if self.is_backtooth:
-                if re.match("[MODBL]{5}", surfaces):
+                if prop.is_fissure_sealant:
+                    shape = QtGui.QPolygon([self.dx-2, self.ey-2, self.fx+2, self.ey-2, self.fx+2, self.ey+2, self.dx-2, self.ey+2])
+                elif re.match("[MODBL]{5}", surfaces):
                     shape = QtGui.QPolygon([self.ax, self.by, self.cx, self.dy, self.dx, self.dy, self.dx, self.by,
                     self.fx, self.by, self.fx, self.dy, self.gx, self.dy, self.ix, self.by, self.ix, self.hy, self.gx, self.fy, self.fx,
                     self.fy, self.fx, self.hy, self.dx, self.hy, self.dx, self.fy, self.cx, self.fy, self.ax, self.hy])
@@ -579,7 +582,7 @@ if __name__ == "__main__":
         tooth.set_graphics_points()
         teeth.append(tooth)
 
-    for fill in ("ODB,CO", "B,GL", "DL,AM", "OL,CO"):
+    for fill in ("O,CO", "FS,AM"): #("ODB,CO", "B,GL", "DL,AM", "OL,CO", "FS"):
         for tooth_id in ids:
             prop = chart_widgets.ToothData(tooth_id)
             prop.from_fill_string(fill)

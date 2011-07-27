@@ -171,10 +171,9 @@ class ChartsPage(QtGui.QWidget):
         self.static_chart_model.add_data(patient.static_chart_records)
         self.static_chart_model.add_perio_records(patient.perio_data)
 
-
     def update_patient(self):
         '''
-        push any edits into the db_orm
+        push any static chart edits into the db_orm
         '''
         if not self.patient:
             return

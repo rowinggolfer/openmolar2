@@ -113,9 +113,12 @@ class StaticCrownsDB(object):
                 q_query.prepare(query)
                 for value in values:
                     q_query.addBindValue(value)
-                if not q_query.exec_():
+                if q_query.exec_():
+                    self._orig_record_list.append(record)
+                else:
                     print q_query.lastError().text()
                     SETTINGS.database.emit_caught_error(q_query.lastError())
+
 
 
     def add_crown_records(self, crown_list):
@@ -133,6 +136,9 @@ class StaticCrownsDB(object):
             new.remove(new.indexOf('date_charted'))
 
             self.record_list.append(new)
+
+            data.in_database = True
+
 
 if __name__ == "__main__":
 

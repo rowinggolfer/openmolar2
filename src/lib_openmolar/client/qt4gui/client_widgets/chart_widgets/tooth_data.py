@@ -132,7 +132,9 @@ class ToothData(object):
 
     @property
     def is_valid(self):
-        if self.type == self.FILLING:
+        if self.is_fissure_sealant:
+            return True
+        elif self.type == self.FILLING:
             return self.surfaces != ""
         elif self.type == self.CROWN:
             return self.crown_type !=""
@@ -140,6 +142,10 @@ class ToothData(object):
 
     def set_type(self, type):
         self.type = type
+
+    @property
+    def is_fissure_sealant(self):
+        return self.type == self.FILLING and self.material == "FS"
 
     @property
     def is_fill(self):
@@ -209,7 +215,9 @@ class ToothData(object):
 
     @property
     def icon(self):
-        if self.is_fill:
+        if self.is_fissure_sealant:
+            return QtGui.QIcon(":icons/fissure_sealant.png")
+        elif self.is_fill:
             return QtGui.QIcon(":icons/filling.png")
         elif self.is_root:
             return QtGui.QIcon(":icons/root.png")
@@ -226,7 +234,9 @@ class ToothData(object):
         a human readable description of this data
         '''
         text = "unknown item!"
-        if self.type == self.FILLING:
+        if self.is_fissure_sealant:
+            return _("fissure sealant")
+        elif self.type == self.FILLING:
             text = "%s,%s"% (self.display_surfaces, self.material)
         elif self.type == self.CROWN:
             # lookup the crown in known types.. else give it straight
@@ -246,6 +256,11 @@ class ToothData(object):
 
         takes "MOD,CO" and converts it to a property
         '''
+        if fill_string.startswith("FS"):
+            self.set_type(self.FILLING)
+            self._material = "FS"
+            return
+
         try:
             surfaces, self._material = fill_string.split(",")
             self.set_type(self.FILLING)
@@ -272,6 +287,8 @@ class ToothData(object):
             self.parse_root_input(input)
         elif input.startsWith("#"):
             self.parse_comment_input(input)
+        elif input == "FS":
+            self.from_fill_string("FS")
         else:
             input = self.parse_fill_input(input)
 
@@ -380,7 +397,7 @@ class ToothData(object):
 
     def parse_comment_input(self, input):
         self.set_type(self.COMMENT)
-        self.comment = unicode(input).strip("#")
+        self.set_comment(unicode(input).strip("#"))
 
     @property
     def display_surfaces(self):
