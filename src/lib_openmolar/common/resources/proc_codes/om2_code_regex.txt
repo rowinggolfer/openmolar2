@@ -2,11 +2,11 @@
 ##this is so that treatments entered on the chart can be matched
 ##to an om code.
 
-C50|FS
+#C50|FS
 
-D01|[MODBL]{1},AM
-D02|[MODBL]{2},AM
-D03|[MODBL]{3},AM
+#D01|[MODBL]{1},AM
+#D02|[MODBL]{2},AM
+#D03|[MODBL]{3},AM
 D04|[MODBL]{4,5},AM
 D10|[MODBL]{1},CO
 D11|[MODBL]{2},CO

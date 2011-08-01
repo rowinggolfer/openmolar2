@@ -1,4 +1,3 @@
-from proc_codes import ProcCode , ProcedureCodesInstance
-
+from proc_codes import ProcedureCodesInstance
 
 

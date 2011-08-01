@@ -237,11 +237,7 @@ class TreatmentItem(object):
 
     @property
     def surfaces_required(self):
-        return self.code.surfaces_required and self.surfaces == ""
-
-    @property
-    def no_surfaces(self):
-        return self.code.no_surfaces
+        return self.code.surfaces_required
 
     @property
     def description_required(self):
@@ -414,7 +410,7 @@ class TreatmentItem(object):
                     entered, _("entered")))
 
         if self.surfaces_required:
-            expected_surfaces = self.no_surfaces
+            expected_surfaces = self.code.no_surfaces
             n = re.match("\d+", expected_surfaces)
             if n:
                 no_surfaces = int(n.group())

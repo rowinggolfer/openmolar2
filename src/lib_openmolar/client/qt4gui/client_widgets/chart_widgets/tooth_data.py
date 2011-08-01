@@ -294,15 +294,6 @@ class ToothData(object):
 
         self.proc_code = SETTINGS.PROCEDURE_CODES.convert_user_shortcut(input)
 
-    def from_proc_code(self, code):
-        '''
-        this input has come from a procedure code
-        '''
-        print "DEPRECATED FUNCTION CALLED - use treatment item instead"
-        self.proc_code = code
-        shortcut = SETTINGS.PROCEDURE_CODES.convert_to_user_shortcut(code)
-        self.from_user_input(shortcut)
-
     def from_treatment_item(self, treatment_item):
         '''
         this input has come from a treatment_item

@@ -238,6 +238,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
             if tooth:
                 treatment_item.set_tooth(tooth.tooth_id)
             treatment_item.set_surfaces(self.tooth.filledSurfaces)
+
             treatment_item.set_description(
                 unicode(self.description_line_edit.text()))
 
@@ -266,11 +267,12 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    item = TreatmentItem("D03")  #3 surface amalgam
+    for code in SETTINGS.PROCEDURE_CODES:
+        item = TreatmentItem(code)
+        item.set_px_clinician(1)
+        if not item.is_valid:
+            dl = TreatmentItemFinaliseDialog()
+            dl.get_info(item)
 
-    dl = TreatmentItemFinaliseDialog()
-    dl.get_info(item)
-
-    print item
-    print item.surfaces
-    print item.material
+        print item
+        print item.is_valid
