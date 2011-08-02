@@ -39,17 +39,19 @@ class ProcCode(object):
     #:
     TOOTH = 1
     #:
-    ROOT = 2
+    TEETH = 2
     #:
-    FILL = 3
+    ROOT = 3
     #:
-    CROWN = 4
+    FILL = 4
     #:
-    BRIDGE = 5
+    CROWN = 5
     #:
-    PROSTHETICS = 6
+    BRIDGE = 6
     #:
-    OTHER = 7
+    PROSTHETICS = 7
+    #:
+    OTHER = 8
 
     def __init__(self, element, category):
         #:
@@ -84,8 +86,7 @@ class ProcCode(object):
             elif type == "tooth":
                 self._type = self.TOOTH
             elif type == "teeth":
-                self._type = self.TOOTH
-                self._multi_teeth = True
+                self._type = self.TEETH
             elif type == "root":
                 self._type = self.ROOT
             elif type == "fill":
@@ -147,6 +148,13 @@ class ProcCode(object):
         return self.type == self.PROSTHETICS
 
     @property
+    def tx_type(self):
+        nodes =  self.element.getElementsByTagName("tx_type")
+        if nodes == []:
+            return None
+        return nodes[0].childNodes[0].data.strip()
+
+    @property
     def description_required(self):
         '''
         some items require an extra description from the user when
@@ -174,11 +182,11 @@ class ProcCode(object):
         this is, for example, the case with an MOD filling,
         but not needed for an examination
         '''
-        return self.is_tooth
+        return self.is_tooth or self.type == self.TEETH
 
     @property
     def multi_tooth(self):
-        return self._multi_teeth
+        return self.no_pontics != "0"
 
     @property
     def surfaces_required(self):

@@ -62,12 +62,12 @@ class TreeItem(object):
             elif column == 1:
                 return u"%s %s"% (item.description, item.user_description)
             elif column == 2:
-                if item.is_tooth:
-                    return SETTINGS.TOOTHGRID_SHORTNAMES.get(item.tooth)
                 return 1
             elif column == 3:
-                if item.is_fill:
-                    return item.surfaces
+                message = u""
+                for data in item.metadata:
+                    message += "%s\n"% data.brief_description
+                return message.strip("\n")
             elif column == 4:
                 return str(item.px_clinician)
             elif column == 5:

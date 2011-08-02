@@ -218,13 +218,12 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         self.px_dent_cb.setModel(practitioners.dentists_model)
         self.px_dent_cb.setCurrentIndex(index)
 
-
         if treatment_item.px_clinician is None:
             self.px_clinician_frame.show()
         else:
             self.px_clinician_frame.hide()
 
-        self.info_list = ["hello world"]
+        self.info_list = [treatment_item.code.element.toxml()]
 
         while True:
             if not self.exec_():
@@ -234,9 +233,6 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
             treatment_item.set_teeth(self.chart.selected_teeth)
             treatment_item.set_pontics(self.pontics_chart.selected_teeth)
 
-            tooth = self.chart.current_tooth
-            if tooth:
-                treatment_item.set_tooth(tooth.tooth_id)
             treatment_item.set_surfaces(self.tooth.filledSurfaces)
 
             treatment_item.set_description(

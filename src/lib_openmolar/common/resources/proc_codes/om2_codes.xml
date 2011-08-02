@@ -132,14 +132,16 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="teeth">
     <id>C30</id>
     <description>Periodontal Splinting</description>
-    <n_teeth>1+</n_teeth>
+    <teeth n="1+" />
+    <tx_type>splint</tx_type>
     <tooth_range>(1..33)</tooth_range>
   </Code>
 
   <Code type="teeth">
     <id>C40</id>
     <description>Periodontal Surgery</description>
-    <n_teeth>1+</n_teeth>
+    <teeth n="1+" />
+    <tx_type>surgery</tx_type>
     <tooth_range>(1..33)</tooth_range>
   </Code>
 
@@ -153,6 +155,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="tooth">
     <id>C60</id>
     <description>Recountouring Tooth to Prevent Food Trapping</description>
+    <tx_type>stoning</tx_type>
   </Code>
 </Category>
 

@@ -31,6 +31,7 @@ SCHEMA = '''
 ix serial,
 treatment_id INTEGER REFERENCES treatments(ix),
 tooth SMALLINT NOT NULL,
+tx_type tooth_tx_type,
 CONSTRAINT pk_treatment_teeth PRIMARY KEY (ix)
 '''
 

@@ -117,7 +117,7 @@ class TreatmentPage(QtGui.QWidget):
             "unable to add to treatment plan... code not found")
             return
         treatment_item = common_db_orm.TreatmentItem(proc_code)
-        treatment_item.set_tooth(tooth_data.tooth_id)
+        treatment_item.set_teeth([tooth_data.tooth_id])
         treatment_item.set_surfaces(tooth_data.surfaces)
 
         self.add_treatment_item(treatment_item, from_chart=True)

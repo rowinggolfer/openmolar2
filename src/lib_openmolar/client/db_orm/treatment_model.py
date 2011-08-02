@@ -78,17 +78,13 @@ class TreatmentModel(object):
 
         if not self.patient_id:
             return
-        query =    '''select
+
+        query =  '''select
 treatments.ix, patient_id, parent_id, om_code, description,
-completed, comment, px_clinician, tx_clinician, tx_date, added_by,
-tooth, surfaces, material, type, technition
+completed, comment, px_clinician, tx_clinician, tx_date, added_by
 from treatments
 left join procedure_codes on procedure_codes.code = treatments.om_code
-left join treatment_teeth on treatments.ix = treatment_teeth.treatment_id
-left join treatment_fills  on treatment_fills.tooth_tx_id = treatment_teeth.ix
-left join treatment_crowns on treatment_crowns.tooth_tx_id = treatment_teeth.ix
-where patient_id = ?
-'''
+where patient_id = ?'''
 
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
@@ -146,10 +142,11 @@ where patient_id = ?
         else:
             chartmodel = self.tooth_tx_plan_model
 
-        tooth_data = ToothData(treatment_item.tooth)
-        tooth_data.from_treatment_item(treatment_item)
+        for data in treatment_item.metadata:
+            tooth_data = ToothData(data.tooth)
+            tooth_data.from_treatment_item_metadata(data)
 
-        chartmodel.add_property(tooth_data)
+            chartmodel.add_property(tooth_data)
         chartmodel.endResetModel()
 
     def update_views(self):
@@ -189,27 +186,12 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    pt = PatientModel(1)
+    pt = PatientModel(2)
 
     obj = pt.treatment_model
 
     for record in obj.treatment_items:
         print record
-
-    SETTINGS.set_current_patient(pt)
-
-    print obj.is_dirty
-    ti = common_db_orm.TreatmentItem("D01")
-    ti.set_px_clinician(1)
-    ti.set_tooth(3)
-    ti.set_surfaces("O")
-
-    print "adding", ti
-    print ti.in_database
-    obj.add_treatment_item(ti)
-    print obj.is_dirty
-    print obj.commit_changes()
-
-    print obj.tooth_tx_plan_model
+        print record.metadata
 
 
