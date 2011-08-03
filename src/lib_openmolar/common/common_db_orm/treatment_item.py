@@ -327,7 +327,7 @@ class TreatmentItem(object):
         self._metadata = None
 
         #:
-        self.user_description = ""
+        self._comment = ""
         #:
         self.is_completed = False
 
@@ -345,6 +345,7 @@ class TreatmentItem(object):
         SETTINGS.log("converting QsqlRecord to TreatmentItem")
         self.set_px_clinician(self.qsql_record.value("px_clinician").toInt()[0])
         tx_clinician, valid = self.qsql_record.value("tx_clinician").toInt()
+        self.set_comment(unicode(self.qsql_record.value("comment").toString()))
         self.set_completed(self.qsql_record.value("completed").toBool())
         if valid and tx_clinician !=0 :
             self.set_tx_clinician(tx_clinician)
@@ -473,12 +474,41 @@ where treatment_teeth.treatment_id = ?
         return self.code.description
 
     @property
+    def comment(self):
+        '''
+        any comment made by the user
+        '''
+        return self._comment
+
+    @property
     def pontics(self):
-        i = 0
+        '''
+        a list of all metadata items which are pontics
+        '''
+        pontics = []
         for data in self.metadata:
             if data.is_pontic:
-                i += 1
-        return i
+                pontics.append(data)
+        return pontics
+
+    @property
+    def abutments(self):
+        '''
+        a list of all metadata items which are bridge abutments
+        '''
+        abutments = []
+        for data in self.metadata:
+            if data.is_abutment:
+                abutments.append(data)
+        return abutments
+
+    @property
+    def allowed_pontics(self):
+        '''
+        which teeth are acceptable as pontics
+        eg upper partial pontics should be in range(1,18)
+        '''
+        return self.code.allowed_pontics
 
     @property
     def further_info_needed(self):
@@ -497,8 +527,14 @@ where treatment_teeth.treatment_id = ?
         return self.code.surfaces_required
 
     @property
-    def description_required(self):
-        return self.code.description_required
+    def comment_required(self):
+        return self.code.comment_required
+
+    def clear_metadata(self):
+        '''
+        reset the metadata
+        '''
+        self._metadata = []
 
     def set_teeth(self, teeth):
         '''
@@ -510,6 +546,17 @@ where treatment_teeth.treatment_id = ?
         for tooth in teeth:
             metadata = self.add_metadata()
             metadata.set_tooth(tooth)
+
+    def set_abutments(self, teeth):
+        '''
+        :param: list of pontics [int, int, int...]
+
+        ints should comply with :doc:`../../misc/tooth_notation`
+        '''
+        for tooth in teeth:
+            metadata = self.add_metadata()
+            metadata.set_tooth(tooth)
+            metadata.set_tx_type("abutment")
 
     def set_pontics(self, pontics):
         '''
@@ -528,13 +575,12 @@ where treatment_teeth.treatment_id = ?
         for data in self.metadata:
             data.set_surfaces(surfaces)
 
-    def set_description(self, description):
+    def set_comment(self, comment):
         '''
         :param: string
 
         '''
-        self.user_description = description
-
+        self._comment = comment
 
     def set_completed(self, completed=True):
         '''
@@ -604,11 +650,18 @@ where treatment_teeth.treatment_id = ?
         '''
         returns the entered total span of a bridge (if this is a bridge)
         '''
-        return len(self.pontics) + len(self.teeth)
+        return len(self.pontics) + len(self.abutments)
 
     @property
     def is_valid(self):
         return self.check_valid()[0]
+
+    @property
+    def errors(self):
+        '''
+        convenience function to get the errors for this item (if any)
+        '''
+        return self.check_valid()[1]
 
     def check_valid(self):
         '''
@@ -639,18 +692,23 @@ where treatment_teeth.treatment_id = ?
         if self.is_bridge:
             entered, required = self.entered_span, self.required_span
             if not ( entered == required or
-            ("+" in self.total_span and entered_span > required)):
+            ("+" in self.total_span and entered > required)):
 
                 errors.append(u"%s (%s %s - %s %s)"% (
                     _("Incorrect Bridge Span"),
                     required, _("units required"),
                     entered, _("entered")))
 
+        for pontic in self.pontics:
+            if not pontic.tooth in self.allowed_pontics:
+                errors.append("invalid pontic (%s)"% (
+                    SETTINGS.TOOTHGRID_LONGNAMES[pontic.tooth]))
+
         for data in self.metadata:
             errors += data.errors()
 
-        if self.description_required and self.user_description == "":
-            errors.append(_("A description is required"))
+        if self.comment_required and self.comment == "":
+            errors.append(_("A comment is required"))
 
         return (errors==[], errors)
 
@@ -678,6 +736,7 @@ where treatment_teeth.treatment_id = ?
         record.setValue("px_date", QtCore.QDate.currentDate())
         record.setValue("tx_date", self.cmp_date)
         record.setValue("added_by", SETTINGS.user)
+        record.setValue("comment", self.comment)
 
         query, values = record.insert_query
 

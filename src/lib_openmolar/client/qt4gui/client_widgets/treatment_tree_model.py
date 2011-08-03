@@ -60,13 +60,14 @@ class TreeItem(object):
             if column == 0:
                 return item.code.code
             elif column == 1:
-                return u"%s %s"% (item.description, item.user_description)
+                return item.description
             elif column == 2:
                 return 1
             elif column == 3:
                 message = u""
                 for data in item.metadata:
                     message += "%s\n"% data.brief_description
+                message += item.comment
                 return message.strip("\n")
             elif column == 4:
                 return str(item.px_clinician)

@@ -134,7 +134,6 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Periodontal Splinting</description>
     <teeth n="1+" />
     <tx_type>splint</tx_type>
-    <tooth_range>(1..33)</tooth_range>
   </Code>
 
   <Code type="teeth">
@@ -142,7 +141,6 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Periodontal Surgery</description>
     <teeth n="1+" />
     <tx_type>surgery</tx_type>
-    <tooth_range>(1..33)</tooth_range>
   </Code>
 
   <Code type="fill">
@@ -154,6 +152,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="tooth">
     <id>C60</id>
+    <shortcut>ST</shortcut>
     <description>Recountouring Tooth to Prevent Food Trapping</description>
     <tx_type>stoning</tx_type>
   </Code>
@@ -645,9 +644,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="prosthetics">
     <id>H40</id>
     <description>Addition of teeth</description>
-    <pontics n="1+">
-      <tooth_range>1..33</tooth_range>
-    </pontics>
+    <pontics n="1+" />
   </Code>
 
   <Code type="prosthetics">
@@ -716,7 +713,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 </Category>
 
 <!--Ixx Fixed Prosthetics-->
-<Category name="Fixed Prosthetics">
+<Category name="Fixed Prosthetics (BridgeWork)">
   <Code type="simple">
     <id>I00</id>
     <description>Other BridgeWork</description>
@@ -757,10 +754,10 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="bridge">
     <id>I14</id>
-    <description>Other Porcelain/Metal Bridge</description>
+    <description>Multi-Unit Porcelain/Metal Bridge</description>
     <abutments n="1+" />
     <pontics n="1+" />
-    <span n="6" />
+    <span n="6+" />
     <ti_requires>description</ti_requires>
   </Code>
 
@@ -798,7 +795,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="bridge">
     <id>I24</id>
-    <description>Other Gold Bridge</description>
+    <description>Multi-Unit Gold Bridge</description>
     <abutments n="1+" />
     <pontics n="1+" />
     <span n="6+" />
@@ -843,7 +840,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="bridge">
     <id>I34</id>
-    <description>Other Ceramic Bridge</description>
+    <description>Multi-Unit Ceramic Bridge</description>
     <abutments n="1+" />
     <pontics n="1+" />
     <span n="6+" />
@@ -855,6 +852,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Resin Retained Bridge</description>
     <wings n="1+" />
     <pontics n="1+" />
+    <span n="1+" />
     <ti_requires>description</ti_requires>
   </Code>
 
@@ -863,6 +861,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Temporary Bridge</description>
     <abutments n="1+" />
     <pontics n="1+" />
+    <span n="1+" />
   </Code>
 
   <Code type="simple">
@@ -1085,7 +1084,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Fluoride Application</description>
   </Code>
 
-  <Code type="simple">
+  <Code type="teeth">
     <id>Z04</id>
     <description>Treatment of sensitivity</description>
   </Code>

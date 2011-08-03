@@ -110,12 +110,12 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         ## a line edit for description
         self.description_frame = QtGui.QFrame()
         description_label = QtGui.QLabel(_("Description of item"))
-        self.description_line_edit = QtGui.QLineEdit()
+        self.comment_line_edit = QtGui.QLineEdit()
 
         layout = QtGui.QHBoxLayout(self.description_frame)
         layout.setMargin(0)
         layout.addWidget(description_label)
-        layout.addWidget(self.description_line_edit)
+        layout.addWidget(self.comment_line_edit)
 
         self.insertWidget(self.top_label)
         self.insertWidget(self.px_clinician_frame)
@@ -141,14 +141,14 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
             QtCore.SIGNAL("current tooth changed"), self.update_widgets)
         self.connect(self.tooth, QtCore.SIGNAL("toothSurface"),
             self.update_surfaces)
-        self.description_line_edit.textEdited.connect(self.update_widgets)
+        self.comment_line_edit.textEdited.connect(self.update_widgets)
 
     def clear(self):
         self.chart.clear()
         self.pontics_chart.clear()
         self.tooth.clear()
         self.treatment_item = None
-        self.description_line_edit.setText("")
+        self.comment_line_edit.setText("")
         self.px_dent_cb.setCurrentIndex(-1)
         self.update_widgets()
 
@@ -208,7 +208,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
         self.surfaces_frame.setVisible(treatment_item.surfaces_required)
 
-        self.description_frame.setVisible(treatment_item.description_required)
+        self.description_frame.setVisible(treatment_item.comment_required)
 
         practitioners = SETTINGS.practitioners
         try:
@@ -230,13 +230,18 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
                 break
 
             treatment_item.set_px_clinician(self.chosen_px_clinician)
-            treatment_item.set_teeth(self.chart.selected_teeth)
-            treatment_item.set_pontics(self.pontics_chart.selected_teeth)
+            treatment_item.clear_metadata()
 
+            if treatment_item.is_bridge:
+                treatment_item.set_abutments(self.chart.selected_teeth)
+            else:
+                treatment_item.set_teeth(self.chart.selected_teeth)
+
+            treatment_item.set_pontics(self.pontics_chart.selected_teeth)
             treatment_item.set_surfaces(self.tooth.filledSurfaces)
 
-            treatment_item.set_description(
-                unicode(self.description_line_edit.text()))
+            treatment_item.set_comment(
+                unicode(self.comment_line_edit.text()))
 
             valid, errors = treatment_item.check_valid()
             if not valid:

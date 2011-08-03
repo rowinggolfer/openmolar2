@@ -155,7 +155,7 @@ class ProcCode(object):
         return nodes[0].childNodes[0].data.strip()
 
     @property
-    def description_required(self):
+    def comment_required(self):
         '''
         some items require an extra description from the user when
         converting to a :doc:`TreatmentItem`
@@ -187,6 +187,27 @@ class ProcCode(object):
     @property
     def multi_tooth(self):
         return self.no_pontics != "0"
+
+    def range_from_node(self, node):
+        '''
+        returns a list of ints which have been specified in the xml
+        in this way <tooth_range>18..33</tooth_range>
+        '''
+        ranges = node.getElementsByTagName("tooth_range")
+        if ranges == []:
+            return
+        data = ranges[0].childNodes[0].data.strip()
+        m = re.match("(\d+)\.\.(\d+)$", data)
+        if m:
+            start, finish = m.groups()
+            return range(int(start), int(finish)+1)
+
+        m = re.match("(\d+)*", data)
+        if m:
+            range_ = []
+            for tooth in m.groups():
+                range_.append(int(tooth))
+            return range_
 
     @property
     def surfaces_required(self):
@@ -228,8 +249,12 @@ class ProcCode(object):
         a list of teeth which can be replaced with this procedure
         (eg upper teeth only for a P/-)
         '''
-        if self._allowed_pontics != None:
-            return self._allowed_pontics
+        pontics_node = self._pontics_node
+        if pontics_node:
+            range_ =  self.range_from_node(pontics_node)
+            if range_ is not None:
+                return range_
+
         return SETTINGS.all_teeth
 
     @property
@@ -282,13 +307,8 @@ class ProcCode(object):
     def further_info_needed(self):
         return (self.tooth_required or
             self.surfaces_required or
-            self.description_required or
+            self.comment_required or
             self.pontics_required)
-
-    @property
-    def allowed_teeth(self):
-        print "ProcCode.allowed_teeth called"
-        return range(1,33)
 
     def __repr__(self):
         return "ProcCode - %s"% self.__str__()

@@ -118,7 +118,7 @@ where patient_id = ?'''
         add a :doc:`TreatmentItem` Object
         returns True if the TreatmentItem is valid, else False
         '''
-        SETTINGS.log("adding treatment item...")
+        SETTINGS.log("adding treatment item ...")
 
         if treatment_item.is_valid:
             self._treatment_items.append(treatment_item)
@@ -128,6 +128,12 @@ where patient_id = ?'''
 
             self.tree_model.update_treatments()
             return True
+
+        SETTINGS.log(treatment_item.errors)
+
+        if treatment_item.in_database:
+            raise IOError, "invalid treatment in database treatments id=%s"% (
+                treatment_item.id.toInt()[0])
 
         SETTINGS.log("FAILED. invalid treatment item:\n%s\n%s"% (
             treatment_item, "(treatment item may be validated by dialog)"))

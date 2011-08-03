@@ -284,15 +284,11 @@ class OMTypes(object):
         new_type.allow(u'tooth', _("tooth"))
         self["tx_chart_type"] = new_type
 
+        # for use in the treatments_teeth table
         new_type = OMType("tooth_tx_type")
-        new_type.allow(u'filling', _("filling"))
-        new_type.allow(u'stoning', _("stoning"))
-        new_type.allow(u'surgery', _("surgery"))
-        new_type.allow(u'crown', _("crown"))
         new_type.allow(u'abutment', _("abutment"))
         new_type.allow(u'pontic', _("pontic"))
         new_type.allow(u'wing', _("wing"))
-        new_type.allow(u'splint', _("splint"))
         self["tooth_tx_type"] = new_type
 
 if __name__ == "__main__":

@@ -405,17 +405,6 @@ class AdminMainWindow(BaseMainWindow):
             self.status_label.setText(_("Not Connected to a Server"))
             return False
 
-    def keep_root_connection(self):
-        '''
-        ask the user if root connection should be dropped
-        '''
-        if (self.connection and self.connection.userName() == "root" and
-        QtGui.QMessageBox.question(self, _("confirm"),
-        _("stay connected as root?"),
-        QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-        QtGui.QMessageBox.No) == QtGui.QMessageBox.No):
-            self.disconnect_server()
-
     def has_connection(self):
         '''
         checks the connection to db.. if not present prompts user to get one

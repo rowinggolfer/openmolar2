@@ -68,7 +68,7 @@ class TreeItem(object):
             elif column == 4:
                 return self.proc_code.crown_type
             elif column == 5:
-                if self.proc_code.description_required:
+                if self.proc_code.comment_required:
                     return "Y"
             elif column == 6:
                 if self.proc_code.tooth_required:
