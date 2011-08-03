@@ -22,8 +22,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-
-
 class CrownCodesModel(QtCore.QAbstractListModel):
     '''
     a model to display crown procedure codes
@@ -62,14 +60,12 @@ class CrownCodesModel(QtCore.QAbstractListModel):
 
 
 if __name__ == "__main__":
+    from lib_openmolar import client
     def sig_catcher(arg):
         index = model.index(arg)
         print model.data(index, QtCore.Qt.UserRole)
-    
-    
 
     app = QtGui.QApplication([])
-
 
     model = CrownCodesModel()
 

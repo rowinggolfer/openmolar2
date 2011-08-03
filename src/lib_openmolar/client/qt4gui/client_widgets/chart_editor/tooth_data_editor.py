@@ -25,17 +25,25 @@ from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.client.qt4gui.client_widgets import chart_widgets
 
-import tooth_data_list_widget
-import chart_line_edit
-import chart_editor_tooth
+from tooth_data_list_widget import ToothDataListWidget
+from chart_line_edit import ChartLineEdit
+from chart_editor_tooth import ToothEditor
+from navigate_frame import NavigateFrame
+from static_shortcuts_frame import StaticShortcutsFrame
 
-from lib_openmolar.client.qt4gui.client_widgets.procedures import \
-    crown_codes_model
+from lib_openmolar.client.qt4gui.client_widgets.procedures.crown_codes_model \
+    import CrownCodesModel
 
 class ToothDataEditor(QtGui.QWidget):
     '''
     this class provides the widget for the right hand side of the charts page
     '''
+    #:
+    STATIC_MODE = 0
+    #:
+    PLANNING_MODE = 1
+    #:
+    mode = STATIC_MODE
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -45,14 +53,12 @@ class ToothDataEditor(QtGui.QWidget):
         self.tooth_label = QtGui.QLabel("")
         self.tooth_label.setAlignment(QtCore.Qt.AlignCenter)
         #:
-        self.line_edit = chart_line_edit.ChartLineEdit(self)
+        self.line_edit = ChartLineEdit(self)
         #: a pointer to the :doc:`ToothDataListWidget`
-        self.tooth_data_list_widget = \
-            tooth_data_list_widget.ToothDataListWidget()
+        self.tooth_data_list_widget = ToothDataListWidget()
 
         #: a pointer to the :doc:`ToothEditor`
-        self.tooth_editor = chart_editor_tooth.ToothEditor(self)
-
+        self.tooth_editor = ToothEditor(self)
 
         self.roots_combo_box = QtGui.QComboBox()
         '''populated with :doc:`OMTypes` ["root_description"].selections'''
@@ -60,12 +66,16 @@ class ToothDataEditor(QtGui.QWidget):
         root_list = SETTINGS.OM_TYPES["root_description"].selections
         self.roots_combo_box.addItems(root_list)
 
-
-
         #: populated with :doc:`CrownCodesModel`
         self.crowns_combo_box = QtGui.QComboBox()
-        self.crowns_combo_box.setModel(crown_codes_model.CrownCodesModel())
+        self.crowns_combo_box.setModel(CrownCodesModel())
 
+        #:
+        self.navigate_buttons = NavigateFrame()
+        #:
+        self.static_buttons = StaticShortcutsFrame()
+
+        #:
         self.show_fee_widget_button = QtGui.QPushButton(_("Procedure Codes"))
 
         edit_frame = QtGui.QFrame()
@@ -79,6 +89,8 @@ class ToothDataEditor(QtGui.QWidget):
         splitter.setOrientation(QtCore.Qt.Vertical)
         splitter.addWidget(edit_frame)
         splitter.addWidget(self.tooth_editor)
+        splitter.addWidget(self.navigate_buttons)
+        splitter.addWidget(self.static_buttons)
         splitter.addWidget(self.roots_combo_box)
         splitter.addWidget(self.crowns_combo_box)
         splitter.addWidget(self.show_fee_widget_button)
@@ -90,10 +102,29 @@ class ToothDataEditor(QtGui.QWidget):
         layout.addWidget(self.tooth_label)
         layout.addWidget(splitter)
 
+        self.connect(self.static_buttons, QtCore.SIGNAL("Shortcut"),
+            self.shortcut_received)
+
     def advise(self, *args):
         if __name__ == "__main__":
             print args
         self.emit(QtCore.SIGNAL("Advise"), *args)
+
+    def set_mode(self, static=True):
+        '''
+        this widget has two modes.. static or planning
+        '''
+        current_mode = self.mode
+        self.mode = self.STATIC_MODE if static else self.PLANNING_MODE
+
+        if current_mode != self.mode:
+            self.apply_mode()
+
+    def apply_mode(self):
+        if self.mode == self.STATIC_MODE:
+            self.static_buttons.show()
+        else:
+            self.static_buttons.hide()
 
     @property
     def is_dirty(self):
@@ -111,6 +142,10 @@ class ToothDataEditor(QtGui.QWidget):
         self.tooth_editor.clear()
         self.tooth_data_list_widget.clear()
         self.line_edit.setText("")
+
+    def shortcut_received(self, shortcut):
+        self.line_edit.setText(shortcut)
+        self.line_edit.finished_edit()
 
     def keyPressEvent(self, event):
         self.line_edit.keyPressEvent(event)
@@ -162,10 +197,10 @@ class ToothDataEditor(QtGui.QWidget):
             model = self.crowns_combo_box.model()
             index = model.index(index)
             chosen_crown = model.data(index, QtCore.Qt.UserRole)
-            print chosen_crown
-            prop = chart_widgets.ToothData(self.current_tooth.tooth_id)
-            prop.from_proc_code(chosen_crown)
-            self.current_tooth.add_property(prop)
+
+            tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)
+            tooth_data.from_proc_code(chosen_crown)
+            self.current_tooth.add_property(to)
             self.tooth_data_list_widget.setTooth(self.current_tooth)
             try:
                 chart = self.current_tooth.data_model.views[0]
@@ -274,6 +309,18 @@ if __name__ == "__main__":
 
     dl.connect(obj, QtCore.SIGNAL("Code Selected"), sig_catcher)
 
+    static_button = QtGui.QRadioButton("static")
+    static_button.setChecked(True)
+    planning_button = QtGui.QRadioButton("planning")
+
+    static_button.toggled.connect(obj.set_mode)
+
+    toggle_frame = QtGui.QFrame()
+    layout = QtGui.QVBoxLayout(toggle_frame)
+    layout.addWidget(static_button)
+    layout.addWidget(planning_button)
+
     layout = QtGui.QVBoxLayout(dl)
     layout.addWidget(obj)
+    layout.addWidget(toggle_frame)
     dl.exec_()
