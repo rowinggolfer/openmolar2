@@ -42,22 +42,18 @@ class ChartLineEdit(QtGui.QLineEdit):
     def trimmed_text(self):
         return self.text().trimmed()
 
-    def finished_edit(self):
-        '''
-        we have finished editing the text..
-        check it.. and emit an appropriate signal
-        '''
-        if self.trimmed_text != "":
-            self.emit(QtCore.SIGNAL("User Input"))
-        self.clear()
-
     def keyPressEvent(self, event):
         '''
         overrides QWidget's keypressEvent
         '''
         if event.key() == QtCore.Qt.Key_Space:
-            QtGui.QLineEdit.keyPressEvent(self, event)
-            self.finished_edit()
+            self.emit(QtCore.SIGNAL("Navigate"), "stay")
+        elif event.key() in (
+            QtCore.Qt.Key_Down,
+            QtCore.Qt.Key_Return):
+                self.emit(QtCore.SIGNAL("Navigate"), "next")
+        elif event.key() == QtCore.Qt.Key_Up:
+            self.emit(QtCore.SIGNAL("Navigate"), "prev")
         else:
             inputT = event.text().toAscii()
             if re.match("[a-z]", inputT):
@@ -73,6 +69,7 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
     object = ChartLineEdit()
-    QtCore.QObject.connect(object, QtCore.SIGNAL("Filling Changed"), sig_catcher)
+    app.connect(object, QtCore.SIGNAL("Navigate"), sig_catcher)
+
     object.show()
     app.exec_()

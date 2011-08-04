@@ -178,6 +178,9 @@ class PatientInterface(QtGui.QWidget):
             QtCore.SIGNAL("clear summary chart selection"),
             self.summary_page.clear_static)
 
+        self.connect(self.summary_page.summary_chart, QtCore.SIGNAL("Focused"),
+            self.charts_page.tooth_data_editor.set_mode)
+
         self.connect(self.charts_page, QtCore.SIGNAL("teeth present changed"),
             self.summary_page.summary_chart.set_known_teeth)
 
@@ -209,8 +212,7 @@ class PatientInterface(QtGui.QWidget):
         self.connect(self.summary_page, QtCore.SIGNAL("Save Requested"),
             self.save_patient)
 
-        self.tab_widget.currentChanged.connect(
-            self.tab_index_changed)
+        self.tab_widget.currentChanged.connect(self.tab_index_changed)
 
         self.connect(self.options_widget,
             QtCore.SIGNAL("chart style"), self.set_chart_style)

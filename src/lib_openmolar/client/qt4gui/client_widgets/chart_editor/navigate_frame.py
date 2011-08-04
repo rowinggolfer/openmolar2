@@ -62,7 +62,7 @@ class NavigateFrame(QtGui.QWidget):
         self.emit(QtCore.SIGNAL("Navigate"), "next")
 
     def emit_add(self):
-        self.emit(QtCore.SIGNAL("Navigate"), "add")
+        self.emit(QtCore.SIGNAL("Navigate"), "stay")
 
     def emit_prev(self):
         self.emit(QtCore.SIGNAL("Navigate"), "prev")

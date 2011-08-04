@@ -38,9 +38,12 @@ class ChartWidgetStatic(chart_widget_base.ChartWidgetBase):
             QtCore.Qt.Key_Minus, self.toggle_tooth_present)
 
     def toggle_tooth_present(self):
-        self.current_tooth.toggle_is_present()
-        self.emit(QtCore.SIGNAL("teeth present changed"), self.known_teeth_key)
-        return self.current_tooth.ref_next
+        if self.current_tooth:
+            self.current_tooth.toggle_is_present()
+            self.emit(QtCore.SIGNAL("teeth present changed"),
+                self.known_teeth_key)
+            self.update()
+            return self.current_tooth.ref_next
 
     @property
     def known_teeth_key(self):

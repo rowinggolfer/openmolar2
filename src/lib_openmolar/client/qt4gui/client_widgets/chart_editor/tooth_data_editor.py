@@ -47,6 +47,8 @@ class ToothDataEditor(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
+        #: a pointer to the chart being edited
+        self.current_chart = None
         #:
         self.current_tooth = None
         #:
@@ -114,6 +116,8 @@ class ToothDataEditor(QtGui.QWidget):
         '''
         this widget has two modes.. static or planning
         '''
+        self.current_chart = self.sender()
+
         current_mode = self.mode
         self.mode = self.STATIC_MODE if static else self.PLANNING_MODE
 
@@ -144,7 +148,16 @@ class ToothDataEditor(QtGui.QWidget):
         self.line_edit.setText("")
 
     def shortcut_received(self, shortcut):
-        self.line_edit.setText(shortcut)
+        '''
+        this is connected to the static_buttons
+        '''
+        if shortcut == "TM":
+            self.emit(QtCore.SIGNAL("toggle_tooth_present"))
+        elif shortcut == "AT":
+            self.advise("AT doesn't work yet")
+        else:
+            self.line_edit.setText(shortcut)
+
         self.line_edit.finished_edit()
 
     def keyPressEvent(self, event):
@@ -225,6 +238,32 @@ class ToothDataEditor(QtGui.QWidget):
         self.apply_edits()
         self.line_edit.setText("")
 
+    def navigate(self, direction):
+        '''
+        catches signals from components requesting a move to another tooth
+        '''
+        if self.current_tooth is None:
+            new_ref = None
+        elif direction == "next":
+            new_ref = self.current_tooth.ref_next
+        elif direction == "prev":
+            new_ref = self.current_tooth.ref_prev
+        else:
+            new_ref = None
+
+        result = self.apply_edits()
+        if result:
+            self.line_edit.clear()
+        else:
+            return
+
+        if direction == "stay":
+            return
+
+        if self.current_chart:
+            self.current_chart.set_current_tooth(new_ref)
+            self.current_chart.redraw_check()
+
     def setTooth(self, tooth):
         '''
         make the editor aware of the tooth selected by the charts
@@ -283,13 +322,16 @@ class ToothDataEditor(QtGui.QWidget):
         self.connect(self.tooth_editor, QtCore.SIGNAL("editing finished"),
             self.tooth_editor_input_finished)
 
-        self.connect(self.line_edit, QtCore.SIGNAL("User Input"),
-            self.apply_edits)
-
         self.show_fee_widget_button.clicked.connect(self._call_fee_widget)
 
         self.crowns_combo_box.currentIndexChanged.connect(
             self.add_crown_property_to_current_tooth)
+
+        self.connect(self.line_edit,
+            QtCore.SIGNAL("Navigate"), self.navigate)
+
+        self.connect(self.navigate_buttons,
+            QtCore.SIGNAL("Navigate"), self.navigate)
 
 if __name__ == "__main__":
 

@@ -422,6 +422,7 @@ class ChartWidgetBase(QtGui.QWidget):
     def focusInEvent(self, event):
         self.focused = True
         self.update()
+        self.emit(QtCore.SIGNAL("Focused"))
 
     def focusOutEvent(self, event):
         self.focused = False
@@ -570,7 +571,7 @@ class ChartWidgetBase(QtGui.QWidget):
 
         self.redraw_check(current_selection, current_tooth)
 
-    def redraw_check(self, previous_selection, previous_current_tooth):
+    def redraw_check(self, previous_selection=None, previous_current_tooth=None):
         redraw_needed = False
 
         if self.current_tooth != previous_current_tooth:

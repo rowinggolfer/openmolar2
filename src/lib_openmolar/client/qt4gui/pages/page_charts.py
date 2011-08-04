@@ -101,6 +101,33 @@ class ChartsPage(QtGui.QWidget):
         self.connect(self.tooth_data_editor, QtCore.SIGNAL("add treatment"),
             self._add_treatment)
 
+        self.connect(self.static, QtCore.SIGNAL("Focused"),
+            self.static_focused)
+
+        self.connect(self.treatment, QtCore.SIGNAL("Focused"),
+            self.treatment_focused)
+
+        ## hmmm - might be best to disable the editor in this case??
+        self.connect(self.completed, QtCore.SIGNAL("Focused"),
+            self.treatment_focused)
+
+        self.connect(self.tooth_data_editor,
+            QtCore.SIGNAL("toggle_tooth_present"),
+            self.static.toggle_tooth_present)
+
+    def static_focused(self):
+        '''
+        call this when a static chart has focus.. it changes the mode of the
+        :doc:`ToothDataEditor`
+        '''
+        self.tooth_data_editor.set_mode(static=True)
+
+    def treatment_focused(self):
+        '''
+        call this when a treatment chart has focus.. it changes the mode of the
+        :doc:`ToothDataEditor`
+        '''
+        self.tooth_data_editor.set_mode(static=False)
 
     def _add_treatment(self, prop, plan_or_cmp):
         self.emit(QtCore.SIGNAL("add treatment"), prop, plan_or_cmp)
