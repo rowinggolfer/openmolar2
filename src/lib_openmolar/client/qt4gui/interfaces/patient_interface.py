@@ -187,6 +187,12 @@ class PatientInterface(QtGui.QWidget):
         self.connect(self.charts_page, QtCore.SIGNAL("add treatment"),
             self.treatment_page.chart_treatment_added)
 
+        self.connect(self.treatment_page, QtCore.SIGNAL("garbage chart tx"),
+            self.charts_page.tooth_data_editor.invalid_input)
+
+        self.connect(self.treatment_page, QtCore.SIGNAL("valid chart tx"),
+            self.charts_page.tooth_data_editor.valid_input)
+
         self.connect(self.summary_page.summary_chart,
             QtCore.SIGNAL("teeth present changed"),
             self.charts_page.known_teeth_changed)

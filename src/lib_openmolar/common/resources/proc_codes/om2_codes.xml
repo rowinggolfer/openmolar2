@@ -957,19 +957,22 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="tooth">
     <id>K10</id>
     <description>Extraction</description>
+    <shortcut>(S,)?EX$</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K11</id>
     <description>Extraction with root dissection</description>
+    <shortcut>(S,)?EX2</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K12</id>
     <description>Surgical Extraction</description>
+    <shortcut>(S,)?EX3</shortcut>
   </Code>
 
-  <Code type="tooth">
+  <Code type="simple">
     <id>K13</id>
     <description>Extraction of Supernumerary</description>
     <ti_requires>description</ti_requires>
@@ -978,31 +981,37 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="tooth">
     <id>K14</id>
     <description>Hemisection</description>
+    <shortcut>(S,)?EX/2</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K15</id>
     <description>Trisection</description>
+    <shortcut>(S,)?EX/3</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K16</id>
     <description>Partial Extraction (fractured tooth)</description>
+    <shortcut>(S,)?EX/P</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K20</id>
     <description>Gingivectomy</description>
+    <shortcut>(S,)?GV</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K21</id>
     <description>Apicectomy</description>
+    <shortcut>(S,)?AP</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>K22</id>
     <description>Re-implantation of root</description>
+    <shortcut>(S,)?REIM</shortcut>
   </Code>
 
   <Code type="simple">
@@ -1165,12 +1174,15 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   <Code type="tooth">
     <id>Z50</id>
     <description>Stoning</description>
+    <shortcut>ST</shortcut>
   </Code>
 
   <Code type="tooth">
     <id>Z51</id>
     <description>Overdenture Preparation</description>
+    <shortcut>TP/OD</shortcut>  
   </Code>
+  
   
 </Category>
 

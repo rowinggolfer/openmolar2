@@ -94,7 +94,7 @@ where patient_id = ?'''
             record = q_query.record()
 
             treatment_item = common_db_orm.TreatmentItem(record)
-            self.add_treatment_item(treatment_item, charted=False)
+            self.add_treatment_item(treatment_item)
 
     @property
     def treatment_items(self):
@@ -113,7 +113,7 @@ where patient_id = ?'''
             dirty = dirty or not treatment_item.in_database
         return dirty
 
-    def add_treatment_item(self, treatment_item, charted=False):
+    def add_treatment_item(self, treatment_item):
         '''
         add a :doc:`TreatmentItem` Object
         returns True if the TreatmentItem is valid, else False
@@ -123,7 +123,7 @@ where patient_id = ?'''
         if treatment_item.is_valid:
             self._treatment_items.append(treatment_item)
 
-            if not charted and treatment_item.is_chartable:
+            if treatment_item.is_chartable:
                 self.add_to_chart_model(treatment_item)
 
             self.tree_model.update_treatments()

@@ -129,8 +129,8 @@ class ChartsPage(QtGui.QWidget):
         '''
         self.tooth_data_editor.set_mode(static=False)
 
-    def _add_treatment(self, prop, plan_or_cmp):
-        self.emit(QtCore.SIGNAL("add treatment"), prop, plan_or_cmp)
+    def _add_treatment(self, tx, plan_or_cmp):
+        self.emit(QtCore.SIGNAL("add treatment"), tx, plan_or_cmp)
 
     def known_teeth_changed(self, key):
         '''

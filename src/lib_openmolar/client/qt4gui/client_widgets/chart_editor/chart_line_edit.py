@@ -48,6 +48,10 @@ class ChartLineEdit(QtGui.QLineEdit):
         '''
         if event.key() == QtCore.Qt.Key_Space:
             self.emit(QtCore.SIGNAL("Navigate"), "stay")
+        elif self.text() == "" and event.key() in (
+        QtCore.Qt.Key_Left, QtCore.Qt.Key_Right,
+        QtCore.Qt.Key_Down, QtCore.Qt.Key_Up):
+            self.emit(QtCore.SIGNAL("Nav_key"), event)
         elif event.key() in (
             QtCore.Qt.Key_Down,
             QtCore.Qt.Key_Return):

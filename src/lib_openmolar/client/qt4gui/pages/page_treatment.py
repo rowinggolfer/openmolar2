@@ -73,7 +73,7 @@ class TreatmentPage(QtGui.QWidget):
         '''
         self.emit(QtCore.SIGNAL("Show Fee Widget"))
 
-    def add_treatment_item(self, treatment_item, from_chart=False):
+    def add_treatment_item(self, treatment_item):
         '''
         adds a treatment item
         '''
@@ -83,7 +83,7 @@ class TreatmentPage(QtGui.QWidget):
             return
 
         while not patient.treatment_model.add_treatment_item(
-                                        treatment_item, charted=from_chart):
+                                        treatment_item):
             dl = self.treatment_item_finalise_dialog
             if self.patient:
                 dl.set_known_teeth(self.patient.dent_key)
@@ -110,17 +110,22 @@ class TreatmentPage(QtGui.QWidget):
     def chart_treatment_added(self, tooth_data, plan_or_cmp):
         '''
         treatment has been added using the charts page
+        if this is not understood, the following signal is emitted
+        QtCore.SIGNAL("garbage chart tx")
         '''
         proc_code = tooth_data.proc_code
         if proc_code == None:
-            QtGui.QMessageBox.warning(self, "error",
-            "unable to add to treatment plan... code not found")
+            proc_code = SETTINGS.PROCEDURE_CODES.convert_user_shortcut(
+                tooth_data.tx_input)
+        if proc_code == None:
+            self.emit(QtCore.SIGNAL("garbage chart tx"))
             return
         treatment_item = common_db_orm.TreatmentItem(proc_code)
         treatment_item.set_teeth([tooth_data.tooth_id])
         treatment_item.set_surfaces(tooth_data.surfaces)
 
-        self.add_treatment_item(treatment_item, from_chart=True)
+        self.add_treatment_item(treatment_item)
+        self.emit(QtCore.SIGNAL("valid chart tx"))
 
     def clear(self):
         self.patient = None

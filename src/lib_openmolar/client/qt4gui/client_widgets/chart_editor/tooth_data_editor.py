@@ -167,43 +167,56 @@ class ToothDataEditor(QtGui.QWidget):
         if not self.current_tooth:
             SETTINGS.log("not adding property.. no current tooth selected")
             return
-        tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)
 
-        try:
-            tooth_data.from_user_input(self.line_edit.trimmed_text)
-            self.current_tooth.add_property(tooth_data)
-            self.tooth_data_list_widget.setTooth(self.current_tooth)
+        tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)
+        input = self.line_edit.trimmed_text
+        if self.mode == self.STATIC_MODE:
 
             try:
-                chart = self.current_tooth.data_model.views[0]
-                plan_or_cmp = chart.treatment_addition_cat
+                tooth_data.from_user_input(input)
+                self.current_tooth.add_property(tooth_data)
+                self.tooth_data_list_widget.setTooth(self.current_tooth)
 
-                ## this signal is eventually caught by the
-                ## estimates page.chart_treatment_added
-                self.emit(QtCore.SIGNAL("add treatment"), tooth_data, plan_or_cmp)
+                return True
+            except chart_widgets.ToothDataError as e:
+                self.invalid_input(e)
+                return False
 
-            except IndexError:
-                #model has no views?
+        else:
+            plan_or_cmp = self.current_chart.treatment_addition_cat
+            try:
+                tooth_data.from_user_input(input)
+            except chart_widgets.ToothDataError as e:
                 pass
-            except AttributeError:
-                #static or summary charts don't have treatment_added
-                pass
 
-            return True
-        except chart_widgets.ToothDataError as e:
-            if QtGui.QMessageBox.question(self,
+            tooth_data.tx_input = input
+            self.emit(QtCore.SIGNAL("add treatment"), tooth_data, plan_or_cmp)
+
+    def invalid_input(self, error=""):
+        '''
+        alert the user that the text entered is garbage, and offer to delete it
+        '''
+        if QtGui.QMessageBox.question(self,
             _("question"),
             u"error from input '%s'<br />%s<hr />delete input?"% (
-            self.line_edit.trimmed_text, e),
+            self.line_edit.trimmed_text, error),
             QtGui.QMessageBox.Yes|QtGui.QMessageBox.No,
             QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes:
-                self.line_edit.setText("")
-            return False
+
+            self.line_edit.setText("")
+
+    def valid_input(self):
+        '''
+        clear the line edit
+        '''
+        self.line_edit.setText("")
 
     def add_crown_property_to_current_tooth(self, index):
         '''
         catches a signal that the row of the crown combobox has changed
         '''
+
+        ##TODO - this is broken!!!
         if not self.current_tooth or index == 0: #row 0 is a header
             pass
         else:
@@ -220,7 +233,7 @@ class ToothDataEditor(QtGui.QWidget):
                 plan_or_cmp = chart.treatment_addition_cat
 
                 ## this signal is eventually caught by the
-                ## estimates page.chart_treatment_added
+                ## treaments page.chart_treatment_added
                 self.emit(QtCore.SIGNAL("add treatment"), prop, plan_or_cmp)
 
             except AttributeError:
@@ -237,6 +250,13 @@ class ToothDataEditor(QtGui.QWidget):
     def tooth_editor_input_finished(self):
         self.apply_edits()
         self.line_edit.setText("")
+
+    def nav_key(self, event):
+        '''
+        pass on some key presses to the current chart
+        '''
+        if self.current_chart:
+            self.current_chart.keyPressEvent(event)
 
     def navigate(self, direction):
         '''
@@ -332,6 +352,9 @@ class ToothDataEditor(QtGui.QWidget):
 
         self.connect(self.navigate_buttons,
             QtCore.SIGNAL("Navigate"), self.navigate)
+
+        self.connect(self.line_edit,
+            QtCore.SIGNAL("Nav_key"), self.nav_key)
 
 if __name__ == "__main__":
 
