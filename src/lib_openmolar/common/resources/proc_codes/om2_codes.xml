@@ -515,7 +515,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="fill">
     <id>G10</id>
-    <shortcut>IN/[MODBL]{1,5},GO</shortcut>
+    <shortcut>(IN/)?[MODBL]{1,5},GO</shortcut>
     <description>Gold Inlay</description>
     <surfaces n="1+" />
   </Code>
@@ -523,7 +523,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="fill">
     <id>G11</id>
-    <shortcut>ON/[MODBL]{1,5},GO</shortcut>
+    <shortcut>(ON/)?[MODBL]{1,5},GO</shortcut>
     <description>Gold Onlay</description>
       <surfaces n="1+" />
   </Code>
@@ -531,7 +531,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="fill">
     <id>G20</id>
-    <shortcut>IN/[MODBL]{1,5},PO</shortcut>
+    <shortcut>(IN/)?[MODBL]{1,5},PO</shortcut>
     <description>Porcelain Inlay</description>
     <surfaces n="1+" />
   </Code>
@@ -539,7 +539,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="fill">
     <id>G21</id>
-    <shortcut>ON/[MODBL]{1,5},PO</shortcut>
+    <shortcut>(ON/)?[MODBL]{1,5},PO</shortcut>
     <description>Porcelain Onlay</description>
     <surfaces n="1+" />
   </Code>

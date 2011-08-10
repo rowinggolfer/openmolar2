@@ -60,7 +60,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
 
-    model = SETTINGS.treatment_model.tooth_tx_plan_model
+    model = SETTINGS.treatment_model.plan_tx_chartmodel
     model.load_test_data()
 
     object = ChartWidgetTreatment(model, dl)

@@ -42,12 +42,13 @@ class TreatmentModel(object):
         self.tree_model = TreatmentTreeModel()
 
         #:a pointer to the treatment plan :doc:`ChartDataModel`
-        self.tooth_tx_plan_model = ChartDataModel()
+        self.plan_tx_chartmodel = ChartDataModel()
 
         #:a pointer to the treatment completed :doc:`ChartDataModel`
-        self.tooth_tx_cmp_model = ChartDataModel()
+        self.cmp_tx_chartmodel = ChartDataModel()
 
         self._treatment_items = []
+        self._deleted_items = []
 
     def load_patient(self, patient_id):
         '''
@@ -65,8 +66,9 @@ class TreatmentModel(object):
         '''
         SETTINGS.log("clearing treatment_model")
         self._treatment_items = []
-        self.tooth_tx_plan_model.clear()
-        self.tooth_tx_cmp_model.clear()
+        self._deleted_items = []
+        self.plan_tx_chartmodel.clear()
+        self.cmp_tx_chartmodel.clear()
         self.tree_model.update_treatments()
 
     def get_records(self):
@@ -104,10 +106,19 @@ where patient_id = ?'''
         return self._treatment_items
 
     @property
+    def deleted_items(self):
+        '''
+        returns a list of all :doc:`TreatmentItem` which have been deleted
+        '''
+        return self._deleted_items
+
+    @property
     def is_dirty(self):
         '''
         will return True if the model differs from that in the database
         '''
+        if self.deleted_items != []:
+            return True
         dirty = False
         for treatment_item in self.treatment_items:
             dirty = dirty or not treatment_item.in_database
@@ -118,8 +129,6 @@ where patient_id = ?'''
         add a :doc:`TreatmentItem` Object
         returns True if the TreatmentItem is valid, else False
         '''
-        SETTINGS.log("adding treatment item ...")
-
         if treatment_item.is_valid:
             self._treatment_items.append(treatment_item)
 
@@ -135,8 +144,6 @@ where patient_id = ?'''
             raise IOError, "invalid treatment in database treatments id=%s"% (
                 treatment_item.id.toInt()[0])
 
-        SETTINGS.log("FAILED. invalid treatment item:\n%s\n%s"% (
-            treatment_item, "(treatment item may be validated by dialog)"))
         return False
 
     def add_to_chart_model(self, treatment_item):
@@ -144,9 +151,9 @@ where patient_id = ?'''
         represent the treatment_item on the charts page somehow.
         '''
         if treatment_item.is_completed:
-            chartmodel = self.tooth_tx_cmp_model
+            chartmodel = self.cmp_tx_chartmodel
         else:
-            chartmodel = self.tooth_tx_plan_model
+            chartmodel = self.plan_tx_chartmodel
 
         for data in treatment_item.metadata:
             tooth_data = ToothData(data.tooth)
@@ -155,14 +162,70 @@ where patient_id = ?'''
             chartmodel.add_property(tooth_data)
         chartmodel.endResetModel()
 
+    def remove_treatment_item(self, treatment_item):
+        '''
+        removes a :doc:`TreatmentItem` Object
+        '''
+        self._treatment_items.remove(treatment_item)
+        self._deleted_items.append(treatment_item)
+
+        if treatment_item.is_chartable:
+            self.update_chart_models()
+
+        self.tree_model.update_treatments()
+
+    def complete_treatment_item(self, treatment_item, completed=True):
+        '''
+        :param: treatment_item (:doc:`TreatmentItem`)
+        :kword: completed=bool (default True)
+
+        toggles the state of a :doc:`TreatmentItem` to completed
+        '''
+        orig_value = treatment_item.is_completed
+
+        treatment_item.set_completed(completed)
+        treatment_item.set_cmp_date()
+
+        if not treatment_item.is_valid:
+            treatment_item.set_completed(orig_value)
+            return False
+
+        if treatment_item.is_chartable:
+            self.update_chart_models()
+
+        self.tree_model.update_treatments()
+        return True
+
+    def update_chart_models(self):
+        '''
+        completely reloads the chart models.
+        '''
+        self.cmp_tx_chartmodel.clear()
+        self.plan_tx_chartmodel.clear()
+
+        for treatment_item in self.treatment_items:
+            if treatment_item.is_completed:
+                chartmodel = self.cmp_tx_chartmodel
+            else:
+                chartmodel = self.plan_tx_chartmodel
+
+            for data in treatment_item.metadata:
+                tooth_data = ToothData(data.tooth)
+                tooth_data.from_treatment_item_metadata(data)
+
+                chartmodel.add_property(tooth_data)
+
+        self.cmp_tx_chartmodel.endResetModel()
+        self.plan_tx_chartmodel.endResetModel()
+
     def update_views(self):
         '''
         this should be called after adding to the model
         update all submodels (treeview, charts etc.)
         '''
         self.tree_model.update_treatments()
-        self.tooth_tx_cmp_model.endResetModel()
-        self.tooth_tx_plan_model.endResetModel()
+        self.cmp_tx_chartmodel.endResetModel()
+        self.plan_tx_chartmodel.endResetModel()
 
     def commit_changes(self):
         '''
@@ -170,12 +233,14 @@ where patient_id = ?'''
         '''
         if not self.is_dirty:
             return
-        print "treatment model, commiting changes"
         result = True
         for item in self.treatment_items:
             if not item.in_database:
                 result = result and self.commit_item(item)
-
+        for item in self.deleted_items:
+            #sliently drop any items which never got committed
+            if item.in_database:
+                print "remove", item, "from database"
         return result
 
     def commit_item(self, item):
@@ -192,7 +257,7 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    pt = PatientModel(2)
+    pt = PatientModel(1)
 
     obj = pt.treatment_model
 

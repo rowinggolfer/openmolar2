@@ -155,6 +155,7 @@ class TreatmentItemMetadata(object):
     def set_tx_type(self, tx_type):
         '''
         :param: tx_type (string)
+
         string should be enumerable by :doc:`OMType` tooth_tx_type
         '''
         self._tx_type = tx_type
@@ -410,7 +411,7 @@ where treatment_teeth.treatment_id = ?
         '''
         return None if not self.in_database else self.qsql_record.value("ix")
 
-    def set_cmp_date(self, date):
+    def set_cmp_date(self, date=QtCore.QDate.currentDate()):
         '''
         :param: date
 
@@ -439,7 +440,7 @@ where treatment_teeth.treatment_id = ?
         '''
         returns True if this code needs tooth metadata (some don't)
         '''
-        return (self.code.tooth_required and not self.metadata)
+        return self.code.tooth_required and self.metadata == []
 
     @property
     def type(self):
@@ -524,6 +525,9 @@ where treatment_teeth.treatment_id = ?
 
     @property
     def surfaces_required(self):
+        for data in self.metadata:
+            if data.surfaces != "":
+                return False
         return self.code.surfaces_required
 
     @property
@@ -596,8 +600,10 @@ where treatment_teeth.treatment_id = ?
             who prescribed this treatment
             int should be the unique id of a clinician
         '''
-        assert type(clinician_id) == types.IntType, (
-            "invalid id for set_px_clinician")
+
+        assert (clinician_id is None or
+        type(clinician_id) == types.IntType), "error setting_px_clinician"
+
         self._px_clinician = clinician_id
 
     def set_tx_clinician(self, clinician_id):
@@ -608,6 +614,8 @@ where treatment_teeth.treatment_id = ?
             who prescribed this treatment
             int should be the unique id of a clinician
         '''
+        assert (clinician_id is None or
+        type(clinician_id) == types.IntType), "error setting_tx_clinician"
         self._tx_clinician = clinician_id
 
     @property
@@ -687,7 +695,10 @@ where treatment_teeth.treatment_id = ?
             errors.append(_("Unknown Prescribing Clinician"))
 
         if self.is_completed and self.tx_clinician is None:
-            errors.append(_("Who Performed this treatment?"))
+            errors.append(_("Unknown Treating Clinician"))
+
+        if self.is_completed and self.cmp_date is None:
+            errors.append(_("Unknown Completion Date"))
 
         if self.is_bridge:
             entered, required = self.entered_span, self.required_span

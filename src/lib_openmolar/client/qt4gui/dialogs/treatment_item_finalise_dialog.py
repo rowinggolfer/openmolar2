@@ -27,6 +27,25 @@ from lib_openmolar.common.dialogs import ExtendableDialog
 
 from lib_openmolar.client.qt4gui import client_widgets
 
+class ChooseClinicianFrame(QtGui.QFrame):
+        '''
+        allows user to choose a prescribing or completing clinician
+        '''
+        def __init__(self, completing, parent=None):
+            QtGui.QFrame.__init__(self, parent)
+            if completing:
+                message = _("Who performed this treatment?")
+            else:
+                message = _("Who is prescribing this treatment?")
+
+            label = QtGui.QLabel(message)
+
+            self.dent_cb = QtGui.QComboBox()
+
+            layout = QtGui.QHBoxLayout(self)
+            layout.addWidget(label)
+            layout.addWidget(self.dent_cb)
+
 
 class TreatmentItemFinaliseDialog(ExtendableDialog):
     def __init__(self, parent=None):
@@ -36,7 +55,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         (ie.. is the item aware who prescribed it?
         if applicable - which tooth it relates to? etc. )
         '''
-        ExtendableDialog.__init__(self, parent)
+        ExtendableDialog.__init__(self, parent, remove_stretch=False)
         self.setWindowTitle(_("Additional Information is Required"))
 
         self.top_label = QtGui.QLabel(_("Additional Information is Required"))
@@ -97,15 +116,8 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         layout.addWidget(self.pontics_chart,0,1,2,1)
 
         ## a combo box for prescribing clinician
-        self.px_clinician_frame = QtGui.QFrame()
-
-        label = QtGui.QLabel(_("Who is prescribing this treatment?"))
-
-        self.px_dent_cb = QtGui.QComboBox()
-
-        layout = QtGui.QHBoxLayout(self.px_clinician_frame)
-        layout.addWidget(label)
-        layout.addWidget(self.px_dent_cb)
+        self.px_clinician_frame = ChooseClinicianFrame(completing=False)
+        self.tx_clinician_frame = ChooseClinicianFrame(completing=True)
 
         ## a line edit for description
         self.description_frame = QtGui.QFrame()
@@ -117,22 +129,31 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         layout.addWidget(description_label)
         layout.addWidget(self.comment_line_edit)
 
+        self.plan_completed_frame = QtGui.QFrame()
+        layout = QtGui.QGridLayout(self.plan_completed_frame)
+        self.completed_radiobutton = QtGui.QRadioButton(_("Completed Today"))
+        self.planning_radiobutton = QtGui.QRadioButton(_("Planned Treatment"))
+        self.planning_radiobutton.setChecked(True)
+        layout.addWidget(self.planning_radiobutton, 0, 0)
+        layout.addWidget(self.completed_radiobutton, 0, 1)
+        layout.addWidget(self.tx_clinician_frame, 1,0,1,2)
+
         self.insertWidget(self.top_label)
         self.insertWidget(self.px_clinician_frame)
         self.insertWidget(self.chart_frame)
         self.insertWidget(self.pontics_frame)
         self.insertWidget(self.surfaces_frame)
         self.insertWidget(self.description_frame)
+        self.insertWidget(self.plan_completed_frame)
 
         self.changes_list_widget = QtGui.QListWidget()
         self.add_advanced_widget(self.changes_list_widget)
 
         self.dent_key = 281474976645120  #adult only
-        self.info_list = []
         self.connect_signals()
 
     def sizeHint(self):
-        return QtCore.QSize(400,100)
+        return QtCore.QSize(400,600)
 
     def connect_signals(self):
         self.connect(self.chart,
@@ -143,19 +164,37 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
             self.update_surfaces)
         self.comment_line_edit.textEdited.connect(self.update_widgets)
 
+        self.completed_radiobutton.toggled.connect(self.set_completed)
+
     def clear(self):
         self.chart.clear()
         self.pontics_chart.clear()
         self.tooth.clear()
         self.treatment_item = None
         self.comment_line_edit.setText("")
-        self.px_dent_cb.setCurrentIndex(-1)
+        self.px_clinician_frame.dent_cb.setCurrentIndex(-1)
+        self.tx_clinician_frame.dent_cb.setCurrentIndex(-1)
         self.update_widgets()
+        self.planning_radiobutton.setChecked(True)
+
+    def set_completed(self, completed):
+        '''
+        this function is fired when the completed radio button is toggled
+        '''
+        if self.treatment_item is not None:
+            if completed:
+                self.treatment_item.set_cmp_date()
+            else:
+                self.treatment_item.set_completed(False)
+        self.tx_clinician_frame.setVisible(completed)
 
     def showExtension(self, extend):
         if extend:
             self.changes_list_widget.clear()
-            self.changes_list_widget.addItems(self.info_list)
+            self.changes_list_widget.addItem(
+                _("The following items need to be resolved by this dialog"))
+            self.changes_list_widget.addItems(self.treatment_item.errors)
+
         ExtendableDialog.showExtension(self, extend)
 
     def update_tooth_widget(self):
@@ -167,7 +206,6 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
             self.update_surfaces("-")
         else:
             self.chosen_teeth_label.setText(chosen_tooth.long_name)
-
         self.update_widgets()
 
     def update_widgets(self, *args):
@@ -188,60 +226,108 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
     @property
     def chosen_px_clinician(self):
-        i = self.px_dent_cb.currentIndex()
-        model = self.px_dent_cb.model()
-        index = model.index(i)
-        practitioner = model.data(index, QtCore.Qt.UserRole)
+        i = self.px_clinician_frame.dent_cb.currentIndex()
+        if i == -1:
+            return None
+        index = SETTINGS.practitioners.dentists_model.index(i)
+        practitioner = SETTINGS.practitioners.dentists_model.data(index,
+            QtCore.Qt.UserRole)
         return practitioner.id
 
-    def get_info(self, treatment_item):
+    @property
+    def chosen_tx_clinician(self):
+        i = self.tx_clinician_frame.dent_cb.currentIndex()
+        if i == -1:
+            return None
+        index = SETTINGS.practitioners.dentists_model.index(i)
+        practitioner = SETTINGS.practitioners.dentists_model.data(index,
+            QtCore.Qt.UserRole)
+        return practitioner.id
+
+    def get_info(self, treatment_item, completing=False):
+        '''
+        executes the dialog in a loop, and modifies the :doc:`TreatmentItem`
+        until it "is_vald" or the dialog is cancelled.
+        '''
         self.clear()
-        self.top_label.setText(
-            u"%s  - %s"% (_("Add Item"), treatment_item.description))
+        self.treatment_item = treatment_item
+        if completing:
+            message = u"%s  - %s"% (_("Add Item"), treatment_item.description)
+        else:
+            message = u"%s  - %s"% (_("Complete Item"),
+                treatment_item.description)
+
+        self.completed_radiobutton.setChecked(completing)
+        self.completed_radiobutton.setVisible(not completing)
+        self.planning_radiobutton.setVisible(not completing)
+
+        self.top_label.setText(message)
         self.chart.set_known_teeth(self.dent_key)
         self.pontics_chart.set_known_teeth(self.dent_key)
-
-        self.chart_frame.setVisible(treatment_item.tooth_required)
         self.chart.allow_multi_select = treatment_item.allow_multiple_teeth
 
-        self.pontics_frame.setVisible(treatment_item.pontics_required)
+        if SETTINGS.current_practitioner is None:
+            result = QtGui.QMessageBox.warning(self.parent(), _("warning"),
+            "No clinician is set.. you will need to enter this manually",
+            QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel)
+            if result == QtGui.QMessageBox.Cancel:
+                return False
 
-        self.surfaces_frame.setVisible(treatment_item.surfaces_required)
-
-        self.description_frame.setVisible(treatment_item.comment_required)
 
         practitioners = SETTINGS.practitioners
         try:
             index = practitioners.index(SETTINGS.current_practitioner)
         except ValueError:
             index = -1
-        self.px_dent_cb.setModel(practitioners.dentists_model)
-        self.px_dent_cb.setCurrentIndex(index)
 
-        if treatment_item.px_clinician is None:
-            self.px_clinician_frame.show()
-        else:
-            self.px_clinician_frame.hide()
+        self.tx_clinician_frame.dent_cb.setModel(practitioners.dentists_model)
+        self.tx_clinician_frame.dent_cb.setCurrentIndex(index)
 
-        self.info_list = [treatment_item.code.element.toxml()]
+        self.px_clinician_frame.dent_cb.setModel(practitioners.dentists_model)
+        self.px_clinician_frame.dent_cb.setCurrentIndex(index)
+
+        get_pontics = treatment_item.pontics_required
+        get_surfaces = treatment_item.surfaces_required
+        get_comment = treatment_item.comment_required
+        get_px_clinician = treatment_item.px_clinician is None
+        get_tx_clinician = (treatment_item.is_completed and
+            treatment_item.tx_clinician is None)
+        get_teeth = treatment_item.tooth_required
+
+        self.chart_frame.setVisible(get_teeth)
+        self.pontics_frame.setVisible(get_pontics)
+        self.surfaces_frame.setVisible(get_surfaces)
+        self.description_frame.setVisible(get_comment)
+        self.px_clinician_frame.setVisible(get_px_clinician)
+        self.tx_clinician_frame.setVisible(get_tx_clinician)
 
         while True:
             if not self.exec_():
                 break
 
-            treatment_item.set_px_clinician(self.chosen_px_clinician)
-            treatment_item.clear_metadata()
+            if treatment_item.is_completed:
+                treatment_item.set_tx_clinician(self.chosen_tx_clinician)
 
-            if treatment_item.is_bridge:
-                treatment_item.set_abutments(self.chart.selected_teeth)
-            else:
-                treatment_item.set_teeth(self.chart.selected_teeth)
+            if get_px_clinician:
+                treatment_item.set_px_clinician(self.chosen_px_clinician)
 
-            treatment_item.set_pontics(self.pontics_chart.selected_teeth)
-            treatment_item.set_surfaces(self.tooth.filledSurfaces)
+            if get_teeth:
+                treatment_item.clear_metadata()
 
-            treatment_item.set_comment(
-                unicode(self.comment_line_edit.text()))
+                if treatment_item.is_bridge:
+                    treatment_item.set_abutments(self.chart.selected_teeth)
+                else:
+                    treatment_item.set_teeth(self.chart.selected_teeth)
+
+            if get_pontics:
+                treatment_item.set_pontics(self.pontics_chart.selected_teeth)
+
+            if get_surfaces:
+                treatment_item.set_surfaces(self.tooth.filledSurfaces)
+
+            if get_comment:
+                treatment_item.set_comment(
+                    unicode(self.comment_line_edit.text()))
 
             valid, errors = treatment_item.check_valid()
             if not valid:
@@ -268,12 +354,21 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    for code in SETTINGS.PROCEDURE_CODES:
-        item = TreatmentItem(code)
-        item.set_px_clinician(1)
-        if not item.is_valid:
-            dl = TreatmentItemFinaliseDialog()
-            dl.get_info(item)
+    dl = TreatmentItemFinaliseDialog()
 
-        print item
-        print item.is_valid
+    code = SETTINGS.PROCEDURE_CODES["D10"]
+    item = TreatmentItem(code)
+    #item.set_completed(True)
+    while not item.is_valid:
+        if not dl.get_info(item):
+            break
+
+    if False:
+        for code in SETTINGS.PROCEDURE_CODES:
+            item = TreatmentItem(code)
+            item.set_px_clinician(1)
+            if not item.is_valid:
+                dl.get_info(item)
+
+            print item
+            print item.is_valid

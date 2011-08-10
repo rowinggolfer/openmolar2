@@ -29,7 +29,7 @@ class ExtendableDialog(BaseDialog):
     unlike BaseDialog.. this dialog has no spacer item by default
     '''
     def __init__(self, parent=None, remove_stretch=True):
-        super(ExtendableDialog, self).__init__(parent, remove_stretch)
+        BaseDialog.__init__(self, parent, remove_stretch)
 
         self.button_box.setCenterButtons(False)
 

@@ -550,7 +550,7 @@ if __name__ == "__main__":
     pi = PatientInterface(dl)
 
     cc.connect()
-    #pi.load_patient(1)
+    pi.load_patient(1)
 
     layout = QtGui.QVBoxLayout(dl)
     layout.setMargin(0)
