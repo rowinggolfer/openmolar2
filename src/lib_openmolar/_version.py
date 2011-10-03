@@ -1,5 +1,5 @@
-revision_id = 'be81e9a0c75605d4c127e33b49d3e0c3eeeb1fa6'
-revision_number = 27
+revision_id = '21c0d8723180fd0e5493fbc39838a41c827c80bd'
+revision_number = 29
 branch = 'default'
 tags = ['tip']
-date = 'Wed Aug 10 10:39:40 2011'
+date = 'Mon Oct  3 17:47:19 2011'

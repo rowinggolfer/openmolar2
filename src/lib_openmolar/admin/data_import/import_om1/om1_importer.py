@@ -32,7 +32,7 @@ from lib_openmolar.admin.data_import.import_om1 import convert_daybook_chart
 from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndu
 from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndl
 from lib_openmolar.admin.data_import.import_om1 import convert_daybook_odu
-from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndl
+from lib_openmolar.admin.data_import.import_om1 import convert_daybook_odl
 
 from lib_openmolar.common import SETTINGS
 
@@ -1084,6 +1084,8 @@ class OM1Importer(Importer):
             return
 
         ##for testing
+
+        return
 
         print "WARNING - using custom import_all"
 
