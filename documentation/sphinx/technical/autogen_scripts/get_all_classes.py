@@ -119,10 +119,12 @@ def get_modules(folder):
         for file_ in files:
             if file_.endswith(".py"):
                 module = file_.replace('.py','')
+                if module == "__init__":
+                    continue
                 if module in sys.modules.keys():
                     #print module, "already imported"
                     sys.modules.pop(module)
-                    
+                #print "importing", module, "from", root 
                 mod = __import__(module)
                 yield mod 
 
@@ -164,8 +166,6 @@ def main():
     index_files = []
     klass_no, warnings = 0,0
     for mod in get_modules(folder):
-        if mod.__name__ == "__init__":
-            continue
         for klass in get_class_names(mod):
             out_file = os.path.join(KLASS_SUBDIR, klass+".rst")
             if os.path.exists(out_file):
