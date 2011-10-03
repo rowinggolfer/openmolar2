@@ -21,6 +21,7 @@
 ###############################################################################
 
 import os
+import sys
 from xml.dom import minidom
 from PyQt4 import QtSql, QtCore
 from lib_openmolar.common import common_db_orm
@@ -87,7 +88,7 @@ class Importer(object):
             psql_query.addBindValue("imported from xml")
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     row.toxml(),
                     psql_query.lastError().text())
 
@@ -119,7 +120,7 @@ class Importer(object):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING - %s"% psql_query.lastError().text()
+                print "ERROR IMPORTING - %s"% psql_query.lastError().text()
 
 
     def import_patients(self):
@@ -197,7 +198,7 @@ class Importer(object):
             psql_query.addBindValue("imported from xml")
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     row.toxml(),
                     psql_query.lastError().text())
             else:
@@ -219,26 +220,39 @@ class Importer(object):
 
 
     def import_all(self):
-        self.insert_null_user()
-        self.import_avatars()
-        self.import_users()
-        self.import_practitioners()
-        self.import_patients()
+        print "importing all"
+        try:
+            sys.stdout.flush()
+            self.insert_null_user()
+            sys.stdout.flush()
+            self.import_avatars()
+            sys.stdout.flush()
+            self.import_users()
+            sys.stdout.flush()
+            self.import_practitioners()
+            sys.stdout.flush()
+            self.import_patients()
+            sys.stdout.flush()
 
-        self.import_tx_completed()
-        self.import_appointments()
-        self.import_clerical_memos()
-        self.import_clinical_memos()
-        self.import_addresses()
+            self.import_tx_completed()
+            self.import_appointments()
+            self.import_clerical_memos()
+            self.import_clinical_memos()
+            self.import_addresses()
 
-        self.import_notes()
+            self.import_notes()
 
-        self.import_static_charts()
-        self.import_bpe()
-        self.import_perio()
-        self.import_contracted_practitioners()
-        self.import_telephones()
-        print "ALL DONE!"
+            self.import_static_charts()
+            self.import_bpe()
+            self.import_perio()
+            self.import_contracted_practitioners()
+            self.import_telephones()
+            print "ALL DONE!"
+
+        except Exception as e:
+            print "FATAL ERROR!"
+            print e
+            sys.exit()
 
 if __name__ == "__main__":
     from lib_openmolar.admin.connect import AdminConnection

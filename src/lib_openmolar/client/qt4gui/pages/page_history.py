@@ -61,20 +61,20 @@ class HistoryPage(QtGui.QWidget):
         if patient is None:
             return
         query = QtSql.QSqlQuery(SETTINGS.database)
-        query.prepare('''select description, tx_date, tx_clinician, tooth,
-        surfaces, material, comment
-        from treatments left join procedure_codes on
-        treatments.om_code = procedure_codes.code
-        left join treatment_fills
-        on treatment_fills.treatment_id = treatments.ix
-        where patient_id=? order by tx_date''')
+        query.prepare('''
+select description, om_code, completed,  tx_date, tx_clinician, tooth,
+surfaces, material, comment
+from treatments left join procedure_codes on
+treatments.om_code = procedure_codes.code
+left join treatment_teeth on treatment_teeth.treatment_id = treatments.ix
+left join treatment_fills on treatment_fills.tooth_tx_id = treatment_teeth.ix
+where patient_id=? order by tx_date, comment
+        ''')
         query.addBindValue(patient.patient_id)
         query.exec_()
         self.model.setQuery(query)
 
 if __name__ == "__main__":
-    
-    
 
     from lib_openmolar.client.connect import ClientConnection
     app = QtGui.QApplication([])

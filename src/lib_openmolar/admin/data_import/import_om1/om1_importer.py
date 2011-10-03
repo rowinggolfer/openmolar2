@@ -21,6 +21,7 @@
 ###############################################################################
 
 import re
+import sys
 from PyQt4 import QtSql, QtCore
 from lib_openmolar.admin.data_import.importer import Importer
 from lib_openmolar.admin.data_import.import_om1 import convert_notes
@@ -28,8 +29,10 @@ from lib_openmolar.admin.data_import.import_om1 import teeth_present
 from lib_openmolar.admin.data_import.import_om1 import convert_perio
 from lib_openmolar.admin.data_import.import_om1 import convert_daybook
 from lib_openmolar.admin.data_import.import_om1 import convert_daybook_chart
-
-
+from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndu
+from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndl
+from lib_openmolar.admin.data_import.import_om1 import convert_daybook_odu
+from lib_openmolar.admin.data_import.import_om1 import convert_daybook_ndl
 
 from lib_openmolar.common import SETTINGS
 
@@ -89,7 +92,7 @@ class OM1Importer(Importer):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
@@ -110,7 +113,7 @@ class OM1Importer(Importer):
 
         if sno_limit is not None:
             print "limited to serialno", sno_limit
-            query +=" where serialno < %d"% sno_limit
+            query +=" where serialno <= %d"% sno_limit
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -143,7 +146,7 @@ class OM1Importer(Importer):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
@@ -372,12 +375,12 @@ class OM1Importer(Importer):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING DENT KEY %s - %s"% (
+                print "ERROR IMPORTING DENT KEY %s - %s"% (
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
 
-    def import_clerical_memos(self):
+    def import_clerical_memos(self, max_sno=None):
         print "importing clerical memos"
 
         ps_query = '''INSERT INTO clerical_memos
@@ -387,6 +390,9 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, memo from patients'''
+        if max_sno:
+            query += " where serialno <= %d"% max_sno
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -411,11 +417,11 @@ class OM1Importer(Importer):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
-    def import_addresses(self):
+    def import_addresses(self, max_sno=None):
         print "importing addresses"
 
         ps_query = '''INSERT INTO addresses
@@ -432,6 +438,8 @@ class OM1Importer(Importer):
 
         query = '''select addr1, addr2, addr3, town, county, pcde,
         serialno from patients order by addr1, addr2, addr3, pcde'''
+        if max_sno:
+            query += " where serialno<=%d"% max_sno
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -463,7 +471,7 @@ class OM1Importer(Importer):
 
                 psql_query.exec_()
                 if psql_query.lastError().isValid():
-                    print "ERRROR IMPORTING %s - %s"% (
+                    print "ERROR IMPORTING %s - %s"% (
                         mysql_query.value(0).toInt()[0],
                         psql_query.lastError().text())
 
@@ -478,12 +486,12 @@ class OM1Importer(Importer):
 
             psql_query2.exec_()
             if psql_query2.lastError().isValid():
-                print "ERRROR IMPORTING %s - %s"% (
+                print "ERROR IMPORTING %s - %s"% (
                     mysql_query.value(0).toInt()[0],
                     psql_query2.lastError().text())
 
 
-    def import_clinical_memos(self):
+    def import_clinical_memos(self, max_sno=None):
         print "importing clinical memos"
 
         ps_query = '''INSERT INTO clinical_memos
@@ -494,6 +502,9 @@ class OM1Importer(Importer):
 
         query = '''select serialno, synopsis, datestamp, author
         from clinical_memos order by serialno, ix desc'''
+        if max_sno:
+            query += " where serialno<=%d"% max_sno
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -521,7 +532,7 @@ class OM1Importer(Importer):
 
             previous_id = pt_id
 
-    def import_appointments(self):
+    def import_appointments(self, max_sno=None):
         print "importing appointments from aslot"
 
         ps_query = '''insert into diary_appointments
@@ -537,6 +548,9 @@ class OM1Importer(Importer):
         query = '''select apptix, adate, start, end, serialno,
         name, code0, concat(code1, ' ', code2), note from aslot
         where adate>20090101'''
+        if max_sno:
+            query += " and serialno <=%d "% max_sno
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -597,6 +611,11 @@ class OM1Importer(Importer):
 
         query = '''select serialno, practix, code0, concat(code1, ' ', code2),
         note, length from apr where adate IS NULL order by serialno, aprix'''
+
+        if max_sno:
+            query = query.replace("IS NULL",
+            "IS NULL and serialno <=%d "% max_sno)
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -744,7 +763,7 @@ class OM1Importer(Importer):
         userlist = self.get_users_from_notes()
         Importer.insert_users(self, userlist)
 
-    def import_bpe(self):
+    def import_bpe(self, max_sno=None):
         print "importing bpe"
 
         ps_query = '''INSERT INTO perio_bpe
@@ -754,6 +773,9 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, bpedate, bpe from bpe'''
+        if max_sno:
+            query += " where serialno<=%d"% max_sno
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -778,7 +800,7 @@ class OM1Importer(Importer):
                     mysql_query.value(2).toString(),
                     psql_query.lastError().text())
 
-    def import_perio(self):
+    def import_perio(self, max_sno=None):
         print "importing perio"
 
         ps_query = '''INSERT INTO perio_pocketing
@@ -789,6 +811,9 @@ class OM1Importer(Importer):
 
         query = '''select serialno, chartdate, chartdata, flag
         from perio order by chartdate'''
+        if max_sno:
+            query += " where serialno<=%d"% max_sno
+
         mysql_query = QtSql.QSqlQuery(query, self.connection)
 
         hex_depths = (0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F')
@@ -828,7 +853,7 @@ class OM1Importer(Importer):
                         mysql_query.value(0).toInt()[0], key),
                     print psql_query.lastError().text()
 
-    def import_contracted_practitioners(self):
+    def import_contracted_practitioners(self, max_sno=None):
         print "importing contracted practitioners"
 
         ps_query = '''INSERT INTO contracted_practitioners
@@ -838,6 +863,9 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, dnt1 from patients'''
+        if max_sno:
+            query += " where serialno<=%d"% max_sno
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -858,7 +886,7 @@ class OM1Importer(Importer):
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
-    def import_telephones(self):
+    def import_telephones(self, max_sno=None):
         print "importing telephones"
 
         ps_query = '''INSERT INTO telephone
@@ -882,6 +910,10 @@ class OM1Importer(Importer):
             where %s IS NOT NULL and %s != "" order by %s'''% (
             field, field, field, field)
 
+            if max_sno:
+                query = query.replace('""', '"" and serialno<=%d'% max_sno)
+
+
             mysql_query = QtSql.QSqlQuery(query, self.connection)
 
             previous = None
@@ -901,7 +933,7 @@ class OM1Importer(Importer):
 
                     psql_query.exec_()
                     if psql_query.lastError().isValid():
-                        print "ERRROR IMPORTING %s - %s"% (
+                        print "ERROR IMPORTING %s - %s"% (
                             mysql_query.value(0).toInt()[0],
                             psql_query.lastError().text())
 
@@ -920,7 +952,7 @@ class OM1Importer(Importer):
 
                 psql_query2.exec_()
                 if psql_query2.lastError().isValid():
-                    print "ERRROR IMPORTING %s - %s"% (
+                    print "ERROR IMPORTING %s - %s"% (
                         mysql_query.value(0).toInt()[0],
                         psql_query2.lastError().text())
 
@@ -932,25 +964,28 @@ class OM1Importer(Importer):
         returning ix'''
 
         ps_query_tooth = '''INSERT INTO treatment_teeth
-        (treatment_id, tooth) VALUES (?, ?) returning ix'''
+        (treatment_id, tooth, tx_type) VALUES (?, ?, ?) returning ix'''
 
         ps_query_fill = '''INSERT INTO treatment_fills
-        (treatment_id, tooth, surfaces, material) VALUES (?, ?, ?, ?)'''
+        (tooth_tx_id, surfaces, material) VALUES (?, ?, ?)'''
 
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         for column, function in (
-        ("chart", convert_daybook_chart.convert),
         ("diagn", convert_daybook.convert_diagn),
+        ("chart", convert_daybook_chart.convert),
         ("perio", convert_daybook.convert_perio),
         ("anaes", convert_daybook.convert_anaes),
         ("misc", convert_daybook.convert_misc),
         ("other", convert_daybook.convert_other),
+        ("ndu", convert_daybook_ndu.convert),
+        ("ndl", convert_daybook_ndl.convert),
+        ("odu", convert_daybook_odu.convert),
+        ("odl", convert_daybook_odl.convert),
         ):
             print "=" * 80
             print "importing column", column, "from daybook"
             print "=" * 80
-
 
             if max_sno is None:
                 query = '''select serialno, date, %s, dntid, trtid, id
@@ -981,7 +1016,7 @@ class OM1Importer(Importer):
                     psql_query.addBindValue(mysql_query.value(1)) #date
                     psql_query.addBindValue(mysql_query.value(4)) #tx_clinician
                     psql_query.addBindValue(mysql_query.value(1)) #date
-                    psql_query.addBindValue("ORIG: %s"% value)
+                    psql_query.addBindValue("ORIG (%s): %s"% (column, value))
 
                     psql_query.exec_()
                     if psql_query.lastError().isValid():
@@ -997,9 +1032,16 @@ class OM1Importer(Importer):
                         psql_query.prepare(ps_query_tooth)
                         psql_query.addBindValue(treatment_id)
                         psql_query.addBindValue(om_code.tooth)
-
+                        psql_query.addBindValue(om_code.tooth_tx_type)
+                        psql_query.exec_()
                         psql_query.first()
                         tooth_tx_id = psql_query.value(0)
+                        if psql_query.lastError().isValid():
+                                print ("ERROR IMPORTING Daybook into"
+                                " treatment_teeth table id %s - %s"% (
+                                mysql_query.value(5).toInt()[0],
+                                psql_query.lastError().text()))
+                                print psql_query.executedQuery()
 
                         if om_code.is_fill:
                             psql_query.prepare(ps_query_fill)
@@ -1012,23 +1054,26 @@ class OM1Importer(Importer):
                                 " treatment_fills table id %s - %s"% (
                                 mysql_query.value(5).toInt()[0],
                                 psql_query.lastError().text()))
+                                print psql_query.executedQuery()
 
-                        elif om_code.is_crown:
-                            psql_query.prepare(ps_query_crown)
-                            psql_query.addBindValue(tooth_tx_id)
-                            psql_query.addBindValue(om_code.surfaces)
-                            #psql_query_fill.addBindValue(om_code.material)
-                            psql_query.exec_()
-                            if psql_query.lastError().isValid():
+                    for pontic in om_code.pontics:
+                        psql_query.prepare(ps_query_tooth)
+                        psql_query.addBindValue(treatment_id)
+                        psql_query.addBindValue(pontic.tooth)
+                        psql_query.addBindValue("pontic")
+                        psql_query.exec_()
+                        #psql_query.first()
+                        #tooth_tx_id = psql_query.value(0)
+                        if psql_query.lastError().isValid():
                                 print ("ERROR IMPORTING Daybook into"
-                                " treatment_fills table id %s - %s"% (
+                                " treatment_teeth table id %s - %s"% (
                                 mysql_query.value(5).toInt()[0],
                                 psql_query.lastError().text()))
+                                print psql_query.executedQuery()
 
 
-
-            ## temporary code!
-            convert_daybook_chart.rogue_output()
+        ## temporary code!
+        convert_daybook_chart.rogue_output()
 
     def import_all(self):
         '''
@@ -1042,26 +1087,28 @@ class OM1Importer(Importer):
 
         print "WARNING - using custom import_all"
 
+        sys.stdout.flush()
         max_sno = None
+
         #self.import_avatars()
         #self.import_users()
         #self.insert_null_user()
         #self.import_practitioners()
-        #self.import_patients()
+        #self.import_patients(max_sno)
         self.import_tx_completed(max_sno)
 
         #self.import_notes(max_sno)
 
-        #self.import_appointments()
-        #self.import_clerical_memos()
-        #self.import_clinical_memos()
-        #self.import_addresses()
+        #self.import_appointments(max_sno)
+        #self.import_clerical_memos(max_sno)
+        #self.import_clinical_memos(max_sno)
+        #self.import_addresses(max_sno)
 
         #self.import_static_charts(max_sno)
-        #self.import_bpe()
-        #self.import_perio()
-        #self.import_contracted_practitioners()
-        #self.import_telephones()
+        #self.import_bpe(max_sno)
+        #self.import_perio(max_sno)
+        #self.import_contracted_practitioners(max_sno)
+        #self.import_telephones(max_sno)
 
 if __name__ == "__main__":
     pass

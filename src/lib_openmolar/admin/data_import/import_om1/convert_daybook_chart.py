@@ -81,6 +81,9 @@ CORRECTIONS = {
 
 non_tooth_treatments = set([])
 
+#add premolars to the "front teeth" for default material reason
+FRONT_TEETH = SETTINGS.front_teeth + (5,12)
+
 def find_codes(treat, tooth):
 
     def crown_extras(c_type):
@@ -95,8 +98,6 @@ def find_codes(treat, tooth):
     treat = CORRECTIONS.get(treat, treat)
 
     pinnable = False
-    front_tooth = tooth in SETTINGS.front_teeth
-    DEFAULT_MAT = ",CO" if front_tooth else ",AM"
     if treat.strip(" ")=="":
         pass
     elif re.match("\(?BR", treat):
@@ -119,6 +120,8 @@ def find_codes(treat, tooth):
         yield ImportCode("C50", tooth)
     elif treat in ("ST", "3661"):
         yield ImportCode("Z50", tooth)
+    elif treat == "DR":
+        yield ImportCode("D60", tooth)
     elif treat in ("PX", "PX+"):
         yield ImportCode("E20", tooth)
     elif treat == "PV":
@@ -221,27 +224,6 @@ def find_codes(treat, tooth):
         yield ImportCode("F11", tooth)
     elif re.match("CR/[MODB]{4},GO$", treat):
         yield ImportCode("F12", tooth)
-    elif re.match("[MODBPLI]{4,}(%s)?"% DEFAULT_MAT, treat):
-        code = ImportCode("D13", tooth)
-        surfs = re.match("([MODBPLI]{4,})", treat).groups()[0]
-        code.setSurfaces(surfs)
-        pinnable = True
-        yield code
-    elif re.match("[MODBPLI]{3}(%s)?"% DEFAULT_MAT, treat):
-        code = ImportCode("D12", tooth)
-        code.setSurfaces(treat[:3])
-        pinnable = True
-        yield code
-    elif re.match("[MODBPLI]{2}(%s)?"% DEFAULT_MAT, treat):
-        code = ImportCode("D11", tooth)
-        code.setSurfaces(treat[:2])
-        pinnable = True
-        yield code
-    elif re.match("[MODBPLI]{1}(%s)?"% DEFAULT_MAT, treat):
-        code = ImportCode("D10", tooth)
-        code.setSurfaces(treat[:1])
-        pinnable = True
-        yield code
     elif re.match("[MODBPLI]{2,},GL", treat):
         code = ImportCode("D21", tooth)
         surfs = re.match("([MODBPLI]{2,})", treat).groups()[0]
@@ -275,6 +257,39 @@ def find_codes(treat, tooth):
         code = ImportCode("G30", tooth)
         surfs = re.match("CI/([MODBPLI]*)", treat).groups()[0]
         code.setSurfaces(surfs)
+        pinnable = True
+        yield code
+    elif re.match("[MODBPLI]{4,}", treat):
+        if treat.endswith(",CO") or tooth in FRONT_TEETH:
+            code = ImportCode("D13", tooth)
+        else:
+            code = ImportCode("D04", tooth)
+        surfs = re.match("([MODBPLI]{4,})", treat).groups()[0]
+        code.setSurfaces(surfs)
+        pinnable = True
+        yield code
+    elif re.match("[MODBPLI]{3}", treat):
+        if treat.endswith(",CO") or tooth in FRONT_TEETH:
+            code = ImportCode("D12", tooth)
+        else:
+            code = ImportCode("D03", tooth)
+        code.setSurfaces(treat[:3])
+        pinnable = True
+        yield code
+    elif re.match("[MODBPLI]{2}", treat):
+        if treat.endswith(",CO") or tooth in FRONT_TEETH:
+            code = ImportCode("D11", tooth)
+        else:
+            code = ImportCode("D02", tooth)
+        code.setSurfaces(treat[:2])
+        pinnable = True
+        yield code
+    elif re.match("[MODBPLI]{1}", treat):
+        if treat.endswith(",CO") or tooth in FRONT_TEETH:
+            code = ImportCode("D10", tooth)
+        else:
+            code = ImportCode("D01", tooth)
+        code.setSurfaces(treat[:1])
         pinnable = True
         yield code
     elif treat == "FA":
@@ -412,11 +427,28 @@ def handle_bridges(line):
 
     return re.sub(" BR[/,][^ ]*", " ", line), codes
 
+def custom_codes(custom_string):
+    '''
+    takes 'custom foo'... and searches for a code
+    '''
+    global non_tooth_treatments
+
+    if custom_string.strip(" ") == "custo":
+        pass
+    elif custom_string == "custo consult":
+        om_code = ImportCode("A10")
+        yield om_code
+    else:
+        om_code = ImportCode("Z00")
+        om_code.description = custom_string
+        print custom_string
+        non_tooth_treatments.add(custom_string)
+        yield om_code
+
 def convert(line):
     '''
     a generator which spits out om_codes for all treatments found
     '''
-    global non_tooth_treatments
 
     line, bridge_codes = handle_bridges(line)
 
@@ -437,12 +469,14 @@ def convert(line):
             for treat in treatments:
                 for om_code in find_codes(treat, om_tooth):
                     yield om_code
-        elif tx.lower().startswith("custo consult"):
-            om_code = ImportCode("A10")
-            yield om_code
+        elif tx.lower().startswith("custo"):
+            for code in custom_codes(tx.lower()):
+                yield code
         else:
-            print tx
-            non_tooth_treatments.add(tx.strip(" "))
+            print "UNHANDLED CODE - ", tx
+            om_code = ImportCode("Z00")
+            om_code.description = tx
+            yield om_code
 
 
 def rogue_output():

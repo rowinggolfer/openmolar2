@@ -54,115 +54,74 @@ def get_teeth(line):
 
     return sorted(teeth)
 
+ALLTYPES = "(SR)|(CC)|(SS)|(CC SKM)"
+
 def convert(line):
-    line = line.strip(" ")
+    line = line.strip(" &")
 
     part_handled = False
 
-    if "ST" in line or "2771" in line:
-        code = ImportCode("H90")
-        code.description = "upper"
+    if " RL" in line:
+        code = ImportCode("H71")
         yield code
         part_handled = True
 
-    if "SL" in line:
-        code = ImportCode("H70")
-        code.description = "upper"
-        yield code
-        part_handled = True
-
-    if "ID" in line:
-        code = ImportCode("H72")
-        code.description = "upper"
+    if " SL" in line:
+        code = ImportCode("H71")
         yield code
         part_handled = True
 
     if line == "":
         pass
 
-    elif re.match("SR P/([LR][1-8]*),?([LR][1-8]*)?", line):
-        #"resin partial"
-        code = ImportCode("H20")
+    elif line == "2864":
+        #tooth additions
+        yield ImportCode("H60")
+
+    elif line == "2802":
+        #repair
+        yield ImportCode("H66")
+
+    elif line == "2832":
+        #adjust
+        yield ImportCode("H65")
+
+    elif line == "2852":
+        #reline
+        yield ImportCode("H71")
+
+    elif line == "2862":
+        #addition of clasp
+        yield ImportCode("H61")
+
+    elif line == "OCCL":
+        #occlusal appliance
+        yield ImportCode("Z07")
+
+    elif re.match("%s A/T/"% ALLTYPES, line):
+        #"teeth additions"
+        code = ImportCode("H60")
         code.pontics = get_teeth(line)
         yield code
 
-    elif re.match("SR P", line):
-        #"resin partial"
-        code = ImportCode("H20")
-        code.description = "NDU: %s"% line
+    elif re.match("%s R/(\d)?G"% ALLTYPES, line):
+        #"repair"
+        code = ImportCode("H66")
         yield code
 
-    elif re.match("=?OCCL", line):
-        #"occlusal appliance"
-        code = ImportCode("Z00")
-        code.description = "NDU: %s"% line
-        yield code
-
-
-    elif re.match("SS(/PL)? P/([LR][1-8]*),?([LR][1-8]*)?", line):
-        #"metal partial"
-        code = ImportCode("H30")
-        code.pontics = get_teeth(line)
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("CC/SKM? P/([LR][1-8]*),?([LR][1-8]*)?", line):
-        #"chrome partial"
-        code = ImportCode("H30")
-        code.pontics = get_teeth(line)
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("CC/PL P/([LR][1-8]*),?([LR][1-8]*)?", line):
-        #"chrome partial"
-        code = ImportCode("H30")
-        code.pontics = get_teeth(line)
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("274[345]", line):
-        #"metal partial"
-        code = ImportCode("H30")
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("SR F", line) or re.search("2731", line):
-        #"metal partial"
-        code = ImportCode("H01")
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("SS F", line) or re.match("CC F", line):
-        #full metal
-        code = ImportCode("H11")
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("SPL/C (\d)U", line):
-        #"Composite Splint %s teeth"%
-        #re.match("SPL/C (\d)U", line).groups()[0], True)
-        code = ImportCode("C30")
-        code.description = "NDU: %s"% line
-        yield code
-
-    elif re.match("SPL/O", line):
-        code = ImportCode("Z00")
-        code.description = "NDU (SPLINT?): %s"% line
-        yield code
-
-    elif re.match("OA", line):
-        code = ImportCode("Z00")
-        code.description = "NDU: %s"% line
+    elif re.match("%s ADJ"% ALLTYPES, line):
+        #"teeth additions"
+        code = ImportCode("H65")
         yield code
 
     else:
-        if not part_handled:
+        if True or not part_handled:
             print "UNMATCHED", line
             code = ImportCode("Z00")
             yield code
 
 if __name__ == "__main__":
-    f = open("/home/neil/Desktop/adp_import/distinct_ndu.txt","r")
+    f = open("/home/neil/Desktop/adp_import/distinct_odl.txt","r")
     for line in f.readlines():
         if not line.startswith("#"):
             for code in convert(line.strip()):

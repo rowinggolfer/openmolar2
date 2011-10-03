@@ -101,7 +101,7 @@ class Parser(optparse.OptionParser):
                         type="string")
 
         self.add_option("--pg_host",
-                        dest = "pg_hostname", default = 'localhost',
+                        dest = "pg_hostname", default = '127.0.0.1',
                         help = "hostname for the new Postgresdatabase",
                         type="string")
 

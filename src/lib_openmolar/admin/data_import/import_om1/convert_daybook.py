@@ -41,6 +41,12 @@ FILL_MATERIALS = {
 "D40":"PR",
 "D50":"CO",
 "D51":"CO",
+"G10":"GO",
+"G11":"GO",
+"G20":"PO",
+"G21":"PO",
+"G30":"CO",
+"G31":"CO",
 }
 
 
@@ -49,8 +55,10 @@ class ImportCode(object):
     def __init__(self, code, tooth=None):
         self.code = code
         self.tooth = tooth
+        self.pontics = []
         self.surfaces = ""
         self.description = ""
+        self.tooth_tx_type = None
 
     def setSurfaces(self, surfaces):
         surf = surfaces.replace("I","O")
@@ -63,14 +71,17 @@ class ImportCode(object):
 
     @property
     def is_fill(self):
-        return self.code in FILL_MATERIALS.keys()
+        if self.code in FILL_MATERIALS.keys():
+            self.tooth_tx_type = "filling"
+            return True
+
 
     @property
     def material(self):
         return FILL_MATERIALS.get(self.code, "OT")
 
     def __repr__(self):
-        return "%2s %s\t%s"% (self.tooth, self.code, self.surfaces)
+        return "ImportCode = %s"% (self.code)
 
 def convert_diagn(line):
     treatments = line.split(" ")

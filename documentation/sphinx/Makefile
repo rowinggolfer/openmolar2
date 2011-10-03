@@ -96,8 +96,5 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
-	      
-publish:
-	rsync -av _build/html/ amazon:rg_website/openmolar2/sphinx/
-	rsync -avk videos/* amazon:rg_website/openmolar2/sphinx/videos/
+	     
 	

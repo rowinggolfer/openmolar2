@@ -293,6 +293,12 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   </Code>
 
   <Code type="fill">
+    <id>D60</id>
+    <shortcut>.DR</shortcut>
+    <description>Dressing</description>
+  </Code>
+
+  <Code type="fill">
     <id>D70</id>
     <shortcut>.*,PR.*</shortcut>
     <description>Pin Retention</description>
@@ -643,22 +649,6 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
 
   <Code type="prosthetics">
     <id>H40</id>
-    <description>Addition of teeth</description>
-    <pontics n="1+" />
-  </Code>
-
-  <Code type="prosthetics">
-    <id>H41</id>
-    <description>Repair Upper</description>
-  </Code>
-
-  <Code type="prosthetics">
-    <id>H42</id>
-    <description>Repair Lower</description>
-  </Code>
-
-  <Code type="prosthetics">
-    <id>H50</id>
     <description>Partial Upper Flexible Denture</description>
     <pontics n="1+">
       <tooth_range>1..17</tooth_range>
@@ -666,7 +656,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   </Code>
 
   <Code type="prosthetics">
-    <id>H51</id>
+    <id>H41</id>
     <description>Partial Lower Flexible Denture</description>
     <pontics n="1+">
       <tooth_range>18..33</tooth_range>
@@ -674,7 +664,44 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   </Code>
 
   <Code type="prosthetics">
+    <id>H60</id>
+    <description>Addition of teeth</description>
+    <pontics n="1+" />
+  </Code>
+ 
+  <Code type="prosthetics">
+    <id>H61</id>
+    <description>Addition of clasp</description>
+  </Code>
+
+  <Code type="prosthetics">
+    <id>H66</id>
+    <description>Repair of existing denture</description>
+  </Code>
+
+  <Code type="prosthetics">
+    <id>H65</id>
+    <description>Adjustment of existing denture</description>
+  </Code>
+
+  
+  <Code type="prosthetics">
     <id>H70</id>
+    <description>Soft Lining</description>
+  </Code>
+  
+  <Code type="prosthetics">
+    <id>H71</id>
+    <description>Hard Lining</description>
+  </Code>
+  
+  <Code type="prosthetics">
+    <id>H72</id>
+    <description>ID Marking</description>
+  </Code>
+
+  <Code type="prosthetics">
+    <id>H80</id>
     <description>Other Upper Denture</description>
     <pontics n="1+">
       <tooth_range>1..17</tooth_range>
@@ -683,7 +710,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   </Code>
 
   <Code type="prosthetics">
-    <id>H71</id>
+    <id>H81</id>
     <description>Other Lower Denture</description>
     <pontics n="1+">
       <tooth_range>18..33</tooth_range>
@@ -692,22 +719,22 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
   </Code>
 
   <Code type="prosthetics">
-    <id>H80</id>
+    <id>H90</id>
     <description>Special Tray</description>
   </Code>
 
   <Code type="prosthetics">
-    <id>H81</id>
+    <id>H91</id>
     <description>Occlusal Registration</description>
   </Code>
 
   <Code type="prosthetics">
-    <id>H82</id>
+    <id>H92</id>
     <description>Try-in of denture</description>
   </Code>
 
   <Code type="prosthetics">
-    <id>H83</id>
+    <id>H93</id>
     <description>Repeat Try-in of denture</description>
   </Code>
 </Category>

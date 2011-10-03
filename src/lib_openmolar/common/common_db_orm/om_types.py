@@ -289,6 +289,7 @@ class OMTypes(object):
         new_type.allow(u'abutment', _("abutment"))
         new_type.allow(u'pontic', _("pontic"))
         new_type.allow(u'wing', _("wing"))
+        new_type.allow(u'filling', _("filling"))
         self["tooth_tx_type"] = new_type
 
 if __name__ == "__main__":

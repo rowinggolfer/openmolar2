@@ -31,7 +31,7 @@ from lib_openmolar.common import common_db_orm
 SCHEMA = '''
 ix SERIAL NOT NULL,
 patient_id INTEGER NOT NULL REFERENCES patients(ix),
-parent_id INTEGER REFERENCES treatments(ix) ON DELETE CASCADE,
+/* parent_id INTEGER REFERENCES treatments(ix) ON DELETE CASCADE, */
 om_code VARCHAR(5) NOT NULL  /* REFERENCES PROCEDURE CODES????*/,
 completed BOOL NOT NULL DEFAULT FALSE,
 px_clinician INTEGER NOT NULL REFERENCES practitioners(ix),
