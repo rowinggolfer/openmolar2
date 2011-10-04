@@ -120,7 +120,7 @@ def convert(line):
         yield code
 
     else:
-        if True or not part_handled:
+        if not part_handled:
             print "UNMATCHED", line
             code = ImportCode("Z00")
             yield code

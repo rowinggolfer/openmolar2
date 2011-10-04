@@ -57,20 +57,25 @@ def get_teeth(line):
 def convert(line):
     line = line.strip(" ")
 
+    part_handled = False
+
     if "ST" in line or "2772" in line:
         code = ImportCode("H90")
         code.description = "upper"
+        part_handled = True
         yield code
 
     if "SL" in line:
         code = ImportCode("H70")
         code.description = "upper"
         yield code
+        part_handled = True
 
     if "ID" in line:
         code = ImportCode("H72")
         code.description = "upper"
         yield code
+        part_handled = True
 
     if line == "":
         pass
