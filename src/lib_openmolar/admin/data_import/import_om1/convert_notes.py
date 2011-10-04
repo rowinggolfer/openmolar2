@@ -57,10 +57,13 @@ CHART = {
 184:"LRB", 185:"LRC", 186:"LRD", 187:"LRE"}
 
 class NoteLineClass(object):
+    '''
+    A custom datatype to store data from the old openmolar notes string
+    '''
     type = ""
     note = ""
-    operator1 = None
-    operator2 = None
+    operator1 = ""
+    operator2 = ""
     NULL_TIME = QtCore.QDateTime(1900,1,1,0,0)
     time = NULL_TIME
     commit_time = QtCore.QDateTime(1900,1,1,0,0)
@@ -80,7 +83,7 @@ class NoteLineClass(object):
         '''
         convenience function to check encoding
         '''
-        self.note = note
+        self.note = note.encode("ascii", "replace")
 
     @property
     def om_type(self):
@@ -98,29 +101,27 @@ class NoteLineClass(object):
         else:
             rep += self.ops.ljust(10)
 
-        rep += str(self.note)
-
-        return rep
+        return rep + self.note
 
 def log_ignore(nlc):
-    try:
-        print "IGNORING", nlc
-    except Exception as e:
-        print "IGNORING, but unable to print", e
+    print "IGNORING", nlc
 
 def notes(lines):
+    '''
+    lines is a list of om1 note "strings"
+    ["/0xc1 foobar","0xc1 etc...",....]
+    '''
     nlcs = []
     for line in lines:
-        for nlc in decipher_noteline(line):
+        nlc = decipher_old_noteline(line)
+        if nlc:
+            #print nlc      #print the lines old style!
             nlcs.append(nlc)
 
     last_ops = None
     yield_nlc = None
-    i = 0
-    while i < len(nlcs):
 
-        nlc = nlcs[i]
-
+    for i, nlc in enumerate(nlcs):
         try:
             next_nlc = nlcs[i+1]
         except IndexError:
@@ -135,20 +136,23 @@ def notes(lines):
             if (next_nlc is None or
             yield_nlc.time.secsTo(next_nlc.time) > 3600 or
             last_ops != next_nlc.ops):
-                yield_nlc.commit_time = nlc.commit_time
+                yield_nlc.commit_time = nlc.time
                 yield yield_nlc
                 yield_nlc = None
 
         else:
             if nlc.type.startswith("TC"):
-                yield_nlc.note = "%s %s\n%s"% (
-                    nlc.type,
-                    nlc.note.strip("\n"),
-                    yield_nlc.note)
+                log_ignore(nlc)
+                #yield_nlc.note = "%s %s\n%s"% (
+                #    nlc.type,
+                #    nlc.note.strip("\n"),
+                #    yield_nlc.note)
             elif nlc.type.startswith("STATIC"):
-                log_ignore(nlc)
+                pass
+                #log_ignore(nlc)
             elif nlc.type == "COURSE CLOSED":
-                log_ignore(nlc)
+                pass
+                #log_ignore(nlc)
             elif nlc.type.startswith("UPDATED"):
                 log_ignore(nlc)
             elif nlc.type != "NOTE":
@@ -157,25 +161,16 @@ def notes(lines):
                 if nlc.note.strip("\n") != "":
                     yield_nlc.note += nlc.note + "\n"
 
-        #try:
-        #    print nlc
-        #except UnicodeEncodeError:
-        #    print "unicode error"
-        i += 1
-
-def decipher_noteline(noteline):
+def decipher_old_noteline(noteline):
     '''
-    returns a list of NoteLineClass objects.
+    changes an old noteline into the custom datatype NoteLineClass
     '''
+    if len(noteline) == 0:  #sometimes a line is blank
+        return
 
     nlc = NoteLineClass()
 
-    #important - this line give us operator and date.
-
-    if len(noteline) == 0:  #sometimes a line is blank
-        pass
-
-    elif noteline[0] == chr(1):
+    if noteline[0] == chr(1):
         nlc.type = "opened"
         operator = ""
         i = 1
@@ -191,22 +186,6 @@ def decipher_noteline(noteline):
         nlc.time = QtCore.QDateTime(1900+ord(noteline[i+2]),
                     ord(noteline[i+1]), ord(noteline[i]),
                     ord(noteline[i+6]), ord(noteline[i+7]))
-        '''
-        try:
-            systemdate = "%s/%s/%s"% (
-            ord(noteline[i+3]), ord(noteline[i+4]),
-            1900 + ord(noteline[i+5]))
-
-            #systemdate includes time
-            systemdate += " %02d:%02d"% (
-            ord(noteline[i+6]), ord(noteline[i+7]))
-
-            nlc.note += "System date - %s"% systemdate
-
-        except IndexError, e:
-            print "error getting system date for patient notes - %s", e
-            nlc.note += "System date - ERROR!!!!!"
-        '''
 
     elif noteline[0] == chr(2):   #
         nlc.type = "closed"
@@ -216,19 +195,9 @@ def decipher_noteline(noteline):
             operator += noteline[i]
             i += 1
 
-        nlc.commit_time = QtCore.QDateTime(1900+ord(noteline[i+2]),
+        nlc.time = QtCore.QDateTime(1900+ord(noteline[i+2]),
                     ord(noteline[i+1]), ord(noteline[i]),
                     ord(noteline[i+3]), ord(noteline[i+4]))
-        '''
-        systemdate = "%s/%s/%s"%(
-        ord(noteline[i]), ord(noteline[i+1]),
-        1900+ord(noteline[i+2]))
-
-        systemdate+=" %02d:%02d"%(
-        ord(noteline[i+3]),ord(noteline[i+4]))
-
-        nlc.note += "%s %s"% (operator, systemdate)
-        '''
 
     elif noteline[0] == chr(3):
         #-- hidden nodes start with chr(3) then another character
@@ -326,9 +295,9 @@ def decipher_noteline(noteline):
 
     else:
         nlc.type="NOTE"
-        nlc.note =  noteline.strip("\t\n")
+        nlc.set_note(noteline.strip("\t\n "))
 
-    yield nlc
+    return nlc
 
 def tooth(data_string):
     retarg=""

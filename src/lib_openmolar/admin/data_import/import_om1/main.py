@@ -29,7 +29,7 @@ command line arguments can be passed in
 
 an example of usage would be::
 
-    python main.py -u [USER] -p [PASSWORD] --pg_user [USER] --pg_password [PASSWORD] --pg_dbname openmolar_test > logfile.txt
+    python main.py -u [USER] -p [PASSWORD] --pg_user [USER] --pg_password [PASSWORD] --pg_dbname openmolar_test -i /path/to/importdir> logfile.txt
 
 
 If information is missing a gui is raised.
@@ -44,7 +44,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.abspath("../../../../../"))
 
 from lib_openmolar.admin.data_import.import_om1 import *
-from lib_openmolar.common.connect import DatabaseConnection
+from lib_openmolar.common.connect import DatabaseConnection, ConnectionError
 
 from PyQt4 import QtCore, QtGui
 
@@ -67,6 +67,7 @@ class Parser(optparse.OptionParser):
             - --pg_password
             - --pg_port
             - --pg_dbname
+            - --import_directory
         '''
         optparse.OptionParser.__init__(self)
 
@@ -120,6 +121,11 @@ class Parser(optparse.OptionParser):
                         help = "dbname for the new Postgresdatabase",
                         type="string")
 
+        self.add_option("-i", "--import_directory",
+                        dest = 'import_directory',
+                        help = "dbname for the new Postgresdatabase",
+                        type="string")
+
     def parse_args(self):
         options, args = optparse.OptionParser.parse_args(self)
         if args != []:
@@ -140,7 +146,8 @@ def main():
     if (options.username !=None and
     options.password !=None and
     options.pg_username !=None and
-    options.pg_password !=None) :
+    options.pg_password !=None and
+    options.import_directory !=None) :
         dl = options
     else:
         dl = ConnectionParamsDialog(options)
@@ -153,8 +160,11 @@ def main():
                                     passwd=dl.password,
                                     db_name=dl.dbname,
                                     port=dl.port)
-
-    connection.connect()
+    try:
+        connection.connect()
+    except IOError as e:
+        QtGui.QMessageBox.warning(None, "error",
+        "unable to connect to Mysql <hr />%s "% e)
 
     new_connection = DatabaseConnection(    host=dl.pg_hostname,
                                         user=dl.pg_username,
@@ -162,18 +172,21 @@ def main():
                                         db_name=dl.pg_dbname,
                                         port=dl.pg_port)
 
-    new_connection.connect()
-
+    try:
+        new_connection.connect()
+    except ConnectionError as e:
+        QtGui.QMessageBox.warning(None, "error",
+        "unable to connect to postgres <hr />%s "% e)
 
     print "Importing from MYSQL DB %s@%s:%s %s"% (
         dl.username, dl.hostname, dl.port, dl.dbname)
     print "Into PSQL DB %s:%s:%s %s" %(
         dl.pg_username, dl.pg_hostname, dl.pg_port, dl.pg_dbname)
+    print "using metadata and xml files stored in %s"% dl.import_directory
 
     importer = OM1Importer(connection, new_connection)
 
-    ##TODO - set cli option to pass this
-    importer.set_import_directory("/home/neil/Desktop/adp_import")
+    importer.set_import_directory(dl.import_directory)
     importer.import_all()
 
 

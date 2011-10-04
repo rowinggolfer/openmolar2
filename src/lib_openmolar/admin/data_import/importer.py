@@ -162,7 +162,7 @@ class Importer(object):
 
         psql_query.exec_()
 
-    def import_users(self):
+    def import_users(self, ignore_errors=False):
         TABLENAME = "users"
         print "importing %s"% TABLENAME
 
@@ -177,7 +177,6 @@ class Importer(object):
 
         rows = dom.getElementsByTagName(TABLENAME.rstrip("s"))
 
-        ps_query += " returning ix"
         for row in rows:
             psql_query.prepare(ps_query)
             for node in ('ix', 'abbrv_name', 'role', 'title', 'last_name',
@@ -187,8 +186,12 @@ class Importer(object):
                 vals = row.getElementsByTagName(node)
                 try:
                     val = vals[0].firstChild.data.strip()
-                    if node == "abbrv_name":
+                    if node == "ix":
+                        ix = int(val)
+                    elif node == "abbrv_name":
                         user = val
+                        self.USER_DICT[user] = ix
+
                 except IndexError:
                     val = None
                 except AttributeError:
@@ -197,13 +200,11 @@ class Importer(object):
 
             psql_query.addBindValue("imported from xml")
             psql_query.exec_()
-            if psql_query.lastError().isValid():
+            if not ignore_errors and psql_query.lastError().isValid():
                 print "ERROR IMPORTING %s - %s"% (
                     row.toxml(),
                     psql_query.lastError().text())
-            else:
-                psql_query.first()
-                self.USER_DICT[user] = psql_query.value(0).toInt()[0]
+
         print self.USER_DICT
 
     def import_bpe(self):

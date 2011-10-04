@@ -76,12 +76,22 @@ class ConnectionParamsDialog(QtGui.QDialog):
         layout.addRow(_("Username"), self.pg_username_le)
         layout.addRow(_("Password"), self.pg_password_le)
 
+        import_frame = QtGui.QFrame()
+        label = QtGui.QLabel(_("Metadata Directory"))
+        self.import_dir_le = QtGui.QLineEdit(options.import_directory)
+        choose_dir_but = QtGui.QPushButton("...")
+        choose_dir_but.setMaximumWidth(40)
+        layout = QtGui.QGridLayout(import_frame)
+        layout.addWidget(label)
+        layout.addWidget(self.import_dir_le,1,0)
+        layout.addWidget(choose_dir_but,1,1)
 
         layout = QtGui.QGridLayout(self)
         layout.addWidget(QtGui.QLabel("MYSQL source"), 0, 0)
         layout.addWidget(frame1,1,0)
         layout.addWidget(QtGui.QLabel("Postgres destination"), 0, 1)
         layout.addWidget(frame2,1,1)
+        layout.addWidget(import_frame, 2,0,1,2)
 
         but_box = QtGui.QDialogButtonBox()
         ok_but = but_box.addButton(but_box.Ok)
@@ -90,7 +100,13 @@ class ConnectionParamsDialog(QtGui.QDialog):
         ok_but.clicked.connect(self.accept)
         canc_but.clicked.connect(self.reject)
 
-        layout.addWidget(but_box,2,0,1,2)
+        choose_dir_but.clicked.connect(self.choose_dir)
+
+        layout.addWidget(but_box,3,0,1,2)
+
+    def choose_dir(self):
+        dirname = QtGui.QFileDialog.getExistingDirectory()
+        self.import_dir_le.setText(dirname)
 
     @property
     def hostname(self):
@@ -131,6 +147,10 @@ class ConnectionParamsDialog(QtGui.QDialog):
     @property
     def pg_password(self):
         return self.pg_password_le.text()
+
+    @property
+    def import_directory(self):
+        return self.import_dir_le.text()
 
 class MySQLConnection(QtSql.QSqlDatabase):
     '''
@@ -193,6 +213,8 @@ if __name__ == "__main__":
     duck.pg_password="password"
     duck.pg_dbname="openmolar_demo"
     duck.pg_port=5432
+
+    duck.import_directory="."
 
     app = QtGui.QApplication([])
     dl = ConnectionParamsDialog(duck)

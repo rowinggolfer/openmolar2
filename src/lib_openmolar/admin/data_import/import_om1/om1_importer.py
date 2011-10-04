@@ -640,6 +640,7 @@ class OM1Importer(Importer):
 
     def import_notes(self, sno_limit=None):
         print "importing notes (this may take time)"
+        sys.stdout.flush()
 
         ps_query = '''INSERT INTO notes_clinical
         (patient_id, open_time, commit_time, type, line, author, co_author)
@@ -958,6 +959,7 @@ class OM1Importer(Importer):
 
     def import_tx_completed(self, max_sno=None):
         print "inserting tx_completed"
+        sys.stdout.flush()
         ps_query = '''INSERT INTO treatments
         (patient_id, om_code, completed, px_clinician, px_date,
         tx_clinician, tx_date, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -1084,22 +1086,26 @@ class OM1Importer(Importer):
             return
 
         ##for testing
-
-        return
-
+        print "=" * 80
         print "WARNING - using custom import_all"
-
+        print "=" * 80
         sys.stdout.flush()
-        max_sno = None
+        max_sno = 10
 
         #self.import_avatars()
-        #self.import_users()
+
+        if False:
+            self.import_users()
+        else:
+            print "WARNING - trusting XML for user dict!"
+            self.import_users(ignore_errors=True)
+
         #self.insert_null_user()
         #self.import_practitioners()
         #self.import_patients(max_sno)
-        self.import_tx_completed(max_sno)
+        #self.import_tx_completed(max_sno)
 
-        #self.import_notes(max_sno)
+        self.import_notes(max_sno)
 
         #self.import_appointments(max_sno)
         #self.import_clerical_memos(max_sno)
@@ -1111,6 +1117,8 @@ class OM1Importer(Importer):
         #self.import_perio(max_sno)
         #self.import_contracted_practitioners(max_sno)
         #self.import_telephones(max_sno)
+
+    print "ALL DONE!"
 
 if __name__ == "__main__":
     pass
