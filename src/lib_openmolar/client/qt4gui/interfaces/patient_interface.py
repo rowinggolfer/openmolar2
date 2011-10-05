@@ -208,8 +208,8 @@ class PatientInterface(QtGui.QWidget):
         self.connect(self.summary_page, QtCore.SIGNAL("clinical_memo_changed"),
             self.update_patient_memo_clinical)
 
-        self.connect(self.reception_page,
-            QtCore.SIGNAL("clerical_memo_changed"),
+        self.connect(self.details_browser,
+            QtCore.SIGNAL("Edit clerical memo"),
             self.update_patient_memo_clerical)
 
         self.connect(self.reception_page, QtCore.SIGNAL("Save Requested"),
@@ -329,10 +329,17 @@ class PatientInterface(QtGui.QWidget):
             return
         self.pt["memo_clinical"].setValue("memo", memo)
 
-    def update_patient_memo_clerical(self, memo):
+    def update_patient_memo_clerical(self):
         if not self.pt:
             return
-        self.pt["memo_clerical"].setValue("memo", memo)
+        dl = QtGui.QInputDialog(self)
+        dl.setWindowTitle(_("Edit Memo"))
+        dl.setLabelText(_("Edit Memo"))
+        dl.setTextValue(self.pt.clerical_memo)
+        dl.resize(QtCore.QSize(400,200))
+        if dl.exec_():
+            self.pt["memo_clerical"].setValue("memo", dl.textValue())
+            self.details_browser.setHtml(self.pt.details_html())
 
     def set_chart_style(self, enum):
         for chart in (

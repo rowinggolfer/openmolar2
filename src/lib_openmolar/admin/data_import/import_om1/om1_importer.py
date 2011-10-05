@@ -1081,7 +1081,7 @@ class OM1Importer(Importer):
         '''
         don't overwrite this normally... for testing one function only
         '''
-        if False:
+        if True:
             Importer.import_all(self)
             return
 

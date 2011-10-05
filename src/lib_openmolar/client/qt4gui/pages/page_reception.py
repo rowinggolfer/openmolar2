@@ -33,8 +33,6 @@ class ReceptionPage(QtGui.QWidget):
     def __init__(self, parent = None):
         super(ReceptionPage, self).__init__(parent)
 
-        self.summary_line_edit = client_widgets.SummaryLineEdit(self)
-
         self.notes_browser = QtWebKit.QWebView(self)
         self.notes_browser.setHtml(messages.welcome_html(
             self.notes_browser.width()))
@@ -59,7 +57,6 @@ class ReceptionPage(QtGui.QWidget):
         top_widget = QtGui.QWidget(self)
         top_layout = QtGui.QVBoxLayout(top_widget)
         top_layout.setMargin(0)
-        top_layout.addWidget(self.summary_line_edit)
         top_layout.addWidget(self.notes_browser)
         top_layout.addWidget(self.notes_entry)
 
@@ -84,20 +81,17 @@ class ReceptionPage(QtGui.QWidget):
     def connect_signals(self):
         self.action_payment.triggered.connect(self.payment_action)
         self.action_new_appointment.triggered.connect(self.new_appointment_action)
-        self.summary_line_edit.textEdited.connect(self.summary_updated)
         self.connect(self.notes_entry, QtCore.SIGNAL("Save Requested"),
             self.send_save_request)
 
     def clear(self):
         self.notes_browser.setHtml(messages.welcome_html(
             self.notes_browser.width()))
-        self.summary_line_edit.clear()
         self.appointment_model.set_patient(0)
 
     def load_patient(self):
         patient = SETTINGS.current_patient
         self.notes_browser.setHtml(patient.notes_reception_html)
-        self.summary_line_edit.setText(patient.clerical_memo)
         self.appointment_model.set_patient(patient.patient_id)
 
     def payment_action(self):
@@ -107,9 +101,6 @@ class ReceptionPage(QtGui.QWidget):
     def new_appointment_action(self):
         self.emit(QtCore.SIGNAL("db notify"), "todays_book_changed")
         self.Advise("new appointment")
-
-    def summary_updated(self, text):
-        self.emit(QtCore.SIGNAL("clerical_memo_changed"), text)
 
     def send_save_request(self):
         print "todo save clerical note"

@@ -38,6 +38,8 @@ The behaviour of this object is very much like a dictionary.
     '''
     _dict = {}
 
+    _notes_summary_html = None
+
     def __init__(self, patient_id):
         self["patient"] = PatientDB(patient_id)
         self["addresses"] = AddressObjects(patient_id)
@@ -159,7 +161,9 @@ The behaviour of this object is very much like a dictionary.
         html += self["addresses"].details_html()
         html += "<br />"
         html += self["telephone"].details_html()
-        html += "<br clear='all' />"
+        html += '''<hr /><div align='center'>
+            <b>%s</b><a href='edit_memo'>%s</a>
+            <br />%s'''% (_("MEMO"), SETTINGS.PENCIL, self.clerical_memo)
         return html + "<hr /></div></body>"
 
     @property
@@ -181,7 +185,9 @@ The behaviour of this object is very much like a dictionary.
         '''
         returns an html representation of the *clinical* notes
         '''
-        return self['notes_clinical'].to_html()
+        if self._notes_summary_html is None:
+            self._notes_summary_html = self['notes_clinical'].to_html()
+        return self._notes_summary_html
 
     @property
     def notes_reception_html(self):

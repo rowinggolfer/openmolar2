@@ -31,10 +31,6 @@ from lib_openmolar.common.common_db_orm.editable_field import EditableField
 
 from lib_openmolar.common import common_db_orm
 
-
-pencil = '''<img height='20' width='20'
-align='right' alt ='edit Patient' src='qrc:/icons/pencil.png' />'''
-
 TABLENAME = "patients"
 
 class PatientNotFoundError(Exception):
@@ -159,7 +155,7 @@ class PatientDB(QtSql.QSqlRecord):
 
     def details_html(self):
         html =  u'''<div><a href="edit_pt">%s</a>Patient %d<br /><b>%s</b><br />
-        %s %s</div>'''% (pencil,
+        %s %s</div>'''% (SETTINGS.PENCIL,
         self.value('ix').toInt()[0], self.full_name,
         self.value('dob').toDate().toString(SETTINGS.QDATE_FORMAT),
         self._display_age)

@@ -33,7 +33,7 @@ TABLENAME = "clerical_memos"
 
 class MemoClericalDB(common_db_orm.InsertableRecord):
     def __init__(self, patient_id):
-
+        self.tablename = TABLENAME
         #:
         self.patient_id = patient_id
 

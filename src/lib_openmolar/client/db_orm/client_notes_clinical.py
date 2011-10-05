@@ -27,8 +27,6 @@ This module provides the ClinicalNotesDB Class
 
 from PyQt4 import QtCore, QtSql
 
-
-
 class NotesClinicalDB(object):
     def __init__(self, patient_id):
         #:
@@ -44,7 +42,8 @@ class NotesClinicalDB(object):
         get the records from the database
         '''
         self._records = []
-        query = 'SELECT * from notes_clinical WHERE patient_id = ?'
+        query = '''SELECT * from notes_clinical WHERE patient_id = ?
+        order by open_time'''
         q_query = QtSql.QSqlQuery(SETTINGS.database)
         q_query.prepare(query)
         q_query.addBindValue(self.patient_id)
@@ -67,8 +66,8 @@ class NotesClinicalDB(object):
         returns the notes in html form
         '''
         html =  u'''<div align='center'><table width='100%%' border='1'>
-        <tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
-        '''% (_("Date"), _("Clinician"), _("Assistant"), _("notes"))
+        <tr><td>%s</td><td>%s</td><td>%s</td></tr>
+        '''% (_("Date"), _("Author"), _("notes"))
 
         for line in self.records:
 
@@ -76,9 +75,10 @@ class NotesClinicalDB(object):
             co_author = line.value("co_author").toInt()[0]
 
             author_repr = SETTINGS.users.get_avatar_html(author)
-            co_author_repr = SETTINGS.users.get_avatar_html(co_author)
+            co_author_repr = SETTINGS.users.get_avatar_html(co_author,
+                size=30, options='align="right"')
 
-            html += u'''<tr><td>%s</td><td>%s</td><td>%s</td><td>
+            html += u'''<tr><td>%s</td><td>%s %s</td><td>
             <pre>%s</pre></td></tr>'''% (
                 line.value('open_time').toDateTime().toString(
                     QtCore.Qt.DefaultLocaleShortDate),
@@ -89,8 +89,6 @@ class NotesClinicalDB(object):
         return html + '</table></div>'
 
 if __name__ == "__main__":
-
-
 
     from lib_openmolar.client.connect import ClientConnection
     cc = ClientConnection()

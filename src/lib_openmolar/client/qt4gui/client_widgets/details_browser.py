@@ -49,6 +49,9 @@ class DetailsBrowser(QtWebKit.QWebView):
     def emit_phone(self):
         self.emit(QtCore.SIGNAL("Edit Patient Phone"))
 
+    def emit_memo(self):
+        self.emit(QtCore.SIGNAL("Edit clerical memo"))
+
     def setHtml(self, html):
         QtWebKit.QWebView.setHtml(self, html)
         self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
@@ -61,6 +64,8 @@ class DetailsBrowser(QtWebKit.QWebView):
             numbers = re.search("(\d+)", val)
             i = int(numbers.group()) if numbers else -1
             self.emit_edit_address(i)
+        elif val.startsWith("edit_memo"):
+            self.emit_memo()
         elif val.startsWith("edit_reg_dent"):
             numbers = re.search("(\d+)", val)
             i = int(numbers.group()) if numbers else -1
@@ -90,7 +95,7 @@ if __name__ == "__main__":
 
     from lib_openmolar.client.connect import ClientConnection
     from lib_openmolar.client.db_orm.patient_wrapper import PatientModel
-    
+
 
     cc = ClientConnection()
     cc.connect()

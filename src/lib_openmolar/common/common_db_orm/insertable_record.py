@@ -23,12 +23,16 @@
 from PyQt4 import QtSql
 
 class InsertableRecord(QtSql.QSqlRecord):
+    '''
+    Inherits from QtSql.QSqlRecord and adds a property insert query
+    '''
+    #:
+    include_ix = False
     def __init__(self, database, tablename):
         self.tablename = tablename
         record = database.record(tablename)
         QtSql.QSqlRecord.__init__(self, record)
 
-        self.include_ix = False
 
     @property
     def insert_query(self):

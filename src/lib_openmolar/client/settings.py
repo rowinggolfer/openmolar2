@@ -44,6 +44,10 @@ class SettingsError(Exception):
 
 
 class Settings(settings.CommonSettings):
+    #: an html image tag showing a pencil
+    PENCIL = '''<img height='20' width='20'
+    align='right' alt ='edit' src='qrc:/icons/pencil.png' />'''
+
     def __init__(self):
         settings.CommonSettings.__init__(self)
 

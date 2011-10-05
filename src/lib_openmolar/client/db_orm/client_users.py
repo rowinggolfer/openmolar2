@@ -39,19 +39,19 @@ class GeneratedSvg(QtSvg.QSvgGenerator):
 
         self.setFileName(save_location)
         self.setTitle("mock svg")
-        self.setSize(QtCore.QSize(50,50))
-        self.setViewBox(QtCore.QRect(0,0,50,50))
+        self.setSize(QtCore.QSize(40,40))
+        self.setViewBox(QtCore.QRect(2,2,36,36))
 
         painter = QtGui.QPainter()
         painter.begin(self)
         #painter.fillRect(gen.viewBox(), QtGui.QColor("blue"))
-        painter.drawEllipse(self.viewBox().adjusted(4,4,-4,-4))
         font = painter.font()
         font.setPointSize(14)
         painter.setFont(font)
         painter.drawText(self.viewBox(),
                          QtCore.Qt.AlignCenter | QtCore.Qt.TextWordWrap,
                          text)
+        #painter.drawEllipse(self.viewBox())
         painter.end()
 
 class UserObject(QtSql.QSqlRecord):
@@ -184,12 +184,12 @@ class Users(object):
         except KeyError:
             return alt
 
-    def get_avatar_html(self, key):
+    def get_avatar_html(self, key, size=40, options=""):
         user = self.get(key)
         if user is None:
             return "%s (?)"% user
-        return '<img src = "%s" width = "50" height = "50" alt="%s"/>' % (
-            user.avatar_resource, key)
+        return '<img src = "%s" width = "%d" height = "%d" alt="%s" %s/>' % (
+            user.avatar_resource, size, size, key, options)
 
 if __name__ == "__main__":
 

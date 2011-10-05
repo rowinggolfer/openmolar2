@@ -32,11 +32,6 @@ from lib_openmolar.common import common_db_orm
 from lib_openmolar.common.common_db_orm.editable_field import EditableField
 
 
-
-pencil = '''<img height='20' width='20'
-align='right' alt ='edit Patient' src='qrc:/icons/pencil.png' />'''
-
-
 class AddressObject(QtSql.QSqlRecord):
     def __init__(self, record):
         QtSql.QSqlRecord.__init__(self, record)
@@ -310,7 +305,7 @@ class AddressObjects(object):
         for record in self.record_list:
 
             html = u"<div><a href='edit_addy %d'>%s</a>%s</div>"% (
-                i, pencil, record.details_html())
+                i, SETTINGS.PENCIL, record.details_html())
 
             full_html += html+"<hr width=50% />"
             i += 1
