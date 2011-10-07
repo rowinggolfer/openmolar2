@@ -21,7 +21,7 @@
 ###############################################################################
 
 '''
-This module provides the AddressDB Class
+This module provides the AddressObjects Class, and AddressRecord Class
 (for client interaction with records in the addresses and address_link table)
 '''
 
@@ -32,10 +32,19 @@ from lib_openmolar.common import common_db_orm
 from lib_openmolar.common.common_db_orm.editable_field import EditableField
 
 
-class AddressObject(QtSql.QSqlRecord):
-    def __init__(self, record):
-        QtSql.QSqlRecord.__init__(self, record)
-        self._editable_fields = None
+class AddressRecord(QtSql.QSqlRecord):
+    '''
+    A re-implementation of QtSql.QSqlRecord which is self aware
+    for editing purposes
+    '''
+    _editable_fields = None
+
+    def __init__(self, record=None):
+        if record is None:
+            blank_record = SETTINGS.database.blank_address_record
+            QtSql.QSqlRecord.__init__(self, blank_record)
+        else:
+            QtSql.QSqlRecord.__init__(self, record)
 
     @property
     def editable_fields(self):
@@ -72,7 +81,8 @@ class AddressObject(QtSql.QSqlRecord):
                 [cat_field,
                 mail_field,
                 from_f,
-                to_f])
+                to_f
+                ])
 
         return self._editable_fields
 
@@ -147,9 +157,7 @@ class AddressObject(QtSql.QSqlRecord):
 class AddressObjects(object):
     '''
     instantiating this class
-    grabs a list of AddressObject python objects
-    object = AddressDB(QtSql.QSqlDatabase, patient_id)
-    addresses = object.records
+    grabs a list of AddressRecords
     '''
     def __init__(self, patient_id):
 
@@ -172,7 +180,7 @@ class AddressObjects(object):
 
             #make a copy
             orig = QtSql.QSqlRecord(record)
-            new = AddressObject(record)
+            new = AddressRecord(record)
 
             if self.record_list == []:
                 SETTINGS.set_last_used_address(new)
@@ -253,7 +261,7 @@ class AddressObjects(object):
             <td><b>changed value</b></td></tr>'''
 
             edit_fields = edited.editable_fields
-            for edit_field in edit_fields:
+            for edit_field in edit_fields[0]:
                 if not edit_field: #separator
                     continue
 

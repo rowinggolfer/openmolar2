@@ -25,12 +25,9 @@ This module provides 2 classes
 AddressDialog and AdvancedAddressOptionsWidget
 '''
 
-
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.dialogs import ExtendableDialog
-
-
 
 from lib_openmolar.client.qt4gui.dialogs.address_dialogs.address_history_dialog \
     import AddressHistoryDialog
@@ -39,11 +36,8 @@ from lib_openmolar.client.qt4gui.dialogs.address_dialogs.components import (
     ExistingAddressWidget,
     NewAddressWidget)
 
-
-
-
 class AddressDialog(ExtendableDialog):
-    def __init__(self, address_obj, chosen=0, parent=None):
+    def __init__(self, address_objects, chosen=0, parent=None):
         '''
         :param: address_obj (:doc:`AddressObject` )
         :kword: chosen - the chosen index
@@ -51,22 +45,21 @@ class AddressDialog(ExtendableDialog):
         '''
         super(AddressDialog, self).__init__(parent)
         self.setWindowTitle(_("Edit Addresses"))
-        
+
         #a pointer to the records stored in the :doc:`AddressObject`
-        self.addresses = address_obj.records
+        self.addresses = address_objects.records
 
         self.value_store_dict = {}
 
         self.advanced_widg = AdvancedAddressOptionsWidget(self)
         self.add_advanced_widget(self.advanced_widg)
 
-
         self.stacked_widget = QtGui.QStackedWidget()
         self.insertWidget(self.stacked_widget)
 
         self.existing_address_widget = QtGui.QWidget() #see next conditional
 
-        new_addy_widget = NewAddressWidget(addressDB, self)
+        new_addy_widget = NewAddressWidget(address_objects, self)
         self.stacked_widget.addWidget(new_addy_widget)
 
         if len(self.addresses) == 0:
@@ -75,7 +68,7 @@ class AddressDialog(ExtendableDialog):
 
         else:
             self.existing_address_widget = \
-                ExistingAddressWidget(addressDB, chosen, self)
+                ExistingAddressWidget(address_objects, chosen, self)
             page = 1
         self.stacked_widget.addWidget(self.existing_address_widget)
         self.stacked_widget.setCurrentIndex(page)
@@ -166,10 +159,7 @@ class AdvancedAddressOptionsWidget(QtGui.QWidget):
             page=1
         self.emit(QtCore.SIGNAL("new address mode"), page)
 
-
 if __name__ == "__main__":
-
-
 
     app = QtGui.QApplication([])
 
@@ -177,10 +167,10 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    from lib_openmolar.client.db_orm.client_address import AddressDB
-    address_db = AddressDB(cc, 70)
+    from lib_openmolar.client.db_orm.client_address import AddressObjects
+    address_db = AddressObjects(70)
 
-    last_used = AddressDB(cc, 2).records[0]
+    last_used = AddressObjects(2).records[0]
 
     SETTINGS.set_last_used_address(last_used)
 

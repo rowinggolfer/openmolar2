@@ -35,12 +35,12 @@ class ExistingAddressWidget(QtGui.QWidget):
     '''
     lays out an existing address for editing
     '''
-    def __init__(self, addressDB, index, parent = None):
+    def __init__(self, address_object, index, parent = None):
         super(ExistingAddressWidget, self).__init__(parent)
 
-        self.addressDB = addressDB
+        self.address_object = address_object
 
-        self.address = addressDB.records[index]
+        self.address = address_object.records[index]
         self.value_store = {}
         self.setupUi()
 
@@ -146,13 +146,13 @@ class ExistingAddressWidget(QtGui.QWidget):
         _("no longer use this address for this patient?"),
         QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
         QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
-            self.addressDB.break_address_link(self.address)
+            self.address_object.break_address_link(self.address)
             self.emit(QtCore.SIGNAL("link broken"))
 
     def who_but_clicked(self):
         address_id = self.address.value("ix").toInt()[0]
 
-        dl = WhoLivesHereDialog(address_id, self.addressDB, self)
+        dl = WhoLivesHereDialog(address_id, self.address_object, self)
         dl.exec_()
 
 
@@ -164,11 +164,10 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    from lib_openmolar.client.db_orm.client_address import AddressDB
-    address_db = AddressDB(1)
+    from lib_openmolar.client.db_orm.client_address import AddressObjects
+    address_object = AddressObjects(1)
 
-
-    obj = ExistingAddressWidget(address_db, 0)
+    obj = ExistingAddressWidget(address_object, 0)
     test_button = QtGui.QPushButton("test_advanced_features")
     test_button.setCheckable(True)
     test_button.clicked.connect(obj.toggle_advanced_ui)

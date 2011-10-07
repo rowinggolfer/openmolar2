@@ -1,4 +1,4 @@
-from lib_openmolar.client.db_orm.client_address import AddressObject, AddressObjects
+from lib_openmolar.client.db_orm.client_address import AddressRecord, AddressObjects
 
 from lib_openmolar.client.db_orm.client_patient import PatientDB, PatientNotFoundError
 from lib_openmolar.client.db_orm.client_address import AddressObjects

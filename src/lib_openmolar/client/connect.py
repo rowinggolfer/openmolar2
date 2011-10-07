@@ -35,9 +35,21 @@ class ClientConnection(DatabaseConnection):
     inherits from lib_openmolar.common.connect.DatabaseConnection,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
+    _blank_address_record = None
+
     def __init__(self, *args):
         super(ClientConnection, self).__init__(*args)
         SETTINGS.database = self
+
+    @property
+    def blank_address_record(self):
+        if self._blank_address_record is None:
+            query = QtSql.QSqlQuery("select * from addresses limit 1", self)
+            #note - not positioned on a valid record
+            record = query.record()
+            #record.clear()
+            self._blank_address_record = record
+        return self._blank_address_record
 
     def fname_completer(self, sname):
         query = 'SELECT DISTINCT(first_name) from patients where last_name=?'
@@ -242,10 +254,8 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    values = {"sname":"POTTA", "soundex_sname":True}
+    #values = {"sname":"POTTA", "soundex_sname":True}
+    values = {"sname":"POTTER"}
     print cc.get_matchlist(values)
 
-    #values = {"addr":"RUE"}
-    #print cc.get_address_matchmodel(values).rowCount()
-
-
+    print cc.blank_address_record

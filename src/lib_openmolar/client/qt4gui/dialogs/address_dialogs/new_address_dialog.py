@@ -22,18 +22,17 @@
 
 from PyQt4 import QtCore, QtGui, QtSql
 
-#from lib_openmolar.common.common_db_orm.address import DataRecord as AddressRecord
 from lib_openmolar.common.settings import om_types
 
 from lib_openmolar.common.dialogs import BaseDialog
 from lib_openmolar.common.widgets.upper_case_lineedit import UpperCaseLineEdit
 
-
-
 from lib_openmolar.client.qt4gui.colours import colours
 
 from lib_openmolar.client.qt4gui.dialogs.address_dialogs.select_address \
     import AddressSelectionDialog
+
+from lib_openmolar.client.db_orm import AddressRecord
 
 class NewAddressDialog(BaseDialog):
     '''
@@ -45,7 +44,7 @@ class NewAddressDialog(BaseDialog):
             1. the database into which the new address will go.
             2. parent widget(optional)
         '''
-        super(NewAddressDialog, self).__init__(parent)
+        BaseDialog.__init__(self, parent)
         self.setWindowTitle(_("New address"))
 
         label = QtGui.QLabel(_('Enter a New Address'))
@@ -61,9 +60,9 @@ class NewAddressDialog(BaseDialog):
         self.enableApply()
         self.set_accept_button_text(_("Create New Record"))
 
-        self.address = AddressRecord() # A blank object
-        self.address.setValue("modified_by", SETTINGS.user)
-        self.address.setValue("status", "active")
+        self.address_record = AddressRecord() # A blank record
+        self.address_record.setValue("modified_by", SETTINGS.user)
+        self.address_record.setValue("status", "active")
 
         self.value_store = {}
 
@@ -74,12 +73,16 @@ class NewAddressDialog(BaseDialog):
         brush = QtGui.QBrush(colours.REQUIRED_FIELD)
         palette.setBrush(QtGui.QPalette.Base, brush)
 
-        for editable_field in self.address.editable_fields:
+        ##TODO this is bust!!
+
+        standard_fields, advanced_fields = self.address_record.editable_fields
+
+        for editable_field in standard_fields:
             field_name = editable_field.fieldname
             display_text = editable_field.readable_fieldname
-            field = self.address.field(field_name)
+            field = self.address_record.field(field_name)
 
-            if editable_field.type == None:
+            if editable_field.type is None:
                 field_type = field.type()
             else:
                 field_type = editable_field.type
@@ -103,7 +106,6 @@ class NewAddressDialog(BaseDialog):
 
             if editable_field.required:
                 widg.setPalette(palette)
-
 
             self.form.addRow(display_text, widg)
             self.value_store[field_name] = (widg, field_type)
@@ -135,7 +137,7 @@ class NewAddressDialog(BaseDialog):
                 if result:
                     self.emit(QtCore.SIGNAL("Load Serial Number"), id)
                     return False
-                query, values = self.address.insert_query
+                query, values = self.address_record.insert_query
                 query += '''\n returning ix, addr1, addr2, addr3, city,
                 county, country, postal_cd '''
                 print query
@@ -166,12 +168,12 @@ class NewAddressDialog(BaseDialog):
         for field_name in self.value_store:
             widg, field_type = self.value_store[field_name]
             if field_type == QtCore.QVariant.Date:
-                self.address.setValue(field_name, widg.date())
+                self.address_record.setValue(field_name, widg.date())
             elif field_type == QtCore.QVariant.String:
-                self.address.setValue(field_name, widg.text())
+                self.address_record.setValue(field_name, widg.text())
             elif type(field_type) == om_types.OMType:
                 val = widg.itemData(widg.currentIndex())
-                self.address.setValue(field_name, val)
+                self.address_record.setValue(field_name, val)
             else:
                 print "Whoops!" ## <-shouldn't happen
 
@@ -179,11 +181,11 @@ class NewAddressDialog(BaseDialog):
 
         self.ommisions = []
         all_completed = True
-        for editable_field in self.address.editable_fields:
+        for editable_field in self.address_record.editable_fields:
             if editable_field.required:
                 field_name = editable_field.fieldname
 
-                if self.address.value(field_name).toString()== "":
+                if self.address_record.value(field_name).toString()== "":
                     all_completed = False
                     self.ommisions.append(editable_field.readable_fieldname)
 
@@ -194,12 +196,12 @@ class NewAddressDialog(BaseDialog):
         is the new address already on the books?
         '''
         chk_dict = {}
-        chk_dict["addr1"] = self.address.value("addr1").toString()
-        chk_dict["addr2"] = self.address.value("addr2").toString()
-        chk_dict["addr3"] = self.address.value("addr3").toString()
-        #chk_dict["city"] = self.address.value("city").toString()
-        #chk_dict["country"] = self.address.value("country").toString()
-        chk_dict["postal_cd"] = self.address.value("postal_cd").toString()
+        chk_dict["addr1"] = self.address_record.value("addr1").toString()
+        chk_dict["addr2"] = self.address_record.value("addr2").toString()
+        chk_dict["addr3"] = self.address_record.value("addr3").toString()
+        #chk_dict["city"] = self.address_record.value("city").toString()
+        #chk_dict["country"] = self.address_record.value("country").toString()
+        chk_dict["postal_cd"] = self.address_record.value("postal_cd").toString()
         match_model = SETTINGS.database.get_address_matchmodel(chk_dict)
         if match_model.rowCount() >0:
             dl = ShowAddyMatchDialog(match_model, self.parent())
@@ -225,8 +227,6 @@ class ShowAddyMatchDialog(AddressSelectionDialog):
 
 
 if __name__ == "__main__":
-
-
 
     app = QtGui.QApplication([])
 

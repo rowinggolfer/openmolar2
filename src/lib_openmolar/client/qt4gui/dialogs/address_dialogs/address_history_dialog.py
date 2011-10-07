@@ -69,8 +69,6 @@ class AddressHistoryWidget(QtGui.QWidget):
         layout.addWidget(label)
 
 if __name__ == "__main__":
-    
-    
 
     app = QtGui.QApplication([])
 
@@ -78,8 +76,8 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    from lib_openmolar.client.db_orm.client_address import AddressDB
-    address_db = AddressDB(1)
+    from lib_openmolar.client.db_orm.client_address import AddressObjects
+    address_object = AddressObjects(1)
 
-    dl = AddressHistoryDialog(address_db.records)
+    dl = AddressHistoryDialog(address_object.records)
     dl.exec_()
