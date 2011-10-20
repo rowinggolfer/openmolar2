@@ -1,0 +1,69 @@
+/*-- stylesheet for openmolar2 notes 
+written by Neil Wallace < rowinggolfer@gmail.com >  --*/
+
+
+/* please feel free to modify this to get notes in a format you like */
+
+body{background-color:#eeeeee;}
+
+.notes{font-size:13pt;}
+
+/*-- DIVS --*/
+div.center{text-align:center;}
+div.new_note_link{text-align:right;}
+
+
+/*-- LINKS --*/
+a.editable_note{background-color:#ffffff;}
+
+/*-- images --*/
+img.pencil{
+    height:20px;
+    width:20px;
+    float:right; 
+    margin: 2px;}
+
+img.author{
+    height:40px;
+    width:40px;
+    float:left; 
+    margin: 4px;}
+
+img.co_author{
+    height:26px;
+    width:26px;
+    float:right; 
+    margin: 4px;}
+    
+/*-- TABLE -- */
+table{
+    width:100%;
+    border:3px solid #aaaaaa;
+    border-collapse:collapse;
+    }
+
+th
+{
+    background-color: #000000;
+    color:#ffffff;
+    border:3px solid #aaaaaa;
+    border-collapse:collapse;
+}
+
+td{
+    border:2px solid #aaaaaa;
+    border-collapse:collapse;
+    }
+
+
+td.date{}
+td.editable_date{background-color:#ffffff;}
+
+td.author{width:100px;}
+td.editable_author{
+    background-color:#ffffff;
+    width:100px;}
+
+td.note{text-align:left}
+td.editable_note{text-align:left; background-color:#ffffff;}
+

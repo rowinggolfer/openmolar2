@@ -133,8 +133,9 @@ def notes(lines):
                 last_ops = nlc.ops
 
         elif nlc.type == "closed":
+            #14400 = 4 hours
             if (next_nlc is None or
-            yield_nlc.time.secsTo(next_nlc.time) > 3600 or
+            yield_nlc.time.secsTo(next_nlc.time) > 14400 or
             last_ops != next_nlc.ops):
                 yield_nlc.commit_time = nlc.time
                 yield yield_nlc

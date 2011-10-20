@@ -27,17 +27,19 @@ This module provides the ClinicalNotesDB Class
 
 from PyQt4 import QtCore, QtSql
 
-
-
 class NotesClericalDB(object):
+    _new_note = None
+    _records = None
     def __init__(self, patient_id):
         #:
         self.patient_id = patient_id
 
-        #:
-        self.exists_in_db = True
-
-        self._records = None
+    @property
+    def is_dirty(self):
+        ## todo - this does not allow for a commited note or an edited note
+        if self._new_note is None:
+            return False
+        return self._new_note.value("line").toString() != ""
 
     def get_records(self):
         '''
@@ -64,27 +66,6 @@ class NotesClericalDB(object):
             self.get_records()
         return self._records
 
-    def to_html(self):
-        '''
-        returns the notes in html form
-        '''
-        html =  u'''<div align='center'><table width='100%%' border='1'>
-        <tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>
-        '''% (_("Date"), _("Author"), _("Action"), _("notes"))
-
-        for line in self.records:
-            author = line.value("author").toInt()[0]
-            author_repr = SETTINGS.users.get_avatar_html(author)
-
-            html += u'''<tr><td>%s</td><td>%s</td><td>%s</td>
-            <td><pre>%s</pre></td></tr>'''% (
-                line.value('open_time').toDateTime().toString(
-                    QtCore.Qt.DefaultLocaleShortDate),
-                author_repr,
-                line.value("type").toString(),
-                line.value("line").toString())
-
-        return html + '</table></div>'
 
 if __name__ == "__main__":
 
@@ -96,4 +77,4 @@ if __name__ == "__main__":
 
     object = NotesClericalDB(1)
 
-    print object.to_html()
+    print object.records

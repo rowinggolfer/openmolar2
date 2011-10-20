@@ -15,18 +15,18 @@ from lib_openmolar.client.db_orm.client_memo_clerical import MemoClericalDB
 from lib_openmolar.client.db_orm.client_perio_bpe import PerioBpeDB
 from lib_openmolar.client.db_orm.client_perio_pocketing import PerioPocketingDB
 from lib_openmolar.client.db_orm.client_contracted_practitioner import ContractedPractitionerDB
+from lib_openmolar.client.db_orm.notes_model import NotesModel
 from lib_openmolar.client.db_orm.treatment_model import TreatmentModel
 from lib_openmolar.client.db_orm.patient_model import PatientModel
 
 
-__all__ = [ 'AddressObject',
-            'AddressObjects',
-            'AddressObjects',
+__all__ = [ 'AddressObjects',
             'ContractedPractitionerDB',
             'MemoClericalDB',
             'MemoClinicalDB',
             'NotesClericalDB',
             'NotesClinicalDB',
+            'NotesModel',
             'PatientDB',
             'PerioBpeDB',
             'PerioPocketingDB',

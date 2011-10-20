@@ -46,6 +46,8 @@
     <file>implants/upper_implant.svg</file>
     <file>implants/lower_implant.svg</file>
     
+    <file>css/notes.css</file>
+    
 </qresource>
 </RCC>
 

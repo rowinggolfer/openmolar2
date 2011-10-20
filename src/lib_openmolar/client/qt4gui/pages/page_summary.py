@@ -28,35 +28,25 @@ Clinical summary page which is added to the patient interface
 '''
 
 from PyQt4 import QtCore, QtGui, QtWebKit
-from lib_openmolar.client.messages import messages
 
-from lib_openmolar.client.qt4gui import client_widgets
+from lib_openmolar.client.qt4gui.client_widgets import *
 
-from lib_openmolar.client.qt4gui.dialogs.new_exam_dialog import NewExamDialog
-from lib_openmolar.client.qt4gui.dialogs.hyg_treatment_dialog \
-    import HygTreatmentDialog
-from lib_openmolar.client.qt4gui.dialogs.xray_treatment_dialog \
-    import XrayTreatmentDialog
-
-
+from lib_openmolar.client.qt4gui.dialogs import (
+    NewExamDialog, HygTreatmentDialog, XrayTreatmentDialog)
 
 class SummaryPage(QtGui.QWidget):
     def __init__(self, chart_data_model, parent = None):
-        super(SummaryPage, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
 
-        self.summary_chart = client_widgets.ChartWidgetSummary(
-            chart_data_model, self)
+        self.summary_chart = ChartWidgetSummary(chart_data_model, self)
         self.summary_chart.setMaximumHeight(220)
 
-        self.summary_line_edit = client_widgets.SummaryLineEdit(self)
+        self.summary_line_edit = SummaryLineEdit(self)
 
-        self.notes_browser = QtWebKit.QWebView(self)
-        self.notes_browser.setHtml(messages.welcome_html(
-            self.notes_browser.width()))
+        self.notes_widget = NotesWidget(self)
+        self.notes_widget.set_type(NotesWidget.CLINICAL)
 
-        self.notes_entry = client_widgets.AddNotesWidget(self)
-
-        self.bpe_widget = client_widgets.BPEWidget()
+        self.bpe_widget = BPEWidget()
         self.bpe_widget.setFocusPolicy(QtCore.Qt.NoFocus)
 
         self.treatment_summary = QtWebKit.QWebView(self)
@@ -85,8 +75,7 @@ class SummaryPage(QtGui.QWidget):
         middle_layout = QtGui.QVBoxLayout(middle_widget)
         middle_layout.setMargin(0)
         middle_layout.addWidget(self.summary_line_edit)
-        middle_layout.addWidget(self.notes_browser)
-        middle_layout.addWidget(self.notes_entry)
+        middle_layout.addWidget(self.notes_widget)
 
         right_widget = QtGui.QWidget(self)
         right_layout = QtGui.QVBoxLayout(right_widget)
@@ -122,12 +111,8 @@ class SummaryPage(QtGui.QWidget):
 
         self.summary_line_edit.textEdited.connect(self.summary_updated)
 
-        self.connect(self.notes_entry, QtCore.SIGNAL("Save Requested"),
-            self.send_save_request)
-
     def clear(self):
-        self.notes_browser.setHtml(messages.welcome_html(
-            self.notes_browser.width()))
+        self.notes_widget.clear()
         self.treatment_summary.setHtml("")
         self.summary_chart.clear()
         self.summary_line_edit.clear()
@@ -167,7 +152,7 @@ class SummaryPage(QtGui.QWidget):
 
     def load_patient(self):
         patient = SETTINGS.current_patient
-        self.notes_browser.setHtml(patient.notes_summary_html)
+        self.notes_widget.load_patient()
         self.treatment_summary.setHtml(patient.treatment_summary_html)
 
         self.summary_chart.set_known_teeth(patient.dent_key)
@@ -207,9 +192,6 @@ class SummaryPage(QtGui.QWidget):
 
     def summary_updated(self, text):
         self.emit(QtCore.SIGNAL("clinical_memo_changed"), text)
-
-    def send_save_request(self):
-        self.emit(QtCore.SIGNAL("Save Requested"))
 
 
 if __name__ == "__main__":

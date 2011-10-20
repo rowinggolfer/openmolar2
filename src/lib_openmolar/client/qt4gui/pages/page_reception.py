@@ -23,8 +23,7 @@
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from lib_openmolar.client.messages import messages
-from lib_openmolar.client.qt4gui import client_widgets
-
+from lib_openmolar.client.qt4gui.client_widgets import NotesWidget
 
 from lib_openmolar.client.db_orm.table_models.patient_diary_model import \
     PatientDiaryModel
@@ -33,10 +32,8 @@ class ReceptionPage(QtGui.QWidget):
     def __init__(self, parent = None):
         super(ReceptionPage, self).__init__(parent)
 
-        self.notes_browser = QtWebKit.QWebView(self)
-        self.notes_browser.setHtml(messages.welcome_html(
-            self.notes_browser.width()))
-        self.notes_entry = client_widgets.AddNotesWidget(self)
+        self.notes_widget = NotesWidget(self)
+        self.notes_widget.set_type(NotesWidget.RECEPTION)
 
         self.menu_bar = QtGui.QToolBar()
         self.menu_bar.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
@@ -54,19 +51,15 @@ class ReceptionPage(QtGui.QWidget):
         appointment_table = QtGui.QTableView()
         appointment_table.setModel(self.appointment_model)
 
-        top_widget = QtGui.QWidget(self)
-        top_layout = QtGui.QVBoxLayout(top_widget)
-        top_layout.setMargin(0)
-        top_layout.addWidget(self.notes_browser)
-        top_layout.addWidget(self.notes_entry)
 
         right_widget =  QtGui.QLabel("Placeholder", self)
         right_widget.setMinimumWidth(100)
+        right_widget.setMaximumWidth(150)
 
         layout = QtGui.QGridLayout(self)
         layout.setMargin(3)
         layout.setSpacing(3)
-        layout.addWidget(top_widget, 0, 0)
+        layout.addWidget(self.notes_widget, 0, 0)
         layout.addWidget(right_widget, 0, 1)
         layout.addWidget(appointment_table, 1, 0, 1, 2)
         layout.addWidget(self.menu_bar, 2, 0, 1, 2)
@@ -81,18 +74,15 @@ class ReceptionPage(QtGui.QWidget):
     def connect_signals(self):
         self.action_payment.triggered.connect(self.payment_action)
         self.action_new_appointment.triggered.connect(self.new_appointment_action)
-        self.connect(self.notes_entry, QtCore.SIGNAL("Save Requested"),
-            self.send_save_request)
 
     def clear(self):
-        self.notes_browser.setHtml(messages.welcome_html(
-            self.notes_browser.width()))
+        self.notes_widget.clear()
         self.appointment_model.set_patient(0)
 
     def load_patient(self):
         patient = SETTINGS.current_patient
-        self.notes_browser.setHtml(patient.notes_reception_html)
-        self.appointment_model.set_patient(patient.patient_id)
+        self.notes_widget.load_patient()
+        self.appointment_model.set_patient(SETTINGS.current_patient.patient_id)
 
     def payment_action(self):
         print "todo payment"
@@ -108,8 +98,6 @@ class ReceptionPage(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-
-
 
     from lib_openmolar.client.connect import ClientConnection
     app = QtGui.QApplication([])

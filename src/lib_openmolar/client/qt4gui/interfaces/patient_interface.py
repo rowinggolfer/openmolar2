@@ -59,8 +59,8 @@ class PatientInterface(QtGui.QWidget):
         self.treatment_page = pages.TreatmentPage(self)
         '''a pointer to the :doc:`TreatmentPage`'''
 
-        self.notes_page = pages.NotesPage(self)
-        '''a pointer to the :doc:`NotesPage`'''
+        self.notes_page = client_widgets.NotesWidget(self)
+        '''a pointer to the :doc:`NotesWidget`'''
 
         self.estimates_page = pages.EstimatesPage(self)
         '''a pointer to the :doc:`EstimatesPage`'''
@@ -212,12 +212,6 @@ class PatientInterface(QtGui.QWidget):
             QtCore.SIGNAL("Edit clerical memo"),
             self.update_patient_memo_clerical)
 
-        self.connect(self.reception_page, QtCore.SIGNAL("Save Requested"),
-            self.save_patient)
-
-        self.connect(self.summary_page, QtCore.SIGNAL("Save Requested"),
-            self.save_patient)
-
         self.tab_widget.currentChanged.connect(self.tab_index_changed)
 
         self.connect(self.options_widget,
@@ -228,7 +222,6 @@ class PatientInterface(QtGui.QWidget):
 
         self.connect(self.summary_page.bpe_widget,
             QtCore.SIGNAL("Show BPE"), self.list_bpes)
-
 
     def Advise(self, *args):
         if __name__ == "__main__":

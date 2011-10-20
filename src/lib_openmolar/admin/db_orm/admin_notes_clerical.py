@@ -65,7 +65,7 @@ class DemoGenerator(object):
         else:
             self.min_patient_id, self.max_patient_id = 0,0
 
-        self.length = 800
+        self.length = 300
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('type'))

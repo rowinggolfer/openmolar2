@@ -1,4 +1,5 @@
 from lib_openmolar.client.qt4gui.client_widgets.add_notes_widget import AddNotesWidget
+from lib_openmolar.client.qt4gui.client_widgets.notes_widget import NotesWidget
 from lib_openmolar.client.qt4gui.client_widgets.bpe_widget import BPEWidget
 from lib_openmolar.client.qt4gui.client_widgets.control_panel import ControlPanel
 from lib_openmolar.client.qt4gui.client_widgets.details_browser import DetailsBrowser

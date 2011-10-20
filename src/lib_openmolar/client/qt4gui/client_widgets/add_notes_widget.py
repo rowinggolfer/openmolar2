@@ -74,6 +74,21 @@ class AddNotesWidget(QtGui.QWidget):
         '''
         self.emit(QtCore.SIGNAL("Save Requested"))
 
+    def set_text(self, text):
+        '''
+        A convenience function to access :doc:`CompletionTextEdit` component's
+        setText functionality
+        '''
+        self.text_edit.setText(text)
+
+    @property
+    def text(self):
+        '''
+        A convenience function to access :doc:`CompletionTextEdit` component's
+        current text
+        '''
+        return self.text_edit.document().toPlainText()
+
 if __name__ == "__main__":
     def sig_catcher():
         print "save request sent!"
@@ -82,3 +97,4 @@ if __name__ == "__main__":
     obj.connect(obj, QtCore.SIGNAL("Save Requested"), sig_catcher)
     obj.show()
     app.exec_()
+    print obj.text

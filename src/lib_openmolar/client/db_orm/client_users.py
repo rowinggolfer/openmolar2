@@ -117,7 +117,7 @@ class UserObject(QtSql.QSqlRecord):
     @property
     def avatar_resource(self):
         if self._avatar_resource is None:
-            self._avatar_resource = "file:%s"% (self.svg_filepath)
+            self._avatar_resource = "file://%s"% (self.svg_filepath)
         return self._avatar_resource
 
     def toHtml(self):
@@ -133,6 +133,7 @@ class Users(object):
         self.get_records()
 
     def get_records(self):
+        self._dict = {}
         query = '''SELECT users.ix, abbrv_name, title, first_name, last_name,
         role, svg_data, status
         from users left join avatars on avatar_id = avatars.ix
@@ -184,12 +185,12 @@ class Users(object):
         except KeyError:
             return alt
 
-    def get_avatar_html(self, key, size=40, options=""):
+    def get_avatar_html(self, key, options=""):
         user = self.get(key)
         if user is None:
             return "%s (?)"% user
-        return '<img src = "%s" width = "%d" height = "%d" alt="%s" %s/>' % (
-            user.avatar_resource, size, size, key, options)
+        return '<img src = "%s" alt="%s" %s/>' % (
+            user.avatar_resource, key, options)
 
 if __name__ == "__main__":
 

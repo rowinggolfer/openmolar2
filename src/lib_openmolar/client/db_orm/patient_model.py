@@ -49,12 +49,14 @@ The behaviour of this object is very much like a dictionary.
         self["static_crowns"] = StaticCrownsDB(patient_id)
         self["static_roots"] = StaticRootsDB(patient_id)
         self["static_comments"] = StaticCommentsDB(patient_id)
-        self["notes_clinical"] = NotesClinicalDB(patient_id)
-        self["notes_clerical"] = NotesClericalDB(patient_id)
         self["memo_clinical"] = MemoClinicalDB(patient_id)
         self["memo_clerical"] = MemoClericalDB(patient_id)
+
         self["treatment_model"] = SETTINGS.treatment_model
         SETTINGS.treatment_model.load_patient(patient_id)
+
+        self["notes_model"] = NotesModel(patient_id)
+
         self["perio_bpe"] = PerioBpeDB(patient_id)
         self["perio_pocketing"] = PerioPocketingDB(patient_id)
         self["contracted_practitioners"] = ContractedPractitionerDB(patient_id)
@@ -70,7 +72,7 @@ The behaviour of this object is very much like a dictionary.
         dirty = False
         for att in ("patient", "addresses", "teeth_present",
         "static_fills", 'static_crowns', 'static_roots', 'static_comments',
-        'memo_clinical', 'memo_clerical', 'treatment_model'):
+        'memo_clinical', 'memo_clerical', 'treatment_model', 'notes_model'):
             if self[att].is_dirty:
                 dirty = True
                 break
@@ -82,7 +84,7 @@ The behaviour of this object is very much like a dictionary.
 
         TODO could be much improved
         '''
-        changes = []
+        changes = self['notes_model'].what_has_changed()
         for att in ("patient", "addresses", "teeth_present",
         "static_fills", 'static_crowns', 'static_roots', 'static_comments',
         'memo_clinical', 'memo_clerical', 'treatment_model'):
@@ -181,22 +183,6 @@ The behaviour of this object is very much like a dictionary.
         return self["patient"].full_name
 
     @property
-    def notes_summary_html(self):
-        '''
-        returns an html representation of the *clinical* notes
-        '''
-        if self._notes_summary_html is None:
-            self._notes_summary_html = self['notes_clinical'].to_html()
-        return self._notes_summary_html
-
-    @property
-    def notes_reception_html(self):
-        '''
-        returns an html representation of the *reception* notes
-        '''
-        return self['notes_clerical'].to_html()
-
-    @property
     def treatment_summary_html(self):
         '''
         returns an html summary of the treatment plan
@@ -239,9 +225,16 @@ The behaviour of this object is very much like a dictionary.
     @property
     def treatment_model(self):
         '''
-        A pointer to the relevant ..class: TreatmentModel
+        the :doc:`TreatmentModel` for this patient
         '''
         return SETTINGS.treatment_model
+
+    @property
+    def notes(self):
+        '''
+        the :doc:`NotesModel` for this patient
+        '''
+        return self["notes_model"]
 
     def get(self, key, fallback=None):
         '''
@@ -275,4 +268,4 @@ if __name__ == "__main__":
     print "Perio Data", obj.perio_data
     print "Age Years", obj.age_years
 
-
+    print obj.notes

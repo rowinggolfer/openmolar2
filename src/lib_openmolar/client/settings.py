@@ -45,11 +45,20 @@ class SettingsError(Exception):
 
 class Settings(settings.CommonSettings):
     #: an html image tag showing a pencil
-    PENCIL = '''<img height='20' width='20'
-    align='right' alt ='edit' src='qrc:/icons/pencil.png' />'''
+    PENCIL = '<img class="pencil" alt ="edit" src="qrc:/icons/pencil.png" />'
+
+    LOCALFOLDER = os.path.join(os.environ.get("HOME"), ".openmolar2")
+
+    _NOTES_CSS = os.path.join(LOCALFOLDER, "notes.css")
+
+    #: location of the notes css file for the current OS user
+    NOTES_CSS = "file://%s"% _NOTES_CSS
 
     def __init__(self):
         settings.CommonSettings.__init__(self)
+
+        if not os.path.exists(self.LOCALFOLDER):
+            os.mkdir(self.LOCALFOLDER)
 
         #: a reference to a :doc:`TeethPresentDecoder`
         self.tooth_decoder = dent_key.TeethPresentDecoder()

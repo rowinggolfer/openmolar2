@@ -39,6 +39,7 @@ type notes_clinical_type NOT NULL DEFAULT 'observation',
 line TEXT DEFAULT NULL,
 author INTEGER NOT NULL REFERENCES users(ix),
 co_author INTEGER REFERENCES users(ix),
+committed bool NOT NULL DEFAULT false,
 CONSTRAINT pk_notes_clinical PRIMARY KEY (ix)
 '''
 
@@ -77,7 +78,7 @@ class DemoGenerator(object):
         for clinician in self.clinicians:
             self.authors.remove(clinician)
 
-        self.length = 2000
+        self.length = 500
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
 
@@ -86,10 +87,12 @@ class DemoGenerator(object):
         return a list of queries to populate a demo database
         '''
         today = QtCore.QDateTime.currentDateTime()
+        self.record.remove(self.record.indexOf('type'))
 
         for i in xrange(0, self.length):
             self.record.clearValues()
-            self.record.setValue('line', u"This is a test Line of Notes")
+            self.record.setValue('line',
+                u"a line of clinical notes. \nrandom %06d"% randint(1,10000))
             self.record.setValue('patient_id',
                 randint(self.min_patient_id, self.max_patient_id))
 
@@ -100,7 +103,7 @@ class DemoGenerator(object):
 
             self.record.setValue('open_time', t_stamp)
             self.record.setValue('commit_time', t_stamp)
-            self.record.remove(self.record.indexOf('type'))
+            self.record.setValue('committed', True)
 
             yield self.record.insert_query
 
