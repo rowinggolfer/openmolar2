@@ -33,7 +33,9 @@ class NotesWidget(QtGui.QWidget):
     COMBINED = 2
 
     # the current note being edited
-    _current_edit_note = None
+    _clinical_edit_note = None
+    _clerical_edit_note = None
+
     _type = COMBINED
 
     def __init__(self, parent = None):
@@ -45,19 +47,24 @@ class NotesWidget(QtGui.QWidget):
         self.notes_browser.setHtml(messages.welcome_html(
             self.notes_browser.width()))
 
-        self.notes_entry = AddNotesWidget()
+        self.clinical_editor = AddNotesWidget()
+        self.clerical_editor = AddNotesWidget()
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(self.notes_browser)
-        layout.addWidget(self.notes_entry)
+        layout.addWidget(self.clerical_editor)
+        layout.addWidget(self.clinical_editor)
 
         self.is_loaded = False
-        self.notes_entry.hide()
+        self.clinical_editor.hide()
+        self.clerical_editor.hide()
 
         self.notes_browser.linkClicked.connect(self._link_clicked)
 
-        self.connect(self.notes_entry, QtCore.SIGNAL("Save Requested"),
-            self.note_edited)
+        self.connect(self.clinical_editor, QtCore.SIGNAL("Save Requested"),
+            self.clinical_note_edited)
+        self.connect(self.clerical_editor, QtCore.SIGNAL("Save Requested"),
+            self.clerical_note_edited)
 
         #ensure that we have a css file.. otherwise the notes will be awful!
         if not os.path.exists(SETTINGS._NOTES_CSS):
@@ -121,7 +128,8 @@ class NotesWidget(QtGui.QWidget):
                 QtWebKit.QWebPage.DelegateAllLinks)
 
             self.is_loaded = True
-            self.notes_entry.hide()
+            self.clinical_editor.hide()
+            self.clerical_editor.hide()
             QtCore.QTimer.singleShot(100, self.scroll_to_end)
 
     def scroll_to_end(self):
@@ -131,35 +139,66 @@ class NotesWidget(QtGui.QWidget):
 
     def _link_clicked(self, qurl):
         url = qurl.toString()
-        if url.startsWith("edit_note"):
-            m = re.match("edit_note_(\d+)", url)
+        show_clinical, show_clerical = False, False
+        if url.startsWith("edit_clinical_note"):
+            m = re.match("edit_clinical_note_(\d+)", url)
             ix = int(m.groups()[0])
             if ix != 0:
-                print "edit existing uncommitted note %d"% ix
-                self._current_edit_note = SETTINGS.current_patient.notes.clinical_by_id(ix)
+                print "edit existing uncommitted clinical note %d"% ix
+                self._clinical_edit_note = SETTINGS.current_patient.notes.clinical_by_id(ix)
             else:
-                self._current_edit_note = SETTINGS.current_patient.notes.new_clinical
+                self._clinical_edit_note = SETTINGS.current_patient.notes.new_clinical
+            show_clinical = True
+        elif url.startsWith("edit_clerical_note"):
+            m = re.match("edit_clerical_note_(\d+)", url)
+            ix = int(m.groups()[0])
+            if ix != 0:
+                print "edit existing uncommitted clerical_note %d"% ix
+                self._clerical_edit_note = SETTINGS.current_patient.notes.clerical_by_id(ix)
+            else:
+                self._clerical_edit_note = SETTINGS.current_patient.notes.new_clerical
+            show_clerical = True
 
-        elif url =="new_note":
-            self._current_edit_note = SETTINGS.current_patient.notes.new_clinical
+        elif url =="new_clinical_note":
+            self._clinical_edit_note = SETTINGS.current_patient.notes.new_clinical
+            show_clinical = True
+
+        elif url =="new_clerical_note":
+            self._clerical_edit_note = SETTINGS.current_patient.notes.new_clerical
+            show_clerical = True
+
         else:
             print "bad url in notes page?", url
             return
         try:
-            self.notes_entry.set_text(
-                self._current_edit_note.value("line").toString())
+            self.clinical_editor.set_text(
+                self._clinical_edit_note.value("line").toString())
         except AttributeError:
-            self.notes_entry.set_text("")
+            self.clinical_editor.set_text("")
 
-        self.notes_entry.show()
+        try:
+            self.clerical_editor.set_text(
+                self._clerical_edit_note.value("line").toString())
+        except AttributeError:
+            self.clerical_editor.set_text("")
+
+        self.clinical_editor.setVisible(show_clinical)
+        self.clerical_editor.setVisible(show_clerical)
         self.scroll_to_end()
 
-    def note_edited(self):
+    def clinical_note_edited(self):
         '''
         the user has edited a note.. time to update the html
         '''
-        self._current_edit_note.setValue("line", self.notes_entry.text)
-        SETTINGS.current_patient.notes.commit_clinical(self._current_edit_note)
+        self._clinical_edit_note.setValue("line", self.clinical_editor.text)
+        SETTINGS.current_patient.notes.commit_clinical(self._clinical_edit_note)
+
+    def clerical_note_edited(self):
+        '''
+        the user has edited a note.. time to update the html
+        '''
+        self._clerical_edit_note.setValue("line", self.clerical_editor.text)
+        SETTINGS.current_patient.notes.commit_clerical(self._clerical_edit_note)
 
     def model_updated(self):
         '''
@@ -178,7 +217,7 @@ class _TestDialog(QtGui.QDialog):
         layout.addWidget(self.nw)
         self.nw.load_patient()
 
-        QtCore.QTimer.singleShot(2000, self.change)
+        #QtCore.QTimer.singleShot(2000, self.change)
 
     def sizeHint(self):
         return QtCore.QSize(700,200)

@@ -39,14 +39,14 @@ from lib_openmolar.client.qt4gui.dialogs.address_dialogs.components import (
 class AddressDialog(ExtendableDialog):
     def __init__(self, address_objects, chosen=0, parent=None):
         '''
-        :param: address_obj (:doc:`AddressObject` )
+        :param: :doc:`AddressObjects`
         :kword: chosen - the chosen index
         :kword: parent widget QtGui.QWidget or None
         '''
         super(AddressDialog, self).__init__(parent)
         self.setWindowTitle(_("Edit Addresses"))
 
-        #a pointer to the records stored in the :doc:`AddressObject`
+        #a pointer to the records stored in the :doc:`AddressObjects`
         self.addresses = address_objects.records
 
         self.value_store_dict = {}

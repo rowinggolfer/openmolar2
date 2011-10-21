@@ -51,9 +51,10 @@ class NotesClinicalDB(object):
     @property
     def new_note(self):
         if self._new_note is None:
-            print "creating new note with authors %s and %s"% (
+            print "creating new clinical note with authors %s and %s"% (
                 SETTINGS.user1, SETTINGS.user2)
             self._new_note = InsertableRecord(SETTINGS.database, TABLENAME)
+            self._new_note.is_clinical = True
             self._new_note.setValue("open_time", QtCore.QDateTime.currentDateTime())
 
             if SETTINGS.user1:
@@ -73,6 +74,9 @@ class NotesClinicalDB(object):
     def get_records(self):
         '''
         get the records from the database
+
+        .. note:
+            A property of is_clinical is added to each record, and set as True
         '''
         self._records = []
         query = 'SELECT * from %s WHERE patient_id = ? order by open_time'% (
@@ -83,6 +87,7 @@ class NotesClinicalDB(object):
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
+            record.is_clinical = True
             self._records.append(record)
 
     @property

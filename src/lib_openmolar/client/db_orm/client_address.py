@@ -157,7 +157,8 @@ class AddressRecord(QtSql.QSqlRecord):
 class AddressObjects(object):
     '''
     instantiating this class
-    grabs a list of AddressRecords
+    grabs a list of :doc:`AddressRecord` types using the
+    view_addresses pseudo table
     '''
     def __init__(self, patient_id):
 

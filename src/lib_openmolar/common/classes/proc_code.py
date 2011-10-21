@@ -71,7 +71,8 @@ class ProcCode(object):
     def is_chartable(self):
         '''
         can this procedure be displayed on a dental chart?
-        note::
+        
+        .. note::
             this needs more work!
 
         '''

@@ -33,7 +33,8 @@ class StatusBarWidget(QtGui.QWidget):
     a layout of comboBoxes for seting the current users
     and "mode" which determines
     whether to default to the surgery or reception page on load
-    emits signals::
+    
+    .. emits signals::
         self.emit(QtCore.SIGNAL("user1 changed"), cb_index)
         self.emit(QtCore.SIGNAL("user2 changed"), cb_index)
         self.emit(QtCore.SIGNAL("mode changed"), cb_index)

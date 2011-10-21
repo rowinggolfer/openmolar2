@@ -21,8 +21,9 @@
 ###############################################################################
 
 '''
-This module provides the ClinicalNotesDB Class
-(for client interaction with records in the notes_clinical table)
+This module provides the NotesClericalDB Class
+(for client interaction with records in the notes_clerical table)
+
 '''
 
 from PyQt4 import QtCore, QtSql
@@ -34,6 +35,32 @@ class NotesClericalDB(object):
         #:
         self.patient_id = patient_id
 
+    def has_new_note(self):
+        return self._new_note is not None
+
+    @property
+    def new_note(self):
+        if self._new_note is None:
+            print "creating clerical new note with authors %s and %s"% (
+                SETTINGS.user1, SETTINGS.user2)
+            self._new_note = InsertableRecord(SETTINGS.database, TABLENAME)
+            self._new_note.is_clinical = True
+            self._new_note.setValue("open_time", QtCore.QDateTime.currentDateTime())
+
+            if SETTINGS.user1:
+                self._new_note.setValue("author", SETTINGS.user1.id)
+            if SETTINGS.user2:
+                self._new_note.setValue("co-author", SETTINGS.user2.id)
+        return self._new_note
+
+    def commit_note(self, note):
+        '''
+        note has been updated
+        '''
+        if not note in self._records:
+            self._records.append(self._new_note)
+        return True
+
     @property
     def is_dirty(self):
         ## todo - this does not allow for a commited note or an edited note
@@ -43,7 +70,10 @@ class NotesClericalDB(object):
 
     def get_records(self):
         '''
-        get the records from the database
+        get the records from the database.
+
+        .. note:
+            A property of is_clinical is added to each record, and set as False
         '''
         self._records = []
 
@@ -55,6 +85,7 @@ class NotesClericalDB(object):
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
+            record.is_clinical = False
             self._records.append(record)
 
     @property
@@ -66,6 +97,15 @@ class NotesClericalDB(object):
             self.get_records()
         return self._records
 
+    def record_by_id(self, id):
+        '''
+        return the text of the record with a specific id
+        '''
+        for record in self.records:
+            if record.value(0) == id:
+                return record
+        print "ERROR - clerical note record %d not found in memory"% id
+        return None
 
 if __name__ == "__main__":
 

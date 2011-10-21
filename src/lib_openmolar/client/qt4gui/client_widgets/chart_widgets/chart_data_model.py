@@ -29,7 +29,7 @@ class ChartDataModel(object):
 
     ChartWidgets hold no data, but are "views" to this model.
 
-    ... note::
+    .. note::
 
         Summary and static chart share one instance of this class.
         the treatment chart and completed chart have an instance each.
@@ -53,7 +53,8 @@ class ChartDataModel(object):
         '''
         register all widgets which are attached to this model, so that
         when "endResetModel" is called, they get notified
-        :note:
+        
+        .. note::
             widgets registered this way must have a method model_changed()
 
         '''

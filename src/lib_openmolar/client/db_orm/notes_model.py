@@ -127,22 +127,22 @@ a view aware editable model of data stored in various notes tables
 
             note, editable = wrap(record.value("line").toString())
 
-            class_ = "editable_" if editable else ""
+            edit_class = 'editable_clinical' if editable else ""
             html += u'''
-            <tr>
-                <td class="%sdate">%s</td>
-                <td class="%sauthor">%s %s</td>
-                <td class="%snote">%s</td>
+            <tr class="%s">
+                <td class="date">%s</td>
+                <td class="author">%s %s</td>
+                <td class="note">%s</td>
             </tr>'''% (
-                class_, record_date(),
-                class_, author_repr, co_author_repr,
-                class_, note)
+                edit_class, record_date(),
+                author_repr, co_author_repr,
+                note)
 
         if not self.clinical.has_new_note:
             html += '''
             </table>
             <div class="new_note_link">
-            <a href = "new_note">%s %s</a>
+            <a href = "new_clinical_note">%s %s</a>
             </div>
             </div>'''% (_("New Clinical Note"), SETTINGS.PENCIL)
 
@@ -153,8 +153,9 @@ a view aware editable model of data stored in various notes tables
 
     def clinical_by_id(self, id):
         '''
-        returns an html representation of the *clinical* note with id "id"
-        '''
+         :param: id (int)
+        returns the :doc:`NotesClinicalDB` with this id
+       '''
         return self.clinical.record_by_id(id)
 
     @property
@@ -169,6 +170,13 @@ a view aware editable model of data stored in various notes tables
         the note has been edited
         '''
         if self.clinical.commit_note(note):
+            self.update_views()
+
+    def commit_clerical(self, note):
+        '''
+        the note has been edited
+        '''
+        if self.clerical.commit_note(note):
             self.update_views()
 
     @property
@@ -197,7 +205,7 @@ a view aware editable model of data stored in various notes tables
         <html lang="en">
         <head>
         <meta charset="utf-8" />
-        <title>Clinical Notes</title>
+        <title>Reception Notes</title>
         <link rel="stylesheet" type="text/css" href="%s">
         </head>
         <body>
@@ -208,19 +216,32 @@ a view aware editable model of data stored in various notes tables
             _("Date"), _("Author"), _("Action"), _("Notes")
             )
 
-        for line in self.clerical.records:
-            author = line.value("author").toInt()[0]
-            author_repr = SETTINGS.users.get_avatar_html(author)
+        for record in self.clerical.records:
+            author = record.value("author").toInt()[0]
+            author_repr = SETTINGS.users.get_avatar_html(author,
+                    options='class="author"')
+            action = record.value("type").toString()
+            note, editable = wrap(record.value("line").toString())
 
-            html += u'''<tr><td>%s</td><td>%s</td><td>%s</td>
-            <td><pre>%s</pre></td></tr>'''% (
-                line.value('open_time').toDateTime().toString(
-                    QtCore.Qt.DefaultLocaleShortDate),
-                author_repr,
-                line.value("type").toString(),
-                line.value("line").toString())
+            edit_class = 'editable_clinical' if editable else ""
+            html += u'''
+            <tr class="%s">
+                <td class="date">%s</td>
+                <td class="author">%s</td>
+                <td class="action">%s</td>
+                <td class="note">%s</td>
+            </tr>'''% (
+                edit_class, record_date(),
+                author_repr, action, note)
 
         return html + '</table></div></body></html>'
+
+    def clerical_by_id(self, id):
+        '''
+        :param: id (int)
+        returns the :doc:`NotesClericalDB` with this id
+        '''
+        return self.clerical.record_by_id(id)
 
     @property
     def all_records(self):
@@ -256,8 +277,10 @@ a view aware editable model of data stored in various notes tables
                 "\n", "<br />")
 
             editable = not record.value("committed").toBool()
+            record_type = "clinical" if record.is_clinical else "clerical"
             if editable:
-                foo = '<a href = "edit_note_%d">%s</a>%s'% (
+                foo = '<a href = "edit_%s_note_%d">%s</a>%s'% (
+                    record_type,
                     record.value("ix").toInt()[0] , SETTINGS.PENCIL, foo)
 
             return (foo, editable)
@@ -295,16 +318,17 @@ a view aware editable model of data stored in various notes tables
 
             note, editable = wrap(record.value("line").toString())
 
-            class_ = "editable_" if editable else ""
+            edit_class = 'editable_' if editable else ""
+            edit_class += "clinical" if record.is_clinical else "clerical"
             html += u'''
-            <tr>
-                <td class="%sdate">%s</td>
-                <td class="%sauthor">%s %s</td>
-                <td class="%snote">%s</td>
+            <tr class="%s">
+                <td class="date">%s</td>
+                <td class="author">%s %s</td>
+                <td class="note">%s</td>
             </tr>'''% (
-                class_, record_date(),
-                class_, author_repr, co_author_repr,
-                class_, note)
+                edit_class, record_date(),
+                author_repr, co_author_repr,
+                note)
 
 
         return html + "</table></div></body></html>"

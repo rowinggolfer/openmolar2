@@ -173,6 +173,7 @@ class TreatmentItemMetadata(object):
         :param: surfaces(string)
 
         set the surfaces for a restoration
+        
         .. note::
             an exception will be raised if surfaces are invalid
 
@@ -380,7 +381,8 @@ where treatment_teeth.treatment_id = ?
         create a new :doc:`TreatmentItemMetadata` object and append to this
         treatment item.
         note - returns the item so that values can be set
-        typical useage::
+        
+        .. typical useage::
             metadata = TreatmentItem().add_metadata()
             metadata.set_tooth(18)
             metadata.set_type("splint")
