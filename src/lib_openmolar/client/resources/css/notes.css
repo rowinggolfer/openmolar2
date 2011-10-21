@@ -55,15 +55,18 @@ td{
     border-collapse:collapse;
     }
 
+tr.clinical{background-color:#eeeeee;}
+tr.clerical{background-color:#dddddd;}
+
+tr.editable_clinical{background-color:#ffeeee;}
+tr.editable_clerical{background-color:#ffdddd;}
 
 td.date{}
-td.editable_date{background-color:#ffffff;}
 
 td.author{width:100px;}
-td.editable_author{
-    background-color:#ffffff;
-    width:100px;}
 
-td.note{text-align:left}
-td.editable_note{text-align:left; background-color:#ffffff;}
+td.clinical_note{text-align:left;}
+
+td.clerical_note{text-align:left;}
+
 
