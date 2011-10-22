@@ -33,6 +33,9 @@ from lib_openmolar.client.db_orm.client_users import Users
 
 import inspect, os, sys, traceback, zipfile, zipimport
 
+from lib_openmolar.client import qrc_resources
+from PyQt4.QtCore import QResource
+
 class SettingsError(Exception):
     '''
     A custom exception
@@ -49,10 +52,7 @@ class Settings(settings.CommonSettings):
 
     LOCALFOLDER = os.path.join(os.environ.get("HOME"), ".openmolar2")
 
-    _NOTES_CSS = os.path.join(LOCALFOLDER, "notes.css")
-
-    #: location of the notes css file for the current OS user
-    NOTES_CSS = "file://%s"% _NOTES_CSS
+    _CSS = {}
 
     def __init__(self):
         settings.CommonSettings.__init__(self)
@@ -117,6 +117,54 @@ class Settings(settings.CommonSettings):
         self._staff = None
         self._users = None
         self._last_known_address = None
+
+        self.init_css()
+
+    def init_css(self):
+        '''
+        look for the presence of custom css files
+        '''
+
+        for css in ("notes", "details"):
+            custom_loc = os.path.join(self.LOCALFOLDER, "custom_%s.css"% css)
+
+            if os.path.exists(custom_loc):
+                print "WARNING: using a custom css file - %s"% custom_loc
+                self._CSS[css] = custom_loc
+            else:
+                self._CSS[css] = os.path.join(self.LOCALFOLDER, "%s.css"% css)
+
+            #ensure that we have a css file.. otherwise the notes will be awful!
+            if not os.path.exists(self._CSS[css]):
+                print "initiating a new css file - %s"% self._CSS[css]
+                resource = QResource(":css/notes.css")
+                f = open(self._CSS[css], "w")
+                f.write(resource.data())
+                f.close()
+
+    @property
+    def NOTES_CSS(self):
+        '''
+        location of the notes css file for the current OS user.
+
+        .. note::
+            this will usually be
+            ~/.openmolar2/notes.css (which is generated if not present)
+            or ~/.openmolar2/custom_notes.css (user edited file)
+        '''
+        return "file://%s"% self._CSS.get("notes", "")
+
+    @property
+    def DETAILS_CSS(self):
+        '''
+        location of the notes css file for the current OS user.
+
+        .. note::
+            this will usually be
+            ~/.openmolar2/details.css (which is generated if not present)
+            or ~/.openmolar2/custom_details.css (user edited file)
+        '''
+        return "file://%s"% self._CSS.get("details", "")
 
     @property
     def users(self):

@@ -66,15 +66,6 @@ class NotesWidget(QtGui.QWidget):
         self.connect(self.clerical_editor, QtCore.SIGNAL("Save Requested"),
             self.clerical_note_edited)
 
-        #ensure that we have a css file.. otherwise the notes will be awful!
-        if not os.path.exists(SETTINGS._NOTES_CSS):
-            print "initiating a new notes.css file"
-            resource = QtCore.QResource(":css/notes.css")
-            f = open(SETTINGS._NOTES_CSS, "w")
-            f.write(resource.data())
-            f.close()
-
-
     def sizeHint(self):
         return QtCore.QSize(500,400)
 

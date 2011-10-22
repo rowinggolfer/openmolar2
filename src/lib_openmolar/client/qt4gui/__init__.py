@@ -1,1 +1,0 @@
-import qrc_resources

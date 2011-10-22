@@ -1,5 +1,4 @@
-print "initiating client library (installing gettext and SETTINGS)"
-
+print "installing gettext and SETTINGS into __builtins__"
 import gettext, os
 
 lang = os.environ.get("LANG")
@@ -15,9 +14,11 @@ else:
     print "no language environment found"
     gettext.install('openmolar', unicode=True)
 
+from classes import Plugin
 import settings
 settings.install()
 
-from classes import Plugin
+import qrc_resources
 
-__all__ = ["Plugin"]
+__all__ = ["Plugin", "qrc_resources"]
+

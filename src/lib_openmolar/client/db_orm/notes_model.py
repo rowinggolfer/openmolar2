@@ -223,7 +223,7 @@ a view aware editable model of data stored in various notes tables
             action = record.value("type").toString()
             note, editable = wrap(record.value("line").toString())
 
-            edit_class = 'editable_clinical' if editable else ""
+            edit_class = 'editable_clerical' if editable else ""
             html += u'''
             <tr class="%s">
                 <td class="date">%s</td>

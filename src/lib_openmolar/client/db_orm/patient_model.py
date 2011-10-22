@@ -155,7 +155,17 @@ The behaviour of this object is very much like a dictionary.
         an html representation of the patient
             this is a combination of html data from several tables
         '''
-        html = u"<body><div>"
+        html =  u'''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8" />
+        <title>Patient Details</title>
+        <link rel="stylesheet" type="text/css" href="%s">
+        </head>
+        <body>
+        '''% SETTINGS.DETAILS_CSS
+
         html += self["patient"].details_html()
         html += "<br />"
         html += self["contracted_practitioners"].details_html()
@@ -163,10 +173,10 @@ The behaviour of this object is very much like a dictionary.
         html += self["addresses"].details_html()
         html += "<br />"
         html += self["telephone"].details_html()
-        html += '''<hr /><div align='center'>
+        html += '''<hr /><div class='center'>
             <b>%s</b><a href='edit_memo'>%s</a>
             <br />%s'''% (_("MEMO"), SETTINGS.PENCIL, self.clerical_memo)
-        return html + "<hr /></div></body>"
+        return html + "</body>"
 
     @property
     def age_years(self):
