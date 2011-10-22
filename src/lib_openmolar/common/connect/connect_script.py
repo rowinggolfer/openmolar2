@@ -43,7 +43,7 @@ class DatabaseConnection(QtSql.QSqlDatabase):
     Will Raise a Connection error if connection has not been established
     within 10 seconds
     '''
-    def __init__(self, host="localhost", user="om_user", passwd="password",
+    def __init__(self, host="localhost", user="om_demo", passwd="password",
     db_name="openmolar_demo", port=5432, options="requiressl=1"):
         super(DatabaseConnection, self).__init__("QPSQL")
         self.setHostName(host)

@@ -254,8 +254,8 @@ if __name__ == "__main__":
     cc = ClientConnection()
     cc.connect()
 
-    #values = {"sname":"POTTA", "soundex_sname":True}
-    values = {"sname":"POTTER"}
+    values = {"sname":"POTTA", "soundex_sname":True}
+    #values = {"sname":"POTTER"}
     print cc.get_matchlist(values)
 
     print cc.blank_address_record

@@ -38,7 +38,7 @@ class ConnectionData(object):
 
     def demo_connection(self):
         self.human_name = "demo"
-        self.username = "om_user"
+        self.username = "om_demo"
         self.password = "password"
         self.host = "localhost"
         self.port = 5432

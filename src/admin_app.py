@@ -63,7 +63,7 @@ def populate_demo():
     def duck_log(output, timestamp=None):
         print output
 
-    print "installing demo..."
+    print "will now populate the demo database..."
 
     from lib_openmolar.admin.connect import AdminConnection
     admin_conn = AdminConnection()
@@ -86,67 +86,15 @@ def layout_tables():
     admin_conn.connect()
     return admin_conn.create_openmolar_tables(duck_log)
 
-def delete_demo_database():
-    print "deleting any existing database called 'openmolar_demo'",
-    print " (if already exists)..."
-    p = subprocess.Popen(["dropdb", "openmolar_demo"])
-    p.wait()
-    print "SUCCESSFULLY dropped (or not present)\n"
-
-def delete_demo_user():
-    print "deleting postgres user 'om_user' (if already exists)..."
-    p = subprocess.Popen(["dropuser", "om_user"])
-    p.wait()
-    print "SUCCESSFULLY dropped (or not present)\n"
-
-def create_demo_database():
-    print "creating database 'openmolar_demo'..."
-    p = subprocess.Popen(["createdb", "openmolar_demo"])
-    p.wait()
-
-
-def create_demo_user():
-    '''
-    creates our default demo user 'om_demo'
-    '''
-    print "creating postgres user 'om_user'..."
-    child = pexpect.spawn ("createuser -P -S -D -R om_user")
-    child.expect ("Enter password for new role:")
-    child.sendline ("password")
-    child.expect ("Enter it again:")
-    child.sendline ("password")
-    child.logfile = sys.stdout
-    child.expect(pexpect.EOF, timeout=None)
-
-def install_fuzzy_match(db="openmolar_demo"):
-    '''
-    this function needs work to provide the soundex functions.
-    '''
-
-    print "="*80
-    print "WARNING - manual installation of soundex function required"
-    print "drop to a terminal and excute this"
-    print "psql -d openmolar_demo < ",
-    print "/usr/share/postgresql/8.4/contrib/fuzzystrmatch.sql"
-    print "="*80
-
 def initiate_demo_database():
     '''
     deletes any existing openmolar_demo database on this machine
     also removes any user om_user
-
-    gksu -u postgres
-    createdb openmolar_demo
-    createuser -P om_user
     '''
-    delete_demo_database()
-    delete_demo_user()
-    create_demo_database()
-    install_fuzzy_match()
-    create_demo_user()
+    p = subprocess.Popen(["gksu", "openmolar_initdb"])
+    p.wait()
     layout_tables()
     populate_demo()
-
 
 
 if __name__ == "__main__":
