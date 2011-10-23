@@ -27,7 +27,7 @@ from PyQt4 import QtSql, QtCore
 from lib_openmolar.common import SETTINGS
 from lib_openmolar.admin.data_import.import_om1 import teeth_present
 
-def convert(mysql_query, psql_query, sno_limit=None):
+def convert(mysql_query, psql_query, sno_conditions=""):
     ps_query_comment = '''INSERT INTO static_comments
     (patient_id, tooth, comment, checked_by)
     VALUES (?, ?, ?, ?)'''
@@ -68,8 +68,8 @@ def convert(mysql_query, psql_query, sno_limit=None):
 
     query = '''select serialno, dent1, dent0, dent3, dent2,
     %s from patients'''% teeth.rstrip(", ")
-    if sno_limit is not None:
-        query += " where serialno<%s" % sno_limit
+
+    query += sno_conditions
 
     mysql_query.prepare(query)
     mysql_query.exec_()

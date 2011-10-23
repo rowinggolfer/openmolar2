@@ -22,6 +22,7 @@
 
 import os
 import sys
+import traceback
 from xml.dom import minidom
 from PyQt4 import QtSql, QtCore
 from lib_openmolar.common import common_db_orm
@@ -36,10 +37,26 @@ class Importer(object):
     for some tables (eg.. I have a subclass which imports data from an
     existing openmolar 1 database
     '''
+
+    sno_range = None
+    sno_conditions = ""
+
     def __init__(self, om2_connection):
         self.om2_connection = om2_connection
         self._import_directory = os.path.curdir
         self.USER_DICT = {}
+
+    def print_traceback(self):
+        '''
+        print any traceback in readableform
+        '''
+        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+
+        readable_ex =   traceback.format_exception(
+            exceptionType, exceptionValue, exceptionTraceback)
+
+        for line in readable_ex:
+            print line
 
     @property
     def import_directory(self):
@@ -220,40 +237,47 @@ class Importer(object):
         print "importing tx_completed"
 
 
-    def import_all(self):
+    def import_all(self, *args):
+        '''
+        go to work
+        .. note::
+            all arguments are ignored. arguments are for inherited classes only
+
+        '''
         print "importing all"
-        try:
-            sys.stdout.flush()
-            self.insert_null_user()
-            sys.stdout.flush()
-            self.import_avatars()
-            sys.stdout.flush()
-            self.import_users()
-            sys.stdout.flush()
-            self.import_practitioners()
-            sys.stdout.flush()
-            self.import_patients()
-            sys.stdout.flush()
+        tracebacks = []
+        for func in (
+            self.insert_null_user,
+            self.import_avatars,
+            self.import_users,
+            self.import_practitioners,
+            self.import_patients,
+            self.import_tx_completed,
+            self.import_appointments,
+            self.import_clerical_memos,
+            self.import_clinical_memos,
+            self.import_addresses,
+            self.import_notes,
+            self.import_static_charts,
+            self.import_bpe,
+            self.import_perio,
+            self.import_contracted_practitioners,
+            self.import_telephones,
+            ):
 
-            self.import_tx_completed()
-            self.import_appointments()
-            self.import_clerical_memos()
-            self.import_clinical_memos()
-            self.import_addresses()
+            try:
+                sys.stdout.flush()
+                func()
 
-            self.import_notes()
+            except Exception as e:
+                print "FATAL ERROR! in function %s"% func
+                tracebacks.append(func)
 
-            self.import_static_charts()
-            self.import_bpe()
-            self.import_perio()
-            self.import_contracted_practitioners()
-            self.import_telephones()
-            print "ALL DONE!"
+        print "ALL DONE!"
+        if tracebacks:
+            print "The following functions gave exceptions"
+            print tracebacks
 
-        except Exception as e:
-            print "FATAL ERROR!"
-            print e
-            sys.exit()
 
 if __name__ == "__main__":
     from lib_openmolar.admin.connect import AdminConnection

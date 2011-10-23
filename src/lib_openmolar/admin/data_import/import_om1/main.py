@@ -126,6 +126,17 @@ class Parser(optparse.OptionParser):
                         help = "dbname for the new Postgresdatabase",
                         type="string")
 
+        self.add_option("-m", "--min_sno",
+                        dest = 'min_sno', default = 0,
+                        help = "the minimum id to be imported, default is 0",
+                        type="int")
+
+        self.add_option("-M", "--max_sno",
+                        dest = 'max_sno', default = -1,
+                        help = "the maximum id to be imported, or -1 for all (default)",
+                        type="int")
+
+
     def parse_args(self):
         options, args = optparse.OptionParser.parse_args(self)
         if args != []:
@@ -165,6 +176,7 @@ def main():
     except IOError as e:
         QtGui.QMessageBox.warning(None, "error",
         "unable to connect to Mysql <hr />%s "% e)
+        sys.exit()
 
     new_connection = DatabaseConnection(    host=dl.pg_hostname,
                                         user=dl.pg_username,
@@ -177,6 +189,7 @@ def main():
     except ConnectionError as e:
         QtGui.QMessageBox.warning(None, "error",
         "unable to connect to postgres <hr />%s "% e)
+        sys.exit()
 
     print "Importing from MYSQL DB %s@%s:%s %s"% (
         dl.username, dl.hostname, dl.port, dl.dbname)
@@ -187,8 +200,8 @@ def main():
     importer = OM1Importer(connection, new_connection)
 
     importer.set_import_directory(dl.import_directory)
-    importer.import_all()
 
+    importer.import_all(options.min_sno, options.max_sno)
 
     sys.exit(app.exit())
 

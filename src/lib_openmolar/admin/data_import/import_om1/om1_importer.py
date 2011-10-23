@@ -46,6 +46,15 @@ class OM1Importer(Importer):
         Importer.__init__(self, om2_connection)
         self.connection = connection
 
+    @property
+    def sno_conditions(self):
+        '''
+        an SQL string dictating which patients to import
+        '''
+        if self.sno_range:
+            return " where (serialno >= %d and serialno <= %d)"% self.sno_range
+        return ""
+
     def OLDimport_practitioners(self):
         print "importing practitioners"
 
@@ -100,7 +109,7 @@ class OM1Importer(Importer):
         print "WARNING - practiitioner sex, dob and names will require attention"
 
 
-    def import_patients(self, sno_limit=None):
+    def import_patients(self):
         print "importing patients"
 
         ps_query = '''insert into patients
@@ -112,9 +121,9 @@ class OM1Importer(Importer):
         query = '''select serialno, title, sname, fname, sex, dob,
         status from patients'''
 
-        if sno_limit is not None:
-            print "limited to serialno", sno_limit
-            query +=" where serialno <= %d"% sno_limit
+        if self.sno_range:
+            query += self.sno_conditions
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -151,15 +160,15 @@ class OM1Importer(Importer):
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
-    def import_static_charts(self, sno_limit=None):
+    def import_static_charts(self):
         print "importing static_charts"
 
         psql_query = QtSql.QSqlQuery(self.om2_connection)
         mysql_query = QtSql.QSqlQuery(self.connection)
 
-        convert_static.convert(mysql_query, psql_query, sno_limit)
+        convert_static.convert(mysql_query, psql_query, self.sno_conditions)
 
-    def import_clerical_memos(self, max_sno=None):
+    def import_clerical_memos(self):
         print "importing clerical memos"
 
         ps_query = '''INSERT INTO clerical_memos
@@ -169,8 +178,7 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, memo from patients'''
-        if max_sno:
-            query += " where serialno <= %d"% max_sno
+        query += self.sno_conditions
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -200,7 +208,7 @@ class OM1Importer(Importer):
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
-    def import_addresses(self, max_sno=None):
+    def import_addresses(self):
         print "importing addresses"
 
         ps_query = '''INSERT INTO addresses
@@ -217,8 +225,8 @@ class OM1Importer(Importer):
 
         query = '''select addr1, addr2, addr3, town, county, pcde,
         serialno from patients order by addr1, addr2, addr3, pcde'''
-        if max_sno:
-            query += " where serialno<=%d"% max_sno
+        query += self.sno_conditions
+
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
         mysql_query.exec_()
@@ -270,7 +278,7 @@ class OM1Importer(Importer):
                     psql_query2.lastError().text())
 
 
-    def import_clinical_memos(self, max_sno=None):
+    def import_clinical_memos(self):
         print "importing clinical memos"
 
         ps_query = '''INSERT INTO clinical_memos
@@ -281,8 +289,7 @@ class OM1Importer(Importer):
 
         query = '''select serialno, synopsis, datestamp, author
         from clinical_memos order by serialno, ix desc'''
-        if max_sno:
-            query += " where serialno<=%d"% max_sno
+        query += self.sno_conditions
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -311,7 +318,7 @@ class OM1Importer(Importer):
 
             previous_id = pt_id
 
-    def import_appointments(self, max_sno=None):
+    def import_appointments(self):
         print "importing appointments from aslot"
 
         ps_query = '''insert into diary_appointments
@@ -327,8 +334,7 @@ class OM1Importer(Importer):
         query = '''select apptix, adate, start, end, serialno,
         name, code0, concat(code1, ' ', code2), note from aslot
         where adate>20090101'''
-        if max_sno:
-            query += " and serialno <=%d "% max_sno
+        query += self.sno_conditions.replace("where", "and")
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -391,9 +397,9 @@ class OM1Importer(Importer):
         query = '''select serialno, practix, code0, concat(code1, ' ', code2),
         note, length from apr where adate IS NULL order by serialno, aprix'''
 
-        if max_sno:
+        if self.sno_range:
             query = query.replace("IS NULL",
-            "IS NULL and serialno <=%d "% max_sno)
+            "IS NULL %s"% self.sno_conditions.replace("where", "and"))
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -417,7 +423,7 @@ class OM1Importer(Importer):
                     psql_query.lastError().text())
 
 
-    def import_notes(self, sno_limit=None):
+    def import_notes(self):
         print "importing notes (this may take time)"
         sys.stdout.flush()
 
@@ -431,18 +437,18 @@ class OM1Importer(Importer):
 
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
-        query = "select max(serialno) from notes"
-        mysql_query = QtSql.QSqlQuery(self.connection)
-        mysql_query.prepare(query)
-        mysql_query.exec_()
-        mysql_query.first()
-        max_sno = mysql_query.value(0).toInt()[0]
+        if self.sno_range:
+            min_sno, max_sno = self.sno_range
+        else:
+            query = "select max(serialno) from notes"
+            mysql_query = QtSql.QSqlQuery(self.connection)
+            mysql_query.prepare(query)
+            mysql_query.exec_()
+            mysql_query.first()
+            max_sno = mysql_query.value(0).toInt()[0]
+            min_sno = 0
 
-        ##TESTING FUNCTIONALITY!
-        if sno_limit is not None:
-            max_sno =  sno_limit
-
-        for i in xrange(0, max_sno, 1):
+        for i in xrange(min_sno, max_sno):
 
             print "="*80
             print "converting notes for record %s"% i
@@ -543,7 +549,7 @@ class OM1Importer(Importer):
         userlist = self.get_users_from_notes()
         Importer.insert_users(self, userlist)
 
-    def import_bpe(self, max_sno=None):
+    def import_bpe(self):
         print "importing bpe"
 
         ps_query = '''INSERT INTO perio_bpe
@@ -553,8 +559,7 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, bpedate, bpe from bpe'''
-        if max_sno:
-            query += " where serialno<=%d"% max_sno
+        query += self.sno_conditions
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -580,7 +585,7 @@ class OM1Importer(Importer):
                     mysql_query.value(2).toString(),
                     psql_query.lastError().text())
 
-    def import_perio(self, max_sno=None):
+    def import_perio(self):
         print "importing perio"
 
         ps_query = '''INSERT INTO perio_pocketing
@@ -590,9 +595,7 @@ class OM1Importer(Importer):
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
         query = '''select serialno, chartdate, chartdata, flag
-        from perio order by chartdate'''
-        if max_sno:
-            query += " where serialno<=%d"% max_sno
+        from perio %s order by chartdate'''% self.sno_conditions
 
         mysql_query = QtSql.QSqlQuery(query, self.connection)
 
@@ -633,7 +636,7 @@ class OM1Importer(Importer):
                         mysql_query.value(0).toInt()[0], key),
                     print psql_query.lastError().text()
 
-    def import_contracted_practitioners(self, max_sno=None):
+    def import_contracted_practitioners(self):
         print "importing contracted practitioners"
 
         ps_query = '''INSERT INTO contracted_practitioners
@@ -642,9 +645,7 @@ class OM1Importer(Importer):
 
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
-        query = '''select serialno, dnt1 from patients'''
-        if max_sno:
-            query += " where serialno<=%d"% max_sno
+        query = 'select serialno, dnt1 from patients %s'% self.sno_conditions
 
         mysql_query = QtSql.QSqlQuery(self.connection)
         mysql_query.prepare(query)
@@ -666,7 +667,7 @@ class OM1Importer(Importer):
                     mysql_query.value(0).toInt()[0],
                     psql_query.lastError().text())
 
-    def import_telephones(self, max_sno=None):
+    def import_telephones(self):
         print "importing telephones"
 
         ps_query = '''INSERT INTO telephone
@@ -680,19 +681,18 @@ class OM1Importer(Importer):
 
         psql_query2 = QtSql.QSqlQuery(self.om2_connection)
 
-        i = 0
-        for field in "tel1", "tel2", "mobile":
+        query_template = '''select serialno, <FIELD> from patients
+            where <FIELD> IS NOT NULL and <FIELD> != ""
+            order by <FIELD>'''
 
+        if self.sno_range:
+            query_template = query_template.replace(
+                "order",
+                self.sno_conditions.replace("where", "and") + " order")
+
+        for i, field in enumerate(("tel1", "tel2", "mobile")):
+            query = query_template.replace("<FIELD>", field)
             new_type = ("home", "work", "mobile")[i]
-            i += 1
-
-            query = '''select serialno, %s from patients
-            where %s IS NOT NULL and %s != "" order by %s'''% (
-            field, field, field, field)
-
-            if max_sno:
-                query = query.replace('""', '"" and serialno<=%d'% max_sno)
-
 
             mysql_query = QtSql.QSqlQuery(query, self.connection)
 
@@ -736,7 +736,7 @@ class OM1Importer(Importer):
                         mysql_query.value(0).toInt()[0],
                         psql_query2.lastError().text())
 
-    def import_tx_completed(self, max_sno=None):
+    def import_tx_completed(self):
         print "inserting tx_completed"
         sys.stdout.flush()
         ps_query = '''INSERT INTO treatments
@@ -768,14 +768,9 @@ class OM1Importer(Importer):
             print "importing column", column, "from daybook"
             print "=" * 80
 
-            if max_sno is None:
-                query = '''select serialno, date, %s, dntid, trtid, id
-                from daybook'''% column
-            else:
-                ##ordering only for debugging.
-                query = '''select serialno, date, %s, dntid, trtid, id
-                from daybook where serialno <= %d
-                order by serialno, id'''% (column, max_sno)
+            query = '''select serialno, date, %s, dntid, trtid, id
+            from daybook %s order by serialno'''% (column, self.sno_conditions)
+
             mysql_query = QtSql.QSqlQuery(self.connection)
             mysql_query.prepare(query)
             mysql_query.exec_()
@@ -783,7 +778,7 @@ class OM1Importer(Importer):
             previous_serialno = None
             while mysql_query.next():
                 serialno = mysql_query.value(0).toInt()[0]
-                if max_sno != None and serialno != previous_serialno:
+                if serialno != previous_serialno:
                     print "========== importing pt %6d ========="% serialno
                     previous_serialno = serialno
                 value = str(mysql_query.value(2).toString())
@@ -856,48 +851,60 @@ class OM1Importer(Importer):
         ## temporary code!
         convert_daybook_chart.rogue_output()
 
-    def import_all(self):
+    def import_all(self, min_sno=0, max_sno=-1):
         '''
-        don't overwrite this normally... for testing one function only
+        for experimenting with the code.
         '''
-        if True:
+        if min_sno ==0 and max_sno == -1:
             Importer.import_all(self)
             return
 
         ##for testing
         print "=" * 80
-        print "WARNING - using custom import_all"
+        print 'WARNING - using custom import_all'''
+        print 'WARNING - restricting to patient range %d - %d'% (
+            min_sno, max_sno)
         print "=" * 80
         sys.stdout.flush()
-        max_sno = 1000
+        tracebacks = []
 
-        #self.import_avatars()
+        self.sno_range = (min_sno, max_sno)
 
-        if False:
-            self.import_users()
-        else:
-            print "WARNING - trusting XML for user dict!"
-            #self.import_users(ignore_errors=True)
+        for func in (
+            #self.insert_null_user,
+            self.import_avatars,
+            self.import_users,
+            self.import_practitioners,
+            self.import_patients,
+            self.import_tx_completed,
+            self.import_appointments,
+            self.import_clerical_memos,
+            self.import_clinical_memos,
+            self.import_addresses,
+            self.import_notes,
+            self.import_static_charts,
+            self.import_bpe,
+            self.import_perio,
+            self.import_contracted_practitioners,
+            self.import_telephones,
+            ):
 
-        #self.insert_null_user()
-        #self.import_practitioners()
-        #self.import_patients(max_sno)
-        #self.import_tx_completed(max_sno)
+            try:
+                sys.stdout.flush()
+                func()
 
-        #self.import_notes(max_sno)
+            except Exception as e:
+                print "FATAL ERROR! in function %s"% func
+                tracebacks.append(func.__name__)
+                self.print_traceback()
 
-        #self.import_appointments(max_sno)
-        #self.import_clerical_memos(max_sno)
-        #self.import_clinical_memos(max_sno)
-        #self.import_addresses(max_sno)
+        print "ALL DONE!"
+        if tracebacks:
+            print "The following functions gave exceptions"
+            for t in tracebacks:
+                print t
 
-        self.import_static_charts(max_sno)
-        self.import_bpe(max_sno)
-        self.import_perio(max_sno)
-        self.import_contracted_practitioners(max_sno)
-        self.import_telephones(max_sno)
 
-    print "ALL DONE!"
 
 if __name__ == "__main__":
     pass
