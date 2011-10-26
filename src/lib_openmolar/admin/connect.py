@@ -192,7 +192,7 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
         result, message = True, _("UNABLE TO LAYOUT TABLES")
 
         #######################################################################
-        ## iterate over all the klasse in the ORM                           ##
+        ## iterate over all the klasse in the ORM                            ##
         ## note - the order is important!                                    ##
         ## types first, then be wary of foreign keys                         ##
         #######################################################################

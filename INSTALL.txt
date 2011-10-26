@@ -6,7 +6,6 @@ ensure dependencies are met for the components you wish to install
 
 client deps
  - python2.* (>=2.5)         http://www.python.org/        
- - python-mysqldb            http://sourceforge.net/projects/mysql-python/
  - python-qt4                http://www.riverbankcomputing.co.uk/software/pyqt/intro
  - qt4                       http://qt.nokia.com/
 
@@ -15,35 +14,17 @@ language pack deps
  
  - gettext                   http://www.gnu.org/software/gettext/
   
-server deps  
+admin deps  
  - python2.* (>=2.5)         http://www.python.org/        
- - python-mysqldb            http://sourceforge.net/projects/mysql-python/
  - python-qt4                http://www.riverbankcomputing.co.uk/software/pyqt/intro
  - qt4                       http://qt.nokia.com/
 
 
-ALSO - YOU NEED A MYSQL SERVER ON YOUR NETWORK.
+ALSO - YOU NEED A POSTGRES SERVER ON YOUR NETWORK.
 
 
 to install components, use the following commands (as root)
 
-CLIENT
-cd into the client folder.
+
 ~$ sudo python setup.py install
-
-LANG
-cd into the lang folder.
-~$ sudo python setup.py install
-
-SERVER
-cd into the server folder.
-~$ sudo python setup.py install
-
-
-
-
-
-
-
-
 

@@ -22,9 +22,12 @@
 
 from distutils.core import setup
 
-import os, re, shutil, sys
-
-VERSIONS = {}
+import os
+import re
+import shutil
+import sys
+import ConfigParser
+import subprocess
 
 DESCRIPTION = 'Dental Practice Management Software'
 AUTHOR = 'Neil Wallace'
@@ -32,70 +35,35 @@ EMAIL = 'rowinggolfer@googlemail.com'
 URL = 'http://www.openmolar.com'
 LICENSE = 'GPL v3'
 
-
-if os.path.isfile("om_setup.lck") or os.path.isfile("manifest.lck"):
-    sys.exit("ERROR - setup.py is locked.."
-    " did a previous installation fail to complete?\n"
-    "this could have left MANIFEST.in and om_setup.cfg in a broken state\n"
-    "Please execute this command before continuing\n\n"
-    "mv manifest.lck MANIFEST.in && mv om_setup.lck om_setup.cfg\n\n"
+if not os.path.isfile("setup.conf"):
+    sys.exit("ERROR - setup.conf not found..\n"
+    "please run python configure.py"
     )
-shutil.copy("om_setup.cfg", "om_setup.lck")
-shutil.copy("MANIFEST.in", "manifest.lck")
 
+if os.path.isfile("setup.lck"):
+    if os.path.isfile("configure.py"):
+        sys.exit("ERROR - setup.py is locked.."
+        " did a previous installation fail to complete?\n"
+        "This could have left setup.conf in a broken state\n"
+        "You must delete setup.lck to remove this warning\n"
+        "please re-run python configure.py"
+        )
 
-packages = []
-config_file = open("om_setup.cfg")
+shutil.copy("setup.conf", "setup.lck")
 
-for line in config_file:
-    m = re.match("([^#]*)_version=(.*)", line)
-    if m:
-        package, version = m.groups()
-        VERSIONS[package] = version
-        packages.append(package)
-
-def mod_config(keep_package):
-    '''
-    if multiple packages are being installed, om_setup.cfg needs to be updated
-    in between each call to setup()
-    '''
-    if len(packages) == 1:
-        return
-    f = open("om_setup.lck", "r")
-    data = f.read()
-    f.close()
-    for package in packages:
-        if package != keep_package:
-            data = re.sub(package, "#"+package, data)
-    f = open("om_setup.cfg", "w")
-    f.write(data)
-    f.close()
-    
-def mod_manifest(additions=[]):
-    '''
-    add addtions to the manifest file - starts from scratch each time
-    '''
-    f = open("manifest.lck", "r")
-    data = f.read()
-    f.close()
-    f = open("MANIFEST.in", "w")
-    f.write(data)
-    f.writelines(additions)
-    f.close()
-        
+config = ConfigParser.RawConfigParser()
+config.read("setup.conf")        
 
 #common setup
-
-if "COMMON" in packages:
-
+if config.has_section("common") and config.get("common", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    mod_config("COMMON")
+    subprocess.Popen(["./configure.py","-o"]).wait()
 
     setup(
         name = 'openmolar-common',
-        version = VERSIONS.get("COMMON", "UNKNOWN"),
+        version = config.get("common", "version"),
         description = DESCRIPTION + ' - common library',
         author = AUTHOR,
         author_email = EMAIL,
@@ -114,17 +82,16 @@ if "COMMON" in packages:
         )
     
 #setup admin
-if "ADMIN" in packages:
+if config.has_section("admin") and config.get("admin", "include"):
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
     
-    mod_config("ADMIN")
-    mod_manifest(["include misc/admin/bin/*",])
-
+    subprocess.Popen(["./configure.py","-a"]).wait()
+    
     setup(
         name = 'openmolar-admin',
-        version = VERSIONS.get("ADMIN", "UNKNOWN"),
+        version = config.get("admin", "version"),
         description = DESCRIPTION + ' - admin library and application',
         author = AUTHOR,
         author_email = EMAIL,
@@ -150,18 +117,16 @@ if "ADMIN" in packages:
         )
         
     
-#setup 
-if "CLIENT" in packages:
-
+#setup client
+if config.has_section("client") and config.get("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-        
-    mod_config("CLIENT")
-    mod_manifest(["include misc/client/bin/*",])
-
+    
+    subprocess.Popen(["./configure.py","-c"]).wait()
+    
     setup(
         name = 'openmolar-client',
-        version = VERSIONS.get("CLIENT", "UNKNOWN"),
+        version = config.get("client", "version"),
         description = DESCRIPTION + ' - client library and application',
         author = AUTHOR,
         author_email = EMAIL,
@@ -182,7 +147,7 @@ if "CLIENT" in packages:
             'lib_openmolar.client.qt4gui.dialogs',
             'lib_openmolar.client.qt4gui.dialogs.address_dialogs',
             'lib_openmolar.client.qt4gui.dialogs.address_dialogs.components',
-            'lib_openmolar.client.qt4gui.modules',
+            'lib_openmolar.client.qt4gui.interfaces',
             'lib_openmolar.client.qt4gui.pages',
             'lib_openmolar.client.scripts',
                     ],
@@ -198,30 +163,33 @@ if "CLIENT" in packages:
 
     
 #setup command_center
-if "STARTUP" in packages:
-
+if config.has_section("server") and config.get("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-        
-    mod_manifest()
+    
+    subprocess.Popen(["./configure.py","-s"]).wait()
 
     setup(
-        name = 'openmolar-startup',
-        version = VERSIONS.get("STARTUP", "UNKNOWN"),
-        description = DESCRIPTION + ' - script to start the application',
+        name = 'openmolar-server',
+        version = config.get("server", "version"),
+        description = DESCRIPTION + ' - the xml_rpc server component of openmolar2',
         author = AUTHOR,
         author_email = EMAIL,
         url = URL,
         license = LICENSE,
-        scripts = ['src/openmolar2'],
+        package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
+        packages = ['lib_openmolar.server'],
+        scripts = ['src/openmolar2-server'],
         )
     
+if config.has_section("lang") and config.get("lang", "include"):
+    print "WARNING - setup.py is unable to install language pack at the moment"    
+    #subprocess.Popen(["./configure.py","-l"]).wait()
         
 if os.path.isfile("MANIFEST"):
     os.unlink("MANIFEST")
 
 # and finally.. if we've got this far.. remove the locks
 
-shutil.move("om_setup.lck", "om_setup.cfg")
-shutil.move("manifest.lck", "MANIFEST.in")
+shutil.move("setup.lck", "setup.conf")
     
