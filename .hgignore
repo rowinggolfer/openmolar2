@@ -12,3 +12,7 @@ documentation/sphinx/images
 .*~$
 experimental/
 experimental/*
+dist/
+build/
+MANIFEST.in
+setup.conf

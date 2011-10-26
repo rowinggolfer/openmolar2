@@ -55,7 +55,7 @@ config = ConfigParser.RawConfigParser()
 config.read("setup.conf")        
 
 #common setup
-if config.has_section("common") and config.get("common", "include"):
+if config.has_section("common") and config.getboolean("common", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -82,7 +82,7 @@ if config.has_section("common") and config.get("common", "include"):
         )
     
 #setup admin
-if config.has_section("admin") and config.get("admin", "include"):
+if config.has_section("admin") and config.getboolean("admin", "include"):
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -118,7 +118,7 @@ if config.has_section("admin") and config.get("admin", "include"):
         
     
 #setup client
-if config.has_section("client") and config.get("client", "include"):
+if config.has_section("client") and config.getboolean("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
     
@@ -163,7 +163,7 @@ if config.has_section("client") and config.get("client", "include"):
 
     
 #setup command_center
-if config.has_section("server") and config.get("server", "include"):
+if config.has_section("server") and config.getboolean("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
     
@@ -182,7 +182,7 @@ if config.has_section("server") and config.get("server", "include"):
         scripts = ['src/openmolar2-server'],
         )
     
-if config.has_section("lang") and config.get("lang", "include"):
+if config.has_section("lang") and config.getboolean("lang", "include"):
     print "WARNING - setup.py is unable to install language pack at the moment"    
     #subprocess.Popen(["./configure.py","-l"]).wait()
         
