@@ -30,7 +30,6 @@ if __name__ == "__main__":
     import os
     sys.path.insert(0, os.path.abspath("../../../../"))
 
-
 from lib_openmolar.common.connect import (
     ConnectionError,
     ConnectionsPreferenceWidget,
@@ -58,7 +57,6 @@ from lib_openmolar.admin.qt4gui.dialogs import (
     PopulateDemoDialog,
     PlainTextDialog,
     NewRowDialog)
-
 
 from lib_openmolar.admin.qt4gui.classes import (
     SqlQueryTable,
@@ -265,10 +263,6 @@ class AdminMainWindow(BaseMainWindow):
             self.connect(QtGui.QApplication.instance(),
                 QtCore.SIGNAL("Query Error"), self.advise_dl)
 
-            #if QtGui.QMessageBox.question(self, _("Question"),
-            #_("Show Views?"),
-            #QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-            #QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes:
             self.addViews()
 
             if len(self.connection.tables()) == 0:

@@ -24,8 +24,6 @@
 Provides base classes for the other admin orm classes
 '''
 import re
-from PyQt4 import QtSql
-
 
 class TableSchema(object):
     def __init__(self, tablename="unknown", schema = ""):
@@ -93,6 +91,4 @@ class TableSchema(object):
             cols.rstrip(", "), vals.rstrip(", "))
 
         return (sql, values)
-
-
 

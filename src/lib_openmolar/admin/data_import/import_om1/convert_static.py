@@ -27,48 +27,44 @@ from PyQt4 import QtSql, QtCore
 from lib_openmolar.common import SETTINGS
 from lib_openmolar.admin.data_import.import_om1 import teeth_present
 
+ps_query_comment = '''INSERT INTO static_comments
+(patient_id, tooth, comment, checked_by)
+VALUES (?, ?, ?, ?)'''
+
+ps_query_crown = '''INSERT INTO static_crowns
+(patient_id, tooth, type, comment)
+VALUES (?, ?, ?, ?)'''
+
+ps_query_fill = '''INSERT INTO static_fills
+(patient_id, tooth, surfaces, material, comment)
+VALUES (?, ?, ?, ?, ?)'''
+
+ps_query_root = '''INSERT INTO static_roots
+(patient_id, tooth, description, comment,
+checked_by) VALUES (?, ?, ?, ?, ?)'''
+
+ps_query_super = '''INSERT INTO static_supernumerary
+(patient_id, mesial_neighbour, comment,
+checked_by) VALUES (?, ?, ?, ?)'''
+
+ps_query_dent_key = '''INSERT INTO teeth_present
+(patient_id, dent_key, checked_by)
+VALUES (?, ?, ?)'''
+
+short_tooth_name_list = []
+for arch in ("u","l"):
+    for tooth in range(8,0,-1):
+        short_tooth_name_list.append("%sr%d"% (arch,tooth))
+    for tooth in range(1,9):
+        short_tooth_name_list.append("%sl%d"% (arch,tooth))
+
 def convert(mysql_query, psql_query, sno_conditions=""):
-    ps_query_comment = '''INSERT INTO static_comments
-    (patient_id, tooth, comment, checked_by)
-    VALUES (?, ?, ?, ?)'''
-
-    ps_query_crown = '''INSERT INTO static_crowns
-    (patient_id, tooth, type, comment)
-    VALUES (?, ?, ?, ?)'''
-
-    ps_query_fill = '''INSERT INTO static_fills
-    (patient_id, tooth, surfaces, material, comment)
-    VALUES (?, ?, ?, ?, ?)'''
-
-    ps_query_root = '''INSERT INTO static_roots
-    (patient_id, tooth, description, comment,
-    checked_by) VALUES (?, ?, ?, ?, ?)'''
-
-    ps_query_super = '''INSERT INTO static_supernumerary
-    (patient_id, mesial_neighbour, comment,
-    checked_by) VALUES (?, ?, ?, ?)'''
-
-    ps_query_dent_key = '''INSERT INTO teeth_present
-    (patient_id, dent_key, checked_by)
-    VALUES (?, ?, ?)'''
-
-    short_tooth_name_list = []
-
-    for arch in ("u","l"):
-        for tooth in range(8,0,-1):
-            short_tooth_name_list.append("%sr%d"% (arch,tooth))
-        for tooth in range(1,9):
-            short_tooth_name_list.append("%sl%d"% (arch,tooth))
-
-    #print short_tooth_name_list
-
-    teeth = ""
+    teeth_fields = ""
     for tooth_name in short_tooth_name_list:
-        teeth += "%sst, "% tooth_name
+        teeth_fields += "%sst, "% tooth_name
 
     query = '''select serialno, dent1, dent0, dent3, dent2,
     %s from patients'''% teeth.rstrip(", ")
-
     query += sno_conditions
 
     mysql_query.prepare(query)
@@ -87,7 +83,7 @@ def convert(mysql_query, psql_query, sno_conditions=""):
             val_str = str(mysql_query.value(i).toString())
             om_tooth = SETTINGS.REV_TOOTHGRID_SHORTNAMES[tooth]
 
-            vals = val_str.split(" ")
+            vals = set(val_str.split(" "))
             for val in vals:
                 if val == '':
                     continue

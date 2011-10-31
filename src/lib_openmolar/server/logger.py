@@ -20,67 +20,50 @@
 ##                                                                           ##
 ###############################################################################
 
-
-from SimpleXMLRPCServer import SimpleXMLRPCServer
-
-import commands
-import datetime
-import subprocess
 import logging
+import logging.handlers
+import os
 
-HOST = commands.getoutput("hostname -I").split(" ")[0]
+BASE = "openmolar"
+APPLICATION = "server"
 
-PORT = 42230
+LOGNAME = "%s_%s"% (BASE, APPLICATION)
+LOCATION = "/var/log/%s/%s/log"% (BASE, APPLICATION)
 
-logger = logging.getLogger("openmolar_server")
+def setup(level=logging.DEBUG, console_echo=True):
+    """
+    initiates the logger.
+    allows caller to set the debug level and whether to echo the log to stdout
+    """
+    logger = logging.getLogger(LOGNAME)
+    logger.setLevel(level)
 
-class MyFuncs(object):
-    '''
-    A class whose functions will be inherited by the server
-    '''
-    def last_backup(self):
-        '''
-        returns a iso formatted datetime string showing when the
-        last backup was made
-        '''
-        return datetime.datetime.now().isoformat()
+    dirname = os.path.dirname(LOCATION)
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
 
-    def init_db(self):
-        '''
-        initialises the database, creating a demo database, and default users
-        '''
-        logger.debug("init_db called")
-        p = subprocess.Popen(["openmolar_initdb"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
+    formatter = logging.Formatter(
+    "%(asctime)s - %(levelname)s - %(message)s")
 
-        logger.debug(p.stdout.read())
-        logger.error(p.stderr.read())
+    handler = logging.handlers.TimedRotatingFileHandler(
+        LOCATION, "D", 1, backupCount=10)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
-        return True
+    if console_echo:
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
 
-    def create_db(self, name):
-        '''
-        creates a database with the name given
-        '''
-        logger.info("TODO create_db function doesn't work!")
-
-    def layout_schema(self, name):
-        '''
-        creates a blank openmolar table set in the database with the name given
-        '''
-        logger.info("TODO layout_schema function doesn't work!")
-
-
-def main():
-
-    server = SimpleXMLRPCServer((HOST, PORT))
-    server.register_instance(MyFuncs())
-
-    logger.debug("listening on %s:%d"% (HOST, PORT))
-    server.serve_forever()
+def _test():
+    my_logger = logging.getLogger(LOGNAME)
+    my_logger.debug("debug message")
+    my_logger.info("info message")
+    my_logger.warn("warn message")
+    my_logger.error("error message")
+    my_logger.critical("critical message")
+    logging.shutdown()
 
 if __name__ == "__main__":
 
-    main()
+    _test()

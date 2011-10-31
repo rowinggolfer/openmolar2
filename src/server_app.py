@@ -20,6 +20,23 @@
 ##                                                                           ##
 ###############################################################################
 
-
+from lib_openmolar.server import logger
 from lib_openmolar.server import xmlrpc_server
-xmlrpc_server.main()
+
+import logging
+
+logger.setup(level = logging.INFO, console_echo=False)
+
+log = logging.getLogger("openmolar_server")
+log.info("openmolar_server starting up")
+
+try:
+    xmlrpc_server.main()
+except KeyboardInterrupt as e:
+    log.warning("Keyboard interupt")
+    e.handled = True
+except Exception as e:
+    log.exception("Server Terminated")
+
+log.warning("openmolar_server closed")
+logging.shutdown()
