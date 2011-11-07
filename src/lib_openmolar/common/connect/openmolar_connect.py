@@ -20,67 +20,48 @@
 ##                                                                           ##
 ###############################################################################
 
-
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+'''
+provides 2 classes.
+ConnectionError - a custom python exception, raised if connection times out
+OpenmolarConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
+'''
 
 import commands
-import datetime
-import subprocess
+import socket
+import xmlrpclib
+
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
-HOST = commands.getoutput("hostname -I").split(" ")[0]
 
-PORT = 42230
-
-logger = logging.getLogger("openmolar_server")
-
-class MyFuncs(object):
+class OpenmolarConnectionError(Exception):
     '''
-    A class whose functions will be inherited by the server
+    a custom Exception
     '''
-    def last_backup(self):
+    pass
+
+class OpenmolarConnection(object):
+    HOST = commands.getoutput("hostname -I").split(" ")[0]
+    PORT = 42230
+    def connect(self, host=HOST, port=PORT):
         '''
-        returns a iso formatted datetime string showing when the
-        last backup was made
+        attempt to connect to xmlrpc_server, and return this object
+        raise a ConnectionError if no success.
         '''
-        return datetime.datetime.now().isoformat()
+        try:
+            proxy = xmlrpclib.ServerProxy('http://%s:%d'% (host, port))
+            proxy.ping()
+            return proxy
+        except socket.error as e:
+            print "whoops"
+            raise OpenmolarConnectionError(
+            'Is the host %s running and accepting connections on port %d?'% (
+            host, port))
 
-    def init_db(self):
-        '''
-        initialises the database, creating a demo database, and default users
-        '''
-        logger.debug("init_db called")
-        p = subprocess.Popen(["openmolar_initdb"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
-        p.wait()
-
-        logger.debug(p.stdout.read())
-        logger.error(p.stderr.read())
-
-        return True
-
-    def create_db(self, name):
-        '''
-        creates a database with the name given
-        '''
-        logger.info("TODO create_db function doesn't work!")
-
-    def layout_schema(self, name):
-        '''
-        creates a blank openmolar table set in the database with the name given
-        '''
-        logger.info("TODO layout_schema function doesn't work!")
-
-
-def main():
-
-    server = SimpleXMLRPCServer((HOST, PORT))
-    server.register_instance(MyFuncs())
-
-    logger.debug("listening on %s:%d"% (HOST, PORT))
-    server.serve_forever()
 
 if __name__ == "__main__":
 
-    main()
+    omc = OpenmolarConnection()
+    proxy = omc.connect()
+    if proxy is not None:
+        print proxy.last_backup()

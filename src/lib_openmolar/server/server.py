@@ -20,56 +20,50 @@
 ##                                                                           ##
 ###############################################################################
 
+import commands
 import logging
-import logging.handlers
-import os
 import sys
 
-BASE = "openmolar"
-APPLICATION = "server"
+from SimpleXMLRPCServer import SimpleXMLRPCServer
 
-LOGNAME = "%s_%s"% (BASE, APPLICATION)
-LOCATION = "/var/log/%s/%s/log"% (BASE, APPLICATION)
+from service import Service
+from functions import ServerFunctions
+import logger
 
-def setup(level=logging.DEBUG, console_echo=True):
-    """
-    initiates the logger.
-    allows caller to set the debug level and whether to echo the log to stdout
-    """
-    logger = logging.getLogger(LOGNAME)
-    logger.setLevel(level)
+HOST = commands.getoutput("hostname -I").split(" ")[0]
 
-    dirname = os.path.dirname(LOCATION)
-    if not os.path.isdir(dirname):
-        os.makedirs(dirname)
+PORT = 42230
 
-    formatter = logging.Formatter(
-    "%(asctime)s - %(levelname)s - %(message)s")
+def ping():
+    return True
 
-    handler = logging.handlers.TimedRotatingFileHandler(
-        LOCATION, "D", 1, backupCount=10)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+class OMServer(Service):
+    def __init__(self, verbose=False):
+        self.log = logging.getLogger("openmolar_server")
+        if verbose:
+            self.log.setLevel(logging.DEBUG)
+        else:
+            self.log.setLevel(logging.INFO)
 
-    if console_echo:
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+    def start(self):
+        self.log.info("starting OMServer Process")
+        if not self.start_():
+            return False
+        self.log.info("creating server...")
+        server = SimpleXMLRPCServer((HOST, PORT))
+        server.register_function(ping)
+        server.register_instance(ServerFunctions())
 
-def _test():
-    try:
-        setup()
-        my_logger = logging.getLogger(LOGNAME)
-        my_logger.debug("debug message")
-        my_logger.info("info message")
-        my_logger.warn("warn message")
-        my_logger.error("error message")
-        my_logger.critical("critical message")
-    except IOError as exc:
-        if exc.errno == 13:
-            sys.stderr.write(
-            "You do not have permission to write this log to\n%s\n"% LOCATION)
-    logging.shutdown()
+        self.log.info("listening on %s:%d"% (HOST, PORT))
+        server.serve_forever()
 
-if __name__ == "__main__":
-    _test()
+    def stop(self):
+        self.log.info("Stopping server")
+        self.stop_()
+
+    def restart(self):
+        self.stop()
+        self.start()
+
+    def status(self):
+        self.status_()

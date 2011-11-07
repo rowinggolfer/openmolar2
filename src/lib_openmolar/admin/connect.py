@@ -29,7 +29,7 @@ from __future__ import division
 from PyQt4 import QtSql
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.connect import DatabaseConnection
+from lib_openmolar.common.connect import DatabaseConnection, ConnectionError
 from lib_openmolar.common.settings import om_types
 from lib_openmolar.common import SETTINGS
 
@@ -64,7 +64,8 @@ class AdminConnection(DatabaseConnection):
             if (q_query.value(0).toString() in tables
             and q_query.value(1).toInt()[0] > 0):
                 return False
-
+        else:
+            raise ConnectionError, "pg_stat failed!"
         return True
 
     def get_db_schema(self):
@@ -161,7 +162,7 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
 
         def apply_queries(klass, removal=False):
             '''
-            we have our klass, now apply it's queries
+            we have our klass, now apply its queries
             this is subroutined to limit the number of cascades of
             types and foreign keys
             '''
@@ -170,7 +171,7 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
                 queries = klass.removal_queries
             else:
                 rem_create_message = "creating"
-                queries =   klass.creation_queries
+                queries = klass.creation_queries
 
             if type(klass) == om_types.OMType:
                 log_name = "type %s"% klass.name
@@ -223,6 +224,32 @@ AND f.attnum > 0 ORDER BY f.attnum'''% table
             message = _("tables created")
 
         return (result, message)
+
+    @property
+    def virgin_sql(self):
+        '''
+        the Sql applied to create the current schema
+        '''
+        sql = ""
+
+        klasses = SETTINGS.OM_TYPES.values()
+        for module in ADMIN_MODULES:
+            klasses.append(module.SchemaGenerator())
+
+        for klass in klasses:
+            for query in klass.creation_queries:
+                sql += query
+                sql += ";\n\n"
+
+        for queries in (
+            om_views.FUNCTION_SQLS,
+            om_views.VIEW_SQLS,
+            om_views.RULE_SQLS):
+            for query in queries:
+                sql += query
+                sql += ";\n\n"
+
+        return sql
 
     def populateDemo(self, log, ommitted_modules=[]):
         '''
@@ -306,7 +333,10 @@ if __name__ == "__main__":
     sc = AdminConnection()
     sc.connect()
 
-    for table in sc.get_available_tables():
-        print table
+    #print "listing tables in", sc.databaseName()
+    #for table in sc.get_available_tables():
+    #    print "\t%s"% table
 
-    print sc.has_all_empty_tables
+    #print "are all tables empty?", sc.has_all_empty_tables
+
+    print sc.virgin_sql

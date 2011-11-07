@@ -20,56 +20,16 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
-import logging.handlers
-import os
-import sys
+import random
+import string
 
-BASE = "openmolar"
-APPLICATION = "server"
-
-LOGNAME = "%s_%s"% (BASE, APPLICATION)
-LOCATION = "/var/log/%s/%s/log"% (BASE, APPLICATION)
-
-def setup(level=logging.DEBUG, console_echo=True):
-    """
-    initiates the logger.
-    allows caller to set the debug level and whether to echo the log to stdout
-    """
-    logger = logging.getLogger(LOGNAME)
-    logger.setLevel(level)
-
-    dirname = os.path.dirname(LOCATION)
-    if not os.path.isdir(dirname):
-        os.makedirs(dirname)
-
-    formatter = logging.Formatter(
-    "%(asctime)s - %(levelname)s - %(message)s")
-
-    handler = logging.handlers.TimedRotatingFileHandler(
-        LOCATION, "D", 1, backupCount=10)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    if console_echo:
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
+def new_password(length=20):
+    chars = string.letters + string.digits
+    return ''.join([random.choice(chars) for i in xrange(length)])
 
 def _test():
-    try:
-        setup()
-        my_logger = logging.getLogger(LOGNAME)
-        my_logger.debug("debug message")
-        my_logger.info("info message")
-        my_logger.warn("warn message")
-        my_logger.error("error message")
-        my_logger.critical("critical message")
-    except IOError as exc:
-        if exc.errno == 13:
-            sys.stderr.write(
-            "You do not have permission to write this log to\n%s\n"% LOCATION)
-    logging.shutdown()
+    for i in range (20,30):
+        print new_password(i)
 
 if __name__ == "__main__":
     _test()

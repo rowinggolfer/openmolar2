@@ -88,11 +88,8 @@ def layout_tables():
 
 def initiate_demo_database():
     '''
-    deletes any existing openmolar_demo database on this machine
-    also removes any user om_user
+    deprecated!!
     '''
-    p = subprocess.Popen(["gksu", "openmolar_initdb"])
-    p.wait()
     layout_tables()
     populate_demo()
 

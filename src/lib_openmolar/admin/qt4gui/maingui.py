@@ -33,7 +33,9 @@ if __name__ == "__main__":
 from lib_openmolar.common.connect import (
     ConnectionError,
     ConnectionsPreferenceWidget,
-    ConnectDialog)
+    ConnectDialog,
+    OpenmolarConnection,
+    OpenmolarConnectionError)
 
 from lib_openmolar.common import SETTINGS
 
@@ -71,6 +73,7 @@ class AdminMainWindow(BaseMainWindow):
     '''
     This class is the core application.
     '''
+    _proxy_server = None
     def __init__(self, parent=None):
         super(AdminMainWindow, self).__init__(parent)
         self.setMinimumSize(600, 400)
@@ -196,6 +199,8 @@ class AdminMainWindow(BaseMainWindow):
         self.show()
         self.setBriefMessageLocation()
 
+        QtCore.QTimer.singleShot(100, self.init_proxy)
+
     def connect_signals(self):
         '''
         set up signals/slots
@@ -227,6 +232,34 @@ class AdminMainWindow(BaseMainWindow):
             self.add_table_tab)
 
         self.tab_widget.currentChanged.connect(self.tab_widget_selected)
+
+    def init_proxy(self):
+        '''
+        attempt to connect to the server controller at startup
+        '''
+        if self.proxy_server is not None:
+            self.advise(u"%s<hr />%s %s"% (
+            _("Successful connection to the server controller"),
+            _("last backup"), self.proxy_server.last_backup()))
+
+    @property
+    def proxy_server(self):
+        '''
+        a connection to the xml_rpc server running on the server
+        '''
+        try:
+            if self._proxy_server is None:
+                self._proxy_server = OpenmolarConnection().connect()
+
+            self._proxy_server.ping()
+        except OpenmolarConnectionError as ex:
+            self.advise(u"%s<hr />%s"%(
+            _("Unable to make a connection to the server controller"),
+            ex), 2)
+
+            self._proxy_server = None
+
+        return self._proxy_server
 
     def tab_widget_selected(self, i=-1):
         tab = self.tab_widget.currentWidget()
@@ -506,8 +539,10 @@ class AdminMainWindow(BaseMainWindow):
         '''
         creates a new db
         '''
-        dl = NoDatabaseDialog(self)
-        dl.exec_()
+        if self.proxy_server is not None:
+            self.proxy_server.init_db()
+        #dl = NoDatabaseDialog(self)
+        #dl.exec_()
 
     def layout_new_schema(self):
         if not self.has_connection():
