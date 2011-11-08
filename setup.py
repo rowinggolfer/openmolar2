@@ -79,6 +79,7 @@ if config.has_section("common") and config.getboolean("common", "include"):
                     'lib_openmolar.common.import_export',
                     'lib_openmolar.common.widgets',
                     ],
+        scripts = ['src/openmolar2'],
         )
     
 #setup admin
@@ -108,10 +109,10 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
                     ],
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps', 
-                            ['misc/admin/bin/openmolar-admin.svg']),
+                            ['misc/admin/openmolar-admin.svg']),
             
                         ('/usr/share/applications', 
-                            ['misc/admin/bin/openmolar2-admin.desktop']) 
+                            ['misc/admin/openmolar2-admin.desktop']) 
                      ],
         scripts = ['src/openmolar2-admin'],
         )
@@ -153,10 +154,10 @@ if config.has_section("client") and config.getboolean("client", "include"):
                     ],
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps', 
-                            ['misc/client/bin/openmolar.svg']),
+                            ['misc/client/openmolar.svg']),
             
                         ('/usr/share/applications', 
-                            ['misc/client/bin/openmolar2.desktop']) 
+                            ['misc/client/openmolar2.desktop']) 
                      ],
         scripts = ['src/openmolar2-client'],
         )
@@ -166,7 +167,10 @@ if config.has_section("client") and config.getboolean("client", "include"):
 if config.has_section("server") and config.getboolean("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-    
+        
+        #os.makedirs('scripts')
+        #shutil.copyfile('myscript.py', 'scripts/myscript')
+
     subprocess.Popen(["./configure.py","-s"]).wait()
 
     setup(
@@ -179,7 +183,11 @@ if config.has_section("server") and config.getboolean("server", "include"):
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.server'],
-        scripts = ['src/openmolar2-server'],
+        scripts = ['misc/server/openmolar-server',
+                   'misc/server/openmolar-init-master-db',
+                   'misc/server/openmolar-init-master-user',
+                   'misc/server/openmolar-fuzzymatch',],
+        data_files=[('/etc/init.d', ['shell_scripts/init.d_script.sh'])]
         )
     
 if config.has_section("lang") and config.getboolean("lang", "include"):

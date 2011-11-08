@@ -1,30 +1,55 @@
+=========================
+INSTALLATION INSTRUCTIONS
+=========================
+
 To install openmolar, it is highly advised to use packages built for your OS.
 
-However, the instructions from source are as follows.
+However, if you wish to install from source, or indeed create packages
+for the distribution of your choice, the following information should
+be of use to you.
 
-ensure dependencies are met for the components you wish to install
+Please note the Appendix below which specifies the current dependencies of 
+each component.
 
-client deps
+
+Openmolar comes in 4 parts.
+server - an xml_rpc daemon. can run on a headless server (ie. not dependent on X)
+common - library required by admin and client (but NOT by the server)
+admin  - a graphical application for management
+client - the everyday application for sugery and reception machines.
+
+the distutils script can allows you to choose which of these you require.
+
+===================
+SOURCE INSTALLATION
+===================
+to install components, use the following commands
+
+~$ python configure.py       (as normal user)
+~# python setup.py install   (as superuser)
+
+
+========
+APPENDIX
+========
+
+## COMMON DEPENDENCIES ##
  - python2.* (>=2.5)         http://www.python.org/        
  - python-qt4                http://www.riverbankcomputing.co.uk/software/pyqt/intro
  - qt4                       http://qt.nokia.com/
+ - libqt4-sql-psql           Qt 4 PostgreSQL database driver
+ - python-xlwt (optional)    http://pypi.python.org/pypi/xlutils
 
-language pack deps
-(mo files are converted to binary po files and installed in /usr/share/locale, and some plugin dialogs go into the openmolar client)
- 
- - gettext                   http://www.gnu.org/software/gettext/
-  
-admin deps  
- - python2.* (>=2.5)         http://www.python.org/        
- - python-qt4                http://www.riverbankcomputing.co.uk/software/pyqt/intro
- - qt4                       http://qt.nokia.com/
+## CLIENT DEPENDENCIES ##
+ - openmolar-common          (as above)
+    
+## ADMIN DEPENDENCIES ##  
+ - openmolar-common          (as above)
+ - python-qscintilla2        Python bindings for QScintilla 2
 
+## SERVER DEPENDENCIES ##
+ - python-psycopg2
+ - postgresql
+ - postgresql-contrib
 
-ALSO - YOU NEED A POSTGRES SERVER ON YOUR NETWORK.
-
-
-to install components, use the following commands (as root)
-
-
-~$ sudo python setup.py install
 
