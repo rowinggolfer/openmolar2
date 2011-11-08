@@ -21,6 +21,7 @@
 ###############################################################################
 
 from distutils.core import setup
+from distutils.command.install_data import install_data
 
 import os
 import re
@@ -39,7 +40,7 @@ if not os.path.isfile("setup.conf"):
     sys.exit("ERROR - setup.conf not found..\n"
     "please run python configure.py"
     )
-
+         
 if os.path.isfile("setup.lck"):
     if os.path.isfile("configure.py"):
         sys.exit("ERROR - setup.py is locked.."
@@ -162,6 +163,16 @@ if config.has_section("client") and config.getboolean("client", "include"):
         scripts = ['src/openmolar2-client'],
         )
 
+
+class InstallData(install_data):
+    '''
+    subclass install_data so that updat.rc is executed
+    '''
+    def run(self):
+        print "RUNNING update-rc"
+        p = subprocess.Popen(["update-rc","openmolar","defaults"])
+        p.wait()
+        install_data.run(self)
     
 #setup command_center
 if config.has_section("server") and config.getboolean("server", "include"):
@@ -183,11 +194,13 @@ if config.has_section("server") and config.getboolean("server", "include"):
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.server'],
+        cmdclass = {'install_data':InstallData},
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
                    'misc/server/openmolar-fuzzymatch',],
-        data_files=[('/etc/init.d', ['shell_scripts/init.d_script.sh'])]
+        data_files=[('/etc/init.d', ['misc/server/openmolar'])],
+        
         )
     
 if config.has_section("lang") and config.getboolean("lang", "include"):
