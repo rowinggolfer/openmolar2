@@ -28,10 +28,10 @@ HEADER = '''
 # As openmolar is a suite of applications with a common source code directory
 # some configuration is required before running setup.py
 #
-# setup.py is capable of installing any combination of 
-# common, admin, server, client, language "packages" 
+# setup.py is capable of installing any combination of
+# common, admin, server, client, language "packages"
 #
-# or creating a pure source distribution for that element 
+# or creating a pure source distribution for that element
 #
 '''
 
@@ -63,9 +63,9 @@ include = False
 MANIFEST = 'include setup.conf'
 
 #these lines are appended as required
-MANIFEST_admin = "include misc/admin/bin/*"
-MANIFEST_client = "include misc/client/bin/*"
-
+MANIFEST_admin = "include misc/admin/*"
+MANIFEST_client = "include misc/client/*"
+MANIFEST_server = "include misc/server/*"
 
 class Parser(optparse.OptionParser):
     def __init__(self):
@@ -76,13 +76,13 @@ class Parser(optparse.OptionParser):
                         action="store_true", default=False,
                         help = "package or install sources for the admin application"
                         )
-        
+
         option = self.add_option("-c", "--client",
                         dest = "client",
                         action="store_true", default=False,
                         help = "package or install sources for the client application"
                         )
-        
+
         option = self.add_option("-l", "--lang",
                         dest = "lang",
                         action="store_true", default=False,
@@ -108,8 +108,8 @@ class Parser(optparse.OptionParser):
 
 def manual_select(options):
     print "please choose from the following"
-    
-    for att in ("common", "client", "common", "admin", "server", "lang"):
+
+    for att in ("common", "client", "admin", "server", "lang"):
         result = raw_input("Include %s (Y/n)"% att)
         options.__dict__[att] = result.lower() in ("y", "")
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
     parser  = Parser()
     options, args = parser.parse_args()
-    
+
     if parser.values == parser.defaults:
         try:
             manual_select(options)
@@ -128,16 +128,16 @@ if __name__ == "__main__":
     f = open("setup.conf", "w")
     f.write(CONF)
     f.close()
-    
+
     config = ConfigParser.RawConfigParser()
-    config.read("setup.conf")        
-    
+    config.read("setup.conf")
+
     config.set("common", "include", options.common)
     config.set("client", "include", options.client)
     config.set("admin", "include", options.admin)
     config.set("server", "include", options.server)
     config.set("lang", "include", options.lang)
-    
+
     f = open("setup.conf", "w")
     f.write(HEADER)
     config.write(f)
@@ -150,5 +150,7 @@ if __name__ == "__main__":
             f.write(MANIFEST_client)
         if options.admin:
             f.write(MANIFEST_admin)
+        if options.server:
+            f.write(MANIFEST_admin)
         f.close()
-    
+
