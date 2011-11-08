@@ -55,18 +55,6 @@ class Parser(optparse.OptionParser):
                         help = _("launch the client application"),
                         )
 
-        option = self.add_option("-i", "--install-demo",
-                        dest = "install_demo",
-                        action="store_true", default=False,
-                        help = "install a demo database (in default location)",
-                        )
-
-        option = self.add_option("-C", "--create-database",
-                        dest = "create_database",
-                        action="store_true", default=False,
-                        help = "create a new database",
-                        )
-
         option = self.add_option("-t", "--terminal",
                         dest = "terminal",
                         action="store_true", default=True,
@@ -132,30 +120,20 @@ def main():
     if options.admin:
         print "running admin app as process %s"%(
         subprocess.Popen(
-            prefixes + ["python", "admin_app.py"] + suffixes
+            prefixes + ["python", "admin.py"] + suffixes
             ).pid)
 
     if options.client:
         print "running client app as process %s"%(
         subprocess.Popen(
-            prefixes + ["python", "client_app.py"] + suffixes
+            prefixes + ["python", "client.py"] + suffixes
             ).pid)
 
     if options.tests:
         print "running test suite as process %s"%(
         subprocess.Popen(
-            prefixes + ["python", "test_suite.py"] + suffixes
+            prefixes + ["python", "tests.py"] + suffixes
             ).pid)
-
-    if options.install_demo:
-        print "install a demo db - process id %s"% (
-        subprocess.Popen(
-            prefixes + ["python", "admin_app.py", "--install-demo"] + suffixes
-            ).pid)
-
-    if options.create_database:
-        print "creating a new database"
-        print "TODO"
 
 
 if __name__ == "__main__":

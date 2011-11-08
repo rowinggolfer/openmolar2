@@ -80,7 +80,7 @@ if config.has_section("common") and config.getboolean("common", "include"):
                     'lib_openmolar.common.import_export',
                     'lib_openmolar.common.widgets',
                     ],
-        scripts = ['src/openmolar2'],
+        scripts = ['misc/openmolar2'],
         )
 
 #setup admin
@@ -115,7 +115,7 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
                         ('/usr/share/applications',
                             ['misc/admin/openmolar2-admin.desktop'])
                      ],
-        scripts = ['src/openmolar2-admin'],
+        scripts = ['misc/admin/openmolar-admin'],
         )
 
 
@@ -160,7 +160,7 @@ if config.has_section("client") and config.getboolean("client", "include"):
                         ('/usr/share/applications',
                             ['misc/client/openmolar2.desktop'])
                      ],
-        scripts = ['src/openmolar2-client'],
+        scripts = ['misc/client/openmolar-client'],
         )
 
 
