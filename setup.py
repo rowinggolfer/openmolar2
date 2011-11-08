@@ -193,7 +193,7 @@ if config.has_section("server") and config.getboolean("server", "include"):
         url = URL,
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
-        packages = ['lib_openmolar.server'],
+        packages = ['lib_openmolar', 'lib_openmolar.server'],
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
