@@ -79,7 +79,7 @@ class Installer(object):
         log = logging.getLogger("openmolar_server")
         log.info("initiating master user")
 
-        p = subprocess.Popen(["openmolar_init_master_user"])
+        p = subprocess.Popen(["openmolar-init-master-user"])
         p.wait()
 
     def init_master_db(self):
@@ -89,7 +89,7 @@ class Installer(object):
         log = logging.getLogger("openmolar_server")
         log.info("initiating master database")
 
-        p = subprocess.Popen(["openmolar_init_master_db"])
+        p = subprocess.Popen(["openmolar-init-master-db"])
         p.wait()
 
     def install(self):

@@ -93,7 +93,7 @@ class ServerFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("Installing fuzzymatch functions into database '%s'"% name)
         try:
-            p = subprocess.Popen(["openmolar_install_fuzzymatch", name])
+            p = subprocess.Popen(["openmolar-install-fuzzymatch", name])
             p.wait()
         except Exception as exc:
             log.exception("unable to install fuzzymatch into '%s'"% name)

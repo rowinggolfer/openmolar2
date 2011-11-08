@@ -40,7 +40,7 @@ if not os.path.isfile("setup.conf"):
     sys.exit("ERROR - setup.conf not found..\n"
     "please run python configure.py"
     )
-         
+
 if os.path.isfile("setup.lck"):
     if os.path.isfile("configure.py"):
         sys.exit("ERROR - setup.py is locked.."
@@ -53,7 +53,7 @@ if os.path.isfile("setup.lck"):
 shutil.copy("setup.conf", "setup.lck")
 
 config = ConfigParser.RawConfigParser()
-config.read("setup.conf")        
+config.read("setup.conf")
 
 #common setup
 if config.has_section("common") and config.getboolean("common", "include"):
@@ -82,15 +82,15 @@ if config.has_section("common") and config.getboolean("common", "include"):
                     ],
         scripts = ['src/openmolar2'],
         )
-    
+
 #setup admin
 if config.has_section("admin") and config.getboolean("admin", "include"):
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-    
+
     subprocess.Popen(["./configure.py","-a"]).wait()
-    
+
     setup(
         name = 'openmolar-admin',
         version = config.get("admin", "version"),
@@ -109,23 +109,23 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
                     'lib_openmolar.admin.qt4gui.dialogs',
                     ],
         data_files = [
-                        ('/usr/share/icons/hicolor/scalable/apps', 
+                        ('/usr/share/icons/hicolor/scalable/apps',
                             ['misc/admin/openmolar-admin.svg']),
-            
-                        ('/usr/share/applications', 
-                            ['misc/admin/openmolar2-admin.desktop']) 
+
+                        ('/usr/share/applications',
+                            ['misc/admin/openmolar2-admin.desktop'])
                      ],
         scripts = ['src/openmolar2-admin'],
         )
-        
-    
+
+
 #setup client
 if config.has_section("client") and config.getboolean("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-    
+
     subprocess.Popen(["./configure.py","-c"]).wait()
-    
+
     setup(
         name = 'openmolar-client',
         version = config.get("client", "version"),
@@ -154,11 +154,11 @@ if config.has_section("client") and config.getboolean("client", "include"):
             'lib_openmolar.client.scripts',
                     ],
         data_files = [
-                        ('/usr/share/icons/hicolor/scalable/apps', 
+                        ('/usr/share/icons/hicolor/scalable/apps',
                             ['misc/client/openmolar.svg']),
-            
-                        ('/usr/share/applications', 
-                            ['misc/client/openmolar2.desktop']) 
+
+                        ('/usr/share/applications',
+                            ['misc/client/openmolar2.desktop'])
                      ],
         scripts = ['src/openmolar2-client'],
         )
@@ -169,16 +169,16 @@ class InstallData(install_data):
     subclass install_data so that updat.rc is executed
     '''
     def run(self):
-        print "RUNNING update-rc"
-        p = subprocess.Popen(["update-rc","openmolar","defaults"])
-        p.wait()
         install_data.run(self)
-    
-#setup command_center
+        print "RUNNING update-rc.d"
+        p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
+        p.wait()
+
+#setup "server"
 if config.has_section("server") and config.getboolean("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
-        
+
         #os.makedirs('scripts')
         #shutil.copyfile('myscript.py', 'scripts/myscript')
 
@@ -194,23 +194,22 @@ if config.has_section("server") and config.getboolean("server", "include"):
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.server'],
-        cmdclass = {'install_data':InstallData},
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
                    'misc/server/openmolar-fuzzymatch',],
         data_files=[('/etc/init.d', ['misc/server/openmolar'])],
-        
+        cmdclass = {'install_data':InstallData}
         )
-    
+
 if config.has_section("lang") and config.getboolean("lang", "include"):
-    print "WARNING - setup.py is unable to install language pack at the moment"    
+    print "WARNING - setup.py is unable to install language pack at the moment"
     #subprocess.Popen(["./configure.py","-l"]).wait()
-        
+
 if os.path.isfile("MANIFEST"):
     os.unlink("MANIFEST")
 
 # and finally.. if we've got this far.. remove the locks
 
 shutil.move("setup.lck", "setup.conf")
-    
+
