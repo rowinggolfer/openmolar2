@@ -46,15 +46,11 @@ try:
         sys.exit('ERROR - %s not found..'% CONF +
         'please run python configure.py')
 
-except ImportError:
-    print "partial setup detected"
-    CONF = PARTCONF
+    print "master setup mode"
 
-if os.path.isfile("setup.lck"):
-    sys.exit("ERROR - setup.py is locked.."
-    " did a previous installation fail to complete?\n"
-    "You must delete setup.lck to remove this warning\n"
-    )
+except ImportError:
+    print "partial setup mode"
+    CONF = PARTCONF
 
 def cleanup():
     '''
@@ -65,19 +61,18 @@ def cleanup():
         files.append(PARTCONF)
         files.append("MANIFEST.in")
     files.append("MANIFEST")
-    files.append("setup.lck")
     for file_ in files:
         try:
-            os.remove(file_)
+            if os.path.isfile(file_):
+                os.remove(file_)
         except OSError:
-            sys.stderr("Unable to remove %s"% file_)
-
-open("setup.lck", "a")
+            sys.stderr.write("INFO : Unable to remove %s"% file_)
 
 config = ConfigParser.RawConfigParser()
 config.read(CONF)
 
 def write_manifest_in(files=[]):
+    f = open("MANIFEST.in", "w")
     f = open("MANIFEST.in", "w")
     f.write("include setup_part.cnf\n")
     for file_ in files:
@@ -88,7 +83,8 @@ def write_manifest_in(files=[]):
 ##                        "common" setup starts                              ##
 ###############################################################################
 
-if config.has_section("common") and config.get("common", "include"):
+if config.has_section("common") and config.getboolean("common", "include"):
+    print "INFO : running common setup (as per conf file)"
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -99,7 +95,7 @@ if config.has_section("common") and config.get("common", "include"):
         new_config.write(f)
         f.close()
 
-        write_manifest_in()
+        write_manifest_in(["src/main.py"])
 
     setup(
         name = 'openmolar-common',
@@ -126,7 +122,8 @@ if config.has_section("common") and config.get("common", "include"):
 ##                        "admin" setup starts                               ##
 ###############################################################################
 
-if config.has_section("admin") and config.get("admin", "include"):
+if config.has_section("admin") and config.getboolean("admin", "include"):
+    print "INFO : running admin setup (as per conf file)"
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -138,7 +135,7 @@ if config.has_section("admin") and config.get("admin", "include"):
         new_config.write(f)
         f.close()
 
-        write_manifest_in(["misc/admin/*"])
+        write_manifest_in(["misc/admin/*", "src/admin.py"])
 
     setup(
         name = 'openmolar-admin',
@@ -172,7 +169,8 @@ if config.has_section("admin") and config.get("admin", "include"):
 ##                        "client" setup starts                              ##
 ###############################################################################
 
-if config.has_section("client") and config.get("client", "include"):
+if config.has_section("client") and config.getboolean("client", "include"):
+    print "INFO : running client setup (as per conf file)"
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -183,7 +181,7 @@ if config.has_section("client") and config.get("client", "include"):
         new_config.write(f)
         f.close()
 
-        write_manifest_in(["misc/client/*"])
+        write_manifest_in(["misc/client/*", "src/client.py"])
 
     setup(
         name = 'openmolar-client',
@@ -237,7 +235,8 @@ class InstallData(install_data):
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
 
-if config.has_section("server") and config.get("server", "include"):
+if config.has_section("server") and config.getboolean("server", "include"):
+    print "INFO : running server setup (as per conf file)"
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -248,7 +247,8 @@ if config.has_section("server") and config.get("server", "include"):
         new_config.write(f)
         f.close()
 
-        write_manifest_in(["misc/server/*"])
+        write_manifest_in(
+            ["misc/server/*", "src/server.py", "src/shell_scripts/*"])
 
     setup(
         name = 'openmolar-server',
@@ -274,7 +274,9 @@ if config.has_section("server") and config.get("server", "include"):
 ##                        "lang" setup starts                                ##
 ###############################################################################
 
-if config.has_section("lang") and config.get("lang", "include"):
+if config.has_section("lang") and config.getboolean("lang", "include"):
+    print "INFO : running lang setup (as per conf file)"
+
     print "WARNING - setup.py is unable to install language pack at the moment"
     if CONF == MAINCONF:
         new_config = OMConfig()
@@ -288,3 +290,5 @@ if config.has_section("lang") and config.get("lang", "include"):
 
 # and finally.. if we've got this far.. remove the locks
 cleanup()
+
+print "ALL DONE!"

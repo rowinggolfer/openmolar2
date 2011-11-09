@@ -47,11 +47,11 @@ class OMConfig(ConfigParser.RawConfigParser):
 #
 '''
 
-    DICT = {"common": False,
-            "client": False,
-            "admin" : False,
-            "server": False,
-            "lang"  : False}
+    DICT = {"common": 'False',
+            "client": 'False',
+            "admin" : 'False',
+            "server": 'False',
+            "lang"  : 'False'}
 
     ATTS = DICT.keys()
 
@@ -109,7 +109,7 @@ def manual_select(options):
 
     for att in OMConfig.ATTS:
         result = raw_input("Include %s (Y/n)"% att)
-        options.__dict__[att] = result.lower() in ("y", "")
+        options.__dict__[att] = str(result.lower() in ("y", ""))
 
 if __name__ == "__main__":
 
