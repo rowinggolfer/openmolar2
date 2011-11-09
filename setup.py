@@ -56,6 +56,22 @@ if os.path.isfile("setup.lck"):
     "You must delete setup.lck to remove this warning\n"
     )
 
+def cleanup():
+    '''
+    called at the end to remove any unwanted cruft
+    '''
+    files = []
+    if CONF == MAINCONF:
+        files.append(PARTCONF)
+        files.append("MANIFEST.in")
+    files.append("MANIFEST")
+    files.append("setup.lck")
+    for file_ in files:
+        try:
+            os.remove(file_)
+        except OSError:
+            sys.stderr("Unable to remove %s"% file_)
+
 open("setup.lck", "a")
 
 config = ConfigParser.RawConfigParser()
@@ -77,10 +93,10 @@ if config.has_section("common") and config.get("common", "include"):
         os.unlink("MANIFEST")
 
     if CONF == MAINCONF:
-        config = OMConfig()
-        config.set("common", "include", True)
+        new_config = OMConfig()
+        new_config.set("common", "include", True)
         f = open(PARTCONF, "w")
-        config.write(f)
+        new_config.write(f)
         f.close()
 
         write_manifest_in()
@@ -116,10 +132,10 @@ if config.has_section("admin") and config.get("admin", "include"):
         os.unlink("MANIFEST")
 
     if CONF == MAINCONF:
-        config = OMConfig()
-        config.set("admin", "include", True)
+        new_config = OMConfig()
+        new_config.set("admin", "include", True)
         f = open(PARTCONF, "w")
-        config.write(f)
+        new_config.write(f)
         f.close()
 
         write_manifest_in(["misc/admin/*"])
@@ -161,10 +177,10 @@ if config.has_section("client") and config.get("client", "include"):
         os.unlink("MANIFEST")
 
     if CONF == MAINCONF:
-        config = OMConfig()
-        config.set("client", "include", True)
+        new_config = OMConfig()
+        new_config.set("client", "include", True)
         f = open(PARTCONF, "w")
-        config.write(f)
+        new_config.write(f)
         f.close()
 
         write_manifest_in(["misc/client/*"])
@@ -226,10 +242,10 @@ if config.has_section("server") and config.get("server", "include"):
         os.unlink("MANIFEST")
 
     if CONF == MAINCONF:
-        config = OMConfig()
-        config.set("server", "include", True)
+        new_config = OMConfig()
+        new_config.set("server", "include", True)
         f = open(PARTCONF, "w")
-        config.write(f)
+        new_config.write(f)
         f.close()
 
         write_manifest_in(["misc/server/*"])
@@ -261,18 +277,14 @@ if config.has_section("server") and config.get("server", "include"):
 if config.has_section("lang") and config.get("lang", "include"):
     print "WARNING - setup.py is unable to install language pack at the moment"
     if CONF == MAINCONF:
-        config = OMConfig()
-        config.set("lang", "include", True)
+        new_config = OMConfig()
+        new_config.set("lang", "include", True)
         f = open(PARTCONF, "w")
-        config.write(f)
+        new_config.write(f)
         f.close()
 
         write_manifest_in()
 
-if os.path.isfile("MANIFEST"):
-    os.unlink("MANIFEST")
 
 # and finally.. if we've got this far.. remove the locks
-
-os.remove("setup.lck")
-
+cleanup()
