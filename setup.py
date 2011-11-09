@@ -72,7 +72,7 @@ def write_manifest_in(files=[]):
 ##                        "common" setup starts                              ##
 ###############################################################################
 
-if config.has_section("common") and config.getboolean("common", "include"):
+if config.has_section("common") and config.get("common", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -110,7 +110,7 @@ if config.has_section("common") and config.getboolean("common", "include"):
 ##                        "admin" setup starts                               ##
 ###############################################################################
 
-if config.has_section("admin") and config.getboolean("admin", "include"):
+if config.has_section("admin") and config.get("admin", "include"):
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -156,7 +156,7 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
 ##                        "client" setup starts                              ##
 ###############################################################################
 
-if config.has_section("client") and config.getboolean("client", "include"):
+if config.has_section("client") and config.get("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -221,7 +221,7 @@ class InstallData(install_data):
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
 
-if config.has_section("server") and config.getboolean("server", "include"):
+if config.has_section("server") and config.get("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -258,7 +258,7 @@ if config.has_section("server") and config.getboolean("server", "include"):
 ##                        "lang" setup starts                                ##
 ###############################################################################
 
-if config.has_section("lang") and config.getboolean("lang", "include"):
+if config.has_section("lang") and config.get("lang", "include"):
     print "WARNING - setup.py is unable to install language pack at the moment"
     if CONF == MAINCONF:
         config = OMConfig()

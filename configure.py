@@ -22,13 +22,14 @@
 
 import ConfigParser
 import optparse
+import os
 import StringIO
-
 import sys
-sys.path.insert(0, os.abspath("src"))
+
+sys.path.insert(0, os.path.abspath("src"))
 from lib_openmolar._version import revision_number
 
-VERSION = "2.0 hg%d"% revision_number
+VERSION = "2.0.0~hg%d"% revision_number
 
 class OMConfig(ConfigParser.RawConfigParser):
     '''
