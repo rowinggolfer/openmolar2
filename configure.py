@@ -24,6 +24,12 @@ import ConfigParser
 import optparse
 import StringIO
 
+import sys
+sys.path.insert(0, os.abspath("src"))
+from lib_openmolar._version import revision_number
+
+VERSION = "2.0 hg%d"% revision_number
+
 class OMConfig(ConfigParser.RawConfigParser):
     '''
     subclass RawConfigParser with default values and an overwrite of the write
@@ -38,7 +44,7 @@ class OMConfig(ConfigParser.RawConfigParser):
 #
 # or creating a pure source distribution for that element
 #
-    '''
+'''
 
     DICT = {"common": False,
             "client": False,
@@ -53,6 +59,7 @@ class OMConfig(ConfigParser.RawConfigParser):
         for att in self.ATTS:
             self.add_section(att)
             self.set(att, "include", self.DICT[att])
+            self.set(att, "version", VERSION)
 
     def write(self, f):
         '''

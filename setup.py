@@ -61,13 +61,6 @@ open("setup.lck", "a")
 config = ConfigParser.RawConfigParser()
 config.read(CONF)
 
-#this next line is always written if manifest option is chosen
-MANIFEST = 'include setup.cnf'
-#these lines are appended as required
-MANIFEST_admin = "include misc/admin/*"
-MANIFEST_client = "include misc/client/*"
-MANIFEST_server = "include misc/server/*"
-
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
     f.write("include setup_part.cnf\n")
@@ -75,7 +68,10 @@ def write_manifest_in(files=[]):
         f.write("include %s\n"% file_)
     f.close()
 
-#common setup
+###############################################################################
+##                        "common" setup starts                              ##
+###############################################################################
+
 if config.has_section("common") and config.getboolean("common", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -110,7 +106,10 @@ if config.has_section("common") and config.getboolean("common", "include"):
         scripts = ['misc/openmolar2'],
         )
 
-#setup admin
+###############################################################################
+##                        "admin" setup starts                               ##
+###############################################################################
+
 if config.has_section("admin") and config.getboolean("admin", "include"):
 
     if os.path.isfile("MANIFEST"):
@@ -153,7 +152,10 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
         )
 
 
-#setup client
+###############################################################################
+##                        "client" setup starts                              ##
+###############################################################################
+
 if config.has_section("client") and config.getboolean("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -205,6 +207,10 @@ if config.has_section("client") and config.getboolean("client", "include"):
         )
 
 
+###############################################################################
+##                        "server" setup starts                              ##
+###############################################################################
+
 class InstallData(install_data):
     '''
     subclass install_data so that updat.rc is executed
@@ -215,7 +221,6 @@ class InstallData(install_data):
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
 
-#setup "server"
 if config.has_section("server") and config.getboolean("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -232,7 +237,8 @@ if config.has_section("server") and config.getboolean("server", "include"):
     setup(
         name = 'openmolar-server',
         version = config.get("server", "version"),
-        description = DESCRIPTION + ' - the xml_rpc server component of openmolar2',
+        description = DESCRIPTION + \
+            ' - the xml_rpc server component of openmolar2',
         author = AUTHOR,
         author_email = EMAIL,
         url = URL,
@@ -246,6 +252,11 @@ if config.has_section("server") and config.getboolean("server", "include"):
         data_files=[('/etc/init.d', ['misc/server/openmolar'])],
         cmdclass = {'install_data':InstallData}
         )
+
+
+###############################################################################
+##                        "lang" setup starts                                ##
+###############################################################################
 
 if config.has_section("lang") and config.getboolean("lang", "include"):
     print "WARNING - setup.py is unable to install language pack at the moment"
