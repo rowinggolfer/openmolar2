@@ -36,31 +36,58 @@ EMAIL = 'rowinggolfer@googlemail.com'
 URL = 'http://www.openmolar.com'
 LICENSE = 'GPL v3'
 
-if not os.path.isfile("setup.conf"):
-    sys.exit("ERROR - setup.conf not found..\n"
-    "please run python configure.py"
-    )
+MAINCONF = "setup.cnf"
+PARTCONF = "setup_part.cnf"
+
+try:
+    from configure import OMConfig
+    CONF = MAINCONF
+    if not os.path.isfile(CONF):
+        sys.exit('ERROR - %s not found..'% CONF +
+        'please run python configure.py')
+
+except ImportError:
+    print "partial setup detected"
+    CONF = PARTCONF
 
 if os.path.isfile("setup.lck"):
-    if os.path.isfile("configure.py"):
-        sys.exit("ERROR - setup.py is locked.."
-        " did a previous installation fail to complete?\n"
-        "This could have left setup.conf in a broken state\n"
-        "You must delete setup.lck to remove this warning\n"
-        "please re-run python configure.py"
-        )
+    sys.exit("ERROR - setup.py is locked.."
+    " did a previous installation fail to complete?\n"
+    "You must delete setup.lck to remove this warning\n"
+    )
 
-shutil.copy("setup.conf", "setup.lck")
+open("setup.lck", "a")
 
 config = ConfigParser.RawConfigParser()
-config.read("setup.conf")
+config.read(CONF)
+
+#this next line is always written if manifest option is chosen
+MANIFEST = 'include setup.cnf'
+#these lines are appended as required
+MANIFEST_admin = "include misc/admin/*"
+MANIFEST_client = "include misc/client/*"
+MANIFEST_server = "include misc/server/*"
+
+def write_manifest_in(files=[]):
+    f = open("MANIFEST.in", "w")
+    f.write("include setup_part.cnf\n")
+    for file_ in files:
+        f.write("include %s\n"% file_)
+    f.close()
 
 #common setup
 if config.has_section("common") and config.getboolean("common", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    subprocess.Popen(["./configure.py","-o"]).wait()
+    if CONF == MAINCONF:
+        config = OMConfig()
+        config.set("common", "include", True)
+        f = open(PARTCONF, "w")
+        config.write(f)
+        f.close()
+
+        write_manifest_in()
 
     setup(
         name = 'openmolar-common',
@@ -89,7 +116,14 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    subprocess.Popen(["./configure.py","-a"]).wait()
+    if CONF == MAINCONF:
+        config = OMConfig()
+        config.set("admin", "include", True)
+        f = open(PARTCONF, "w")
+        config.write(f)
+        f.close()
+
+        write_manifest_in(["misc/admin/*"])
 
     setup(
         name = 'openmolar-admin',
@@ -124,7 +158,14 @@ if config.has_section("client") and config.getboolean("client", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    subprocess.Popen(["./configure.py","-c"]).wait()
+    if CONF == MAINCONF:
+        config = OMConfig()
+        config.set("client", "include", True)
+        f = open(PARTCONF, "w")
+        config.write(f)
+        f.close()
+
+        write_manifest_in(["misc/client/*"])
 
     setup(
         name = 'openmolar-client',
@@ -179,10 +220,14 @@ if config.has_section("server") and config.getboolean("server", "include"):
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-        #os.makedirs('scripts')
-        #shutil.copyfile('myscript.py', 'scripts/myscript')
+    if CONF == MAINCONF:
+        config = OMConfig()
+        config.set("server", "include", True)
+        f = open(PARTCONF, "w")
+        config.write(f)
+        f.close()
 
-    subprocess.Popen(["./configure.py","-s"]).wait()
+        write_manifest_in(["misc/server/*"])
 
     setup(
         name = 'openmolar-server',
@@ -204,12 +249,19 @@ if config.has_section("server") and config.getboolean("server", "include"):
 
 if config.has_section("lang") and config.getboolean("lang", "include"):
     print "WARNING - setup.py is unable to install language pack at the moment"
-    #subprocess.Popen(["./configure.py","-l"]).wait()
+    if CONF == MAINCONF:
+        config = OMConfig()
+        config.set("lang", "include", True)
+        f = open(PARTCONF, "w")
+        config.write(f)
+        f.close()
+
+        write_manifest_in()
 
 if os.path.isfile("MANIFEST"):
     os.unlink("MANIFEST")
 
 # and finally.. if we've got this far.. remove the locks
 
-shutil.move("setup.lck", "setup.conf")
+os.remove("setup.lck")
 

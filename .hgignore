@@ -15,4 +15,5 @@ experimental/*
 dist/
 build/
 MANIFEST.in
-setup.conf
+setup.cnf
+setup_part.cnf

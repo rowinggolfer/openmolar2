@@ -24,7 +24,12 @@ import ConfigParser
 import optparse
 import StringIO
 
-HEADER = '''
+class OMConfig(ConfigParser.RawConfigParser):
+    '''
+    subclass RawConfigParser with default values and an overwrite of the write
+    function so that a nice header is included
+    '''
+    HEADER = '''
 # As openmolar is a suite of applications with a common source code directory
 # some configuration is required before running setup.py
 #
@@ -33,39 +38,29 @@ HEADER = '''
 #
 # or creating a pure source distribution for that element
 #
-'''
+    '''
 
-CONF = '''
+    DICT = {"common": False,
+            "client": False,
+            "admin" : False,
+            "server": False,
+            "lang"  : False}
 
-[common]
-version = 2.0
-include = True
+    ATTS = DICT.keys()
 
-[client]
-version = 2.0
-include = True
+    def __init__(self):
+        ConfigParser.RawConfigParser.__init__(self)
+        for att in self.ATTS:
+            self.add_section(att)
+            self.set(att, "include", self.DICT[att])
 
-[admin]
-version = 2.0
-include = True
+    def write(self, f):
+        '''
+        re-implement write so that our header is included
+        '''
+        f.write(self.HEADER)
+        ConfigParser.RawConfigParser.write(self, f)
 
-[server]
-version = 2.0
-include = True
-
-[lang]
-version = 2.0
-include = False
-'''
-
-
-#this next line is always written if manifest option is chosen
-MANIFEST = 'include setup.conf'
-
-#these lines are appended as required
-MANIFEST_admin = "include misc/admin/*"
-MANIFEST_client = "include misc/client/*"
-MANIFEST_server = "include misc/server/*"
 
 class Parser(optparse.OptionParser):
     def __init__(self):
@@ -100,16 +95,11 @@ class Parser(optparse.OptionParser):
                         action="store_true", default=False,
                         help = "package or install sources for the server application"
                         )
-        option = self.add_option("-w", "--write_manifest",
-                        dest = "manifest",
-                        action="store_true", default=True,
-                        help = "write the manifest file"
-                        )
 
 def manual_select(options):
     print "please choose from the following"
 
-    for att in ("common", "client", "admin", "server", "lang"):
+    for att in OMConfig.ATTS:
         result = raw_input("Include %s (Y/n)"% att)
         options.__dict__[att] = result.lower() in ("y", "")
 
@@ -125,32 +115,11 @@ if __name__ == "__main__":
             parser.print_help()
             sys.exit("nothing to do")
 
-    f = open("setup.conf", "w")
-    f.write(CONF)
-    f.close()
+    config = OMConfig()
+    for att in config.ATTS:
+        config.set(att, "include", options.__dict__[att])
 
-    config = ConfigParser.RawConfigParser()
-    config.read("setup.conf")
-
-    config.set("common", "include", options.common)
-    config.set("client", "include", options.client)
-    config.set("admin", "include", options.admin)
-    config.set("server", "include", options.server)
-    config.set("lang", "include", options.lang)
-
-    f = open("setup.conf", "w")
-    f.write(HEADER)
+    f = open("setup.cnf", "w")
     config.write(f)
     f.close()
-
-    if options.manifest:
-        f = open("MANIFEST.in", "w")
-        f.write(MANIFEST)
-        if options.client:
-            f.write(MANIFEST_client)
-        if options.admin:
-            f.write(MANIFEST_admin)
-        if options.server:
-            f.write(MANIFEST_admin)
-        f.close()
 
