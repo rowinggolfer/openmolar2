@@ -227,13 +227,20 @@ if config.has_section("client") and config.getboolean("client", "include"):
 
 class InstallData(install_data):
     '''
-    subclass install_data so that updat.rc is executed
+    subclass install_data so that update-rc.d is executed
+    (which may not be appropriate for some distros?)
+    also.. (re)start the openmolar-server!
     '''
     def run(self):
         install_data.run(self)
         print "RUNNING update-rc.d"
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
+        
+        print "(RE)Startting the openmolar-sever"
+        p = subprocess.Popen(["openmolar-server","--restart"])
+        p.wait()
+        
 
 if config.has_section("server") and config.getboolean("server", "include"):
     print "INFO : running server setup (as per conf file)"
