@@ -21,7 +21,7 @@
 ###############################################################################
 
 
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, QtWebKit
 
 from lib_openmolar.common.widgets.closeable_tab_widget import ClosableTabWidget
 
@@ -33,13 +33,13 @@ class AdminTabWidget(ClosableTabWidget):
     def __init__(self, parent=None):
         super(AdminTabWidget, self).__init__(parent)
 
-        action_close = QtGui.QAction("Close All Tabs", self)
-        action_close.triggered.connect(self._closeAll)
+        action_close = QtGui.QAction(_("Close Tabs"), self)
+        action_close.triggered.connect(self.closeAll)
 
-        action_new_table = QtGui.QAction("New Table Viewer", self)
+        action_new_table = QtGui.QAction(_("New Table Viewer"), self)
         action_new_table.triggered.connect(self.new_table)
 
-        action_new_query = QtGui.QAction("New Query Tool", self)
+        action_new_query = QtGui.QAction(_("New Query Tool"), self)
         action_new_query.triggered.connect(self.new_query)
 
         menu = QtGui.QMenu(self)
@@ -60,8 +60,13 @@ class AdminTabWidget(ClosableTabWidget):
 
         self.currentChanged.connect(self._tab_changed)
 
-    def _closeAll(self):
-        ClosableTabWidget.closeAll(self, _("Disconnect and"))
+        self.browser = QtWebKit.QWebView()
+        self.addTab(self.browser, _("Messages"))
+
+    def closeAll(self):
+        if self.count() > 1:
+            ClosableTabWidget.closeAll(self, _("Disconnect and"))
+            self.addTab(self.browser, _("Messages"))
 
     def _tab_changed(self, i):
         try:
@@ -77,8 +82,6 @@ class AdminTabWidget(ClosableTabWidget):
 
     def new_table(self):
         self.emit(QtCore.SIGNAL("new table tab"))
-
-
 
 if __name__ == "__main__":
     import gettext

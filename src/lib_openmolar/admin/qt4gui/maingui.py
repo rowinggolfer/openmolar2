@@ -179,10 +179,6 @@ class AdminMainWindow(BaseMainWindow):
         insertpoint = self.action_show_statusbar
         self.menu_view.insertAction(insertpoint, self.action_show_log)
 
-        self.tab_widget = AdminTabWidget(self)
-
-        self.setCentralWidget(self.tab_widget)
-
         #take a note of this before restoring settings
         self.system_font = self.font()
 
@@ -193,8 +189,12 @@ class AdminMainWindow(BaseMainWindow):
 
         self.connection = None
         self.tabs = []
-        self.disconnect_server()
 
+        self.tab_widget = AdminTabWidget(self)
+        self.browser = self.tab_widget.browser
+        self.setCentralWidget(self.tab_widget)
+
+        self.disconnect_server()
         self.connect_signals()
         self.show()
         self.setBriefMessageLocation()
@@ -238,9 +238,11 @@ class AdminMainWindow(BaseMainWindow):
         attempt to connect to the server controller at startup
         '''
         if self.proxy_server is not None:
-            self.advise(u"%s<hr />%s %s"% (
-            _("Successful connection to the server controller"),
-            _("last backup"), self.proxy_server.last_backup()))
+            message = self.proxy_server.admin_welcome()
+        else:
+            message = "<html><body><h1>%s</h1></body></html>"% _(
+                "Error connecting to the openmolar-server")
+        self.browser.setHtml(message)
 
     @property
     def proxy_server(self):
@@ -327,6 +329,7 @@ class AdminMainWindow(BaseMainWindow):
 
     def addViews(self):
         self.tab_widget.closeAllWithoutQuestion()
+        self.tab_widget.addTab(self.browser, _("Messages"))
         self.add_table_tab()
         self.add_query_editor()
 
@@ -353,8 +356,9 @@ class AdminMainWindow(BaseMainWindow):
             self.tab_widget.addTab(widg, icon, _("Query Tool"))
 
     def remove_tab(self, tab):
-        tab.deleteLater()
-        self.tabs.remove(tab)
+        if tab in self.tabs:
+            tab.deleteLater()
+            self.tabs.remove(tab)
 
     def choose_connection(self):
         '''

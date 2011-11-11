@@ -25,17 +25,10 @@ import subprocess
 import sys
 import psycopg2
 
-filename = ""
-
-class ServerFunctions(object):
+class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
-    def __init__(self):
-        f = open("/etc/openmolar/server/master_pword.txt", "r")
-        self.MASTER_PWORD = f.readline()
-        f.close()
-
     def execute(self, statement, dbname="openmolar_master"):
         s = "host=127.0.0.1 "
         s += "user=openmolar "
@@ -54,13 +47,23 @@ class ServerFunctions(object):
             log.exception("error executing statements")
             return False
 
-    def last_backup(self):
+    def admin_welcome(self):
         '''
-        returns a iso formatted datetime string showing when the
-        last backup was made
+        return the html shown at admin_startup
         '''
-        import datetime
-        return datetime.datetime.now().isoformat()
+        html = u'''
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8" />
+        <title>Admin Welcome</title>
+        </head>
+        <body>
+        <h1>Hello from the server</h1>
+        All appears to be working!
+        </body>
+        </html>'''
+        return html
 
     def drop_db(self, name):
         '''
@@ -163,7 +166,6 @@ class ServerFunctions(object):
             version_, name))
         self.execute([sql], name)
 
-
     def get_demo_user(self):
         '''
         return the demo user (created on install)
@@ -172,15 +174,13 @@ class ServerFunctions(object):
 
 
 def _test():
-    #make a test logger
+    '''
+    test the DBFunctions class
+    '''
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger("openmolar_server")
-    sf = ServerFunctions()
-    sf.last_backup()
-
-    sf.drop_db("openmolar_demo")
-    sf.create_db("openmolar_demo")
-    sf.layout_schema("openmolar_demo")
+    sf = DBFunctions()
+    log.debug(sf.get_demo_user())
 
 if __name__ == "__main__":
     _test()
