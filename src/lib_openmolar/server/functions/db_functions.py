@@ -29,14 +29,21 @@ class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
-    def execute(self, statement, dbname="openmolar_master"):
-        s = "host=127.0.0.1 "
-        s += "user=openmolar "
-        s += "password=%s "% self.MASTER_PWORD
-        s += "dbname=%s"% dbname
+    MASTER_PWORD = ""
+    if __name__ == "__main__":
+        f = open("/home/neil/openmolar/master_pword.txt")
+        MASTER_PWORD = f.read()
+        f.close()
+
+    def __init__(self):
+        self.conn_atts = \
+            "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
+            self.MASTER_PWORD, "openmolar_master")
+
+    def execute(self, statement):
         log = logging.getLogger("openmolar_server")
         try:
-            conn = psycopg2.connect(s)
+            conn = psycopg2.connect(self.conn_atts)
             conn.autocommit = True
             cursor = conn.cursor()
             log.debug(statement)
@@ -47,23 +54,37 @@ class DBFunctions(object):
             log.exception("error executing statements")
             return False
 
-    def admin_welcome(self):
+    def available_databases(self):
         '''
-        return the html shown at admin_startup
+        get a list of databases (owned by "openmolar")
+
+        the query I use for this is based on the following.
+
+        SELECT datname, usename, datdba
+        FROM pg_database JOIN pg_user
+        ON pg_database.datdba = pg_user.usesysid and usename='openmolar';
+
+        pg_database and pg_user are tables which do not require a superuser
+        to poll for this information.
+
         '''
-        html = u'''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8" />
-        <title>Admin Welcome</title>
-        </head>
-        <body>
-        <h1>Hello from the server</h1>
-        All appears to be working!
-        </body>
-        </html>'''
-        return html
+        log = logging.getLogger("openmolar_server")
+        log.debug("polling for available databases")
+        databases = []
+        try:
+            conn = psycopg2.connect(self.conn_atts)
+            cursor = conn.cursor()
+            cursor.execute('''SELECT datname FROM pg_database JOIN pg_user
+            ON pg_database.datdba = pg_user.usesysid
+            where usename='openmolar' and datname != 'openmolar_master'
+            order by datname''')
+            for result in cursor.fetchall():
+                databases.append(result[0])
+            conn.close()
+        except Exception:
+            log.exception("Serious Error")
+
+        return databases
 
     def drop_db(self, name):
         '''
@@ -181,6 +202,7 @@ def _test():
     log = logging.getLogger("openmolar_server")
     sf = DBFunctions()
     log.debug(sf.get_demo_user())
+    log.debug(sf.available_databases())
 
 if __name__ == "__main__":
     _test()

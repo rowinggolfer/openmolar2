@@ -36,6 +36,19 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         f = open("/etc/openmolar/server/master_pword.txt", "r")
         self.MASTER_PWORD = f.readline()
         f.close()
+        DBFunctions.__init__(self)
+
+    def admin_welcome(self):
+        dbs = self.available_databases()
+        if dbs == []:
+            message = self.no_databases_message()
+        else:
+            message = self.admin_welcome_template()
+            db_list = ""
+            for db in dbs:
+                db_list += "<li>%s</li>"% db
+            message = message.replace("{DATABASE LIST}", db_list)
+        return message
 
     def last_backup(self):
         '''
@@ -54,6 +67,7 @@ def _test():
     log = logging.getLogger("openmolar_server")
     sf = ServerFunctions()
     log.debug(sf.get_demo_user())
+    log.debug(sf.admin_welcome())
 
 if __name__ == "__main__":
     _test()

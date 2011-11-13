@@ -62,11 +62,13 @@ class AdminTabWidget(ClosableTabWidget):
 
         self.browser = QtWebKit.QWebView()
         self.addTab(self.browser, _("Messages"))
+        self.toggle_tabbar()
 
     def closeAll(self):
         if self.count() > 1:
             ClosableTabWidget.closeAll(self, _("Disconnect and"))
             self.addTab(self.browser, _("Messages"))
+        self.toggle_tabbar()
 
     def _tab_changed(self, i):
         try:
@@ -82,6 +84,19 @@ class AdminTabWidget(ClosableTabWidget):
 
     def new_table(self):
         self.emit(QtCore.SIGNAL("new table tab"))
+
+    def addTab(self, *args):
+        ClosableTabWidget.addTab(self, *args)
+        self.toggle_tabbar()
+
+    def removeTab(self, i):
+        ClosableTabWidget.removeTab(self, i)
+        self.toggle_tabbar()
+
+    def toggle_tabbar(self):
+        pass
+        #self.tabBar().setVisible(self.count()>1)
+
 
 if __name__ == "__main__":
     import gettext

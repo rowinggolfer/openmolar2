@@ -23,7 +23,8 @@
 '''
 provides 2 classes.
 ConnectionError - a custom python exception, raised if connection times out
-OpenmolarConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
+OpenmolarConnection - a custom class which connects to
+the openmolar xmlrpc server
 '''
 
 import commands
@@ -33,7 +34,6 @@ import xmlrpclib
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-
 class OpenmolarConnectionError(Exception):
     '''
     a custom Exception
@@ -41,7 +41,10 @@ class OpenmolarConnectionError(Exception):
     pass
 
 class OpenmolarConnection(object):
-    HOST = commands.getoutput("hostname -I").split(" ")[0]
+    '''
+    a class which connects to the openmolar xmlrpc server
+    '''
+    HOST = "127.0.0.1"
     PORT = 42230
     def connect(self, host=HOST, port=PORT):
         '''

@@ -22,6 +22,7 @@
 
 import commands
 import logging
+import socket
 import sys
 
 from SimpleXMLRPCServer import SimpleXMLRPCServer
@@ -29,8 +30,6 @@ from SimpleXMLRPCServer import SimpleXMLRPCServer
 from service import Service
 from functions import ServerFunctions
 import logger
-
-HOST = commands.getoutput("hostname -I").split(" ")[0]
 
 PORT = 42230
 
@@ -50,11 +49,12 @@ class OMServer(Service):
         if not self.start_():
             return False
         self.log.info("creating server...")
-        server = SimpleXMLRPCServer((HOST, PORT))
+
+        server = SimpleXMLRPCServer(("", PORT))
         server.register_function(ping)
         server.register_instance(ServerFunctions())
 
-        self.log.info("listening on %s:%d"% (HOST, PORT))
+        self.log.info("listening on port %d"% (PORT))
         server.serve_forever()
 
     def stop(self):
