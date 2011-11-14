@@ -57,8 +57,13 @@ class MessageFunctions(object):
         return '''%s
         <h1>%s</h1>
         <h2>%s</h2>
-        %s<br />%s<br />%s
-        <a href="install_demo">%s</a>.%s'''%(HEADER,
+        %s<br />%s<br />
+
+        %s <a href="install_demo">%s</a>.<br />
+
+        some other function <a href="function">Some other function</a>.
+
+        %s'''%(HEADER,
         _("Welcome!"),
         _("Connection to the Server Controller has been established."),
         _("You do not appear to have any openmolar databases installed."),

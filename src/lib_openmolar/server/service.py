@@ -22,6 +22,7 @@
 
 '''
 "borrows" heavily from http://code.google.com/p/supay/
+and the book python for sysadmins (which I own)
 '''
 
 import logging

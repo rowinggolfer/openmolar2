@@ -21,9 +21,10 @@
 ###############################################################################
 
 
-from PyQt4 import QtCore, QtGui, QtWebKit
+from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.widgets.closeable_tab_widget import ClosableTabWidget
+from lib_openmolar.admin.qt4gui.classes.browser import Browser
 
 class AdminTabWidget(ClosableTabWidget):
     '''
@@ -60,8 +61,9 @@ class AdminTabWidget(ClosableTabWidget):
 
         self.currentChanged.connect(self._tab_changed)
 
-        self.browser = QtWebKit.QWebView()
+        self.browser = Browser()
         self.addTab(self.browser, _("Messages"))
+
         self.toggle_tabbar()
 
     def closeAll(self):
@@ -105,14 +107,15 @@ if __name__ == "__main__":
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     dl.setMinimumSize(400,200)
-    stw = AdminTabWidget(dl)
+    atw = AdminTabWidget(dl)
 
+    atw.browser.setHtml("hello")
     label1 = QtGui.QLabel("Placeholder1")
     label2 = QtGui.QLabel("Placeholder2")
-    stw.addTab(label1, "one")
-    stw.addTab(label2, "two")
+    atw.addTab(label1, "one")
+    atw.addTab(label2, "two")
 
     layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(stw)
+    layout.addWidget(atw)
 
     dl.exec_()

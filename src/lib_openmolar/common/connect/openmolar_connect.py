@@ -45,7 +45,7 @@ class OpenmolarConnection(object):
     a class which connects to the openmolar xmlrpc server
     '''
     HOST = "127.0.0.1"
-    PORT = 42230
+    PORT = 230
     def connect(self, host=HOST, port=PORT):
         '''
         attempt to connect to xmlrpc_server, and return this object

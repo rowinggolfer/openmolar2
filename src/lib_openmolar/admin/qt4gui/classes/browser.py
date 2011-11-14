@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -20,50 +20,45 @@
 ##                                                                           ##
 ###############################################################################
 
-import commands
+
+from PyQt4 import QtCore, QtGui, QtWebKit
 import logging
-import socket
-import sys
 
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+class Browser(QtWebKit.QWebView):
+    '''
+    A browser which is aware of some of the shortcuts offered by the server.
+    '''
+    shortcut_clicked = QtCore.pyqtSignal(object)
 
-from service import Service
-from functions import ServerFunctions
-import logger
+    def __init__(self, parent=None):
+        QtWebKit.QWebView.__init__(self, parent)
+        self.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.linkClicked.connect(self._link_clicked)
 
-PORT = 230
+    def setHtml(self, html):
+        QtWebKit.QWebView.setHtml(self, html)
+        self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
 
-def ping():
-    return True
+    def _link_clicked(self, url):
+        logging.debug("admin browser link clicked '%s'"% url)
+        self.shortcut_clicked.emit(url.toString())
 
-class OMServer(Service):
-    def __init__(self, verbose=False):
-        self.log = logging.getLogger("openmolar_server")
-        if verbose:
-            self.log.setLevel(logging.DEBUG)
-        else:
-            self.log.setLevel(logging.INFO)
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
 
-    def start(self):
-        self.log.info("starting OMServer Process")
-        if not self.start_():
-            return False
-        self.log.info("creating server...")
+    app = QtGui.QApplication([])
+    dl = QtGui.QDialog()
+    dl.setMinimumSize(400,200)
 
-        server = SimpleXMLRPCServer(("", PORT))
-        server.register_function(ping)
-        server.register_instance(ServerFunctions())
+    def sig_catcher(*args):
+        print args
 
-        self.log.info("listening on port %d"% (PORT))
-        server.serve_forever()
+    browser = Browser()
+    browser.setHtml("hello<br /><a href='url'>click here</a>")
 
-    def stop(self):
-        self.log.info("Stopping server")
-        self.stop_()
+    browser.shortcut_clicked.connect(sig_catcher)
 
-    def restart(self):
-        self.stop()
-        self.start()
+    layout = QtGui.QVBoxLayout(dl)
+    layout.addWidget(browser)
 
-    def status(self):
-        self.status_()
+    dl.exec_()

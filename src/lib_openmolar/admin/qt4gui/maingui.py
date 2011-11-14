@@ -22,9 +22,11 @@
 
 import datetime
 import cPickle
+import logging
 import re
 import sys
 from PyQt4 import QtGui, QtCore
+
 
 if __name__ == "__main__":
     import os
@@ -232,6 +234,8 @@ class AdminMainWindow(BaseMainWindow):
             self.add_table_tab)
 
         self.tab_widget.currentChanged.connect(self.tab_widget_selected)
+
+        self.browser.shortcut_clicked.connect(self.manage_shortcut)
 
     def init_proxy(self):
         '''
@@ -668,7 +672,8 @@ class AdminMainWindow(BaseMainWindow):
             try:
                 SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
             except Exception as e:
-                print "exception caught loading python settings...", e
+                logging.exception(
+                    "exception caught loading python settings...")
 
     def saveSettings(self):
         BaseMainWindow.saveSettings(self)
@@ -739,6 +744,19 @@ _("Would you like to install the openmolar schema into this database now?")),
         QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
             self.populate_demo()
 
+    def manage_shortcut(self, url):
+        '''
+        the admin browser
+        (which commonly contains messages from the openmolar_server)
+        is connected to this slot.
+        when a url is clicked it finds it's way here for management.
+        unrecognised signals are send to the user via the notification.
+        '''
+        if url == "install_demo":
+            logging.debug("Install demo called")
+        else:
+            self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
+
 def main():
     app = RestorableApplication("openmolar-admin")
     ui = AdminMainWindow()
@@ -747,6 +765,8 @@ def main():
     app = None
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     import gettext
     gettext.install("openmolar")
     sys.exit(main())
