@@ -105,13 +105,12 @@ class PopulateDemoDialog(ExtendableDialog):
             return (False, "")
         dbname = self.connection.databaseName()
 
-        if (not self.connection.has_all_empty_tables and
-        QtGui.QMessageBox.warning(self.parent(), _("Populating Demo"),
+        if QtGui.QMessageBox.warning(self.parent(), _("Populating Demo"),
         u"<b>%s '%s'</b><hr />%s"%(
 _("continuing may corrupt/overwrite any existing data in the database named"),
         dbname, _("do you wish to continue?")),
         QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Cancel):
+        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Cancel:
             return ("", False)
 
         self.Advise(u"%s %s"% (_("Populating Database"), dbname))

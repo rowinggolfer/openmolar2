@@ -24,34 +24,51 @@ import logging
 import subprocess
 import sys
 import psycopg2
+from lib_openmolar.server.password_generator import new_password
+
 
 class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
     MASTER_PWORD = ""
-    if __name__ == "__main__":
-        f = open("/home/neil/openmolar/master_pword.txt")
-        MASTER_PWORD = f.read()
-        f.close()
 
     def __init__(self):
-        self.conn_atts = \
-            "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
-            self.MASTER_PWORD, "openmolar_master")
+        if __name__ == "__main__":
+            ## this is useful for testing purposes only
+            f = open("/home/neil/openmolar/master_pword.txt")
+            self.MASTER_PWORD = f.read()
+            f.close()
 
-    def execute(self, statement):
+    @property
+    def default_conn_atts(self):
+        return self.__conn_atts()
+
+    def __conn_atts(self, dbname="openmolar_master"):
+        '''
+        has to be a private function because of the password!
+        a well set up server will restrict user "openmolar" to TCP/IP
+        connections restricted to localhost though.
+        (doesn't get picked up by register_instance)
+        '''
+        return "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
+            self.MASTER_PWORD, dbname)
+
+    def _execute(self, statement, dbname="openmolar_master"):
+        '''
+        execute an sql statement with default connection rights.
+        '''
         log = logging.getLogger("openmolar_server")
         try:
-            conn = psycopg2.connect(self.conn_atts)
+            conn = psycopg2.connect(self.__conn_atts(dbname))
             conn.autocommit = True
             cursor = conn.cursor()
-            log.debug(statement)
+            #log.debug(statement)
             cursor.execute(statement)
             conn.close()
             return True
         except:
-            log.exception("error executing statements")
+            log.exception("error executing statement")
             return False
 
     def available_databases(self):
@@ -72,7 +89,7 @@ class DBFunctions(object):
         log.debug("polling for available databases")
         databases = []
         try:
-            conn = psycopg2.connect(self.conn_atts)
+            conn = psycopg2.connect(self.default_conn_atts)
             cursor = conn.cursor()
             cursor.execute('''SELECT datname FROM pg_database JOIN pg_user
             ON pg_database.datdba = pg_user.usesysid
@@ -93,7 +110,7 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.warning("dropping database %s"% name)
         try:
-            self.execute("drop database %s"% name)
+            self._execute("drop database %s"% name)
         except:
             log.exception("unable to drop database %s"% name)
 
@@ -104,23 +121,46 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("creating new database %s [with owner openmolar]"% name)
         try:
-            self.execute("create database %s with owner openmolar"% name)
+            self._execute("create database %s with owner openmolar"% name)
         except Exception as exc:
             log.exception("unable to create database '%s'"% name)
             return False
         return True
 
-    def install_fuzzymatch(self, name):
+    def create_usergroups(self, dbname):
+        '''
+        creates usergroups.
+        to do this we create two non-login roles.
+        Any future users can inherited permissions from these guys.
+        permissions are way to permissive at this point
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.info(
+            "creating new roles to act as group privileges for %s"% dbname)
+        admin = '%s_admin_privs;' %dbname
+        client = '%s_client_privs;' %dbname
+
+        for group in (admin, client):
+            SQL = 'create role %s;\n'% group
+            SQL += 'grant all privileges on patients to %s ;\n'% group
+            logging.debug(SQL)
+            try:
+                self._execute(SQL, dbname)
+            except Exception as exc:
+                log.exception("problem executing %s"% SQL)
+        return True
+
+    def install_fuzzymatch(self, dbname):
         '''
         installs fuzzymatch functions into database with the name given
         '''
         log = logging.getLogger("openmolar_server")
-        log.info("Installing fuzzymatch functions into database '%s'"% name)
+        log.info("Installing fuzzymatch functions into database '%s'"% dbname)
         try:
-            p = subprocess.Popen(["openmolar-install-fuzzymatch", name])
+            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname])
             p.wait()
         except Exception as exc:
-            log.exception("unable to install fuzzymatch into '%s'"% name)
+            log.exception("unable to install fuzzymatch into '%s'"% dbname)
             return False
         return True
 
@@ -141,57 +181,98 @@ class DBFunctions(object):
             return False
         return True
 
-    def save_schema(self, sql, version="unknown"):
+    def save_schema(self, sql):
         '''
         the admin app is responsible for the schema in use.
         here, it has passed the schema in text form to the server, so that the
         server can lay out new databases without the admin app.
         '''
-        filename = "/etc/openmolar/server/schema.sql"
+        filename = "/usr/share/blank_schema.sql"
         log = logging.getLogger("openmolar_server")
-        log.info("saving schema version %s to %s"% (version, filename))
+        log.info("saving schema to %s"% filename)
         f = open(filename, "w")
         f.write(sql)
-        f.close()
-        f = open("/etc/openmolar/server/schema_version.txt", "w")
-        f.write(version)
         f.close()
         return True
 
     def get_schema(self):
         '''
-        returns a tuple.
-        (sql_statements, version)
+        gets the schema from file
         '''
-        filename = "/etc/openmolar/server/schema.sql"
+        filename = "/usr/share/openmolar/blank_schema.sql"
 
         log = logging.getLogger("openmolar_server")
-        log.info("saving schema to %s"% filename)
+        log.info("reading schema from %s"% filename)
 
         f = open(filename, "r")
         sql = f.read()
         f.close()
 
-        f = open("/etc/openmolar/server/schema_version.txt", "r")
-        version = f.read()
-        f.close()
-        return (sql, version)
+        return sql
 
-    def layout_schema(self, name):
+    def layout_schema(self, dbname):
         '''
         creates a blank openmolar table set in the database with the name given
         '''
-        sql, version_ = self.get_schema()
+        sql = self.get_schema()
         log = logging.getLogger("openmolar_server")
-        log.info("laying out schema version %s for database '%s'"% (
-            version_, name))
-        self.execute([sql], name)
+        log.info("laying out schema for database '%s'"% dbname)
 
-    def get_demo_user(self):
+        try:
+            self._execute(sql, dbname)
+            return True
+        except Exception:
+            log.exception("Serious Error")
+        return False
+
+    def create_demo_user(self):
         '''
-        return the demo user (created on install)
+        create our demo user
         '''
-        return {"username":"om_demo","password":"password"}
+        log = logging.getLogger("openmolar_server")
+        log.info("creating a demo user")
+
+        return self.create_user("om_demo", "password")
+
+    def create_user(self, username, password=None):
+        '''
+        create a user (remote user)
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.info("add a user(role) with name '%s'"% username)
+
+        if password is None:
+            password = new_password()
+
+        try:
+            self._execute(
+                "create user %s with password '%s' "% (username, password))
+            return True
+        except Exception:
+            log.exception("Serious Error")
+        return False
+
+    def grant_user_permissions(self, user, dbname, admin=True, client=True):
+        '''
+        grant permissions for a user to database dbname
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.info("adding %s to priv groups on database %s"% (user, dbname))
+
+        SQL = ""
+        if admin:
+            SQL += "GRANT %s_admin_privs to %s;\n"% (dbname, user)
+        if client:
+            SQL += "GRANT %s_client_privs to %s;\n"% (dbname, user)
+        try:
+            self._execute(SQL, dbname)
+            return True
+        except Exception:
+            log.exception("Serious Error")
+        return False
+
+    def grant_demo_user_permissions(self, dbname="openmolar_demo"):
+        return self.grant_user_permissions('om_demo', dbname)
 
 
 def _test():
@@ -201,8 +282,17 @@ def _test():
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger("openmolar_server")
     sf = DBFunctions()
-    log.debug(sf.get_demo_user())
-    log.debug(sf.available_databases())
+    #sf.create_demo_user()
+    #log.debug(sf.get_demo_user())
+    #log.debug(sf.available_databases())
+    #log.debug(sf.get_schema())
+
+    dbname = "openmolar_demo"
+    sf.create_db(dbname)
+    sf.layout_schema(dbname)
+    sf.create_usergroups(dbname)
+    sf.create_demo_user()
+    sf.grant_demo_user_permissions(dbname)
 
 if __name__ == "__main__":
     _test()

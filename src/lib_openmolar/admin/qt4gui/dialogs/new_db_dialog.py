@@ -20,119 +20,74 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
 import re
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.dialogs import BaseDialog, ExtendableDialog
-
-CREATE_INSTRUCTIONS = '''<html>
-EXAMPLE -
-To create a database called 'openmolar_demo' with a user 'om_user'<br />
-Please do the following<hr />
-drop to a terminal and type the following
-<pre>
-
-~$ sudo su - postgres
-~$ createdb openmolar_demo
-~$ createuser -P om_user
-Enter password for new role:
-Enter it again:
-Shall the new role be a superuser? (y/n) n
-Shall the new role be allowed to create databases? (y/n) n
-Shall the new role be allowed to create more new roles? (y/n) n
-
-</pre>
-<br />
-(instructions valid for debian based distributions, for other server types,
-please consult their documentation)
-</html>
-'''
-
-class NoDatabaseDialog(BaseDialog):
-    def __init__(self, parent=None):
-        super(NoDatabaseDialog, self).__init__(parent)
-        self.setWindowTitle(_("New Database"))
-
-        label = QtGui.QLabel(CREATE_INSTRUCTIONS)
-        self.insertWidget(label)
+from lib_openmolar.common.dialogs import ExtendableDialog
 
 class NewDatabaseDialog(ExtendableDialog):
-    def __init__(self, connection, log, parent=None):
-        super(NewDatabaseDialog, self).__init__(parent)
+    def __init__(self, parent=None):
+        ExtendableDialog.__init__(self, parent)
 
-        self.connection = connection
-        self.log = log
+        self.setWindowTitle(_("New Database"))
 
-        self.setWindowTitle(_("Install Schema"))
-
-        label = QtGui.QLabel(_("Install ALL required openmolar tables and datatypes into the current database?"))
+        label = QtGui.QLabel("<b>%s %s %s</b>"% (
+        _('You are about to install a new database'),
+        _("(correctly called a 'schema')"),
+        _("onto your postgresql server")))
         label.setWordWrap(True)
+
+        label1 = QtGui.QLabel(_("Please enter a name for this new database"))
+        label1.setWordWrap(True)
+
+        self.lineedit = QtGui.QLineEdit()
+
         self.insertWidget(label)
+        self.insertWidget(label1)
+        self.insertWidget(self.lineedit)
+
+        advanced_label = QtGui.QLabel("no advanced options as yet")
+
+        self.add_advanced_widget(advanced_label)
 
         self.enableApply()
 
     def sizeHint(self):
-        return QtCore.QSize(300, 200)
+        return QtCore.QSize(400, 400)
 
-    def Advise(self, *args):
-        if __name__ == "__main__":
-            print args
-        self.emit(QtCore.SIGNAL("Advise"), *args)
+    @property
+    def database_name(self):
+        '''
+        the name the user has enetered
+        '''
+        return unicode(self.lineedit.text())
+
+    def set_database_name(self, name):
+        '''
+        set the name the user has enetered
+        '''
+        self.lineedit.setText(name)
 
     def exec_(self):
-        if not ExtendableDialog.exec_(self):
-            self.Advise(_("Action Cancelled"))
-            return
+        while True:
+            if ExtendableDialog.exec_(self):
+                if self.lineedit.text() == "":
+                    QtGui.QMessageBox.warning(self, _("Error"),
+                    _("Please enter a name for this new database"))
+                else:
+                    break
+            else:
+                return False
 
-        dbname = self.connection.databaseName()
-
-        if self.connection.get_available_tables() != [] and (
-        QtGui.QMessageBox.warning(self.parent(), _("Warning"),
-        u"%s<hr /><b>%s '%s' %s</b><br />%s"%(
-        _("POTENTIAL DATA LOSS WARNING"),
-        _("database"), dbname, _("has existing tables"),
-        _("do you wish to continue?")),
-        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Cancel):
-            return ("", False)
-
-        self.Advise(u"%s %s"% (_("Creating Database"), dbname))
-
-        return (dbname, self.layout_schema())
-
-    def layout_schema(self):
-        '''
-        will layout a schema DESTRUCTIVELY!!!
-        '''
-        dbname = self.connection.databaseName()
-
-        self.Advise(u"%s %s"% (_("laying out schema for database"), dbname))
-
-        result, message = self.connection.create_openmolar_tables(self.log)
-        self.log(message)
-
-        if not result:
-            self.Advise(message, 2)
-        else:
-            self.Advise(message, 1)
-
-        return result
+        return True
 
 if __name__ == "__main__":
-    import gettext
-    gettext.install("")
-
-    class DuckLog(object):
-        def log(self, *args):
-            print args
+    logging.basicConfig(level=logging.DEBUG)
+    from gettext import gettext as _
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
-    sc.connect()
+    dl = NewDatabaseDialog()
 
-    dl = NewDatabaseDialog(sc, DuckLog().log)
-
-    print dl.exec_()
-
+    dl.exec_()

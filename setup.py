@@ -23,12 +23,15 @@
 from distutils.core import setup
 from distutils.command.install_data import install_data
 
+import logging
 import os
 import re
 import shutil
 import sys
 import ConfigParser
 import subprocess
+
+logging.basicConfig(level=logging.INFO)
 
 DESCRIPTION = 'Dental Practice Management Software'
 AUTHOR = 'Neil Wallace'
@@ -39,37 +42,66 @@ LICENSE = 'GPL v3'
 MAINCONF = "setup.cnf"
 PARTCONF = "setup_part.cnf"
 
+# keep a note of any setup created files which are to be removed
+# I don't want any files own by root left behind.
+cleanup_files = []
+
 try:
     from configure import OMConfig
     CONF = MAINCONF
     if not os.path.isfile(CONF):
-        sys.exit('ERROR - %s not found..'% CONF +
-        'please run python configure.py')
+        logging.debug('%s not found..'% CONF)
+        print ('please run python configure.py')
+        sys.exit(1)
 
-    print "master setup mode"
-
+    ALL_PACKAGES_AVAILABLE = True
 except ImportError:
-    print "partial setup mode"
-    CONF = PARTCONF
-
-def cleanup():
-    '''
-    called at the end to remove any unwanted cruft
-    '''
-    files = []
-    if CONF == MAINCONF:
-        files.append(PARTCONF)
-        files.append("MANIFEST.in")
-    files.append("MANIFEST")
-    for file_ in files:
-        try:
-            if os.path.isfile(file_):
-                os.remove(file_)
-        except OSError:
-            sys.stderr.write("INFO : Unable to remove %s"% file_)
+    # this file works if included in an sdist package.
+    # however it will only install one component
+    logging.debug("partial setup mode")
+    ALL_PACKAGES_AVAILABLE = True
 
 config = ConfigParser.RawConfigParser()
 config.read(CONF)
+
+INSTALL_COMMON = (config.has_section("common") and
+                config.getboolean("common", "include"))
+
+INSTALL_ADMIN = (config.has_section("admin") and
+                config.getboolean("admin", "include"))
+
+INSTALL_CLIENT = (config.has_section("client") and
+                config.getboolean("client", "include"))
+
+INSTALL_SERVER = (config.has_section("server") and
+                config.getboolean("server", "include"))
+
+INSTALL_LANG = (config.has_section("lang") and
+                config.getboolean("lang", "include"))
+
+if INSTALL_SERVER and "win" in sys.platform and "install" in sys.argv:
+    logging.error("Server package cannot be installed on windows")
+    INSTALL_SERVER = False
+
+if ALL_PACKAGES_AVAILABLE:
+    logging.info("including the following packages (as per setup.cnf file)")
+    for include, name in (
+        (INSTALL_COMMON, "common modules"),
+        (INSTALL_COMMON, "client application"),
+        (INSTALL_COMMON, "admin application"),
+        (INSTALL_COMMON, "server daemon"),
+        (INSTALL_COMMON, "language pack")):
+        if include:
+            logging.info ("package - %s"% name)
+
+    if INSTALL_SERVER:
+        from lib_openmolar.admin.db_tools.schema_manager import SchemaManager
+
+        schema_path = "misc/server/blank_schema.sql"
+        s_manager = SchemaManager()
+        if not s_manager.match(schema_path):
+            s_manager.write(schema_path)
+            cleanup_files.append(schema_path)
 
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
@@ -83,12 +115,12 @@ def write_manifest_in(files=[]):
 ##                        "common" setup starts                              ##
 ###############################################################################
 
-if config.has_section("common") and config.getboolean("common", "include"):
-    print "INFO : running common setup (as per conf file)"
+if INSTALL_COMMON:
+    logging.info("running common setup")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    if CONF == MAINCONF:
+    if ALL_PACKAGES_AVAILABLE:
         new_config = OMConfig()
         new_config.set("common", "include", True)
         f = open(PARTCONF, "w")
@@ -122,13 +154,13 @@ if config.has_section("common") and config.getboolean("common", "include"):
 ##                        "admin" setup starts                               ##
 ###############################################################################
 
-if config.has_section("admin") and config.getboolean("admin", "include"):
-    print "INFO : running admin setup (as per conf file)"
+if INSTALL_ADMIN:
+    logging.info("running admin setup")
 
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    if CONF == MAINCONF:
+    if ALL_PACKAGES_AVAILABLE:
         new_config = OMConfig()
         new_config.set("admin", "include", True)
         f = open(PARTCONF, "w")
@@ -150,6 +182,7 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
                     'lib_openmolar.admin.data_import',
                     'lib_openmolar.admin.data_import.import_om1',
                     'lib_openmolar.admin.db_orm',
+                    'lib_openmolar.admin.db_tools',
                     'lib_openmolar.admin.qt4gui',
                     'lib_openmolar.admin.qt4gui.classes',
                     'lib_openmolar.admin.qt4gui.dialogs',
@@ -169,12 +202,12 @@ if config.has_section("admin") and config.getboolean("admin", "include"):
 ##                        "client" setup starts                              ##
 ###############################################################################
 
-if config.has_section("client") and config.getboolean("client", "include"):
-    print "INFO : running client setup (as per conf file)"
+if INSTALL_CLIENT:
+    logging.info("running client setup")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    if CONF == MAINCONF:
+    if ALL_PACKAGES_AVAILABLE:
         new_config = OMConfig()
         new_config.set("client", "include", True)
         f = open(PARTCONF, "w")
@@ -236,18 +269,18 @@ class InstallData(install_data):
         print "RUNNING update-rc.d"
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
-        
-        print "(RE)Startting the openmolar-sever"
+
+        print "(re)Starting the openmolar-sever"
         p = subprocess.Popen(["openmolar-server","--restart"])
         p.wait()
-        
 
-if config.has_section("server") and config.getboolean("server", "include"):
-    print "INFO : running server setup (as per conf file)"
+
+if INSTALL_SERVER:
+    logging.info("running server setup")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
-    if CONF == MAINCONF:
+    if ALL_PACKAGES_AVAILABLE:
         new_config = OMConfig()
         new_config.set("server", "include", True)
         f = open(PARTCONF, "w")
@@ -272,7 +305,13 @@ if config.has_section("server") and config.getboolean("server", "include"):
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
                    'misc/server/openmolar-fuzzymatch',],
-        data_files=[('/etc/init.d', ['misc/server/openmolar'])],
+        data_files=[
+                    ('/etc/init.d', ['misc/server/openmolar']),
+                    ('/usr/share/openmolar/',
+                        ['misc/server/master_schema.sql',
+                         'misc/server/blank_schema.sql'])
+                   ],
+
         cmdclass = {'install_data':InstallData}
         )
 
@@ -281,11 +320,11 @@ if config.has_section("server") and config.getboolean("server", "include"):
 ##                        "lang" setup starts                                ##
 ###############################################################################
 
-if config.has_section("lang") and config.getboolean("lang", "include"):
-    print "INFO : running lang setup (as per conf file)"
+if INSTALL_LANG:
+    logging.info("running lang setup")
 
-    print "WARNING - setup.py is unable to install language pack at the moment"
-    if CONF == MAINCONF:
+    logging.error( "language pack not yet available")
+    if ALL_PACKAGES_AVAILABLE:
         new_config = OMConfig()
         new_config.set("lang", "include", True)
         f = open(PARTCONF, "w")
@@ -294,8 +333,22 @@ if config.has_section("lang") and config.getboolean("lang", "include"):
 
         write_manifest_in()
 
+###############################################################################
+# and finally.. if we've got this far.. remove any unwanted cruft             #
+###############################################################################
 
-# and finally.. if we've got this far.. remove the locks
-cleanup()
+logging.info("cleaning up any temporary files")
+if ALL_PACKAGES_AVAILABLE:
+    cleanup_files.append(PARTCONF)
+    cleanup_files.append("MANIFEST.in")
+cleanup_files.append("MANIFEST")
 
-print "ALL DONE!"
+for file_ in cleanup_files:
+    try:
+        if os.path.isfile(file_):
+            os.remove(file_)
+    except OSError:
+        logging.exception("Unable to remove %s"% file_)
+
+logging.info("ALL DONE!")
+sys.exit(0)

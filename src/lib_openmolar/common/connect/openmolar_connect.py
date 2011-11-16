@@ -26,13 +26,10 @@ ConnectionError - a custom python exception, raised if connection times out
 OpenmolarConnection - a custom class which connects to
 the openmolar xmlrpc server
 '''
-
-import commands
 import socket
 import xmlrpclib
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
 
 class OpenmolarConnectionError(Exception):
     '''
@@ -51,19 +48,24 @@ class OpenmolarConnection(object):
         attempt to connect to xmlrpc_server, and return this object
         raise a ConnectionError if no success.
         '''
+        location = 'http://%s:%d'% (host, port)
+        logging.debug("attempting connection to %s"% location)
         try:
-            proxy = xmlrpclib.ServerProxy('http://%s:%d'% (host, port))
+            proxy = xmlrpclib.ServerProxy(location)
             proxy.ping()
+            logging.debug("connected and pingable (this is good!)")
             return proxy
         except socket.error as e:
-            print "whoops"
+            logging.exception(
+            "error connecting to the openmolar-xmlrpc server %s"% location)
+
             raise OpenmolarConnectionError(
             'Is the host %s running and accepting connections on port %d?'% (
             host, port))
 
 
 if __name__ == "__main__":
-
+    logging.basicConfig(level=logging.DEBUG)
     omc = OpenmolarConnection()
     proxy = omc.connect()
     if proxy is not None:

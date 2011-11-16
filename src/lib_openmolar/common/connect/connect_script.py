@@ -25,6 +25,7 @@ provides 2 classes.
 ConnectionError - a custom python exception, raised if connection times out
 DatabaseConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 '''
+import logging
 
 from PyQt4 import QtSql
 from PyQt4 import QtGui, QtCore
@@ -43,8 +44,9 @@ class DatabaseConnection(QtSql.QSqlDatabase):
     Will Raise a Connection error if connection has not been established
     within 10 seconds
     '''
-    def __init__(self, host="localhost", user="om_demo", passwd="password",
-    db_name="openmolar_demo", port=5432, options="requiressl=1"):
+    def __init__(self, host="127.0.0.1", user="om_demo", passwd="password",
+    db_name="openmolar_demo", port=5432, options="requiressl=1",
+    connect_timeout=10):
         super(DatabaseConnection, self).__init__("QPSQL")
         self.setHostName(host)
         self.setPort(port)
@@ -59,6 +61,7 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         '''
         load the connection from a connection_data object
         '''
+        logging.debug("loading connection params from connection data object")
         self.setHostName(cd.host)
         self.setPort(cd.port)
         self.setUserName(cd.username)
@@ -82,9 +85,11 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         open the connection, raising an error if fails or timeouts
         optional arguments of (user, password)
         '''
+        logging.debug("connecting")
         self._wait_cursor()
         connection_in_progress = True
         def time_out():
+            logging.debug("time out")
             if connection_in_progress:
                 self._wait_cursor(False)
                 if not self.isOpen():
@@ -92,13 +97,19 @@ class DatabaseConnection(QtSql.QSqlDatabase):
                     self.close()
                     raise ConnectionError("Time out Error %s"% message)
 
-        QtCore.QTimer.singleShot(10000, time_out) ## 10 seconds.
+        logging.debug("setting timeout to 10 seconds")
+        QtCore.QTimer.singleShot(1000, time_out) ## 10 seconds.
+        logging.debug("timer set")
         if args:
             user = args[0]
             password = args[1]
+            logging.debug("connecting with user '%s', password '%s'"% (
+                user, "*"* len(password)))
             connected = self.open(user, password)
         else:
+            logging.debug("connecting with default params")
             connected = self.open()
+        logging.debug("connected??")
         connection_in_progress = False
         self._wait_cursor(False)
         if not connected:
@@ -106,30 +117,6 @@ class DatabaseConnection(QtSql.QSqlDatabase):
             "<pre font='courier'>%s</pre>"% self.lastError().text())
         else:
             self.subscribeToNotifications()
-
-    def get_available_databases(self):
-        '''
-        returns a list of available databases
-        '''
-        query = '''SELECT pg_catalog.quote_ident(datname) AS database
-        FROM pg_catalog.pg_database ORDER BY database'''
-        self._wait_cursor()
-        databases = []
-        q_query = QtSql.QSqlQuery(query, self)
-        while q_query.next():
-            databases.append(unicode(q_query.value(0).toString()))
-        self._wait_cursor(False)
-        return databases
-
-    def get_server_version(self):
-        '''
-        returns the version info of the server
-        '''
-        version = u""
-        q_query = QtSql.QSqlQuery('select version()', self)
-        if q_query.first():
-            version = q_query.value(0).toString()
-        return version
 
     def subscribeToNotifications(self):
         '''
@@ -139,7 +126,7 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         the query is simple
         NOTIFY new_appointment_made
         '''
-        print "implement any notifications here"
+        print "re-implement DatabaseConnection.subscribeToNotifications"
         #self.driver().subscribeToNotification("new_appointment_made")
 
     def notification_received(self, notification):
@@ -159,23 +146,22 @@ class DatabaseConnection(QtSql.QSqlDatabase):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     app = QtGui.QApplication([])
     parent = QtGui.QWidget()
     db = DatabaseConnection()
+    logging.debug(db)
+    message =  '<body>'
     try:
         db.connect()
-        message =  '<body><h4>connection Ok... </h4>'
-        message += "%s <br /><br />"% db.get_server_version()
-        databases =  db.get_available_databases()
-        message += "found %d available databases:<ul>"% len(databases)
-        for database in databases:
-            message += "<li>%s</li> "% database
+        message += '<h4>connection Ok... </h4>'
         db.emit_notification("hello")
         db.close()
-        message += "</ul></body>"
     except ConnectionError as e:
         message = u"connection error<hr />%s"% e
         app.restoreOverrideCursor()
+    message += "</body>"
 
     QtGui.QMessageBox.information(parent, "result", message)
 

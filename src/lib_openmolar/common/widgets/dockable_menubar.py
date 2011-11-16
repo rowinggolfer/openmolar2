@@ -31,10 +31,30 @@ to experience this... either
 
     click View>Tiny Menu or hit ctrl M
 '''
-
+import logging
 from PyQt4 import QtGui, QtCore
 
+class DockableToolButton(QtGui.QToolButton):
+    '''
+    A toolbutton which acts nicely with a toolbar.
+    '''
+    def __init__(self, parent=None):
+        QtGui.QToolButton.__init__(self, parent)
+        try:
+            icon = self.parent().windowIcon()
+        except AttributeError:
+            logging.debug("using fallback icon for tiny menu")
+            icon = QtGui.QIcon.fromTheme("go-down")
+        self.setIcon(icon)
+        self.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.setText(_("Menu"))
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonFollowStyle)
+
 class DockableMenuBar(QtGui.QMenuBar):
+    '''
+    inherits from QMenuBar, adding the functionality to become a
+    standalone widget (thus saving screen estate)
+    '''
     def __init__(self, parent=None):
         QtGui.QMenuBar.__init__(self, parent)
 
@@ -49,15 +69,10 @@ class DockableMenuBar(QtGui.QMenuBar):
         self.menu_view.addAction(self.toggleViewAction)
         self.addMenu(self.menu_view)
 
-
     @property
     def menu_button(self):
-        self._menu_button = QtGui.QToolButton()
-        self._menu_button.setPopupMode(QtGui.QToolButton.InstantPopup)
-        self._menu_button.setText(_("Menu"))
+        self._menu_button = DockableToolButton(self.parent())
         self._menu_button.setMenu(self.mini_menu)
-        self._menu_button.setToolButtonStyle(
-            QtCore.Qt.ToolButtonFollowStyle)
         return self._menu_button
 
     @property
@@ -96,7 +111,6 @@ class DockableMenuBar(QtGui.QMenuBar):
             retval = QtGui.QMenuBar.addAction(self, *args)
         self.refresh_mini_menu()
         return retval
-
 
     def toggle_visability(self, set_visible):
         self.setVisible(not set_visible)
@@ -141,13 +155,14 @@ class DockAwareToolBar(QtGui.QToolBar):
             self._menu_button.deleteLater()
             self._menu_button = None
 
-class TestMainWindow(QtGui.QMainWindow):
+class _TestMainWindow(QtGui.QMainWindow):
     def __init__(self, parent=None):
         QtGui.QMainWindow.__init__(self, parent)
+        self.setWindowIcon(QtGui.QIcon.fromTheme("application-exit"))
 
         ## initiate instances of our classes
 
-        self.toolbar = DockAwareToolBar()
+        self.toolbar = DockAwareToolBar(self)
         menu_bar = DockableMenuBar(self)
 
         ## the menu bar needs this action adding
@@ -172,23 +187,36 @@ class TestMainWindow(QtGui.QMainWindow):
         edit_action = QtGui.QAction("&Edit", self)
         self.menuBar().addAction(edit_action)
 
-        line_edit = QtGui.QLineEdit("http://google.com")
-        self.toolbar.addWidget(line_edit)
+        ## and a couple of extras for the toolbar
+        icon = QtGui.QIcon.fromTheme("system-file-manager")
+        random_action = QtGui.QAction(icon, "function", self)
+        self.toolbar.addAction(random_action)
 
+        ## a typical web address widget
+        address_widget = QtGui.QWidget()
+        layout = QtGui.QHBoxLayout(address_widget)
+        layout.setMargin(0)
+        line_edit = QtGui.QLineEdit("http://google.com")
         go_but = QtGui.QPushButton("Go!")
         go_but.setFixedWidth(60)
-        self.toolbar.addWidget(go_but)
+        layout.addWidget(line_edit)
+        layout.addWidget(go_but)
+        self.toolbar.addWidget(address_widget)
 
         te = QtGui.QTextEdit()
         self.setCentralWidget(te)
         te.setText(__doc__)
 
+    def sizeHint(self):
+        return QtCore.QSize(400,400)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     import gettext
     gettext.install("")
 
     app = QtGui.QApplication([])
-    mw = TestMainWindow()
+    mw = _TestMainWindow()
     mw.show()
     app.exec_()

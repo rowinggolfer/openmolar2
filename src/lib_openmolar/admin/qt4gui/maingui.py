@@ -27,11 +27,6 @@ import re
 import sys
 from PyQt4 import QtGui, QtCore
 
-
-if __name__ == "__main__":
-    import os
-    sys.path.insert(0, os.path.abspath("../../../../"))
-
 from lib_openmolar.common.connect import (
     ConnectionError,
     ConnectionsPreferenceWidget,
@@ -56,7 +51,6 @@ from lib_openmolar.common.dialogs import (
 from lib_openmolar.admin.connect import AdminConnection
 
 from lib_openmolar.admin.qt4gui.dialogs import (
-    NoDatabaseDialog,
     NewDatabaseDialog,
     PopulateDemoDialog,
     PlainTextDialog,
@@ -77,7 +71,7 @@ class AdminMainWindow(BaseMainWindow):
     '''
     _proxy_server = None
     def __init__(self, parent=None):
-        super(AdminMainWindow, self).__init__(parent)
+        BaseMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
         self.dirty = False
         self.setWindowTitle("Openmolar Admin")
@@ -109,44 +103,15 @@ class AdminMainWindow(BaseMainWindow):
         self.menu_database = QtGui.QMenu(_("&Database Tools"), self)
         self.insertMenu_(self.menu_database)
 
-        icon = QtGui.QIcon.fromTheme("edit-find")
-        self.action_list_databases = QtGui.QAction(icon,
-            _("List Available Databases"), self)
-
-        icon = QtGui.QIcon.fromTheme("edit-select-all")
-        self.action_select_database = QtGui.QAction(icon,
-            _("Select a Database"), self)
-
-        icon = QtGui.QIcon.fromTheme("accessories-text-editor")
-        self.action_show_tables = QtGui.QAction(icon,
-            _("Show Database Tables"), self)
-        self.action_show_schema = QtGui.QAction(icon,
-            _("Show Database schema"), self)
-
-        self.menu_database.addAction(self.action_list_databases)
-        self.menu_database.addAction(self.action_select_database)
-        self.menu_database.addSeparator()
-        self.menu_database.addAction(self.action_show_tables)
-        self.menu_database.addAction(self.action_show_schema)
-
-        ## "Openmolar Specific Tools"
-
-        self.menu_openmolar = QtGui.QMenu(_("&OpenMolar Tools"), self)
-        self.insertMenu_(self.menu_openmolar)
-
         icon = QtGui.QIcon.fromTheme("contact-new")
         self.action_new_database = QtGui.QAction(icon,
             _("New Openmolar Database"), self)
 
-        self.action_new_schema = QtGui.QAction(icon,
-            _("Install the basic (empty) schema into current database"), self)
-
         self.action_populate_demo = QtGui.QAction(icon,
             _("Populate database with demo data"), self)
 
-        self.menu_openmolar.addAction(self.action_new_database)
-        self.menu_openmolar.addAction(self.action_new_schema)
-        self.menu_openmolar.addAction(self.action_populate_demo)
+        self.menu_database.addAction(self.action_new_database)
+        self.menu_database.addAction(self.action_populate_demo)
 
         tb_database = QtGui.QToolButton(self)
         icon = QtGui.QIcon(":icons/database.png")
@@ -157,17 +122,6 @@ class AdminMainWindow(BaseMainWindow):
         tb_database.setMenu(self.menu_database)
 
         self.insertToolBarWidget(tb_database, True)
-
-        tb_openmolar = QtGui.QToolButton(self)
-        icon = QtGui.QIcon(":icons/openmolar-server.png")
-        tb_openmolar.setIcon(icon)
-        tb_openmolar.setText(_("&OpenMolar Tools"))
-        tb_openmolar.setToolTip(
-            _("Tools to install/manage your openmolar database(s)"))
-        tb_openmolar.setPopupMode(tb_openmolar.InstantPopup)
-        tb_openmolar.setMenu(self.menu_openmolar)
-
-        self.insertToolBarWidget(tb_openmolar, True)
 
         self.log_widget = LogWidget(self.parent())
         self.log_widget.welcome()
@@ -187,7 +141,6 @@ class AdminMainWindow(BaseMainWindow):
         ####       now load stored settings                                ####
         self.loadSettings()
         tb_database.setToolButtonStyle(self.main_toolbar.toolButtonStyle())
-        tb_openmolar.setToolButtonStyle(self.main_toolbar.toolButtonStyle())
 
         self.connection = None
         self.tabs = []
@@ -215,15 +168,8 @@ class AdminMainWindow(BaseMainWindow):
         self.action_disconnect.triggered.connect(self.disconnect_server)
 
         self.action_show_log.triggered.connect(self.show_log)
-        self.action_list_databases.triggered.connect(self.show_databases)
-        self.action_show_tables.triggered.connect(self.show_tables)
-        self.action_show_schema.triggered.connect(self.show_schema)
-
-        self.connect(self.action_select_database,
-            QtCore.SIGNAL("triggered()"), self.select_database)
 
         self.action_new_database.triggered.connect(self.new_database)
-        self.action_new_schema.triggered.connect(self.layout_new_schema)
         self.action_populate_demo.triggered.connect(self.populate_demo)
 
         self.connect(self.tab_widget, QtCore.SIGNAL("Widget Removed"),
@@ -241,12 +187,27 @@ class AdminMainWindow(BaseMainWindow):
         '''
         attempt to connect to the server controller at startup
         '''
+        self.wait()
+        self.advise(_("connecting..."))
+        if self.get_proxy_message():
+            self.advise(_("success!"))
+        else:
+            self.advise(_("Failure!"))
+        self.wait(False)
+
+    def get_proxy_message(self):
+        '''
+        poll the openmolar xml_rpc server for messages
+        '''
         if self.proxy_server is not None:
             message = self.proxy_server.admin_welcome()
+            result = True
         else:
             message = "<html><body><h1>%s</h1></body></html>"% _(
                 "Error connecting to the openmolar-server")
+            result = False
         self.browser.setHtml(message)
+        return result
 
     @property
     def proxy_server(self):
@@ -304,12 +265,6 @@ class AdminMainWindow(BaseMainWindow):
 
             self.addViews()
 
-            if len(self.connection.tables()) == 0:
-                self.setup_wizard()
-            if self.connection.has_all_empty_tables:
-                self.populate_wizard()
-
-
         except ConnectionError as error:
             self.advise(u"%s<hr />%s"% (
                 _("Connection Error"), error), 2)
@@ -322,7 +277,7 @@ class AdminMainWindow(BaseMainWindow):
         '''
         if self.connection:
             if (self.connection.isOpen() and (
-            shutting_down or self.tab_widget.closeAll(_("Disconnect and")))):
+            shutting_down or self.tab_widget.closeAll())):
                 self.connection.close()
                 self.connection = None
                 self.log(_("DISCONNECTED"), True)
@@ -449,31 +404,6 @@ class AdminMainWindow(BaseMainWindow):
         self.advise(_("database connection required to continue"), 1)
         return self.choose_connection()
 
-    def show_databases(self):
-        '''
-        show a message box and log which databases are available with the
-        current connection and user privileges
-        '''
-        if not self.has_connection():
-            return
-        self.wait()
-        databases = self.connection.get_available_databases()
-        self.log()
-        self.log(_("Polling for databases"),True)
-        if databases:
-            message = u'''<body>List of Databases on the current server<br />
-            %s<hr /><ul>'''% self.connection.get_server_version()
-            for database in databases:
-                message += u"<li>%s</li>"% database
-                self.log("- %s"% database)
-            message += "</ul></body>"
-        else:
-            message = _('No databases found')
-            self.log(_("None Found"))
-        self.wait(False)
-        self.advise(message, 1)
-        self.log()
-
     def has_database(self):
         '''
         checks if a database has been selected yet..
@@ -531,34 +461,86 @@ class AdminMainWindow(BaseMainWindow):
             self.advise(u"%s <hr /><ul>%s</ul>"% (header_line, table_list), 1)
         self.wait(False)
 
-    def show_schema(self):
-        '''
-        popup the schema for a database
-        '''
-        if self.has_database()[1]:
-            self.wait()
-            schema = self.connection.get_db_schema()
-            self.log(schema)
-            dl = PlainTextDialog(schema, self)
-            self.wait(False)
-            dl.exec_()
-
-    def new_database(self):
+    def new_database(self, demo=False):
         '''
         creates a new db
         '''
-        if self.proxy_server is not None:
-            self.proxy_server.init_db()
-        #dl = NoDatabaseDialog(self)
-        #dl.exec_()
+        dl = NewDatabaseDialog(self)
+        if demo:
+            dl.set_database_name("openmolar_demo")
 
-    def layout_new_schema(self):
-        if not self.has_connection():
+        if not dl.exec_():
+            self.get_proxy_message()
             return
-        dl = NewDatabaseDialog(self.connection, self.log, self)
-        self.connect(dl, QtCore.SIGNAL("Advise"), self.advise)
-        if dl.exec_():
-            self.addViews()
+
+        dbname = dl.database_name
+        try:
+            self.advise("%s '%s' <br />%s"%(
+                _("Creating a new database"), dbname,
+                _("This may take some time")))
+            self.wait()
+            if self.proxy_server.create_db(dbname):
+                self.advise(_("success!"))
+        except:
+            message = "error creating new database '%s'"% dbname
+            logging.exception(message)
+            self.advise(message, 2)
+        finally:
+            self.wait(False)
+        logging.info("database %s created"% dbname)
+
+        try:
+            self.wait()
+            self.advise("laying out tables")
+            if self.proxy_server.layout_schema(dbname):
+                self.advise(_("success!"))
+        except:
+            message = "error laying out tables in '%s'"% dbname
+            logging.exception(message)
+            self.advise(message, 2)
+        finally:
+            self.wait(False)
+
+        try:
+            self.wait()
+            self.advise("creating usergroups")
+            if self.proxy_server.create_usergroups(dbname):
+                self.advise(_("success!"))
+        except:
+            message = "error creating usergroups '%s'"% dbname
+            logging.exception(message)
+            self.advise(message, 2)
+        finally:
+            self.wait(False)
+
+        if demo:
+            try:
+                self.wait()
+                self.advise("creating demo user")
+                if self.proxy_server.create_demo_user():
+                    self.advise(_("success!"))
+            except:
+                message = "error creating demo_user"
+                logging.exception(message)
+                self.advise(message, 2)
+            finally:
+                self.wait(False)
+
+        if demo:
+            try:
+                self.wait()
+                self.proxy_server.grant_demo_user_permissions(dbname)
+            except:
+                message = "error granting demo_user permissions"
+                logging.exception(message)
+                self.advise(message, 2)
+            finally:
+                self.wait(False)
+
+
+        self.get_proxy_message()
+        if demo:
+            self.populate_demo()
 
     def set_permissions(self, database):
         '''
@@ -714,36 +696,6 @@ Neil Wallace - rowinggolfer@googlemail.com'''
 
         SETTINGS.set_connections(cp_widg.connections)
 
-    def setup_wizard(self):
-        '''
-        we arrive here if there are no tables found in the loaded database
-        '''
-        if (self.connection.databaseName().startsWith("openmolar") and
-        QtGui.QMessageBox.question(self, _("Question"),
-        u"%s <b>%s</b><br />%s<hr />%s"% (
-        _("You are connected to a database named"),
-        self.connection.databaseName(),
-        _("This database contains no tables."),
-_("Would you like to install the openmolar schema into this database now?")),
-        QtGui.QMessageBox.Yes|QtGui.QMessageBox.No,
-        QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
-            self.layout_new_schema()
-
-    def populate_wizard(self):
-        '''
-        we arrive here if ALL tables found in the loaded database are empty
-        '''
-        if (self.connection.databaseName().startsWith("openmolar") and
-        QtGui.QMessageBox.question(self, _("Question"),
-        u"%s <b>%s</b><br />%s<hr />%s"% (
-        _("You are connected to a database named"),
-        self.connection.databaseName(),
-        _("All tables are empty."),
-        "populate now?") ,
-        QtGui.QMessageBox.Yes|QtGui.QMessageBox.No,
-        QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes):
-            self.populate_demo()
-
     def manage_shortcut(self, url):
         '''
         the admin browser
@@ -753,7 +705,11 @@ _("Would you like to install the openmolar schema into this database now?")),
         unrecognised signals are send to the user via the notification.
         '''
         if url == "install_demo":
-            logging.debug("Install demo called")
+            logging.debug("Install demo called via shortcut")
+            self.new_database(demo=True)
+        elif re.match("connect_.*", url):
+            dbname = re.match("connect_(.*)", url).groups()[0]
+            self.advise("connect to %s"% dbname)
         else:
             self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
 

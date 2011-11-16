@@ -46,7 +46,8 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             message = self.admin_welcome_template()
             db_list = ""
             for db in dbs:
-                db_list += "<li>%s</li>"% db
+                db_list += "<li>%s <a href='connect_%s'>connect</a></li>"% (
+                    db, db)
             message = message.replace("{DATABASE LIST}", db_list)
         return message
 
