@@ -43,7 +43,7 @@ class MessageFunctions(object):
         '''
         html = u'''%s
         <h1>%s</h1>
-        <h2>%s</h2>
+        <i>%s</i><br />
         %s
         <ul>{DATABASE LIST}</ul>%s'''% (HEADER,
             _("Welcome"),
@@ -56,20 +56,15 @@ class MessageFunctions(object):
     def no_databases_message(self):
         return '''%s
         <h1>%s</h1>
-        <h2>%s</h2>
-        %s<br />%s<br />
-
+        <i>%s</i><br />
+        %s<br />
         %s <a href="install_demo">%s</a>.<br />
-
-        some other function <a href="function">Some other function</a>.
 
         %s'''%(HEADER,
         _("Welcome!"),
         _("Connection to the Server Controller has been established."),
         _("You do not appear to have any openmolar databases installed."),
-        _("Would you like to install a demo database now?"),
-        _("If so, please"), _("Click here"),
-        FOOTER)
+        _("To install a database now"), _("Click Here"), FOOTER)
 
 def _test():
     '''

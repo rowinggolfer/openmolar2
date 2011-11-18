@@ -103,67 +103,6 @@ class DBFunctions(object):
 
         return databases
 
-    def drop_db(self, name):
-        '''
-        drops the database with the name given
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.warning("dropping database %s"% name)
-        try:
-            self._execute("drop database %s"% name)
-        except:
-            log.exception("unable to drop database %s"% name)
-
-    def create_db(self, name):
-        '''
-        creates a database with the name given
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("creating new database %s [with owner openmolar]"% name)
-        try:
-            self._execute("create database %s with owner openmolar"% name)
-        except Exception as exc:
-            log.exception("unable to create database '%s'"% name)
-            return False
-        return True
-
-    def create_usergroups(self, dbname):
-        '''
-        creates usergroups.
-        to do this we create two non-login roles.
-        Any future users can inherited permissions from these guys.
-        permissions are way to permissive at this point
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info(
-            "creating new roles to act as group privileges for %s"% dbname)
-        admin = '%s_admin_privs;' %dbname
-        client = '%s_client_privs;' %dbname
-
-        for group in (admin, client):
-            SQL = 'create role %s;\n'% group
-            SQL += 'grant all privileges on patients to %s ;\n'% group
-            logging.debug(SQL)
-            try:
-                self._execute(SQL, dbname)
-            except Exception as exc:
-                log.exception("problem executing %s"% SQL)
-        return True
-
-    def install_fuzzymatch(self, dbname):
-        '''
-        installs fuzzymatch functions into database with the name given
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("Installing fuzzymatch functions into database '%s'"% dbname)
-        try:
-            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname])
-            p.wait()
-        except Exception as exc:
-            log.exception("unable to install fuzzymatch into '%s'"% dbname)
-            return False
-        return True
-
     def refresh_saved_schema(self):
         '''
         gets the schema from the admin app.
@@ -195,26 +134,85 @@ class DBFunctions(object):
         f.close()
         return True
 
-    def get_schema(self):
+    def install_fuzzymatch(self, dbname):
         '''
-        gets the schema from file
+        installs fuzzymatch functions into database with the name given
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.info("Installing fuzzymatch functions into database '%s'"% dbname)
+        try:
+            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname])
+            p.wait()
+        except Exception as exc:
+            log.exception("unable to install fuzzymatch into '%s'"% dbname)
+            return False
+        return True
+
+    def newDB_sql(self, dbname):
+        '''
+        returns the sql to layout the users and tables in a database.
         '''
         filename = "/usr/share/openmolar/blank_schema.sql"
 
         log = logging.getLogger("openmolar_server")
         log.info("reading schema from %s"% filename)
 
+        sql, permissions = "", ""
+
+        for group in ('Admin', 'Client'):
+            groupname = "OM%sGROUP_%s"% (group, dbname)
+            sql += "drop user if exists %s;\n"% groupname
+            sql += "create user %s;\n"% groupname
+
+
+            ## TODO - tighten this up!!
+            #permissions += "grant all on patients to %s;\n"% groupname
+            permissions = "grant openmolar to %s;\n"%groupname
+
         f = open(filename, "r")
-        sql = f.read()
+        sql += f.read()
         f.close()
 
-        return sql
+        return sql + permissions
 
-    def layout_schema(self, dbname):
+    def drop_db(self, name):
+        '''
+        drops the database with the name given
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.warning("dropping database %s"% name)
+        try:
+            self._execute("drop database if exists %s"% name)
+            return True
+        except:
+            log.exception("unable to drop database %s"% name)
+        return False
+
+    def create_db(self, dbname):
+        '''
+        creates a database with the name given
+        '''
+        log = logging.getLogger("openmolar_server")
+        log.info("creating new database %s [with owner openmolar]"% dbname)
+
+        try:
+            self._execute("create database %s with owner openmolar"% dbname)
+        except Exception as exc:
+            log.exception("unable to create database '%s'"% dbname)
+            return False
+        try:
+            self._layout_schema(dbname)
+        except Exception as exc:
+            log.exception("unable to create database '%s'"% dbname)
+            return False
+        return True
+
+    def _layout_schema(self, dbname):
         '''
         creates a blank openmolar table set in the database with the name given
         '''
-        sql = self.get_schema()
+        sql = self.newDB_sql(dbname)
+
         log = logging.getLogger("openmolar_server")
         log.info("laying out schema for database '%s'"% dbname)
 
@@ -225,14 +223,19 @@ class DBFunctions(object):
             log.exception("Serious Error")
         return False
 
-    def create_demo_user(self):
+    def create_demo_user(self, dbname):
         '''
         create our demo user
         '''
         log = logging.getLogger("openmolar_server")
         log.info("creating a demo user")
 
-        return self.create_user("om_demo", "password")
+        if self.create_user("om_demo", "password"):
+            log.info("user om_demo created")
+        else:
+            log.error("unable to create user om_demo. perhaps exists already?")
+
+        return self.grant_user_permissions("om_demo", dbname, True, True)
 
     def create_user(self, username, password=None):
         '''
@@ -246,7 +249,8 @@ class DBFunctions(object):
 
         try:
             self._execute(
-                "create user %s with password '%s' "% (username, password))
+                "create user %s with login encrypted password '%s' "% (
+                    username, password))
             return True
         except Exception:
             log.exception("Serious Error")
@@ -261,18 +265,15 @@ class DBFunctions(object):
 
         SQL = ""
         if admin:
-            SQL += "GRANT %s_admin_privs to %s;\n"% (dbname, user)
+            SQL += "GRANT OMAdminGroup_%s to %s;\n"% (dbname, user)
         if client:
-            SQL += "GRANT %s_client_privs to %s;\n"% (dbname, user)
+            SQL += "GRANT OMClientGroup_%s to %s;\n"% (dbname, user)
         try:
             self._execute(SQL, dbname)
             return True
         except Exception:
             log.exception("Serious Error")
         return False
-
-    def grant_demo_user_permissions(self, dbname="openmolar_demo"):
-        return self.grant_user_permissions('om_demo', dbname)
 
 
 def _test():
@@ -285,14 +286,12 @@ def _test():
     #sf.create_demo_user()
     #log.debug(sf.get_demo_user())
     #log.debug(sf.available_databases())
-    #log.debug(sf.get_schema())
 
     dbname = "openmolar_demo"
+    #log.debug(sf.newDB_sql(dbname))
+    sf.drop_db(dbname)
     sf.create_db(dbname)
-    sf.layout_schema(dbname)
-    sf.create_usergroups(dbname)
-    sf.create_demo_user()
-    sf.grant_demo_user_permissions(dbname)
+    sf.create_demo_user(dbname)
 
 if __name__ == "__main__":
     _test()

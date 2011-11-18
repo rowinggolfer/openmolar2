@@ -26,6 +26,16 @@ import logging
 from lib_openmolar.common import SETTINGS
 from lib_openmolar.admin.db_orm import *
 
+proc_code_sql = '''
+?, ?, ?)'''
+
+def proc_code_inserts():
+    for code in SETTINGS.PROCEDURE_CODES:
+        yield '''INSERT INTO procedure_codes (category, code, description)
+        VALUES ('%s', '%s', '%s');\n'''% (
+        code.cat_no, code.code, code.description)
+
+
 class SchemaManager(object):
     _bare_sql = None
     _md5 = None
@@ -42,11 +52,14 @@ class SchemaManager(object):
             klasses = SETTINGS.OM_TYPES.values()
             for module in ADMIN_MODULES:
                 klasses.append(module.SchemaGenerator())
-
+            klasses.append(admin_procedure_codes.SchemaGenerator())
             for klass in klasses:
                 for query in klass.creation_queries:
                     self._bare_sql += query
                     self._bare_sql += ";\n\n"
+
+            for query in proc_code_inserts():
+                self._bare_sql += query
 
             for queries in (
                 om_views.FUNCTION_SQLS,
@@ -77,6 +90,7 @@ class SchemaManager(object):
         return result
 
     def write(self, filepath):
+        logging.info("writing sql to %s"% filepath)
         f = open(filepath, "w")
         f.write(self.CURRENT_SQL)
         f.close()
@@ -88,5 +102,5 @@ if __name__ == "__main__":
     s = SchemaManager()
     s.MD5
     FILEPATH = "../../../../misc/server/blank_schema.sql"
-    #s.write(FILEPATH)
-    s.match(FILEPATH)
+    if not s.match(FILEPATH):
+        s.write(FILEPATH)

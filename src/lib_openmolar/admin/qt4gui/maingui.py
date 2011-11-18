@@ -489,35 +489,11 @@ class AdminMainWindow(BaseMainWindow):
             self.wait(False)
         logging.info("database %s created"% dbname)
 
-        try:
-            self.wait()
-            self.advise("laying out tables")
-            if self.proxy_server.layout_schema(dbname):
-                self.advise(_("success!"))
-        except:
-            message = "error laying out tables in '%s'"% dbname
-            logging.exception(message)
-            self.advise(message, 2)
-        finally:
-            self.wait(False)
-
-        try:
-            self.wait()
-            self.advise("creating usergroups")
-            if self.proxy_server.create_usergroups(dbname):
-                self.advise(_("success!"))
-        except:
-            message = "error creating usergroups '%s'"% dbname
-            logging.exception(message)
-            self.advise(message, 2)
-        finally:
-            self.wait(False)
-
         if demo:
             try:
                 self.wait()
                 self.advise("creating demo user")
-                if self.proxy_server.create_demo_user():
+                if self.proxy_server.create_demo_user(dbname):
                     self.advise(_("success!"))
             except:
                 message = "error creating demo_user"
@@ -526,21 +502,7 @@ class AdminMainWindow(BaseMainWindow):
             finally:
                 self.wait(False)
 
-        if demo:
-            try:
-                self.wait()
-                self.proxy_server.grant_demo_user_permissions(dbname)
-            except:
-                message = "error granting demo_user permissions"
-                logging.exception(message)
-                self.advise(message, 2)
-            finally:
-                self.wait(False)
-
-
         self.get_proxy_message()
-        if demo:
-            self.populate_demo()
 
     def set_permissions(self, database):
         '''
@@ -678,9 +640,8 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         self.advise(ABOUT_TEXT, 1)
 
     def show_help(self):
-        HELP_TEXT = '''<a href='https://launchpad.net/openmolar'>
-https://launchpad.net/openmolar</a><br />
-Neil Wallace - rowinggolfer@googlemail.com'''
+        HELP_TEXT = '''Website -
+<a href='http://www.openmolar.com'>www.openmolar.com</a>'''
         self.advise(HELP_TEXT, 1)
 
     def show_preferences_dialog(self):

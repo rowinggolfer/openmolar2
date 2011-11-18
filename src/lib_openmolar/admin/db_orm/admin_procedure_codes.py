@@ -44,7 +44,6 @@ CONSTRAINT unique_procedure_codes UNIQUE (code)
 
 TABLENAME = "procedure_codes"
 
-
 class SchemaGenerator(table_schema.TableSchema):
     '''
     A custom object which lays out the schema for this table.
@@ -52,30 +51,3 @@ class SchemaGenerator(table_schema.TableSchema):
     def __init__(self):
         table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
 
-class DemoGenerator(object):
-    def __init__(self, database):
-        self.length = len(SETTINGS.PROCEDURE_CODES)
-
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
-
-    def demo_queries(self):
-        '''
-        return a list of queries to populate a demo database
-        '''
-
-        for code in SETTINGS.PROCEDURE_CODES:
-            self.record.clearValues()
-
-            #set values, or allow defaults
-            self.record.setValue('category', code.cat_no)
-            self.record.setValue('code', code.code)
-            self.record.setValue('description', code.description)
-            yield self.record.insert_query
-
-if __name__ == "__main__":
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
-    sc.connect()
-
-    builder = DemoGenerator(sc)
-    print builder.demo_queries().next()

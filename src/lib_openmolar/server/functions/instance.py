@@ -46,8 +46,26 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             message = self.admin_welcome_template()
             db_list = ""
             for db in dbs:
-                db_list += "<li>%s <a href='connect_%s'>connect</a></li>"% (
-                    db, db)
+                db_list += '''
+                <li class='dboptions'>%s
+                    <ul>
+                        <li class="users">
+                            <a href='users_%s'>manage users</a>
+                        </li>
+                        <li class="connect">
+                            <a href='connect_%s?users=%s'>connect</a>
+                        </li>
+                        <li class="disconnect">
+                            <a href='disconnect_%s'>disconnect</a>
+                        </li>
+                        <li class="populate">
+                            <a href='populate_%s'>populate with demo data</a>
+                        </li>
+                        <li class="setup">
+                            <a href='setup_wizard_%s'>run setup wizard</a>
+                        </li>
+                    </ul>
+                </li>'''% (db, db, db, 'neil,om_demo', db, db, db)
             message = message.replace("{DATABASE LIST}", db_list)
         return message
 

@@ -2,7 +2,6 @@ from lib_openmolar.common.common_db_orm import om_views
 
 from lib_openmolar.admin.db_orm import (
     admin_avatars,
-    admin_dbusers,
     admin_patient,
     admin_teeth_present,
     admin_static_fills,
@@ -47,7 +46,6 @@ from lib_openmolar.admin.db_orm import (
 
 ## list the modules here also... NOTE the order is important!!
 ADMIN_MODULES = (   admin_avatars,
-                    admin_dbusers,
                     admin_users,
                     admin_patient,
                     admin_teeth_present,
@@ -66,7 +64,7 @@ ADMIN_MODULES = (   admin_avatars,
                     admin_notes_clerical,
                     admin_memo_clinical,
                     admin_memo_clerical,
-                    admin_procedure_codes,
+                    #admin_procedure_codes,
                     admin_treatments,
                     admin_treatment_teeth,
                     admin_treatment_fills,
