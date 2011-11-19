@@ -26,9 +26,6 @@ import logging
 from lib_openmolar.common import SETTINGS
 from lib_openmolar.admin.db_orm import *
 
-proc_code_sql = '''
-?, ?, ?)'''
-
 def proc_code_inserts():
     for code in SETTINGS.PROCEDURE_CODES:
         yield '''INSERT INTO procedure_codes (category, code, description)
@@ -44,30 +41,33 @@ class SchemaManager(object):
     def CURRENT_SQL(self):
         '''
         the Sql applied to create the current schema
+        this gathers up all types, tables, functions, views and rules,
+        along with data for the special procedure codes table.
         '''
         if self._bare_sql is None:
             logging.debug("grabbing CURRENT_SQL")
-            self._bare_sql = ""
+            queries = ""
 
+            # gather up all types, tables, functions, views and rules
             klasses = SETTINGS.OM_TYPES.values()
             for module in ADMIN_MODULES:
                 klasses.append(module.SchemaGenerator())
             klasses.append(admin_procedure_codes.SchemaGenerator())
             for klass in klasses:
                 for query in klass.creation_queries:
-                    self._bare_sql += query
-                    self._bare_sql += ";\n\n"
+                    queries += query + ";\n"
 
             for query in proc_code_inserts():
-                self._bare_sql += query
+                queries += query
 
-            for queries in (
+            for view_queries in (
                 om_views.FUNCTION_SQLS,
                 om_views.VIEW_SQLS,
                 om_views.RULE_SQLS):
-                for query in queries:
-                    self._bare_sql += query
-                    self._bare_sql += ";\n\n"
+                for query in view_queries:
+                    queries += query + ";\n"
+
+            self._bare_sql = queries
 
         return self._bare_sql
 

@@ -152,26 +152,33 @@ class DBFunctions(object):
         '''
         returns the sql to layout the users and tables in a database.
         '''
-        filename = "/usr/share/openmolar/blank_schema.sql"
+        sql_file = "/usr/share/openmolar/blank_schema.sql"
+        perms_file = "/usr/share/openmolar/permissions.sql"
 
         log = logging.getLogger("openmolar_server")
-        log.info("reading schema from %s"% filename)
+        log.info("reading sql from %s"% sql_file)
+        log.info("reading sql from %s"% perms_file)
 
-        sql, permissions = "", ""
+        groups = {}
+        sql = ""
 
         for group in ('Admin', 'Client'):
             groupname = "OM%sGROUP_%s"% (group, dbname)
+
             sql += "drop user if exists %s;\n"% groupname
             sql += "create user %s;\n"% groupname
 
+            groups[group] = groupname
 
-            ## TODO - tighten this up!!
-            #permissions += "grant all on patients to %s;\n"% groupname
-            permissions = "grant openmolar to %s;\n"%groupname
-
-        f = open(filename, "r")
+        f = open(sql_file, "r")
         sql += f.read()
         f.close()
+
+        f = open(perms_file, "r")
+        perms = f.read()
+        f.close()
+        permissions = perms.replace("ADMIN_GROUP", groups["Admin"]).replace(
+                            "CLIENT_GROUP", groups["Client"])
 
         return sql + permissions
 
