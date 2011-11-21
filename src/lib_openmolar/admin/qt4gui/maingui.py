@@ -67,6 +67,7 @@ class AdminMainWindow(BaseMainWindow):
     This class is the core application.
     '''
     _proxy_server = None
+    _preferences_dialog = None
 
     FAILURE_MESSAGE = '''
     <html><body><h1>%s</h1><a href="init_proxy">%s</a></body></html>
@@ -672,18 +673,22 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
 <a href='http://www.openmolar.com'>www.openmolar.com</a>'''
         self.advise(HELP_TEXT, 1)
 
+    @property
+    def preferences_dialog(self):
+        if self._preferences_dialog is None:
+            dl = self._preferences_dialog = PreferencesDialog(self)
+
+            connections_pref = Preference(_("Database Connections"))
+            dl.cp_widg = ConnectionsPreferenceWidget(
+                SETTINGS.connections, self)
+            connections_pref.setWidget(dl.cp_widg)
+            dl.insert_preference_dialog(0, connections_pref)
+
+        return self._preferences_dialog
+
     def show_preferences_dialog(self):
-        dl = PreferencesDialog(self)
-
-        connections_pref = Preference(_("Database Connections"))
-
-        cp_widg = ConnectionsPreferenceWidget(SETTINGS.connections, self)
-        connections_pref.setWidget(cp_widg)
-        dl.insert_preference_dialog(0, connections_pref)
-
-        dl.exec_()
-
-        SETTINGS.set_connections(cp_widg.connections)
+        self.preferences_dialog.exec_()
+        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def manage_shortcut(self, url):
         '''

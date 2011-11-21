@@ -83,6 +83,7 @@ class Service(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, exc:
+            self.log.exception("fork 1 failed")
             sys.exit("%s: fork #1 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
 
@@ -95,6 +96,7 @@ class Service(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, exc:
+            self.log.exception("fork 2 failed")
             sys.exit("%s: fork #2 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
 

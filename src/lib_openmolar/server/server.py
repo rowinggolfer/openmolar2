@@ -55,7 +55,7 @@ class OMServer(Service):
         server.register_instance(ServerFunctions())
 
         self.log.info("listening on port %d"% (PORT))
-        server.serve_forever()
+        sys.exit(server.serve_forever())
 
     def stop(self):
         self.log.info("Stopping server")

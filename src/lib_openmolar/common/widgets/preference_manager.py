@@ -38,7 +38,7 @@ class Preference(object):
     def setWidget(self, widget):
         self.widget = widget
 
-class PreferencesDialog(QtGui.QDialog, Advisor):
+class PreferencesDialog(QtGui.QMainWindow, Advisor):
     '''
     A custom dialog providing a listWidget and a connected panel
     '''
@@ -48,15 +48,12 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
         self.setWindowTitle(u"Openmolar %s"% _("Preferences"))
         self.setMinimumSize(400, 400)
 
-        self.main_gui = parent
         self.listwidget = QtGui.QListWidget()
         self.stackedwidget = QtGui.QStackedWidget(self)
 
         splitter = QtGui.QSplitter(self)
         splitter.addWidget(self.listwidget)
         splitter.addWidget(self.stackedwidget)
-        layout = QtGui.QVBoxLayout(self)
-        layout.addWidget(splitter)
 
         self.connect(self.listwidget,
             QtCore.SIGNAL("currentRowChanged (int)"),
@@ -64,12 +61,14 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
 
         self.add_font_option()
 
+        self.setCentralWidget(splitter)
+
     def add_font_option(self):
         '''
         this is so useful, I include it by default
         '''
         pref = Preference(_("Fonts"))
-        pref.setWidget(FontOptionsWidget(self.main_gui))
+        pref.setWidget(FontOptionsWidget(self.parent()))
         pref.setIcon(QtGui.QIcon.fromTheme("applications-fonts"))
         self.add_preference_dialog(pref)
 
@@ -101,6 +100,15 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
 
         self.listwidget.setCurrentRow(index)
 
+    def exec_(self):
+        '''
+        With the advent of gnome3.. it became clear that this isn't a dialog at
+        all.
+        so I changed the base class to QMainWindow, and put exec_ here for
+        backwards compatibility
+        '''
+        self.show()
+
 class FontOptionsWidget(QtGui.QWidget):
     '''
     a widget, added at runtime to the preferences dialog,
@@ -108,7 +116,6 @@ class FontOptionsWidget(QtGui.QWidget):
     '''
     def __init__(self, parent=None):
         super(FontOptionsWidget, self).__init__(parent)
-        self.main_gui = parent
         try:
             self.systemFont = parent.system_font
             self.initialFont = parent.font()
@@ -143,12 +150,13 @@ class FontOptionsWidget(QtGui.QWidget):
             self.fontdialog.setCurrentFont(self.systemFont)
         QtGui.QApplication.instance().setFont(self.fontdialog.currentFont())
 
-
+def _test():
+    app = QtGui.QApplication([])
+    dl = PreferencesDialog()
+    dl.show()
+    app.exec_()
 
 if __name__ == "__main__":
     import gettext
     gettext.install("")
-
-    app = QtGui.QApplication([])
-    dl = PreferencesDialog()
-    dl.exec_()
+    _test()

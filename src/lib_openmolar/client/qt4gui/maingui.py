@@ -42,8 +42,9 @@ from lib_openmolar.client.qt4gui.interfaces import PatientInterface
 from lib_openmolar.client.qt4gui.interfaces import DiaryInterface
 
 class ClientMainWindow(BaseMainWindow):
+    _preferences_dialog = None
     def __init__(self, parent=None):
-        super(ClientMainWindow, self).__init__(parent)
+        BaseMainWindow.__init__(self, parent)
 
         self.setWindowIcon(QtGui.QIcon(":icons/openmolar.png"))
         self.setWindowTitle(_("OpenMolar - YOUR dental database application"))
@@ -258,31 +259,36 @@ class ClientMainWindow(BaseMainWindow):
             message = _("No Patient Loaded")
         self.status_label.setText(message)
 
+    @property
+    def preferences_dialog(self):
+        if self._preferences_dialog is None:
+            dl = self._preferences_dialog = PreferencesDialog(self)
+            plugin_icon = QtGui.QIcon(":icons/plugins.png")
+
+            plugins_pref = Preference(_("Plugins"))
+            plugins_pref.setIcon(plugin_icon)
+            pl_widg = client_widgets.PluginOptionsWidget(self)
+            plugins_pref.setWidget(pl_widg)
+            dl.insert_preference_dialog(0, plugins_pref)
+
+            plugin_icon = QtGui.QIcon(":icons/plugins.png")
+            plugins_dir_pref = Preference(_("Plugin Directories"))
+            plugins_dir_pref.setIcon(plugin_icon)
+            pl_dir_widg = client_widgets.PluginsDirectoryWidget(self)
+            plugins_dir_pref.setWidget(pl_dir_widg)
+            dl.insert_preference_dialog(0, plugins_dir_pref)
+
+            connections_pref = Preference(_("Database Connections"))
+            dl.cp_widg = ConnectionsPreferenceWidget(
+                SETTINGS.connections, self)
+            connections_pref.setWidget(dl.cp_widg)
+            dl.insert_preference_dialog(0, connections_pref)
+
+        return self._preferences_dialog
+
     def show_preferences_dialog(self):
-        dl = PreferencesDialog(self)
-
-        plugin_icon = QtGui.QIcon(":icons/plugins.png")
-
-        plugins_pref = Preference(_("Plugins"))
-        plugins_pref.setIcon(plugin_icon)
-        pl_widg = client_widgets.PluginOptionsWidget(self)
-        plugins_pref.setWidget(pl_widg)
-        dl.insert_preference_dialog(0, plugins_pref)
-
-        plugin_icon = QtGui.QIcon(":icons/plugins.png")
-        plugins_dir_pref = Preference(_("Plugin Directories"))
-        plugins_dir_pref.setIcon(plugin_icon)
-        pl_dir_widg = client_widgets.PluginsDirectoryWidget(self)
-        plugins_dir_pref.setWidget(pl_dir_widg)
-        dl.insert_preference_dialog(0, plugins_dir_pref)
-
-        connections_pref = Preference(_("Database Connections"))
-        cp_widg = ConnectionsPreferenceWidget(SETTINGS.connections, self)
-        connections_pref.setWidget(cp_widg)
-        dl.insert_preference_dialog(0, connections_pref)
-
-        dl.exec_()
-        SETTINGS.set_connections(cp_widg.connections)
+        self.preferences_dialog.exec_()
+        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def add_dock_widget(self, dw):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dw)
