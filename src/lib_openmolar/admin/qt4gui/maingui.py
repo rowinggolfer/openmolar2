@@ -50,11 +50,7 @@ from lib_openmolar.common.dialogs import (
 
 from lib_openmolar.admin.connect import AdminConnection
 
-from lib_openmolar.admin.qt4gui.dialogs import (
-    NewDatabaseDialog,
-    PopulateDemoDialog,
-    PlainTextDialog,
-    NewRowDialog)
+from lib_openmolar.admin.qt4gui.dialogs import *
 
 from lib_openmolar.admin.qt4gui.classes import (
     SqlQueryTable,
@@ -65,11 +61,18 @@ from lib_openmolar.admin.qt4gui.classes.database_table import (
     DatabaseTableViewer,
     RelationalDatabaseTableViewer)
 
+
 class AdminMainWindow(BaseMainWindow):
     '''
     This class is the core application.
     '''
     _proxy_server = None
+
+    FAILURE_MESSAGE = '''
+    <html><body><h1>%s</h1><a href="init_proxy">%s</a></body></html>
+    '''% (_("Error connecting to the openmolar-server"),
+    _("Try Again?"))
+
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
@@ -152,8 +155,8 @@ class AdminMainWindow(BaseMainWindow):
         self.disconnect_server()
         self.connect_signals()
         self.show()
-        self.setBriefMessageLocation()
 
+        QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
         QtCore.QTimer.singleShot(100, self.init_proxy)
 
     def connect_signals(self):
@@ -189,6 +192,7 @@ class AdminMainWindow(BaseMainWindow):
         '''
         self.wait()
         self.advise(_("connecting..."))
+        self.log("connecting to the openmolar_server")
         if self.get_proxy_message():
             self.advise(_("success!"))
         else:
@@ -203,8 +207,7 @@ class AdminMainWindow(BaseMainWindow):
             message = self.proxy_server.admin_welcome()
             result = True
         else:
-            message = "<html><body><h1>%s</h1></body></html>"% _(
-                "Error connecting to the openmolar-server")
+            message = self.FAILURE_MESSAGE
             result = False
         self.browser.setHtml(message)
         return result
@@ -392,7 +395,7 @@ class AdminMainWindow(BaseMainWindow):
             self.log(message, True)
             return True
         else:
-            self.status_label.setText(_("Not Connected to a Server"))
+            self.status_label.setText(_("Not Connected to a database"))
             return False
 
     def has_connection(self):
@@ -461,19 +464,42 @@ class AdminMainWindow(BaseMainWindow):
             self.advise(u"%s <hr /><ul>%s</ul>"% (header_line, table_list), 1)
         self.wait(False)
 
+    def new_demo_database(self):
+        '''
+        initiates the demo database
+        '''
+        self.new_database(True)
+        try:
+            self.wait()
+            self.advise("creating demo user")
+            if self.proxy_server.create_demo_user():
+                self.advise(_("success!"))
+        except:
+            message = "error creating demo_user"
+            logging.exception(message)
+            self.advise(message, 2)
+        finally:
+            self.wait(False)
+
+        if QtGui.QMessageBox.question(self, _("Confirm"),
+        u"%s"% _("Populate with demo data now?"),
+        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+        QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
+            self.populate_demo()
+
     def new_database(self, demo=False):
         '''
         creates a new db
         '''
-        dl = NewDatabaseDialog(self)
         if demo:
-            dl.set_database_name("openmolar_demo")
+            dbname = "openmolar_demo"
+        else:
+            dl = NewDatabaseDialog(self)
+            if not dl.exec_():
+                self.get_proxy_message()
+                return
+            dbname = dl.database_name
 
-        if not dl.exec_():
-            self.get_proxy_message()
-            return
-
-        dbname = dl.database_name
         try:
             self.advise("%s '%s' <br />%s"%(
                 _("Creating a new database"), dbname,
@@ -488,19 +514,6 @@ class AdminMainWindow(BaseMainWindow):
         finally:
             self.wait(False)
         logging.info("database %s created"% dbname)
-
-        if demo:
-            try:
-                self.wait()
-                self.advise("creating demo user")
-                if self.proxy_server.create_demo_user(dbname):
-                    self.advise(_("success!"))
-            except:
-                message = "error creating demo_user"
-                logging.exception(message)
-                self.advise(message, 2)
-            finally:
-                self.wait(False)
 
         self.get_proxy_message()
 
@@ -533,11 +546,26 @@ class AdminMainWindow(BaseMainWindow):
             self.advise("Demo data population was abandoned", 1)
         self.addViews()
 
-    def manage_users(self):
+    def manage_db(self, dbname):
         '''
-        adds permission for a user to connect to a database
+        raise a dialog, and provide database management tools
         '''
-        self.advise("TODO - manage users", 1)
+        dl = ManageDatabaseDialog(dbname, self)
+        if dl.exec_():
+            if dl.manage_users:
+                self.advise("manage users")
+            elif dl.drop_db:
+                self.advise(u"%s %s"%(_("dropping database"), dbname))
+                self.drop_db(dbname)
+
+    def drop_db(self, dbname):
+        '''
+        send a message to the openmolar server to drop this database
+        '''
+        if not self.proxy_server.drop_db(str(dbname)):
+            self.advise(u"%s<hr />%s"%(
+                _("unable to drop database"), self.proxy_server.last_error()), 2)
+        self.get_proxy_message()
 
     def closeEvent(self, event=None):
         '''
@@ -665,12 +693,18 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         when a url is clicked it finds it's way here for management.
         unrecognised signals are send to the user via the notification.
         '''
-        if url == "install_demo":
+        if url == "init_proxy":
+            logging.debug("User shortcut - Re-try openmolar_server connection")
+            self.init_proxy()
+        elif url == "install_demo":
             logging.debug("Install demo called via shortcut")
-            self.new_database(demo=True)
+            self.new_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]
-            self.advise("connect to %s"% dbname)
+            self.advise("connect to database %s"% dbname)
+        elif re.match("manage_.*", url):
+            dbname = re.match("manage_(.*)", url).groups()[0]
+            self.manage_db(dbname)
         else:
             self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
 

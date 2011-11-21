@@ -22,14 +22,38 @@
 
 import logging
 
+CSS = '''
+body {
+    background-color:#cccccc;
+    }
+
+.database ul{
+    padding-left: 0px;
+    }
+.database li{
+    padding-left: 20px;
+    }
+
+.database li.header{
+    width:100%;
+    background-color:#333;
+    color:white;
+    list-style-type: none;
+    padding-left: 0px;
+    }
+'''
+
 HEADER = '''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Server Message</title>
+<style type="text/css">
+%s
+</style>
 </head>
 <body>
-'''
+'''% CSS
 
 FOOTER = '''\n</body>\n</html>'''
 
@@ -43,11 +67,10 @@ class MessageFunctions(object):
         '''
         html = u'''%s
         <h1>%s</h1>
-        <i>%s</i><br />
         %s
-        <ul>{DATABASE LIST}</ul>%s'''% (HEADER,
-            _("Welcome"),
-            _("Connection to the Server Controller has been established."),
+        {DATABASE LIST}
+        %s'''% (HEADER,
+            _("Welcome to Openmolar"),
             _("The following databases are at your disposal"),
             FOOTER)
 
@@ -56,15 +79,24 @@ class MessageFunctions(object):
     def no_databases_message(self):
         return '''%s
         <h1>%s</h1>
-        <i>%s</i><br />
-        %s<br />
+        <p>
+            <i>%s</i><br />
+        </p>
+        <br />
+        <p>%s<br />
         %s <a href="install_demo">%s</a>.<br />
-
+        </p>
+        <br />
+        <p>
+        %s
+        </p>
         %s'''%(HEADER,
-        _("Welcome!"),
+        _("Welcome to Openmolar"),
         _("Connection to the Server Controller has been established."),
         _("You do not appear to have any openmolar databases installed."),
-        _("To install a database now"), _("Click Here"), FOOTER)
+        _("To install a demo database now"), _("Click Here"),
+        _("Other options are available from the menu above"),
+        FOOTER)
 
 def _test():
     '''

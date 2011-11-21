@@ -47,25 +47,18 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             db_list = ""
             for db in dbs:
                 db_list += '''
-                <li class='dboptions'>%s
+                <div class="database">
                     <ul>
-                        <li class="users">
-                            <a href='users_%s'>manage users</a>
-                        </li>
+                        <li class="header">%s</li>
                         <li class="connect">
-                            <a href='connect_%s?users=%s'>connect</a>
+                            <a href='connect_%s?'>connect</a>
                         </li>
-                        <li class="disconnect">
-                            <a href='disconnect_%s'>disconnect</a>
-                        </li>
-                        <li class="populate">
-                            <a href='populate_%s'>populate with demo data</a>
-                        </li>
-                        <li class="setup">
-                            <a href='setup_wizard_%s'>run setup wizard</a>
+                        <li class="manage">
+                            <a href='manage_%s'>manage</a>
                         </li>
                     </ul>
-                </li>'''% (db, db, db, 'neil,om_demo', db, db, db)
+                </div>
+                '''% (db, db, db)
             message = message.replace("{DATABASE LIST}", db_list)
         return message
 

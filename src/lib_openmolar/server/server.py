@@ -67,3 +67,6 @@ class OMServer(Service):
 
     def status(self):
         self.status_()
+
+    def __del__(self):
+        self.log.debug("OMServer object destroyed")

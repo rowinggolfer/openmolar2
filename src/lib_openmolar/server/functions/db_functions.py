@@ -26,12 +26,12 @@ import sys
 import psycopg2
 from lib_openmolar.server.password_generator import new_password
 
-
 class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
     MASTER_PWORD = ""
+    _last_error = None
 
     def __init__(self):
         if __name__ == "__main__":
@@ -54,6 +54,12 @@ class DBFunctions(object):
         return "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
             self.MASTER_PWORD, dbname)
 
+    def last_error(self):
+        if self._last_error is None:
+            return ""
+        else:
+            return self._last_error
+
     def _execute(self, statement, dbname="openmolar_master"):
         '''
         execute an sql statement with default connection rights.
@@ -67,8 +73,14 @@ class DBFunctions(object):
             cursor.execute(statement)
             conn.close()
             return True
-        except:
+        except psycopg2.Warning as warn:
+            log.warning(warn)
+            conn.close()
+            return True
+        except psycopg2.Error as exc:
             log.exception("error executing statement")
+            log.error(statement)
+            self._last_error = str(exc)
             return False
 
     def available_databases(self):
@@ -182,19 +194,6 @@ class DBFunctions(object):
 
         return sql + permissions
 
-    def drop_db(self, name):
-        '''
-        drops the database with the name given
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.warning("dropping database %s"% name)
-        try:
-            self._execute("drop database if exists %s"% name)
-            return True
-        except:
-            log.exception("unable to drop database %s"% name)
-        return False
-
     def create_db(self, dbname):
         '''
         creates a database with the name given
@@ -230,7 +229,7 @@ class DBFunctions(object):
             log.exception("Serious Error")
         return False
 
-    def create_demo_user(self, dbname):
+    def create_demo_user(self):
         '''
         create our demo user
         '''
@@ -242,7 +241,36 @@ class DBFunctions(object):
         else:
             log.error("unable to create user om_demo. perhaps exists already?")
 
-        return self.grant_user_permissions("om_demo", dbname, True, True)
+        return self.grant_user_permissions("om_demo", "openmolar_demo",
+                True, True)
+
+    def drop_demodb(self):
+        '''
+        remove the openmolar_demo database
+        '''
+        return self.drop_db("openmolar_demo")
+
+    def drop_db(self, dbname):
+        '''
+        remove the database with this name
+        also attempts to remove the standard user groups (this will fail if
+        other roles in these groups haven't been removed first)
+        '''
+        logging.warning("removing database (if exists) %s"% dbname)
+        if self._execute('drop database if exists %s;'% dbname):
+            logging.info("database '%s' removed"% dbname)
+        else:
+            return False
+
+        for group in ("Admin", "Client"):
+            user_group = 'om%sgroup_%s;'% (group, dbname)
+            logging.warning("removing role (if exists) '%s'"% user_group)
+            if self._execute('drop user if exists %s'% user_group ):
+                logging.info("role '%s' removed"% user_group)
+            else:
+                return False
+
+        return True
 
     def create_user(self, username, password=None):
         '''
@@ -282,6 +310,21 @@ class DBFunctions(object):
             log.exception("Serious Error")
         return False
 
+    def drop_demo_user(self):
+        '''
+        drops the demo user
+        '''
+        return self.drop_user("om_demo")
+
+    def drop_user(self, username):
+        '''
+        drops a user
+        '''
+        logging.warning("removing user %s"% username)
+        if self._execute('drop user %s;'% username):
+            logging.info("user '%s' removed"% username)
+            return True
+        return False
 
 def _test():
     '''
@@ -290,15 +333,17 @@ def _test():
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger("openmolar_server")
     sf = DBFunctions()
-    #sf.create_demo_user()
-    #log.debug(sf.get_demo_user())
-    #log.debug(sf.available_databases())
+    log.debug(sf.available_databases())
 
     dbname = "openmolar_demo"
     #log.debug(sf.newDB_sql(dbname))
     sf.drop_db(dbname)
+    sf.drop_demo_user()
     sf.create_db(dbname)
     sf.create_demo_user(dbname)
+    sf.drop_db(dbname)
+    sf.drop_demo_user()
+
 
 if __name__ == "__main__":
     _test()

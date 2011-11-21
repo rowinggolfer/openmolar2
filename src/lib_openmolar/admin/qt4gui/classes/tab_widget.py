@@ -67,10 +67,12 @@ class AdminTabWidget(ClosableTabWidget):
         self.toggle_tabbar()
 
     def closeAll(self):
+        result = False
         if self.count() > 1:
-            ClosableTabWidget.closeAll(self, _("Disconnect and"))
+            result = ClosableTabWidget.closeAll(self, _("Disconnect and"))
             self.addTab(self.browser, _("Messages"))
         self.toggle_tabbar()
+        return result
 
     def _tab_changed(self, i):
         try:
