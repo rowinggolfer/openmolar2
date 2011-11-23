@@ -20,11 +20,11 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
 import re
 
 from PyQt4 import QtGui, QtCore
 from lib_openmolar.client.classes import Tooth
-
 
 class ToothDataError(Exception):
     '''
@@ -277,7 +277,7 @@ class ToothData(object):
         this input has come from a line edit.. so has to be checked for sanity
         '''
 
-        SETTINGS.debug_log("from_user_input", input)
+        logging.debug("from_user_input - '%s'"% input)
 
         if input.startsWith("CR"):
             self.parse_crown_input(input)
@@ -321,11 +321,6 @@ class ToothData(object):
         else:
             self.set_type(self.COMMENT)
             self.set_comment(t_i_meta.description)
-
-        #else:
-        #    SETTINGS.log("unknown ToothData type during from_treatment_item")
-        #    raise ToothDataError("unable to create ToothData from %s"% (
-        #        t_i_meta.parent_item))
 
     def parse_fill_input(self, input, decode=True):
         input_list = input.split(",")

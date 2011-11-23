@@ -205,8 +205,7 @@ class AdminMainWindow(BaseMainWindow):
         poll the openmolar xml_rpc server for messages
         '''
         if self.proxy_server is not None:
-            message = self.proxy_server.admin_welcome()
-            result = True
+            result, message = self.proxy_server.admin_welcome()
         else:
             message = self.FAILURE_MESSAGE
             result = False

@@ -53,9 +53,6 @@ def singleton(cls):
 
 class CommonSettings(object):
 
-    #: determines how much is output to the terminal
-    VERBOSE = True
-
     #: the system dictionary
     DICT_LOCATION = "/usr/share/dict/words"
 
@@ -144,31 +141,6 @@ class CommonSettings(object):
         self._pydate_format = None
         self._qdate_format = None
         self._rev_toothgrid_shortnames = {}
-
-    def log(self, *args):
-        '''
-        a function to output to terminal if application is launched in
-        verbose mode
-        '''
-        if not self.VERBOSE:
-            return
-        for arg in args:
-            print str(arg),
-        print
-
-    def debug_log(self, *args):
-        '''
-        a debug log. the main reason for the existence of this is I can
-        put SETTINGS.debug_log("blah", "blah") all over the codebase
-        and clean it up quickly
-        '''
-        print
-        print "=" *30, " DEBUG  ", "=" *30
-        for arg in args:
-            print str(arg),
-        print
-        print "=" *70
-        print
 
     @property
     def REV_TOOTHGRID_SHORTNAMES(self):

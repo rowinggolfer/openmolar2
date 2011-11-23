@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
 from PyQt4 import QtGui, QtCore
 
 HORIZONTAL_HEADERS = ("Code", "Description", "No.", "details",
@@ -175,7 +176,7 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
         self.parents = {0 : self.rootItem}
 
         if SETTINGS.current_patient is None:
-            SETTINGS.log("TreatmentTreeModel - no patient")
+            logging.debug("TreatmentTreeModel - no patient")
             treatment_items = []
         else:
             model = SETTINGS.current_patient.treatment_model
@@ -206,6 +207,7 @@ class _TestDialog(QtGui.QDialog):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
 
     app = QtGui.QApplication([])
 

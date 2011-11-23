@@ -39,6 +39,7 @@ class DBFunctions(object):
             f = open("/home/neil/openmolar/master_pword.txt")
             self.MASTER_PWORD = f.read()
             f.close()
+            self._current_user = None
 
     @property
     def default_conn_atts(self):
@@ -256,6 +257,9 @@ class DBFunctions(object):
         also attempts to remove the standard user groups (this will fail if
         other roles in these groups haven't been removed first)
         '''
+        if self.current_user() != "admin":
+            logging.error("%s has insufficient permissions to drop database"% self.current_user())
+            return False
         logging.warning("removing database (if exists) %s"% dbname)
         if self._execute('drop database if exists %s;'% dbname):
             logging.info("database '%s' removed"% dbname)

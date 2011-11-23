@@ -27,7 +27,6 @@ and starts the admin gui
 
 import gettext
 import os
-import pexpect
 import sys
 import subprocess
 

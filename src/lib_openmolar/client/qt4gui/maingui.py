@@ -21,6 +21,7 @@
 ###############################################################################
 
 import cPickle
+import logging
 import sys
 from PyQt4 import QtGui, QtCore
 
@@ -297,7 +298,8 @@ def main():
     '''
     main entry point for lib_openmolar.client
     '''
-    SETTINGS.VERBOSE = "-v" in sys.argv
+    if not "-v" in sys.argv:
+        logging.basicConfig(level = logging.info)
 
     app = RestorableApplication("openmolar-client")
     ui = ClientMainWindow()
@@ -306,5 +308,6 @@ def main():
     app = None
 
 if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
 
     sys.exit(main())

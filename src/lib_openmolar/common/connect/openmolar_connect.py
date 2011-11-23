@@ -43,18 +43,25 @@ class OpenmolarConnection(object):
     '''
     HOST = "127.0.0.1"
     PORT = 230
-    def connect(self, host=HOST, port=PORT):
+    def connect(self, host=HOST, port=PORT, user="restricted",
+        psword="eihjfosdhvpwi"):
         '''
         attempt to connect to xmlrpc_server, and return this object
         raise a ConnectionError if no success.
         '''
-        location = 'http://%s:%d'% (host, port)
-        logging.debug("attempting connection to %s"% location)
+        location = 'https://%s:%s@%s:%d'% (user, psword, host, port)
+        logging.debug("attempting connection to %s"%
+            location.replace(psword, "********"))
         try:
             proxy = xmlrpclib.ServerProxy(location)
             proxy.ping()
             logging.debug("connected and pingable (this is good!)")
             return proxy
+        except xmlrpclib.ProtocolError:
+            message = _("connection refused")
+            logging.error(message)
+            raise OpenmolarConnectionError(message)
+
         except socket.error as e:
             logging.exception(
             "error connecting to the openmolar-xmlrpc server %s"% location)
@@ -66,7 +73,23 @@ class OpenmolarConnection(object):
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    from gettext import gettext as _
+
     omc = OpenmolarConnection()
     proxy = omc.connect()
     if proxy is not None:
-        print proxy.last_backup()
+        print proxy.system.listMethods()
+
+        logging.debug("getting last backup")
+        result, val = proxy.last_backup()
+        if result:
+            logging.debug("last backup %s"% val)
+        else:
+            logging.error(val)
+
+        logging.debug("getting current user")
+        result, val = proxy.current_user()
+        if result:
+            logging.debug("current_user = %s"% val)
+        else:
+            logging.error(val)
