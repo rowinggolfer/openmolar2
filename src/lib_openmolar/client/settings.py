@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
 from lib_openmolar.common import settings
 
 from lib_openmolar.client import classes
@@ -217,14 +218,14 @@ class Settings(settings.CommonSettings):
             full_path = os.path.join(str(plugin_dir), file_)
 
             if file_.endswith(".py"):
-                self.log("NAKED PLUGIN FOUND", full_path)
+                logging.info("NAKED PLUGIN FOUND '%s'"% full_path)
                 if self.PERSISTANT_SETTINGS.get("compile_plugins", False):
                     module = file_.replace('.py','')
                     mod = __import__(module)
                     yield mod
                 else:
-                    self.log ('NOT COMPILING',
-                        "(as you have naked plugins disabled)")
+                    logging.info(
+                    'NOT COMPILING (as you have naked plugins disabled)')
             elif zipfile.is_zipfile(full_path):
                 module = file_.replace('.zip','')
                 try:
@@ -232,7 +233,7 @@ class Settings(settings.CommonSettings):
                     mod = z.load_module(module)
                     yield mod
                 except (zipimport.ZipImportError, zipfile.BadZipfile) as e:
-                    self.log ("incompatible plugin", filepath)
+                    logging.exception ("incompatible plugin '%s'"% filepath)
 
     def get_plugins(self, plugin_dir):
         '''
@@ -246,37 +247,21 @@ class Settings(settings.CommonSettings):
                 i += 1
         return i
 
-    def verbose_exception(self):
-        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-
-        readable_ex =   traceback.format_exception(
-            exceptionType, exceptionValue, exceptionTraceback)
-
-        message = u"%s\n\n"% _(
-            "exception loading plugin- please file a bug")
-
-        for line in readable_ex:
-            message += "%s\n" % line
-
-        self.log (message)
-
     def load_plugins(self):
         '''
         this function is called by the client application to load plugins
         '''
-        self.log ("loading plugins...")
+        logging.info ("loading plugins...")
         i = 0
         for plugin_dir in self.PLUGIN_DIRS:
-            self.log ("looking in", plugin_dir, "for plugins")
-
+            logging.info ("looking for plugins in directory %s"% plugin_dir)
             try:
                 i += self.get_plugins(plugin_dir)
 
             except Exception as e:
-                self.log ("Exception loading plugin")
-                self.verbose_exception()
+                logging.exception ("Exception loading plugin")
 
-        self.log (str(i), "plugin(s) loaded")
+        logging.info("%d plugin(s) loaded"% i)
 
     @property
     def allowed_fill_materials(self):
@@ -316,7 +301,7 @@ class Settings(settings.CommonSettings):
             return "?month?"
 
     def set_user1(self, user):
-        SETTINGS.log("setting user1 as %s"% user)
+        logging.info("setting user1 as %s"% user)
         self.user1 = user
         try:
             practitioner = self.practitioners.practitioner_from_user(user)
@@ -349,7 +334,7 @@ class Settings(settings.CommonSettings):
         this means other modules can always access this important object
         '''
         self._current_patient = patient
-        self.log("setting current patient - %s"% patient)
+        logging.debug("setting current patient - %s"% patient)
 
     @property
     def current_patient(self):
@@ -368,8 +353,8 @@ class Settings(settings.CommonSettings):
         try:
             plugin.setup_plugin()
         except Exception, e:
-            print "Exception during plugin.setup_plugin", plugin.name
-            self.verbose_exception()
+            logging.exception(
+            "Exception during plugin.setup_plugin '%s'"% plugin.name)
 
         self._plugins.append(plugin)
 
@@ -384,7 +369,7 @@ class Settings(settings.CommonSettings):
         '''
         installs a fee_scale (of type BasePlugin)
         '''
-        self.log ("installing fee_scale", fee_scale)
+        logging.info ("installing fee_scale %s"% fee_scale)
         self._fee_scales.append(fee_scale)
 
     @property
@@ -403,6 +388,7 @@ def install():
     __builtin__.__dict__["SETTINGS"] = Settings()
 
 if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
 
     install()
     print SETTINGS.PROCEDURE_CODES

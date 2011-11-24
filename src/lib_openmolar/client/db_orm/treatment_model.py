@@ -24,6 +24,7 @@
 Provides the TreatmentModel Class
 '''
 
+import logging
 from PyQt4 import QtCore, QtSql
 
 from lib_openmolar.common.settings import om_types
@@ -64,7 +65,7 @@ class TreatmentModel(object):
         '''
         reset this model
         '''
-        SETTINGS.log("clearing treatment_model")
+        logging.debug("clearing treatment_model")
         self._treatment_items = []
         self._deleted_items = []
         self.plan_tx_chartmodel.clear()
@@ -138,7 +139,7 @@ where patient_id = ?'''
             self.tree_model.update_treatments()
             return True
 
-        SETTINGS.log(treatment_item.errors)
+        logging.debug(treatment_item.errors)
 
         if treatment_item.in_database:
             raise IOError, "invalid treatment in database treatments id=%s"% (
@@ -250,6 +251,7 @@ where patient_id = ?'''
         return item.commit_to_db(SETTINGS.database)
 
 if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
 
     from lib_openmolar.client.connect import ClientConnection
     from lib_openmolar.client.db_orm import PatientModel

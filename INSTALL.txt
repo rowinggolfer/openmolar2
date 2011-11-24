@@ -8,7 +8,7 @@ However, if you wish to install from source, or indeed create packages
 for the distribution of your choice, the following information should
 be of use to you.
 
-Please note the Appendix below which specifies the current dependencies of 
+Please note the Appendix below which specifies the current dependencies of
 each component.
 
 
@@ -34,7 +34,7 @@ APPENDIX
 ========
 
 ## COMMON DEPENDENCIES ##
- - python2.* (>=2.5)         http://www.python.org/        
+ - python2.* (>=2.5)         http://www.python.org/
  - python-qt4                http://www.riverbankcomputing.co.uk/software/pyqt/intro
  - qt4                       http://qt.nokia.com/
  - libqt4-sql-psql           Qt 4 PostgreSQL database driver
@@ -42,8 +42,8 @@ APPENDIX
 
 ## CLIENT DEPENDENCIES ##
  - openmolar-common          (as above)
-    
-## ADMIN DEPENDENCIES ##  
+
+## ADMIN DEPENDENCIES ##
  - openmolar-common          (as above)
  - python-qscintilla2        Python bindings for QScintilla 2
 
@@ -51,5 +51,6 @@ APPENDIX
  - python-psycopg2
  - postgresql
  - postgresql-contrib
+ - python-openssl
 
 

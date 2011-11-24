@@ -24,6 +24,7 @@
 Provides the TreatmentItem Class
 '''
 
+import logging
 import re
 import types
 
@@ -173,7 +174,7 @@ class TreatmentItemMetadata(object):
         :param: surfaces(string)
 
         set the surfaces for a restoration
-        
+
         .. note::
             an exception will be raised if surfaces are invalid
 
@@ -344,7 +345,7 @@ class TreatmentItem(object):
         An extension of __init__, loading data from the database
         when initiated by a QSqlRecord.
         '''
-        SETTINGS.log("converting QsqlRecord to TreatmentItem")
+        logging.debug("converting QsqlRecord to TreatmentItem")
         self.set_px_clinician(self.qsql_record.value("px_clinician").toInt()[0])
         tx_clinician, valid = self.qsql_record.value("tx_clinician").toInt()
         self.set_comment(unicode(self.qsql_record.value("comment").toString()))
@@ -381,7 +382,7 @@ where treatment_teeth.treatment_id = ?
         create a new :doc:`TreatmentItemMetadata` object and append to this
         treatment item.
         note - returns the item so that values can be set
-        
+
         .. typical useage::
             metadata = TreatmentItem().add_metadata()
             metadata.set_tooth(18)
@@ -760,7 +761,7 @@ where treatment_teeth.treatment_id = ?
         q_query.exec_()
 
         if q_query.lastError().isValid():
-            SETTINGS.log(query)
+            logging.error(query)
             error = q_query.lastError()
             database.emit_caught_error(error)
             return False
@@ -790,4 +791,8 @@ where treatment_teeth.treatment_id = ?
             return cmp(self.code, other.code)
         except AttributeError as e:
             return -1
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
 

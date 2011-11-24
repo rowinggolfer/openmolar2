@@ -22,6 +22,7 @@
 
 from __future__ import division
 
+import logging
 import re
 
 from PyQt4 import QtGui, QtCore
@@ -469,7 +470,7 @@ class ChartTooth(Tooth):
             if shape:
                 self.fill_shapes.append((shape, brush))
             else:
-                SETTINGS.log ("shape error! '%s'"% surfaces)
+                logging.debug ("shape error! '%s'"% surfaces)
 
         self.fill_shapes_current = True
 
@@ -550,6 +551,7 @@ class ChartTooth(Tooth):
         painter.restore()
 
 if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)
     from lib_openmolar.client.qt4gui.client_widgets import chart_widgets
 
     def paintEvent(event):

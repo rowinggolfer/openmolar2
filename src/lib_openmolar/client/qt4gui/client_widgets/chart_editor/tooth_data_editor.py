@@ -20,7 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
-
+import logging
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.client.qt4gui.client_widgets import chart_widgets
@@ -165,7 +165,7 @@ class ToothDataEditor(QtGui.QWidget):
 
     def add_property_to_current_tooth(self):
         if not self.current_tooth:
-            SETTINGS.log("not adding property.. no current tooth selected")
+            logging.debug("not adding property.. no current tooth selected")
             return
 
         tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)
@@ -389,3 +389,7 @@ if __name__ == "__main__":
     layout.addWidget(obj)
     layout.addWidget(toggle_frame)
     dl.exec_()
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level = logging.DEBUG)

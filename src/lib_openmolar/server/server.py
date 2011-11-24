@@ -24,8 +24,9 @@ import commands
 import logging
 import socket
 import sys
+import threading
 
-from SimpleXMLRPCServer import SimpleXMLRPCServer
+from simple_xmlrpc_server_tls import SimpleXMLRPCServerTLS
 
 from service import Service
 from functions import ServerFunctions
@@ -37,6 +38,7 @@ def ping():
     return True
 
 class OMServer(Service):
+    server = None
     def __init__(self, verbose=False):
         self.log = logging.getLogger("openmolar_server")
         if verbose:
@@ -50,15 +52,25 @@ class OMServer(Service):
             return False
         self.log.info("creating server...")
 
-        server = SimpleXMLRPCServer(("", PORT))
-        server.register_function(ping)
-        server.register_instance(ServerFunctions())
+        self.server = SimpleXMLRPCServerTLS(("", PORT))
+        self.server.register_function(ping)
 
+        ## allow user to list methods?
+        self.server.register_introspection_functions()
+
+        functions = ServerFunctions()
+        self.server.register_instance(functions)
+        self.server.function_instance = functions
         self.log.info("listening on port %d"% (PORT))
-        sys.exit(server.serve_forever())
+        server_thread = threading.Thread(target=self.server.serve_forever)
+        server_thread.start()
 
     def stop(self):
         self.log.info("Stopping server")
+        try:
+            self.server.shutdown()
+        except AttributeError: # could be a NoneType or pre 2.6 Baseserver
+            pass
         self.stop_()
 
     def restart(self):
@@ -67,6 +79,3 @@ class OMServer(Service):
 
     def status(self):
         self.status_()
-
-    def __del__(self):
-        self.log.debug("OMServer object destroyed")
