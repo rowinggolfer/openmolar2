@@ -26,12 +26,10 @@ import os
 import sys
 import subprocess
 from lib_openmolar.server import server
-from lib_openmolar.server import logger
-from lib_openmolar.server.password_generator import new_password
+from lib_openmolar.server.functions import logger
+from lib_openmolar.server.functions.om_server_config import OMServerConfig
 
 LOGDIR = "/var/log/openmolar/server/"
-ETCDIR = "/etc/openmolar/server/"
-PWORD_FILE = "/etc/openmolar/server/master_pword.txt"
 
 class Installer(object):
     '''
@@ -40,16 +38,15 @@ class Installer(object):
     creates a master database,
     sets out the directory structure.
     '''
+    def __init__(self):
+        self.config = OMServerConfig()
 
     @property
     def chk_install(self):
-        return (
-            os.path.isfile(PWORD_FILE) and
-            os.path.isdir(LOGDIR) and
-            os.path.isdir(ETCDIR))
+        return self.config.is_installed
 
     def make_dirs(self):
-        for dir in (ETCDIR, LOGDIR):
+        for dir in (self.config.etc_dir, LOGDIR):
             try:
                 print "making directory", dir
                 os.makedirs(dir)
@@ -59,18 +56,12 @@ class Installer(object):
                     print ("Are you Root?")
                     sys.exit(0)
 
-    def create_password(self):
+    def write_config(self):
         '''
-        look for a master password in %s
-        if it doesn't exist, create it.
-        the permissions of this file are changed to 600 so that only root can
-        read and write it.
-        '''% PWORD_FILE
-        if not os.path.isfile(PWORD_FILE):
-            f = open(PWORD_FILE, "w")
-            f.write("%s\n"% new_password(20))
-            f.close()
-            os.chmod(PWORD_FILE, 600)
+        write the config file for openmolar
+        '''
+        self.config.new_config()
+        self.config.write()
 
     def init_master_user(self):
         '''
@@ -98,7 +89,7 @@ class Installer(object):
         server application
         '''
         self.make_dirs()
-        self.create_password()
+        self.write_config()
         self.init_master_user()
         self.init_master_db()
 

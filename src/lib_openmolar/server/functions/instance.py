@@ -30,6 +30,7 @@ from db_functions import DBFunctions
 from message_functions import MessageFunctions
 from shell_functions import ShellFunctions
 from payload import PayLoad
+from om_server_config import OMServerConfig
 
 _PROXY_ID = 0
 
@@ -69,10 +70,6 @@ MANAGER_METHODS = ( 'create_db',
                     #'newDB_sql',
                     )
 
-def new_password(length=20):
-    chars = string.letters + string.digits
-    return ''.join([random.choice(chars) for i in xrange(length)])
-
 class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
     '''
     A class whose functions will be inherited by the server.
@@ -84,12 +81,13 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
     PERMISSIONS = {}
 
     def __init__(self):
-        f = open("/etc/openmolar/server/master_pword.txt", "r")
-        self.MASTER_PWORD = f.readline()
-        f.close()
+        self.config = OMServerConfig()
         DBFunctions.__init__(self)
-
         self._init_permissions()
+
+    @property
+    def MASTER_PWORD(self):
+        return self.config.openmolar_pass
 
     def _init_permissions(self):
         '''

@@ -90,8 +90,9 @@ class OpenmolarConnection(object):
             location.replace(user.psword, "********"))
         try:
             proxy = xmlrpclib.ServerProxy(location)
+            logging.debug("connected (this is good!)")
             proxy.ping()
-            logging.debug("connected and pingable (this is good!)")
+            logging.debug("connected and pingable (this is very good!)")
             return proxy
         except xmlrpclib.ProtocolError:
             message = u"%s '%s'"% (_("connection refused for user"), user.name)
@@ -115,6 +116,7 @@ if __name__ == "__main__":
 
     omc = OpenmolarConnection()
     proxy = omc.connect()
+
     if proxy is not None:
         print proxy.system.listMethods()
 

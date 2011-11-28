@@ -33,9 +33,6 @@ from SimpleXMLRPCServer import (
 
 import logging
 
-USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest(),
-            "neil":md5("eihjfosdhvpwi").hexdigest()}
-
 def ping():
     '''
     A trivial function given to all servers for testing purposes
@@ -55,6 +52,8 @@ class VerifyingServer(SimpleXMLRPCServer):
     if this instance needs to know the user.. give it a special function
     _remember_user(user)
     '''
+
+    USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest()}
 
     HAS_SMART_INSTANCE = False
 
@@ -76,14 +75,24 @@ class VerifyingServer(SimpleXMLRPCServer):
         except AttributeError:
             self.HAS_SMART_INSTANCE = False
             logging.debug(
-        "the registered instance does not have special function _remeber_user")
+    "the registered instance does not have special function _remember_user")
 
         SimpleXMLRPCServer.register_instance(self, klass)
 
     def remember_user(self, user):
+        '''
+        remember the current user
+        '''
         if not self.HAS_SMART_INSTANCE:
             return
         self.registered_instance._remember_user(user)
+
+    def add_user(self, user, hash):
+        '''
+        add a user to the userdict
+        password should be MD5 hashed.
+        '''
+        self.USERDICT[user] = hash
 
 class VerifyingServerSSL(VerifyingServer):
     '''
@@ -155,8 +164,8 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         '''
         log = logging.getLogger("openmolar_server")
         self.set_proxy_user()
-        if username in USERDICT:
-            if USERDICT[username] == md5(password).hexdigest():
+        if username in self.server.USERDICT:
+            if self.server.USERDICT[username] == md5(password).hexdigest():
                 self.set_proxy_user(username)
                 log.info("authenticated user '%s'"% username)
                 return True
@@ -170,6 +179,7 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         '''
         self.server.remember_user(user)
 
+
 def _test():
     s = VerifyingServer(("",1230))
     s.serve_forever()
@@ -178,10 +188,11 @@ def _test_ssl():
     s = VerifyingServerSSL(("",1230),
         '/etc/openmolar/server/privatekey.pem',
         '/etc/openmolar/server/cert.pem')
+    logging.debug(s.USERDICT)
+
     s.serve_forever()
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
-    logging.debug(USERDICT)
     #_test()
     _test_ssl()

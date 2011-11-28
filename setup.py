@@ -266,6 +266,11 @@ class InstallData(install_data):
     '''
     def run(self):
         install_data.run(self)
+
+        print "Placing restrictive conditions on server certificates"
+        os.chmod('/etc/openmolar/server/private_key.pem', 400)
+        os.chmod('/etc/openmolar/server/cert.pem', 400)
+
         print "RUNNING update-rc.d"
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
@@ -309,7 +314,10 @@ if INSTALL_SERVER:
                     ('/etc/init.d', ['misc/server/openmolar']),
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
-                         'misc/server/blank_schema.sql'])
+                         'misc/server/blank_schema.sql']),
+                    ('/etc/openmolar/server',
+                        ['misc/server/cert.pem',
+                         'misc/server/private_key.pem'])
                    ],
 
         cmdclass = {'install_data':InstallData}

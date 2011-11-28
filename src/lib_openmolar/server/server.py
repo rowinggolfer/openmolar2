@@ -31,7 +31,7 @@ import threading
 
 from service import Service
 from functions import ServerFunctions
-from lib_openmolar.server import logger
+from lib_openmolar.server.functions import logger
 from lib_openmolar.server.verifying_servers import VerifyingServerSSL
 
 ##############################################################################
@@ -44,13 +44,8 @@ from lib_openmolar.server.verifying_servers import VerifyingServerSSL
 
 KEYFILE  = '/etc/openmolar/server/privatekey.pem'
 CERTFILE = '/etc/openmolar/server/cert.pem'
-SSL_AVAILABLE = os.path.exists(KEYFILE) and os.path.exists(CERTFILE)
 
 SSL_PORT = 230
-PORT = 1230
-
-def ssl_available():
-    return SSL_AVAILABLE
 
 class OMServer(Service):
     server = None
@@ -76,7 +71,7 @@ class OMServer(Service):
             "listening for ssl connections on port %d"% (SSL_PORT))
 
         # daemonise the process and write to /var/run
-        self.start_()
+        self.start_(stderr=logger.LOCATION)
 
         ## allow user to list methods?
         self.server.register_introspection_functions()

@@ -64,14 +64,24 @@ class Service(object):
 
         return True
 
-    def start_(self):
+    def start_(self, stdin="/dev/null", stdout="/dev/null", stderr="/dev/null"):
+        '''
+        checks for a PIDfile,
+        daemonises the process,
+        writes the new PIDfile
+        '''
+        if os.path.isfile(PIDFILE):
+            self.log.warning("%s already exists"% PIDFILE)
+
+        self.daemonise(stdin, stdout, stderr)
+
+        return self.write_pidfile()
+
+    def daemonise(self, stdin, stdout, stderr):
         """
         Double forks the process in the background
         to avoid zombies, writes a PID.
         """
-        if os.path.isfile(PIDFILE):
-            self.log.warning("openmolar-server is already running")
-            return False
 
         #we are about to fork the process... so clear any output first
         sys.stdout.flush()
@@ -99,15 +109,13 @@ class Service(object):
             sys.exit("%s: fork #2 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
 
-        si = file("/dev/null", "r")
-        so = file("/dev/null", "a+")
-        se = file("/dev/null", "a+", 0)
+        si = file(stdin, "r")
+        so = file(stdout, "a+")
+        se = file(stderr, "a+", 0)
 
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
-
-        return self.write_pidfile()
 
     def stop_(self):
         try:

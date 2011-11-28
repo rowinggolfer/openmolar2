@@ -24,7 +24,7 @@ import logging
 import subprocess
 import sys
 import psycopg2
-from lib_openmolar.server.password_generator import new_password
+from lib_openmolar.server.functions.password_generator import new_password
 
 class DBFunctions(object):
     '''
@@ -36,6 +36,7 @@ class DBFunctions(object):
     def __init__(self):
         if __name__ == "__main__":
             ## this is useful for testing purposes only
+            ## when subclassed by instance, this attribute is handled
             f = open("/home/neil/openmolar/master_pword.txt")
             self.MASTER_PWORD = f.read()
             f.close()

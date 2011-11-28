@@ -22,14 +22,31 @@
 
 import random
 import string
+from hashlib import md5
+
+def md5hash(str):
+    '''
+    returns a hash of a string.
+    '''
+    return md5(str).hexdigest()
 
 def new_password(length=20):
+    '''
+    returns a new password
+    '''
     chars = string.letters + string.digits
     return ''.join([random.choice(chars) for i in xrange(length)])
 
+def pass_hash(length=20):
+    '''
+    returns a new password and its hash
+    '''
+    p = new_password(length)
+    return (p, md5hash(p))
+
 def _test():
-    for i in range (20,30):
-        print new_password(i)
+    for i in range (10,30):
+        print pass_hash(i)
 
 if __name__ == "__main__":
     _test()
