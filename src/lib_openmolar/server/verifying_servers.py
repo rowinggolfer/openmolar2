@@ -33,7 +33,7 @@ from SimpleXMLRPCServer import (
 
 import logging
 
-USERDICT = {"restricted":md5("eihjfosdhvpwi").hexdigest(),
+USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest(),
             "neil":md5("eihjfosdhvpwi").hexdigest()}
 
 def ping():

@@ -37,28 +37,64 @@ class OpenmolarConnectionError(Exception):
     '''
     pass
 
+class ProxyUser(object):
+    '''
+    a custom data type to hold the user details for connection to the
+    openmolar-server.
+    Will expire permission after 10 minutes.
+    '''
+    _creation_time = None
+
+    #:
+    timeout = 600
+
+    def __init__(self, name=None, psword=None):
+        if name is None and psword is None:
+            name, psword = "default", "eihjfosdhvpwi"
+        else:
+            self._creation_time = int(time.time())
+        self.name = name
+        self.psword = psword
+
+    @property
+    def has_expired(self):
+        '''
+        privileged users get logged out after a timeout (default is 10 minutes)
+        '''
+        if self._creation_time is None:
+            return False
+        return time.time() > self._creation_time + self.timeout
+
 class OpenmolarConnection(object):
     '''
     a class which connects to the openmolar xmlrpc server
     '''
     HOST = "127.0.0.1"
     PORT = 230
-    def connect(self, host=HOST, port=PORT, user="restricted",
-        psword="eihjfosdhvpwi"):
+
+    def connect(self, host=HOST, port=PORT, user=None):
         '''
         attempt to connect to xmlrpc_server, and return this object
         raise a ConnectionError if no success.
         '''
-        location = 'https://%s:%s@%s:%d'% (user, psword, host, port)
+        if user is None:
+            user = ProxyUser()
+        if user.has_expired:
+            logging.warning("ProxyUser has expired - using default ProxyUser")
+            user = ProxyUser()
+
+        assert type(user) == ProxyUser, "incorrect connection params supplied"
+
+        location = 'https://%s:%s@%s:%d'% (user.name, user.psword, host, port)
         logging.debug("attempting connection to %s"%
-            location.replace(psword, "********"))
+            location.replace(user.psword, "********"))
         try:
             proxy = xmlrpclib.ServerProxy(location)
             proxy.ping()
             logging.debug("connected and pingable (this is good!)")
             return proxy
         except xmlrpclib.ProtocolError:
-            message = _("connection refused")
+            message = u"%s '%s'"% (_("connection refused for user"), user.name)
             logging.error(message)
             raise OpenmolarConnectionError(message)
 

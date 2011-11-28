@@ -30,6 +30,7 @@ from xmlrpclib import Fault as ServerFault
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.connect import (
+    ProxyUser,
     ConnectionError,
     ConnectionsPreferenceWidget,
     ConnectDialog,
@@ -63,6 +64,22 @@ from lib_openmolar.admin.qt4gui.classes.database_table import (
     DatabaseTableViewer,
     RelationalDatabaseTableViewer)
 
+class PermissionError(Exception):
+    '''
+    A custom exception raised when user privileges are insufficient
+    '''
+    pass
+
+def user_perms(func):
+    def userf(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except PermissionError:
+            admin_instance = args[0]
+            if admin_instance.switch_server_user():
+                return func(*args, **kwargs)
+
+    return userf
 
 class AdminMainWindow(BaseMainWindow):
     '''
@@ -175,7 +192,7 @@ class AdminMainWindow(BaseMainWindow):
 
         self.action_show_log.triggered.connect(self.show_log)
 
-        self.action_new_database.triggered.connect(self.new_database)
+        self.action_new_database.triggered.connect(self.create_database)
         self.action_populate_demo.triggered.connect(self.populate_demo)
 
         self.connect(self.tab_widget, QtCore.SIGNAL("Widget Removed"),
@@ -201,6 +218,10 @@ class AdminMainWindow(BaseMainWindow):
         else:
             self.advise(_("Failure!"))
         self.wait(False)
+
+    def switch_server_user(self):
+        self.advise("we need to up your permissions for this",1)
+        return False
 
     def get_proxy_message(self):
         '''
@@ -455,11 +476,12 @@ class AdminMainWindow(BaseMainWindow):
             self.advise(_("No Databases found"),2)
         return ("", False)
 
-    def new_demo_database(self):
+    @user_perms
+    def create_demo_database(self):
         '''
         initiates the demo database
         '''
-        continue_ = self.new_database(True)
+        continue_ = self.create_database(True)
         if not continue_:
             self.advise(_("failed"))
             return
@@ -492,7 +514,8 @@ class AdminMainWindow(BaseMainWindow):
         QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
             self.populate_demo()
 
-    def new_database(self, demo=False):
+    @user_perms
+    def create_database(self, demo=False):
         '''
         creates a new db
         '''
@@ -506,28 +529,24 @@ class AdminMainWindow(BaseMainWindow):
                 return
             dbname = dl.database_name
 
-        try:
-            self.advise("%s '%s' <br />%s"%(
-                _("Creating a new database"), dbname,
-                _("This may take some time")))
-            self.wait()
-            if not demo:
-                payload = pickle.loads(self.proxy_server.create_db(dbname))
-            else:
-                payload = pickle.loads(self.proxy_server.create_demodb())
-            self.wait(False)
-            if payload.payload:
-                success = True
-                self.advise(_("success!"), 1)
-                logging.info("database %s created"% dbname)
-            else:
-                self.advise(payload.error_message, 2)
-        except:
-            message = "error creating new database '%s'"% dbname
-            logging.exception(message)
-            self.advise(message, 2)
-        finally:
-            self.wait(False)
+
+        self.advise("%s '%s' <br />%s"%(
+            _("Creating a new database"), dbname,
+            _("This may take some time")))
+        self.wait()
+        if not demo:
+            payload = pickle.loads(self.proxy_server.create_db(dbname))
+        else:
+            payload = pickle.loads(self.proxy_server.create_demodb())
+        self.wait(False)
+        if not payload.permission:
+            raise PermissionError
+        if payload.payload:
+            success = True
+            self.advise(_("success!"), 1)
+            logging.info("database %s created"% dbname)
+        else:
+            self.advise(payload.error_message, 2)
 
         self.get_proxy_message()
         return success
@@ -543,6 +562,7 @@ class AdminMainWindow(BaseMainWindow):
         if result:
             self.log(message)
 
+    @user_perms
     def populate_demo(self):
         '''
         catches signal when user hits the demo action
@@ -573,6 +593,7 @@ class AdminMainWindow(BaseMainWindow):
                 self.advise(u"%s %s"%(_("dropping database"), dbname))
                 self.drop_db(dbname)
 
+    @user_perms
     def drop_db(self, dbname):
         '''
         send a message to the openmolar server to drop this database
@@ -727,7 +748,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
             self.init_proxy()
         elif url == "install_demo":
             logging.debug("Install demo called via shortcut")
-            self.new_demo_database()
+            self.create_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]
             self.advise("connect to database %s"% dbname)

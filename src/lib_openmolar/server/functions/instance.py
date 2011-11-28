@@ -96,7 +96,7 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         parse the tuples above into a dictionary of lists
         '''
         for method in LOOSE_METHODS:
-            self.PERMISSIONS[method] = ["manager", "restricted"]
+            self.PERMISSIONS[method] = ["manager", "default"]
         for method in MANAGER_METHODS:
             if self.PERMISSIONS.has_key(method):
                 self.log.debug(
