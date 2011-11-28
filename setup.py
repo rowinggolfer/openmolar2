@@ -83,6 +83,44 @@ if INSTALL_SERVER and "win" in sys.platform and "install" in sys.argv:
     logging.error("Server package cannot be installed on windows")
     INSTALL_SERVER = False
 
+PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
+MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAMQ63QLYZTsoHT4q
+QW3q5635IP6YMTyvKCi7fKtQ5/KMRrCuotL/UUuqG9oHfxWJv8YfMUjxvKXYxIoE
+sWziLgWRBVysG41fThfNtOmM5s+wQs+emMieKCsOaTqK65j0RCIwlzyw7ntHHKHq
+TAPHqsgA0NGogg0MtmxehkEqMSnFAgMBAAECgYEAqj8TnrNV6KQd8uBAUff6t1Ks
+kJZEKY0hv20idZPFGQchEYsCEyOWSZo1fc0BMhOHwYEwhkPM0uqlYcU+leQJ3h2D
+GjK4I1Dp9HKfFyakW31E814CT2JCz4XZM6YsZHRCkgKq8zQD8X2+L17SoPFOPL+c
+eMVluALV8mFDBAaLDgUCQQD4Y1gCtRI+M6cHhuD3OPfMarOp1Qtgu4nazl9A4xQF
+UoIXmYFwumyyqmwjoqIp7Qw+SMRtThpjYH4AJscCj3gLAkEAyj5UANI8ZcpHXied
+O0Kh5RNqftzUQgnThYSG8dc7yh1ImiH2aqIK/1Vwfu85GqwGf/VfNNfneZ/Rh7Gi
+ke13bwJBAK5GFZQgs2INH546VlFfGQ3Ft7TrE4aVTo3EyjRensd1Mm2YeKc9RdK9
+nA4Mp7a+6R4yNA91AzLCmuVET9FOFC0CQQCBrjuhFy2hO3ZNumsIf65du/hyhlkY
+S0K1f4gj9JYjAGn4Y0SllWgl13w9+FkOcDXuwMCemr6Tb1Ykg1Ox7KnDAkBCfy6N
+4cxb3+9hF2TdO02irBy7QHdEkDYXdOr9RCjTZ6C1JLZIZ6zoIiYbDwjsGQSER21X
+LuJP1XlIVY94hkN3
+-----END PRIVATE KEY-----'''
+
+CERT = '''-----BEGIN CERTIFICATE-----
+MIIC3DCCAkWgAwIBAgIJANihg2PRAsTxMA0GCSqGSIb3DQEBBQUAMIGGMQswCQYD
+VQQGEwJHQjERMA8GA1UECAwIU2NvdGxhbmQxEjAQBgNVBAcMCUludmVybmVzczES
+MBAGA1UECgwJT3Blbk1vbGFyMRUwEwYDVQQDDAxOZWlsIFdhbGxhY2UxJTAjBgkq
+hkiG9w0BCQEWFnJvd2luZ2dvbGZlckBnbWFpbC5jb20wHhcNMTExMTI4MjI1MTI5
+WhcNMTExMjI4MjI1MTI5WjCBhjELMAkGA1UEBhMCR0IxETAPBgNVBAgMCFNjb3Rs
+YW5kMRIwEAYDVQQHDAlJbnZlcm5lc3MxEjAQBgNVBAoMCU9wZW5Nb2xhcjEVMBMG
+A1UEAwwMTmVpbCBXYWxsYWNlMSUwIwYJKoZIhvcNAQkBFhZyb3dpbmdnb2xmZXJA
+Z21haWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEOt0C2GU7KB0+
+KkFt6uet+SD+mDE8rygou3yrUOfyjEawrqLS/1FLqhvaB38Vib/GHzFI8byl2MSK
+BLFs4i4FkQVcrBuNX04XzbTpjObPsELPnpjInigrDmk6iuuY9EQiMJc8sO57Rxyh
+6kwDx6rIANDRqIINDLZsXoZBKjEpxQIDAQABo1AwTjAdBgNVHQ4EFgQUH+9vWPuG
++dQu13Fsi65XUXP5eIEwHwYDVR0jBBgwFoAUH+9vWPuG+dQu13Fsi65XUXP5eIEw
+DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCVfpTpGATWBoRiLeaSX1hj
+wgD02zt6w3Uyu8375Pfz2rWk7cQvgrItsqus8Nsxgj9g9GgWhrU1jKBqdkI/Gd61
+Ls9LXSzPxD5vw7k+qI9wJM8o8FwG7fV/AS/YXGtvcPfxkxDYGlPFIkEk2eVnmDVx
+oZQpPIajVk0TZRGvKgEzUQ==
+-----END CERTIFICATE-----'''
+
+
+
 if ALL_PACKAGES_AVAILABLE:
     logging.info("including the following packages (as per setup.cnf file)")
     for include, name in (
@@ -102,6 +140,15 @@ if ALL_PACKAGES_AVAILABLE:
         if not s_manager.match(schema_path):
             s_manager.write(schema_path)
             cleanup_files.append(schema_path)
+
+        for loc, data in (
+        ("misc/server/privatekey.pem", PRIVATE_KEY),
+        ("misc/server/cert.pem", PRIVATE_KEY)
+            ):
+            f = open(loc, "w")
+            f.write(data)
+            f.close()
+            cleanup_files.append(loc)
 
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
