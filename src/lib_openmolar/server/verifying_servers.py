@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+from base64 import b64decode
 from hashlib import md5
 import pickle
 import socket
@@ -30,31 +31,69 @@ from SimpleXMLRPCServer import (
     SimpleXMLRPCDispatcher,
     SimpleXMLRPCRequestHandler)
 
-##############################################################################
-##  create a pair with openssl http://openssl.org/                          ##
-##                                                                          ##
-##  ~$ openssl req -new -x509 -days 365 -nodes -out cert.pem \              ##
-##                             -keyout privatekey.pem                       ##
-##                                                                          ##
-##############################################################################
-
 import logging
-
-KEYFILE  = '/etc/openmolar/server/privatekey.pem'
-CERTFILE = '/etc/openmolar/server/cert.pem'
 
 USERDICT = {"restricted":md5("eihjfosdhvpwi").hexdigest(),
             "neil":md5("eihjfosdhvpwi").hexdigest()}
 
-class SimpleXMLRPCServerTLS(SimpleXMLRPCServer):
+def ping():
+    '''
+    A trivial function given to all servers for testing purposes
+    '''
+    return True
+
+class VerifyingServer(SimpleXMLRPCServer):
+    '''
+    an extension of SimpleXMLPRCServer
+    which enforces user authentication
+    '''
+
+    registered_instance = None
+    '''
+    this attribute is a pointer to the instance passed into
+    SimpleXMLRPCServer.register_instance()
+    if this instance needs to know the user.. give it a special function
+    _remember_user(user)
+    '''
+
+    HAS_SMART_INSTANCE = False
+
+    def __init__(self, addr):
+        SimpleXMLRPCDispatcher.__init__(self)
+        SimpleXMLRPCServer.__init__(self, addr, VerifyingRequestHandler)
+        self.logRequests = False # the request handler logs enough detail
+
+        self.register_function(ping)
+
+    def register_instance(self, klass):
+        '''
+        re-implement this function so that our set_user function makes sense!
+        '''
+        self.registered_instance = klass
+        try:
+            klass._remember_user(None)
+            self.HAS_SMART_INSTANCE = True
+        except AttributeError:
+            self.HAS_SMART_INSTANCE = False
+            logging.debug(
+        "the registered instance does not have special function _remeber_user")
+
+        SimpleXMLRPCServer.register_instance(self, klass)
+
+    def remember_user(self, user):
+        if not self.HAS_SMART_INSTANCE:
+            return
+        self.registered_instance._remember_user(user)
+
+class VerifyingServerSSL(VerifyingServer):
     '''
     an extension of SimpleXMLPRCServer
     which enforces ssl connection, and user authentication
     '''
-    def __init__(self, addr):
+    def __init__(self, addr, KEYFILE, CERTFILE):
         SimpleXMLRPCDispatcher.__init__(self)
 
-        BaseServer.__init__(self, addr, VerifyingRequestHandler)
+        VerifyingServer.__init__(self, addr)
         self.socket = ssl.wrap_socket(
             socket.socket(self.address_family, self.socket_type),
             server_side=True,
@@ -64,10 +103,7 @@ class SimpleXMLRPCServerTLS(SimpleXMLRPCServer):
             ssl_version=ssl.PROTOCOL_SSLv23,
             )
 
-        self.logRequests = False
-
         self.server_bind()
-        #self.server._current_user = None
         self.server_activate()
 
 class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
@@ -89,9 +125,13 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         return False
 
     def authenticate(self, headers):
-        from base64 import b64decode
+
+        auth_header = headers.get('Authorization')
+        if auth_header is None:
+            return False
+
         #    Confirm that Authorization header is set to Basic
-        (basic, _, encoded) = headers.get('Authorization').partition(' ')
+        (basic, _, encoded) = auth_header.partition(' ')
         assert basic == 'Basic', 'Only basic authentication supported'
 
         #    Encoded portion of the header is a string
@@ -128,8 +168,20 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         when a user authenticates, make the username accessible to the
         registered functions
         '''
-        self.server.function_instance._current_user = user
+        self.server.remember_user(user)
+
+def _test():
+    s = VerifyingServer(("",1230))
+    s.serve_forever()
+
+def _test_ssl():
+    s = VerifyingServerSSL(("",1230),
+        '/etc/openmolar/server/privatekey.pem',
+        '/etc/openmolar/server/cert.pem')
+    s.serve_forever()
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
     logging.debug(USERDICT)
+    #_test()
+    _test_ssl()

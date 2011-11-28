@@ -69,7 +69,6 @@ class Service(object):
         Double forks the process in the background
         to avoid zombies, writes a PID.
         """
-        self.log.debug("Service.start_ called")
         if os.path.isfile(PIDFILE):
             self.log.warning("openmolar-server is already running")
             return False
@@ -99,6 +98,14 @@ class Service(object):
             self.log.exception("fork 2 failed")
             sys.exit("%s: fork #2 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
+
+        si = file("/dev/null", "r")
+        so = file("/dev/null", "a+")
+        se = file("/dev/null", "a+", 0)
+
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
 
         return self.write_pidfile()
 

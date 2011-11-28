@@ -72,8 +72,10 @@ class OpenmolarConnection(object):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    import pickle
     from gettext import gettext as _
+
+    logging.basicConfig(level=logging.DEBUG)
 
     omc = OpenmolarConnection()
     proxy = omc.connect()
@@ -81,15 +83,10 @@ if __name__ == "__main__":
         print proxy.system.listMethods()
 
         logging.debug("getting last backup")
-        result, val = proxy.last_backup()
-        if result:
-            logging.debug("last backup %s"% val)
+        payload = pickle.loads(proxy.last_backup())
+        logging.debug("received payload %s"% payload)
+        if payload.payload:
+            logging.debug("last backup %s"% payload.payload)
         else:
-            logging.error(val)
+            logging.error(payload.error_message)
 
-        logging.debug("getting current user")
-        result, val = proxy.current_user()
-        if result:
-            logging.debug("current_user = %s"% val)
-        else:
-            logging.error(val)

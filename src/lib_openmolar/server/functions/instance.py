@@ -23,11 +23,13 @@
 import hashlib
 import logging
 import random
+import pickle
 import string
 
 from db_functions import DBFunctions
 from message_functions import MessageFunctions
 from shell_functions import ShellFunctions
+from payload import PayLoad
 
 _PROXY_ID = 0
 
@@ -36,6 +38,7 @@ LOOSE_METHODS = (   'system.listMethods',
                     #'admin_welcome_template',
                     'available_databases',
                     #'create_db',
+                    'create_demodb',
                     'create_demo_user',
                     #'create_user',
                     #'current_user',
@@ -66,11 +69,6 @@ MANAGER_METHODS = ( 'create_db',
                     #'newDB_sql',
                     )
 
-def new_proxy_id():
-    global _PROXY_ID
-    _PROXY_ID += 1
-    return _PROXY_ID
-
 def new_password(length=20):
     chars = string.letters + string.digits
     return ''.join([random.choice(chars) for i in xrange(length)])
@@ -81,7 +79,7 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
     Inherits from many other classes as only one call of
     SimpleXMLServer.register_instance is allowed.
     '''
-    _current_user = None
+    _user = None
     log = logging.getLogger("openmolar_server")
     PERMISSIONS = {}
 
@@ -113,30 +111,35 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         "root" can do anything it likes!
         other users depend on the list above.
         '''
-        user = self.current_user()
-        self.log.debug("user '%s' wants to do method '%s'"% (user, method))
+        user = self._user
+        message = "permission for user '%s' for method '%s'"% (user, method)
+
         if (user == "root" or user in self.PERMISSIONS.get(method, [])):
-            self.log.debug("permission granted")
+            self.log.debug("granted %s"% message)
             return True
         else :
-            self.log.debug("permission DENIED")
+            self.log.debug("DENIED %s"% message)
             return False
 
-    def _dispatch(self, method, args):
+    def _dispatch(self, method, params):
         '''
         overwrite the special _dispatch function which is a wrapper
         around all functions.
-        this gives me the opportunity to make all returns in the format
-        (allowed(bool), result(object))
+        returns a pickled object of type ..doc `Payload`
         '''
-        self.log.debug("_dispatch")
-        if self._get_permission(method):
-            return (True, getattr(self, method)(*args))
-        else:
-            return (False,
-            "You do not have sufficient privileges to call %s"% method)
+        self.log.debug("_dispatch called for method %s"% method)
+        pl = PayLoad(method)
+        pl.permission = self._get_permission(method)
+        if pl.permission:
+            #this line execute the method!
+            pl.set_payload(getattr(self, method)(*params))
+        self.log.debug("returning (pickled) %s"% pl)
+        return pickle.dumps(pl)
 
     def admin_welcome(self):
+        '''
+        the html shown on startup to the admin application
+        '''
         dbs = self.available_databases()
         if dbs == []:
             message = self.no_databases_message()
@@ -168,8 +171,8 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         import datetime
         return datetime.datetime.now().isoformat()
 
-    def current_user(self):
-        return self._current_user
+    def _remember_user(self, user):
+        self._user = user
 
 def _test():
     '''

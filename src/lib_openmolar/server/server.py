@@ -22,20 +22,35 @@
 
 import commands
 import logging
+import os
 import socket
 import sys
+import time
 import threading
 
-from simple_xmlrpc_server_tls import SimpleXMLRPCServerTLS
 
 from service import Service
 from functions import ServerFunctions
-import logger
+from lib_openmolar.server import logger
+from lib_openmolar.server.verifying_servers import VerifyingServerSSL
 
-PORT = 230
+##############################################################################
+##  create a pair with openssl http://openssl.org/                          ##
+##                                                                          ##
+##  ~$ openssl req -new -x509 -days 365 -nodes -out cert.pem \              ##
+##                             -keyout privatekey.pem                       ##
+##                                                                          ##
+##############################################################################
 
-def ping():
-    return True
+KEYFILE  = '/etc/openmolar/server/privatekey.pem'
+CERTFILE = '/etc/openmolar/server/cert.pem'
+SSL_AVAILABLE = os.path.exists(KEYFILE) and os.path.exists(CERTFILE)
+
+SSL_PORT = 230
+PORT = 1230
+
+def ssl_available():
+    return SSL_AVAILABLE
 
 class OMServer(Service):
     server = None
@@ -48,20 +63,25 @@ class OMServer(Service):
 
     def start(self):
         self.log.info("starting OMServer Process")
-        if not self.start_():
-            return False
-        self.log.info("creating server...")
 
-        self.server = SimpleXMLRPCServerTLS(("", PORT))
-        self.server.register_function(ping)
+        try:
+            self.server = VerifyingServerSSL(("", SSL_PORT), KEYFILE, CERTFILE)
+        except socket.error:
+            self.log.error('Unable to start the server.' +
+                (' Port %d is in use' % SSL_PORT ) +
+                ' (Perhaps openmolar server is already running?)')
+            return
+
+        self.log.info(
+            "listening for ssl connections on port %d"% (SSL_PORT))
+
+        # daemonise the process and write to /var/run
+        self.start_()
 
         ## allow user to list methods?
         self.server.register_introspection_functions()
+        self.server.register_instance(ServerFunctions())
 
-        functions = ServerFunctions()
-        self.server.register_instance(functions)
-        self.server.function_instance = functions
-        self.log.info("listening on port %d"% (PORT))
         server_thread = threading.Thread(target=self.server.serve_forever)
         server_thread.start()
 
@@ -75,6 +95,7 @@ class OMServer(Service):
 
     def restart(self):
         self.stop()
+        time.sleep(1)
         self.start()
 
     def status(self):

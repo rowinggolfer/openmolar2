@@ -39,7 +39,6 @@ class DBFunctions(object):
             f = open("/home/neil/openmolar/master_pword.txt")
             self.MASTER_PWORD = f.read()
             f.close()
-            self._current_user = None
 
     @property
     def default_conn_atts(self):
@@ -195,6 +194,12 @@ class DBFunctions(object):
 
         return sql + permissions
 
+    def create_demodb(self):
+        '''
+        creates a demo database (loose permission to do this)
+        '''
+        return self.create_db("openmolar_demo")
+
     def create_db(self, dbname):
         '''
         creates a database with the name given
@@ -257,9 +262,8 @@ class DBFunctions(object):
         also attempts to remove the standard user groups (this will fail if
         other roles in these groups haven't been removed first)
         '''
-        if self.current_user() != "admin":
-            logging.error("%s has insufficient permissions to drop database"% self.current_user())
-            return False
+        logging.warning("user '%s' is deleting database %s" %(
+            self._user, dbname))
         logging.warning("removing database (if exists) %s"% dbname)
         if self._execute('drop database if exists %s;'% dbname):
             logging.info("database '%s' removed"% dbname)
@@ -337,6 +341,7 @@ def _test():
     logging.basicConfig(level=logging.DEBUG)
     log = logging.getLogger("openmolar_server")
     sf = DBFunctions()
+    sf._user = "test_user"
     log.debug(sf.available_databases())
 
     dbname = "openmolar_demo"
@@ -344,7 +349,7 @@ def _test():
     sf.drop_db(dbname)
     sf.drop_demo_user()
     sf.create_db(dbname)
-    sf.create_demo_user(dbname)
+    sf.create_demo_user()
     sf.drop_db(dbname)
     sf.drop_demo_user()
 
