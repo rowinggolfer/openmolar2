@@ -5,7 +5,7 @@
 # This user will be the owner of ALL openmolar's databases, 
 # and as such be of use for backups etc..
 
-PWORD_LOCATION='/etc/openmolar/server/master_pword.txt'
+PWORD_LOCATION='/etc/openmolar/server/openmolar.conf'
 
 if [ ! -f $PWORD_LOCATION ]
 then
@@ -13,9 +13,9 @@ then
     exit 0
 fi
 
-PWORD=`cat $PWORD_LOCATION`
+PWORD=`grep 'openmolar = ' /etc/openmolar/server/openmolar.conf | awk -F' = ' {'print $2'}`
 
-echo "CREATE ROLE openmolar WITH CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD '$PWORD';"
+echo "CREATE ROLE openmolar WITH CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD '************';"
 echo "CREATE ROLE openmolar WITH CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD '$PWORD';" | su postgres -c psql
 
 echo "\nALL DONE!"

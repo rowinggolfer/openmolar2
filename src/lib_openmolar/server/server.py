@@ -28,11 +28,11 @@ import sys
 import time
 import threading
 
-
 from service import Service
-from functions import ServerFunctions
+from lib_openmolar.server.functions.instance import ServerFunctions
 from lib_openmolar.server.functions import logger
 from lib_openmolar.server.verifying_servers import VerifyingServerSSL
+from lib_openmolar.server.functions.om_server_config import OMServerConfig
 
 ##############################################################################
 ##  create a pair with openssl http://openssl.org/                          ##
@@ -41,11 +41,6 @@ from lib_openmolar.server.verifying_servers import VerifyingServerSSL
 ##                             -keyout privatekey.pem                       ##
 ##                                                                          ##
 ##############################################################################
-
-KEYFILE  = '/etc/openmolar/server/privatekey.pem'
-CERTFILE = '/etc/openmolar/server/cert.pem'
-
-SSL_PORT = 230
 
 class OMServer(Service):
     server = None
@@ -58,17 +53,23 @@ class OMServer(Service):
 
     def start(self):
         self.log.info("starting OMServer Process")
-
+        config = OMServerConfig()
+        loc = config.location
+        port = config.port
+        key = config.private_key
+        cert = config.pub_key
         try:
-            self.server = VerifyingServerSSL(("", SSL_PORT), KEYFILE, CERTFILE)
+            self.server = VerifyingServerSSL((loc, port), key, cert)
         except socket.error:
             self.log.error('Unable to start the server.' +
-                (' Port %d is in use' % SSL_PORT ) +
+                (' Port %d is in use' % port ) +
                 ' (Perhaps openmolar server is already running?)')
             return
 
         self.log.info(
-            "listening for ssl connections on port %d"% (SSL_PORT))
+            "listening for ssl connections on loc'%s' port %d"% (loc, port))
+        self.log.info("using cert %s"% cert)
+        self.log.info("using key %s"% key)
 
         # daemonise the process and write to /var/run
         self.start_(stderr=logger.LOCATION)

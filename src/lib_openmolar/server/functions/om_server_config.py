@@ -52,6 +52,8 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
                 logging.warning(
         "Insufficient Permission unable to parse config file. Are You Root?")
                 sys.exit("FATAL ERROR - Unable to read config file")
+            elif exc.errno == 2:
+                logging.warning("no config file found")
             else:
                 logging.exception(
                 "Unknown error in parsing config file.")
@@ -87,15 +89,16 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
             self.set(section, "admin", man_pass[i])
 
         self.add_section("server")
-        self.add_section("listen", "")
-        self.add_section("port", 230)
+        self.set("server", "listen", "")
+        self.set("server", "port", "230")
 
     def write(self, f=None):
         logging.warning("writing conf file '%s'"% CONF_FILE)
         f = open(CONF_FILE, "w")
-        f.write(header)
+        f.write(HEADER)
         ConfigParser.SafeConfigParser.write(self, f)
         f.close()
+        os.chmod(CONF_FILE, 384)
 
     @property
     def openmolar_pass(self):
@@ -103,7 +106,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
 
     @property
     def etc_dir(self):
-        os.path.dirname(CONF_FILE)
+        return os.path.dirname(CONF_FILE)
 
     @property
     def pub_key(self):
@@ -120,6 +123,15 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         (for ssl connections with openmolar-server)
         '''
         return os.path.join(self.etc_dir, "privatekey.pem")
+
+    @property
+    def location(self):
+        return self.get("server", "listen")
+
+    @property
+    def port(self):
+        return self.getint("server", "port")
+
 
 
 def _test():

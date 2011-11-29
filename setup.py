@@ -98,7 +98,8 @@ nA4Mp7a+6R4yNA91AzLCmuVET9FOFC0CQQCBrjuhFy2hO3ZNumsIf65du/hyhlkY
 S0K1f4gj9JYjAGn4Y0SllWgl13w9+FkOcDXuwMCemr6Tb1Ykg1Ox7KnDAkBCfy6N
 4cxb3+9hF2TdO02irBy7QHdEkDYXdOr9RCjTZ6C1JLZIZ6zoIiYbDwjsGQSER21X
 LuJP1XlIVY94hkN3
------END PRIVATE KEY-----'''
+-----END PRIVATE KEY-----
+'''
 
 CERT = '''-----BEGIN CERTIFICATE-----
 MIIC3DCCAkWgAwIBAgIJANihg2PRAsTxMA0GCSqGSIb3DQEBBQUAMIGGMQswCQYD
@@ -117,7 +118,8 @@ DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCVfpTpGATWBoRiLeaSX1hj
 wgD02zt6w3Uyu8375Pfz2rWk7cQvgrItsqus8Nsxgj9g9GgWhrU1jKBqdkI/Gd61
 Ls9LXSzPxD5vw7k+qI9wJM8o8FwG7fV/AS/YXGtvcPfxkxDYGlPFIkEk2eVnmDVx
 oZQpPIajVk0TZRGvKgEzUQ==
------END CERTIFICATE-----'''
+-----END CERTIFICATE-----
+'''
 
 
 
@@ -143,9 +145,9 @@ if ALL_PACKAGES_AVAILABLE:
 
         for loc, data in (
         ("misc/server/privatekey.pem", PRIVATE_KEY),
-        ("misc/server/cert.pem", PRIVATE_KEY)
+        ("misc/server/cert.pem", CERT)
             ):
-            f = open(loc, "w")
+            f = open(loc, "wb")
             f.write(data)
             f.close()
             cleanup_files.append(loc)
@@ -315,14 +317,14 @@ class InstallData(install_data):
         install_data.run(self)
 
         print "Placing restrictive conditions on server certificates"
-        os.chmod('/etc/openmolar/server/private_key.pem', 400)
-        os.chmod('/etc/openmolar/server/cert.pem', 400)
+        os.chmod('/etc/openmolar/server/privatekey.pem', 384)
+        os.chmod('/etc/openmolar/server/cert.pem', 384)
 
         print "RUNNING update-rc.d"
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
         p.wait()
 
-        print "(re)Starting the openmolar-sever"
+        print "(re)Starting the openmolar-server"
         p = subprocess.Popen(["openmolar-server","--restart"])
         p.wait()
 
@@ -352,7 +354,9 @@ if INSTALL_SERVER:
         url = URL,
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
-        packages = ['lib_openmolar', 'lib_openmolar.server'],
+        packages = ['lib_openmolar',
+                    'lib_openmolar.server',
+                    'lib_openmolar.server.functions'],
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
@@ -364,7 +368,7 @@ if INSTALL_SERVER:
                          'misc/server/blank_schema.sql']),
                     ('/etc/openmolar/server',
                         ['misc/server/cert.pem',
-                         'misc/server/private_key.pem'])
+                         'misc/server/privatekey.pem'])
                    ],
 
         cmdclass = {'install_data':InstallData}
