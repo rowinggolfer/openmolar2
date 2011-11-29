@@ -48,6 +48,7 @@ class OMServer(Service):
         self.log = logging.getLogger("openmolar_server")
         if verbose:
             self.log.setLevel(logging.DEBUG)
+            self.log.debug("logging in verbose mode")
         else:
             self.log.setLevel(logging.INFO)
 
@@ -68,8 +69,8 @@ class OMServer(Service):
 
         self.log.info(
             "listening for ssl connections on loc'%s' port %d"% (loc, port))
-        self.log.info("using cert %s"% cert)
-        self.log.info("using key %s"% key)
+        self.log.debug("using cert %s"% cert)
+        self.log.debug("using key %s"% key)
 
         # daemonise the process and write to /var/run
         self.start_(stderr=logger.LOCATION)

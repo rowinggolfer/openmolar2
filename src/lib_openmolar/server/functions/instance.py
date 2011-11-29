@@ -32,8 +32,6 @@ from shell_functions import ShellFunctions
 from payload import PayLoad
 from om_server_config import OMServerConfig
 
-_PROXY_ID = 0
-
 LOOSE_METHODS = (   'system.listMethods',
                     'admin_welcome',
                     #'admin_welcome_template',
@@ -130,7 +128,11 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         pl.permission = self._get_permission(method)
         if pl.permission:
             #this line execute the method!
-            pl.set_payload(getattr(self, method)(*params))
+            try:
+                pl.set_payload(getattr(self, method)(*params))
+            except Exception as exc:
+                pl.set_exception(exc)
+
         self.log.debug("returning (pickled) %s"% pl)
         return pickle.dumps(pl)
 

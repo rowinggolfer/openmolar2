@@ -20,7 +20,13 @@
 ##                                                                           ##
 ###############################################################################
 
+import inspect 
 import logging
+import os
+import sys
+import zipfile
+import zipimport
+
 from lib_openmolar.common import settings
 
 from lib_openmolar.client import classes
@@ -32,9 +38,8 @@ from lib_openmolar.client.db_orm.client_practitioner import Practitioners
 from lib_openmolar.client.db_orm.client_staff_members import StaffMembers
 from lib_openmolar.client.db_orm.client_users import Users
 
-import inspect, os, sys, traceback, zipfile, zipimport
-
 from lib_openmolar.client import qrc_resources
+
 from PyQt4.QtCore import QResource
 
 class SettingsError(Exception):

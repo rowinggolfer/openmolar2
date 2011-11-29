@@ -119,7 +119,7 @@ def main():
 
     options, args = parser.parse_args()
 
-    omserver = server.OMServer(verbose=True)
+    omserver = server.OMServer(options.verbose)
 
     if options.start:
         first_run()

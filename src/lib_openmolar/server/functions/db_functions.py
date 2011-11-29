@@ -31,7 +31,6 @@ class DBFunctions(object):
     A class whose functions will be inherited by the server
     '''
     MASTER_PWORD = ""
-    _last_error = None
 
     def __init__(self):
         if __name__ == "__main__":
@@ -55,12 +54,6 @@ class DBFunctions(object):
         return "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
             self.MASTER_PWORD, dbname)
 
-    def last_error(self):
-        if self._last_error is None:
-            return ""
-        else:
-            return self._last_error
-
     def _execute(self, statement, dbname="openmolar_master"):
         '''
         execute an sql statement with default connection rights.
@@ -81,8 +74,7 @@ class DBFunctions(object):
         except psycopg2.Error as exc:
             log.exception("error executing statement")
             log.error(statement)
-            self._last_error = str(exc)
-            return False
+            raise exc
 
     def available_databases(self):
         '''
