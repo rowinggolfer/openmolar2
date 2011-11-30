@@ -186,8 +186,8 @@ def _test():
 
 def _test_ssl():
     s = VerifyingServerSSL(("",1230),
-        '/etc/openmolar/server/privatekey.pem',
-        '/etc/openmolar/server/cert.pem')
+        '/etc/openmolar/privatekey.pem',
+        '/etc/openmolar/cert.pem')
     logging.debug(s.USERDICT)
 
     s.serve_forever()

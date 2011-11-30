@@ -59,7 +59,8 @@ except ImportError:
     # this file works if included in an sdist package.
     # however it will only install one component
     logging.debug("partial setup mode")
-    ALL_PACKAGES_AVAILABLE = True
+    CONF = PARTCONF
+    ALL_PACKAGES_AVAILABLE = False
 
 config = ConfigParser.RawConfigParser()
 config.read(CONF)
@@ -121,8 +122,6 @@ oZQpPIajVk0TZRGvKgEzUQ==
 -----END CERTIFICATE-----
 '''
 
-
-
 if ALL_PACKAGES_AVAILABLE:
     logging.info("including the following packages (as per setup.cnf file)")
     for include, name in (
@@ -142,15 +141,6 @@ if ALL_PACKAGES_AVAILABLE:
         if not s_manager.match(schema_path):
             s_manager.write(schema_path)
             cleanup_files.append(schema_path)
-
-        for loc, data in (
-        ("misc/server/privatekey.pem", PRIVATE_KEY),
-        ("misc/server/cert.pem", CERT)
-            ):
-            f = open(loc, "wb")
-            f.write(data)
-            f.close()
-            cleanup_files.append(loc)
 
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
@@ -316,9 +306,14 @@ class InstallData(install_data):
     def run(self):
         install_data.run(self)
 
-        print "Placing restrictive conditions on server certificates"
-        os.chmod('/etc/openmolar/server/privatekey.pem', 384)
-        os.chmod('/etc/openmolar/server/cert.pem', 384)
+        for loc, data in (
+        ("/etc/openmolar/privatekey.pem", PRIVATE_KEY),
+        ("/etc/openmolar/cert.pem", CERT)
+            ):
+            f = open(loc, "wb")
+            f.write(data)
+            f.close()
+            os.chmod(loc, 384)
 
         print "RUNNING update-rc.d"
         p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
@@ -327,7 +322,6 @@ class InstallData(install_data):
         print "(re)Starting the openmolar-server"
         p = subprocess.Popen(["openmolar-server","--restart"])
         p.wait()
-
 
 if INSTALL_SERVER:
     logging.info("running server setup")
@@ -366,9 +360,7 @@ if INSTALL_SERVER:
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql']),
-                    ('/etc/openmolar/server',
-                        ['misc/server/cert.pem',
-                         'misc/server/privatekey.pem'])
+                    ('/etc/openmolar/', [])
                    ],
 
         cmdclass = {'install_data':InstallData}

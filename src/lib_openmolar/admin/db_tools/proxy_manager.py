@@ -113,7 +113,8 @@ class ProxyManager(object):
         '''
         try:
             if self._proxy_server is None:
-                self._proxy_server = OpenmolarConnection().connect()
+                self._proxy_server = OpenmolarConnection().connect(
+                    SETTINGS.server_location, SETTINGS.server_port)
             self._proxy_server.ping()
         except OpenmolarConnectionError as ex:
             self.advise(u"%s<hr />%s"%(
@@ -266,6 +267,9 @@ def _test():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+
+    from lib_openmolar.admin import settings
+    settings.install()
 
     import gettext
     gettext.install("openmolar")

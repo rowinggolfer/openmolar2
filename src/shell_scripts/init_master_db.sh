@@ -8,9 +8,9 @@ echo "CREATING MASTER DATABASE"
 
 echo "createdb -e --owner=openmolar "$DATABASE" 'contains information about openmolar databases on this server' " | su postgres
 
-echo "LAYING OUT SCHEMA"
+echo "LAYING OUT SCHEMA for openmolar_master"
 
-cat /etc/openmolar/master_schema.sql | su postgres -c "psql $DATABASE"
+cat /usr/share/openmolar/master_schema.sql | su postgres -c "psql $DATABASE"
 
 
 echo "\nALL DONE!"

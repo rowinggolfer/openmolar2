@@ -1,11 +1,6 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
-this module provides a class CommonSettings, which is inherited by the Settings
-objects of admin and client applications
-'''
-
 ###############################################################################
 ##                                                                           ##
 ##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
@@ -25,6 +20,11 @@ objects of admin and client applications
 ##                                                                           ##
 ###############################################################################
 
+'''
+this module provides a class CommonSettings, which is inherited by the Settings
+objects of admin and client applications
+'''
+
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
@@ -32,10 +32,6 @@ import gettext
 gettext.install("openmolar")
 
 import re
-
-if __name__ == "__main__":
-    import sys
-    sys.path.append("../")
 
 from lib_openmolar.common import classes
 from lib_openmolar.common.common_db_orm import om_types
@@ -49,7 +45,6 @@ def singleton(cls):
             instances[cls] = cls()
         return instances[cls]
     return getinstance
-
 
 class CommonSettings(object):
 
@@ -239,7 +234,10 @@ class CommonSettingsInstance(CommonSettings):
 
 if __name__ == "__main__":
 
-    SETTINGS = CommonSettings()
+    SETTINGS = CommonSettingsInstance()
+    print SETTINGS
+
+    SETTINGS = CommonSettingsInstance()
     print SETTINGS
 
     print SETTINGS.OM_TYPES

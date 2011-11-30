@@ -1,4 +1,4 @@
-echo "CREATE TABLE info (
+CREATE TABLE info (
 key VARCHAR(20),
 value VARCHAR(20),
 CONSTRAINT pk_info PRIMARY KEY (key)

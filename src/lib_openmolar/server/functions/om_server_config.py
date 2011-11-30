@@ -28,7 +28,7 @@ import ConfigParser
 from lib_openmolar.server.functions.password_generator import (
     new_password, pass_hash)
 
-CONF_FILE = "/etc/openmolar/server/openmolar.conf"
+CONF_FILE = "/etc/openmolar/server.conf"
 
 HEADER = '''
 ######################################################################
@@ -80,6 +80,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         return True
 
     def new_config(self):
+        ConfigParser.SafeConfigParser.__init__(self)
         self.add_section("superusers")
         self.set("superusers", "openmolar", new_password())
 

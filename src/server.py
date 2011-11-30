@@ -68,7 +68,7 @@ class Installer(object):
         initialises the user "openmolar"
         '''
         log = logging.getLogger("openmolar_server")
-        log.info("initiating master user")
+        log.info("calling script openmolar-init-master-user")
 
         p = subprocess.Popen(["openmolar-init-master-user"])
         p.wait()
@@ -78,7 +78,7 @@ class Installer(object):
         initialises the openmolar_master database
         '''
         log = logging.getLogger("openmolar_server")
-        log.info("initiating master database")
+        log.info("calling script openmolar-init-master-db")
 
         p = subprocess.Popen(["openmolar-init-master-db"])
         p.wait()
@@ -113,9 +113,14 @@ def main():
         help="restart the server")
     parser.add_option("--status", action="store_true",
         help="check the status of the server")
+
+    parser.add_option("-v", "--verbose",
+                  action="store_true", dest="verbose", default=True,
+                  help="print debug messages to stdout")
+
     parser.add_option("-q", "--quiet",
-                  action="store_false", dest="verbose", default=False,
-                  help="don't print status messages to stdout")
+                  action="store_false", dest="verbose",
+                  help="don't print debug messages to stdout")
 
     options, args = parser.parse_args()
 

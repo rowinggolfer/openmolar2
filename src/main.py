@@ -36,9 +36,7 @@ gettext.install('openmolar', unicode=True)
 
 class Parser(optparse.OptionParser):
     def __init__(self):
-        from lib_openmolar import _version
-
-        self.version_str = "%s~hg%s"% (VERSION, _version.revision_number)
+        self.version_str = "%s"% (VERSION)
         optparse.OptionParser.__init__(self,
             prog="openmolar2",
             version=self.version_str)

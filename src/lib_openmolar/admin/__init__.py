@@ -1,1 +1,2 @@
-
+import settings
+settings.install()

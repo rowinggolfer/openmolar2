@@ -200,16 +200,9 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("creating new database %s [with owner openmolar]"% dbname)
 
-        try:
-            self._execute("create database %s with owner openmolar"% dbname)
-        except Exception as exc:
-            log.exception("unable to create database '%s'"% dbname)
-            return False
-        try:
-            self._layout_schema(dbname)
-        except Exception as exc:
-            log.exception("unable to create database '%s'"% dbname)
-            return False
+        self._execute("create database %s with owner openmolar"% dbname)
+
+        self._layout_schema(dbname)
         return True
 
     def _layout_schema(self, dbname):
@@ -221,12 +214,8 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("laying out schema for database '%s'"% dbname)
 
-        try:
-            self._execute(sql, dbname)
-            return True
-        except Exception:
-            log.exception("Serious Error")
-        return False
+        self._execute(sql, dbname)
+        return True
 
     def create_demo_user(self):
         '''

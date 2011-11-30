@@ -134,10 +134,3 @@ if __name__ == "__main__":
     app = QtGui.QApplication([])
     sc = AdminConnection()
     sc.connect()
-
-    #print "listing tables in", sc.databaseName()
-    #for table in sc.get_available_tables():
-    #    print "\t%s"% table
-
-
-    print sc.virgin_sql
