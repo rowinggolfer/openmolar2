@@ -1,0 +1,10 @@
+# this config contains the manual revision numbers for openmolar
+# uses standard major.minor.point versioning
+# hg information is appended by configure.py
+
+[version]
+server = 2.0.0
+client = 2.0.0
+admin  = 2.0.0
+common = 2.0.0
+

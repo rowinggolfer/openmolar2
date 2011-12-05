@@ -21,15 +21,11 @@
 ###############################################################################
 
 from distutils.core import setup
-from distutils.command.install_data import install_data
 
 import logging
 import os
-import re
-import shutil
 import sys
 import ConfigParser
-import subprocess
 
 logging.basicConfig(level=logging.INFO)
 
@@ -84,43 +80,6 @@ if INSTALL_SERVER and "win" in sys.platform and "install" in sys.argv:
     logging.error("Server package cannot be installed on windows")
     INSTALL_SERVER = False
 
-PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
-MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBAMQ63QLYZTsoHT4q
-QW3q5635IP6YMTyvKCi7fKtQ5/KMRrCuotL/UUuqG9oHfxWJv8YfMUjxvKXYxIoE
-sWziLgWRBVysG41fThfNtOmM5s+wQs+emMieKCsOaTqK65j0RCIwlzyw7ntHHKHq
-TAPHqsgA0NGogg0MtmxehkEqMSnFAgMBAAECgYEAqj8TnrNV6KQd8uBAUff6t1Ks
-kJZEKY0hv20idZPFGQchEYsCEyOWSZo1fc0BMhOHwYEwhkPM0uqlYcU+leQJ3h2D
-GjK4I1Dp9HKfFyakW31E814CT2JCz4XZM6YsZHRCkgKq8zQD8X2+L17SoPFOPL+c
-eMVluALV8mFDBAaLDgUCQQD4Y1gCtRI+M6cHhuD3OPfMarOp1Qtgu4nazl9A4xQF
-UoIXmYFwumyyqmwjoqIp7Qw+SMRtThpjYH4AJscCj3gLAkEAyj5UANI8ZcpHXied
-O0Kh5RNqftzUQgnThYSG8dc7yh1ImiH2aqIK/1Vwfu85GqwGf/VfNNfneZ/Rh7Gi
-ke13bwJBAK5GFZQgs2INH546VlFfGQ3Ft7TrE4aVTo3EyjRensd1Mm2YeKc9RdK9
-nA4Mp7a+6R4yNA91AzLCmuVET9FOFC0CQQCBrjuhFy2hO3ZNumsIf65du/hyhlkY
-S0K1f4gj9JYjAGn4Y0SllWgl13w9+FkOcDXuwMCemr6Tb1Ykg1Ox7KnDAkBCfy6N
-4cxb3+9hF2TdO02irBy7QHdEkDYXdOr9RCjTZ6C1JLZIZ6zoIiYbDwjsGQSER21X
-LuJP1XlIVY94hkN3
------END PRIVATE KEY-----
-'''
-
-CERT = '''-----BEGIN CERTIFICATE-----
-MIIC3DCCAkWgAwIBAgIJANihg2PRAsTxMA0GCSqGSIb3DQEBBQUAMIGGMQswCQYD
-VQQGEwJHQjERMA8GA1UECAwIU2NvdGxhbmQxEjAQBgNVBAcMCUludmVybmVzczES
-MBAGA1UECgwJT3Blbk1vbGFyMRUwEwYDVQQDDAxOZWlsIFdhbGxhY2UxJTAjBgkq
-hkiG9w0BCQEWFnJvd2luZ2dvbGZlckBnbWFpbC5jb20wHhcNMTExMTI4MjI1MTI5
-WhcNMTExMjI4MjI1MTI5WjCBhjELMAkGA1UEBhMCR0IxETAPBgNVBAgMCFNjb3Rs
-YW5kMRIwEAYDVQQHDAlJbnZlcm5lc3MxEjAQBgNVBAoMCU9wZW5Nb2xhcjEVMBMG
-A1UEAwwMTmVpbCBXYWxsYWNlMSUwIwYJKoZIhvcNAQkBFhZyb3dpbmdnb2xmZXJA
-Z21haWwuY29tMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDEOt0C2GU7KB0+
-KkFt6uet+SD+mDE8rygou3yrUOfyjEawrqLS/1FLqhvaB38Vib/GHzFI8byl2MSK
-BLFs4i4FkQVcrBuNX04XzbTpjObPsELPnpjInigrDmk6iuuY9EQiMJc8sO57Rxyh
-6kwDx6rIANDRqIINDLZsXoZBKjEpxQIDAQABo1AwTjAdBgNVHQ4EFgQUH+9vWPuG
-+dQu13Fsi65XUXP5eIEwHwYDVR0jBBgwFoAUH+9vWPuG+dQu13Fsi65XUXP5eIEw
-DAYDVR0TBAUwAwEB/zANBgkqhkiG9w0BAQUFAAOBgQCVfpTpGATWBoRiLeaSX1hj
-wgD02zt6w3Uyu8375Pfz2rWk7cQvgrItsqus8Nsxgj9g9GgWhrU1jKBqdkI/Gd61
-Ls9LXSzPxD5vw7k+qI9wJM8o8FwG7fV/AS/YXGtvcPfxkxDYGlPFIkEk2eVnmDVx
-oZQpPIajVk0TZRGvKgEzUQ==
------END CERTIFICATE-----
-'''
 
 if ALL_PACKAGES_AVAILABLE:
     logging.info("including the following packages (as per setup.cnf file)")
@@ -144,11 +103,19 @@ if ALL_PACKAGES_AVAILABLE:
 
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
-    f = open("MANIFEST.in", "w")
     f.write("include setup_part.cnf\n")
     for file_ in files:
         f.write("include %s\n"% file_)
     f.close()
+    
+def get_version(name):
+    '''
+    returns a string with in the format X.Y.Z~hgN
+    '''
+    return "%s+hg%s"% (
+        config.get("version", name), 
+        config.get("mercurial", "revision_number")) 
+
 
 ###############################################################################
 ##                        "common" setup starts                              ##
@@ -170,7 +137,7 @@ if INSTALL_COMMON:
 
     setup(
         name = 'openmolar-common',
-        version = config.get("common", "version"),
+        version = get_version("common"),
         description = DESCRIPTION + ' - common library',
         author = AUTHOR,
         author_email = EMAIL,
@@ -210,7 +177,7 @@ if INSTALL_ADMIN:
 
     setup(
         name = 'openmolar-admin',
-        version = config.get("admin", "version"),
+        version = get_version("admin"),
         description = DESCRIPTION + ' - admin library and application',
         author = AUTHOR,
         author_email = EMAIL,
@@ -257,7 +224,7 @@ if INSTALL_CLIENT:
 
     setup(
         name = 'openmolar-client',
-        version = config.get("client", "version"),
+        version = get_version("client"),
         description = DESCRIPTION + ' - client library and application',
         author = AUTHOR,
         author_email = EMAIL,
@@ -297,32 +264,6 @@ if INSTALL_CLIENT:
 ##                        "server" setup starts                              ##
 ###############################################################################
 
-class InstallData(install_data):
-    '''
-    subclass install_data so that update-rc.d is executed
-    (which may not be appropriate for some distros?)
-    also.. (re)start the openmolar-server!
-    '''
-    def run(self):
-        install_data.run(self)
-
-        for loc, data in (
-        ("/etc/openmolar/privatekey.pem", PRIVATE_KEY),
-        ("/etc/openmolar/cert.pem", CERT)
-            ):
-            f = open(loc, "wb")
-            f.write(data)
-            f.close()
-            os.chmod(loc, 384)
-
-        print "RUNNING update-rc.d"
-        p = subprocess.Popen(["update-rc.d","openmolar","defaults"])
-        p.wait()
-
-        print "(re)Starting the openmolar-server"
-        p = subprocess.Popen(["openmolar-server","--restart"])
-        p.wait()
-
 if INSTALL_SERVER:
     logging.info("running server setup")
     if os.path.isfile("MANIFEST"):
@@ -340,7 +281,7 @@ if INSTALL_SERVER:
 
     setup(
         name = 'openmolar-server',
-        version = config.get("server", "version"),
+        version = get_version("server"),
         description = DESCRIPTION + \
             ' - the xml_rpc server component of openmolar2',
         author = AUTHOR,
@@ -360,10 +301,10 @@ if INSTALL_SERVER:
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql']),
-                    ('/etc/openmolar/', [])
+                    ('/etc/openmolar/', 
+                        ['misc/server/privatekey.pem',
+                         'misc/server/cert.pem']),
                    ],
-
-        cmdclass = {'install_data':InstallData}
         )
 
 

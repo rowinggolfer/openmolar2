@@ -18,6 +18,6 @@ MANIFEST.in
 setup.cnf
 setup_part.cnf
 blank_schema.sql
-.*.pem$
-VERSION.txt
-packaging/Makefile
+src/version.py
+releases/*
+tmp/*

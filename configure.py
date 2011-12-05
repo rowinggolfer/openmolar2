@@ -27,9 +27,7 @@ import StringIO
 import sys
 
 sys.path.insert(0, os.path.abspath("src"))
-from lib_openmolar._version import revision_number
-
-VERSION = "2.0.0~hg%d"% revision_number
+from version import revision_number, revision_id
 
 class OMConfig(ConfigParser.RawConfigParser):
     '''
@@ -57,10 +55,15 @@ class OMConfig(ConfigParser.RawConfigParser):
 
     def __init__(self):
         ConfigParser.RawConfigParser.__init__(self)
+        self.read("VERSION.txt")
         for att in self.ATTS:
             self.add_section(att)
             self.set(att, "include", self.DICT[att])
-            self.set(att, "version", VERSION)
+
+        self.add_section("mercurial")
+        self.set("mercurial", "revision_number", revision_number)
+        self.set("mercurial", "revision_id", revision_id)
+		
 
     def write(self, f):
         '''

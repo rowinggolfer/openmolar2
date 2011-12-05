@@ -61,7 +61,14 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         try:
             conn = psycopg2.connect(self.__conn_atts(dbname))
-            conn.autocommit = True
+            try:
+                conn.autocommit = True
+            except AttributeError:
+                log.warning(
+                    "no autocommit attribute in pyscopg2 - old version?")
+                conn.set_isolation_level(
+                    psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+
             cursor = conn.cursor()
             #log.debug(statement)
             cursor.execute(statement)
