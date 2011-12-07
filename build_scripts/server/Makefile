@@ -1,5 +1,6 @@
 #HEAD=../
 HEAD=/home/neil/openmolar/hg_openmolar/
+BUILD_SCRIPTS_DIR=$(HEAD)/build_scripts/
 
 RELEASES_DIR=$(HEAD)releases/server/
 
@@ -11,9 +12,12 @@ DEB_DIR=$(HEAD)/build_scripts/server/debian/
 
 PACKAGE=openmolar-server
 
-VERSION=2.0.0+hg79
+# grep setup.cnf for major versions and head revno
 
-DEB_NO = 0
+version=`grep 'server =' $(HEAD)setup.cnf | sed "s/.*= //"`
+rev_no=`grep revision_number $(HEAD)setup.cnf | sed "s/.*= //"`
+
+VERSION=$(version)+hg$(rev_no)
 
 clean_tmp:
 	rm -rf $(TMP_DIR)/*
@@ -24,17 +28,17 @@ sources:
 		python configure.py --server ;\
 		python setup.py sdist ;\
 	
-	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(RELEASES_DIR)tarballs/
+	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(RELEASES_DIR)sources/
 	
-	cd $(RELEASES_DIR)/tarballs ;\
+	cd $(RELEASES_DIR)/sources ;\
 	gpg --armor --sign --detach-sig -u rowinggolfer@googlemail.com $(PACKAGE)-$(VERSION).tar.gz ;\
 	md5sum $(PACKAGE)-$(VERSION).tar.gz | sed "s/ .*//" > $(PACKAGE)-$(VERSION)_md5.txt 	
 		
 deb:
-	#python new_changelog.py $(VERSION) $(PACKAGING_NO) > $(VERSIONED_TMP_DIR)debian/changelog
-	
 	make clean_tmp
 	make sources
+	
+	$(BUILD_SCRIPTS_DIR)deb_maker.py -s$(RELEASES_DIR)sources -d$(DEB_DIR) -popenmolar-server
 	
 	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(TMP_DIR)
 	gunzip $(TMP_DIR)$(PACKAGE)-$(VERSION).tar.gz
@@ -43,9 +47,8 @@ deb:
 	
 	cd $(TMP_DIR)$(PACKAGE)-$(VERSION) ; dpkg-buildpackage -kF230408E
 			
-	mv $(TMP_DIR)$(PACKAGE)_$(VERSION)~$(DEB_NO)_all.deb $(RELEASES_DIR)debs/
+	mv $(TMP_DIR)$\*.deb $(RELEASES_DIR)debs/
 	
-	#mv $(VERSIONED_TMP_DIR)debian/changelog $(TEMPLATES_DIR)changelog_history.txt
 	make clean_tmp
 	
 rpm:
