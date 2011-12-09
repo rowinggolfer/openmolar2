@@ -279,7 +279,7 @@ if INSTALL_CLIENT:
                     ],
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps',
-                            ['misc/client/openmolar.svg']),
+                            ['misc/client/openmolar2.svg']),
 
                         ('/usr/share/applications',
                             ['misc/client/openmolar2.desktop'])

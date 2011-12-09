@@ -1,3 +1,10 @@
+openmolar-admin (2.0.0+hg82~0) unstable; urgency=low
+
+  * added dependency on python-qscintilla2
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 18:30:57 +0000
+
+
 openmolar-admin (2.0.0+hg81~0) unstable; urgency=low
 
   * initial debian package

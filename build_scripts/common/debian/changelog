@@ -1,3 +1,10 @@
+openmolar-common (2.0.0+hg82~0) unstable; urgency=low
+
+  * fixed missing depency python-qt4-sql
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 18:28:01 +0000
+
+
 openmolar-common (2.0.0+hg81~0) unstable; urgency=low
 
   * Initial debian package
