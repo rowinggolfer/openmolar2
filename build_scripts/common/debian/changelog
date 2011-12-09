@@ -1,0 +1,7 @@
+openmolar-common (2.0.0+hg81~0) unstable; urgency=low
+
+  * Initial debian package
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 12:54:51 +0000
+
+

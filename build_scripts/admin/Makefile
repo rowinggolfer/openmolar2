@@ -2,7 +2,7 @@
 HEAD=/home/neil/openmolar/hg_openmolar/
 BUILD_SCRIPTS_DIR=$(HEAD)/build_scripts/
 
-SUFFIX=server
+SUFFIX=admin
 
 RELEASES_DIR=$(HEAD)releases/$(SUFFIX)/
 

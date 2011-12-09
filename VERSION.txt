@@ -3,6 +3,7 @@
 # hg information is appended by configure.py
 
 [version]
+namespace = 2.0.0
 server = 2.0.0
 client = 2.0.0
 admin  = 2.0.0

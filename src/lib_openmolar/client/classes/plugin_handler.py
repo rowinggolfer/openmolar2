@@ -84,7 +84,7 @@ class PluginHandler(object):
                     mod = z.load_module(module)
                     yield mod
                 except (zipimport.ZipImportError, zipfile.BadZipfile) as e:
-                    logging.exception ("incompatible plugin '%s'"% filepath)
+                    logging.exception ("incompatible plugin '%s'"% full_path)
 
     def get_plugins(self, plugin_dir):
         '''

@@ -1,0 +1,16 @@
+Source: openmolar-client
+Section: misc
+Priority: extra
+Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
+Build-Depends: python-all, debhelper (>= 7)
+Homepage: http://www.openmolar.com
+
+Package: openmolar-client
+Architecture: all
+Section: misc
+Priority: extra
+Depends: ${python:Depends}, python-qt4, libqt4-sql-psql, openmolar-common
+Description: Dental Practice Management Software - Client Application
+ .
+ the openmolar-client application provides the application designed to be run
+ in a dentist's surgery or at a reception station.

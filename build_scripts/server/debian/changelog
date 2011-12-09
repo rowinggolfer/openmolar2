@@ -1,3 +1,24 @@
+openmolar-server (2.0.0+hg81~2) unstable; urgency=low
+
+  * repackage
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 14:27:18 +0000
+
+
+openmolar-server (2.0.0+hg81~1) unstable; urgency=low
+
+  * added a dependency of openmolar-namespace, and prevented this package from including the __init__.py for lib_openmolar.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 12:58:10 +0000
+
+
+openmolar-server (2.0.0+hg81~0) unstable; urgency=low
+
+  * trial debianisation build of revision 81
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 07 Dec 2011 13:37:36 +0000
+
+
 openmolar-server (2.0.0+hg80~0) unstable; urgency=low
 
   * using dh_python2

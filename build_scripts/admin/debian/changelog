@@ -1,0 +1,7 @@
+openmolar-admin (2.0.0+hg81~0) unstable; urgency=low
+
+  * initial debian package
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 12:55:54 +0000
+
+

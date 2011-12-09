@@ -9,7 +9,7 @@ Package: openmolar-server
 Architecture: all
 Section: misc
 Priority: extra
-Depends: ${python:Depends}, postgresql, python-psycopg2
+Depends: ${python:Depends}, postgresql, python-psycopg2, openmolar-namespace
 Description: Dental Practice Management Software - Server Component
   the openmolar daemon running on port 230.
  .

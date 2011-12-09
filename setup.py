@@ -61,6 +61,9 @@ except ImportError:
 config = ConfigParser.RawConfigParser()
 config.read(CONF)
 
+INSTALL_NAMESPACE = (config.has_section("namespace") and
+                config.getboolean("namespace", "include"))
+
 INSTALL_COMMON = (config.has_section("common") and
                 config.getboolean("common", "include"))
 
@@ -84,6 +87,7 @@ if INSTALL_SERVER and "win" in sys.platform and "install" in sys.argv:
 if ALL_PACKAGES_AVAILABLE:
     logging.info("including the following packages (as per setup.cnf file)")
     for include, name in (
+        (INSTALL_NAMESPACE, "namespace"),
         (INSTALL_COMMON, "common modules"),
         (INSTALL_COMMON, "client application"),
         (INSTALL_COMMON, "admin application"),
@@ -107,15 +111,40 @@ def write_manifest_in(files=[]):
     for file_ in files:
         f.write("include %s\n"% file_)
     f.close()
-    
+
 def get_version(name):
     '''
     returns a string with in the format X.Y.Z~hgN
     '''
     return "%s+hg%s"% (
-        config.get("version", name), 
-        config.get("mercurial", "revision_number")) 
+        config.get("version", name),
+        config.get("mercurial", "revision_number"))
 
+if INSTALL_NAMESPACE:
+    logging.info("running namespace setup")
+    if os.path.isfile("MANIFEST"):
+        os.unlink("MANIFEST")
+
+    if ALL_PACKAGES_AVAILABLE:
+        new_config = OMConfig()
+        new_config.set("namespace", "include", True)
+        f = open(PARTCONF, "w")
+        new_config.write(f)
+        f.close()
+
+        write_manifest_in([])
+
+    setup(
+        name = 'openmolar-namespace',
+        version = get_version("namespace"),
+        description = DESCRIPTION + ' - namespace',
+        author = AUTHOR,
+        author_email = EMAIL,
+        url = URL,
+        license = LICENSE,
+        package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
+        packages = ['lib_openmolar'],
+        )
 
 ###############################################################################
 ##                        "common" setup starts                              ##
@@ -144,8 +173,7 @@ if INSTALL_COMMON:
         url = URL,
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
-        packages = ['lib_openmolar',
-                    'lib_openmolar.common',
+        packages = ['lib_openmolar.common',
                     'lib_openmolar.common.classes',
                     'lib_openmolar.common.common_db_orm',
                     'lib_openmolar.common.connect',
@@ -289,8 +317,7 @@ if INSTALL_SERVER:
         url = URL,
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
-        packages = ['lib_openmolar',
-                    'lib_openmolar.server',
+        packages = ['lib_openmolar.server',
                     'lib_openmolar.server.functions'],
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
@@ -301,7 +328,7 @@ if INSTALL_SERVER:
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql']),
-                    ('/etc/openmolar/', 
+                    ('/etc/openmolar/',
                         ['misc/server/privatekey.pem',
                          'misc/server/cert.pem']),
                    ],

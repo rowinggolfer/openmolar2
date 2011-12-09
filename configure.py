@@ -45,7 +45,8 @@ class OMConfig(ConfigParser.RawConfigParser):
 #
 '''
 
-    DICT = {"common": 'False',
+    DICT = {"namespace":'False',
+            "common": 'False',
             "client": 'False',
             "admin" : 'False',
             "server": 'False',
@@ -63,7 +64,6 @@ class OMConfig(ConfigParser.RawConfigParser):
         self.add_section("mercurial")
         self.set("mercurial", "revision_number", revision_number)
         self.set("mercurial", "revision_id", revision_id)
-		
 
     def write(self, f):
         '''
@@ -77,34 +77,39 @@ class Parser(optparse.OptionParser):
     def __init__(self):
         optparse.OptionParser.__init__(self)
 
+        option = self.add_option("-n", "--namespace",
+                        dest = "namespace",
+                        action="store_true", default=False,
+                help = "package or install sources for the namespace"
+                        )
         option = self.add_option("-a", "--admin",
                         dest = "admin",
                         action="store_true", default=False,
-                        help = "package or install sources for the admin application"
+                help = "package or install sources for the admin application"
                         )
 
         option = self.add_option("-c", "--client",
                         dest = "client",
                         action="store_true", default=False,
-                        help = "package or install sources for the client application"
+                help = "package or install sources for the client application"
                         )
 
         option = self.add_option("-l", "--lang",
                         dest = "lang",
                         action="store_true", default=False,
-                        help = "package or install sources for the language pack"
+                help = "package or install sources for the language pack"
                         )
 
         option = self.add_option("-o", "--common",
                         dest = "common",
                         action="store_true", default=False,
-                        help = "package or install sources for lib_openmolar.common"
+                help = "package or install sources for lib_openmolar.common"
                         )
 
         option = self.add_option("-s", "--server",
                         dest = "server",
                         action="store_true", default=False,
-                        help = "package or install sources for the server application"
+                help = "package or install sources for the server application"
                         )
 
 def manual_select(options):
@@ -134,4 +139,4 @@ if __name__ == "__main__":
     config.write(f)
     f.close()
 
-    
+
