@@ -43,7 +43,8 @@ pushdebs:
 	
 
 all:
-	make namespace_deb
+	#make namespace_deb
+	echo "WARNING - not making new namespace_deb"
 	make common_deb
 	make admin_deb
 	make client_deb

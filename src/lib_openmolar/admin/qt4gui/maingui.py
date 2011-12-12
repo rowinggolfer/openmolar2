@@ -427,7 +427,10 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         initiates the demo database
         '''
-        if (ProxyManager.create_demo_database(self) and
+        logging.info("creating demo database")
+        result = ProxyManager.create_demo_database(self)
+        logging.info(result)
+        if (result and
         QtGui.QMessageBox.question(self, _("Confirm"),
         u"%s"% _("Populate with demo data now?"),
         QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,

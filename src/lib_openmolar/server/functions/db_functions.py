@@ -82,6 +82,9 @@ class DBFunctions(object):
             log.exception("error executing statement")
             log.error(statement)
             raise exc
+        except Exceptions as exc:
+            log.exception("UNHANDLED EXCEPTION")
+            raise exc
 
     def available_databases(self):
         '''
@@ -153,8 +156,13 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("Installing fuzzymatch functions into database '%s'"% dbname)
         try:
-            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname])
-            p.wait()
+            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname],
+                stdout = subprocess.PIPE)
+            while True:
+                line = p.stdout.readline()
+                if not line:
+                    break
+                log.info(line)
         except Exception as exc:
             log.exception("unable to install fuzzymatch into '%s'"% dbname)
             return False
@@ -172,7 +180,7 @@ class DBFunctions(object):
         log.info("reading sql from %s"% perms_file)
 
         groups = {}
-        sql = ""
+        perms, sql = "",""
 
         for group in ('Admin', 'Client'):
             groupname = "OM%sGROUP_%s"% (group, dbname)
@@ -182,13 +190,17 @@ class DBFunctions(object):
 
             groups[group] = groupname
 
-        f = open(sql_file, "r")
-        sql += f.read()
-        f.close()
+        try:
+            f = open(sql_file, "r")
+            sql += f.read()
+            f.close()
 
-        f = open(perms_file, "r")
-        perms = f.read()
-        f.close()
+            f = open(perms_file, "r")
+            perms = f.read()
+            f.close()
+        except IOError:
+            log.exception("error reading sql files.")
+
         permissions = perms.replace("ADMIN_GROUP", groups["Admin"]).replace(
                             "CLIENT_GROUP", groups["Client"])
 

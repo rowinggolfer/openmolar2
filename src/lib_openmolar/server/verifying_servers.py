@@ -167,7 +167,7 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         if username in self.server.USERDICT:
             if self.server.USERDICT[username] == md5(password).hexdigest():
                 self.set_proxy_user(username)
-                log.info("authenticated user '%s'"% username)
+                log.debug("authenticated user '%s'"% username)
                 return True
         log.error("authenticate failure for user '%s'"% username)
         return False

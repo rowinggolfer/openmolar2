@@ -67,8 +67,12 @@ class OMServer(Service):
                 ' (Perhaps openmolar server is already running?)')
             return
 
+        if loc == "":
+            readable_loc = "on all interfaces"
+        else:
+            readable_loc = loc
         self.log.info(
-            "listening for ssl connections on loc'%s' port %d"% (loc, port))
+            "listening for ssl connections %s port %d"% (readable_loc, port))
         self.log.debug("using cert %s"% cert)
         self.log.debug("using key %s"% key)
 

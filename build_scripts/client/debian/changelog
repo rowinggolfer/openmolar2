@@ -1,3 +1,10 @@
+openmolar-client (2.0.0+hg83~0) unstable; urgency=low
+
+  * renamed the openmolar icon to openmolar2.svg.  To prevent clashes with om1 installs.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 09 Dec 2011 18:47:16 +0000
+
+
 openmolar-client (2.0.0+hg82~0) unstable; urgency=low
 
   * removed dependencies duplicated by openmolar-common

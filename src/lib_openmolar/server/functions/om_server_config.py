@@ -133,8 +133,6 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
     def port(self):
         return self.getint("server", "port")
 
-
-
 def _test():
     conf = OMServerConfig()
     #conf.new_config()

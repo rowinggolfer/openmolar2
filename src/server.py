@@ -70,8 +70,14 @@ class Installer(object):
         log = logging.getLogger("openmolar_server")
         log.info("calling script openmolar-init-master-user")
 
-        p = subprocess.Popen(["openmolar-init-master-user"])
-        p.wait()
+        p = subprocess.Popen(["openmolar-init-master-user"],
+            stdout=subprocess.PIPE )
+
+        while True:
+            line = p.stdout.readline()
+            if not line:
+                break
+            log.info(line)
 
     def init_master_db(self):
         '''
@@ -80,8 +86,14 @@ class Installer(object):
         log = logging.getLogger("openmolar_server")
         log.info("calling script openmolar-init-master-db")
 
-        p = subprocess.Popen(["openmolar-init-master-db"])
-        p.wait()
+        p = subprocess.Popen(["openmolar-init-master-db"],
+            stdout=subprocess.PIPE )
+
+        while True:
+            line = p.stdout.readline()
+            if not line:
+                break
+            log.info(line)
 
     def install(self):
         '''
