@@ -20,7 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 import re
 import sys
 import pickle
@@ -75,11 +74,11 @@ class ProxyManager(object):
         advise function. normally overwritten
         '''
         if importance is None:
-            logging.debug(message)
+            AD_SETTINGS.log.debug(message)
         elif importance == 1:
-            logging.info(message)
+            AD_SETTINGS.log.info(message)
         else:
-            logging.warning(message)
+            AD_SETTINGS.log.warning(message)
 
     def log(self, message):
         '''
@@ -114,7 +113,7 @@ class ProxyManager(object):
         try:
             if self._proxy_server is None:
                 self._proxy_server = OpenmolarConnection().connect(
-                    SETTINGS.server_location, SETTINGS.server_port)
+                    AD_SETTINGS.server_location, AD_SETTINGS.server_port)
             self._proxy_server.ping()
         except OpenmolarConnectionError as ex:
             self.advise(u"%s<hr />%s"%(
@@ -144,7 +143,7 @@ class ProxyManager(object):
                     raise PermissionError
                 message = payload.payload
             except ServerFault:
-                logging.exception("error getting proxy message")
+                AD_SETTINGS.log.exception("error getting proxy message")
                 message = '''<h1>Unexpected server error!</h1>
                 please check the log and report a bug.'''
         else:
@@ -174,7 +173,7 @@ class ProxyManager(object):
                 self.advise(_("unable to create demo user"))
         except:
             message = "error creating demo_user"
-            logging.exception(message)
+            AD_SETTINGS.log.exception(message)
             self.advise(message, 2)
             continue_= False
         finally:
@@ -206,7 +205,7 @@ class ProxyManager(object):
 
         if payload.payload:
             self.advise(_("success!"), 1)
-            logging.info("database %s created"% dbname)
+            AD_SETTINGS.log.info("database %s created"% dbname)
 
         self.display_proxy_message()
         return payload.payload
@@ -227,7 +226,7 @@ class ProxyManager(object):
 
         if payload.payload:
             self.advise(u"%s %s"%(
-                _("Sucessfully dropped database"), dbname), 2)
+                _("Sucessfully dropped database"), dbname), 1)
         else:
             self.advise(u"%s<hr />%s"%(
                 _("unable to drop database"), payload.error_message), 2)
@@ -243,10 +242,10 @@ class ProxyManager(object):
         unrecognised signals are send to the user via the notification.
         '''
         if url == "init_proxy":
-            logging.debug("User shortcut - Re-try openmolar_server connection")
+            AD_SETTINGS.log.debug("User shortcut - Re-try openmolar_server connection")
             self.init_proxy()
         elif url == "install_demo":
-            logging.debug("Install demo called via shortcut")
+            AD_SETTINGS.log.debug("Install demo called via shortcut")
             self.create_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]
@@ -260,17 +259,13 @@ class ProxyManager(object):
 def _test():
     pm = ProxyManager()
 
-    logging.debug(pm.init_proxy())
-    logging.debug(pm.proxy_server)
-    logging.debug(pm.drop_db("openmolar_demo"))
-    logging.debug(pm.create_demo_database())
+    AD_SETTINGS.log.debug(pm.init_proxy())
+    AD_SETTINGS.log.debug(pm.proxy_server)
+    #AD_SETTINGS.log.debug(pm.drop_db("openmolar_demo"))
+    #AD_SETTINGS.log.debug(pm.create_demo_database())
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
-    from lib_openmolar.admin import settings
-    settings.install()
-
+    import lib_openmolar.admin
     import gettext
     gettext.install("openmolar")
     _test()

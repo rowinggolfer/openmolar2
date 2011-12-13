@@ -30,7 +30,7 @@ import subprocess
 import sys
 import optparse
 
-VERSION = "1.2.0alpha1"
+VERSION = "2.0.0"
 
 gettext.install('openmolar', unicode=True)
 

@@ -22,7 +22,6 @@
 
 import os
 import hashlib
-import logging
 from lib_openmolar.common import SETTINGS
 from lib_openmolar.admin.db_orm import *
 
@@ -45,7 +44,7 @@ class SchemaManager(object):
         along with data for the special procedure codes table.
         '''
         if self._bare_sql is None:
-            logging.debug("grabbing CURRENT_SQL")
+            AD_SETTINGS.log.debug("grabbing CURRENT_SQL")
             queries = ""
 
             # gather up all types, tables, functions, views and rules
@@ -73,10 +72,10 @@ class SchemaManager(object):
 
     @property
     def MD5(self):
-        logging.debug("getting MD5 sum for the schema")
+        AD_SETTINGS.log.debug("getting MD5 sum for the schema")
         if self._md5 is None:
             self._md5 = hashlib.md5(self.CURRENT_SQL).hexdigest()
-        logging.debug("MD5 sum is '%s'"% self._md5)
+        AD_SETTINGS.log.debug("MD5 sum is '%s'"% self._md5)
         return self._md5
 
     def match(self, filepath):
@@ -86,18 +85,18 @@ class SchemaManager(object):
         saved_md5 = hashlib.md5(f.read()).hexdigest()
         f.close()
         result = saved_md5 == self._md5
-        logging.debug("saved schema is current? %s"% result)
+        AD_SETTINGS.log.debug("saved schema is current? %s"% result)
         return result
 
     def write(self, filepath):
-        logging.info("writing sql to %s"% filepath)
+        AD_SETTINGS.log.info("writing sql to %s"% filepath)
         f = open(filepath, "w")
         f.write(self.CURRENT_SQL)
         f.close()
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    AD_SETTINGS.log.basicConfig(level=AD_SETTINGS.log.DEBUG)
 
     s = SchemaManager()
     s.MD5

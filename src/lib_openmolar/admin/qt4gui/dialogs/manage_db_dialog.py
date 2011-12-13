@@ -20,7 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.dialogs import ExtendableDialog
@@ -81,6 +80,5 @@ def _test():
     dl.exec_()
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
     from gettext import gettext as _
     _test()

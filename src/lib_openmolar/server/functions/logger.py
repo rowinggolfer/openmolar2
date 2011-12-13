@@ -29,7 +29,7 @@ BASE = "openmolar"
 APPLICATION = "server"
 
 LOGNAME = "%s_%s"% (BASE, APPLICATION)
-LOCATION = "/var/log/%s/%s/log"% (BASE, APPLICATION)
+LOCATION = "/var/log/%s/%s.log"% (BASE, APPLICATION)
 
 def setup(level=logging.DEBUG, console_echo=True):
     """

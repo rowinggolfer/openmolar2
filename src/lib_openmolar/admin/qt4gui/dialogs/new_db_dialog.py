@@ -20,7 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 import re
 from PyQt4 import QtCore, QtGui
 
@@ -86,7 +85,6 @@ class NewDatabaseDialog(ExtendableDialog):
         return True
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
     from gettext import gettext as _
 
     app = QtGui.QApplication([])

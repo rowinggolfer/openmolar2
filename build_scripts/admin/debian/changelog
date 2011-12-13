@@ -1,3 +1,17 @@
+openmolar-admin (2.0.0+hg84~1) unstable; urgency=low
+
+  * altered the admin settings so that it is in charge of all logging.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 13 Dec 2011 14:23:07 +0000
+
+
+openmolar-admin (2.0.0+hg84~0) unstable; urgency=low
+
+  * repackaging only.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 12 Dec 2011 13:12:00 +0000
+
+
 openmolar-admin (2.0.0+hg83~0) unstable; urgency=low
 
   * making the server log more comprehensive

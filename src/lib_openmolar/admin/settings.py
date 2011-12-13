@@ -21,6 +21,7 @@
 ###############################################################################
 
 import logging
+import logging.handlers
 import os
 import shutil
 import sys
@@ -49,7 +50,7 @@ class SettingsError(Exception):
 
 class AdminSettings(object):
     '''
-    A class installed into the global namespace as SETTINGS.
+    A class installed into the global namespace as AD_SETTINGS.
     '''
     _dom = None
 
@@ -58,8 +59,22 @@ class AdminSettings(object):
     if multiple servers are found in the config, this variable can be used to
     choose between them
     '''
-    def __init__(self):
-        pass
+    def __init__(self, level = logging.DEBUG):
+        self.init_log(level)
+
+    def init_log(self, level):
+
+        #log only to console
+        handler = logging.StreamHandler()
+        handler.setLevel(level)
+
+        formatter = logging.Formatter("%(levelname)s:%(message)s")
+        handler.setFormatter(formatter)
+
+        self.log = logging.getLogger("openmolar-admin")
+        self.log.setLevel(level)
+        self.log.addHandler(handler)
+        self.log.debug("started log")
 
     @property
     def dom(self):
@@ -67,7 +82,7 @@ class AdminSettings(object):
             for filepath in CONF_FILES:
                 try:
                     self._dom = minidom.parse(filepath)
-                    logging.debug("using %s as adminconfig"% filepath)
+                    self.log.debug("using %s as adminconfig"% filepath)
                     continue
                 except IOError:
                     try:
@@ -79,11 +94,11 @@ class AdminSettings(object):
                         f.write(DEFAULT_XML)
                         f.close()
                     except IOError:
-                        logging.debug("unable to save adminconfig to %s"%
+                        self.log.debug("unable to save adminconfig to %s"%
                             filepath)
 
             if self._dom is None:
-                logging.debug("falling back to default xml for admin config")
+                self.log.debug("falling back to default xml for admin config")
                 self._dom = minidom.parseString(DEFAULT_XML)
 
         return self._dom
@@ -110,7 +125,7 @@ class AdminSettings(object):
         the server location specified in the config.
         '''
         if self.has_multiple_servers:
-            logging.warning("multiple servers found in admin config")
+            self.log.warning("multiple servers found in admin config")
         return self._server_node.getAttributeNode("location").value
 
     @property
@@ -125,13 +140,11 @@ def install():
     make an instance of this object acessible in the global namespace
     >>>
     '''
-    logging.debug("Installing an instance of AdminSettings into globals")
     import __builtin__
-    __builtin__.__dict__["SETTINGS"] = AdminSettings()
+    __builtin__.__dict__["AD_SETTINGS"] = AdminSettings()
+    AD_SETTINGS.log.debug("Installing an instance of AdminSettings into globals")
 
 if __name__ == "__main__":
-    logging.basicConfig(level = logging.DEBUG)
-
     install()
-    print SETTINGS.server_location
-    print SETTINGS.server_port
+    print AD_SETTINGS.server_location
+    print AD_SETTINGS.server_port

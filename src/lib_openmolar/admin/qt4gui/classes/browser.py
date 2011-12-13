@@ -22,7 +22,6 @@
 
 
 from PyQt4 import QtCore, QtGui, QtWebKit
-import logging
 
 class Browser(QtWebKit.QWebView):
     '''
@@ -40,12 +39,12 @@ class Browser(QtWebKit.QWebView):
         self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
 
     def _link_clicked(self, url):
-        logging.debug("admin browser link clicked '%s'"% url)
+        AD_SETTINGS.log.debug("admin browser link clicked '%s'"% url)
         self.shortcut_clicked.emit(url.toString())
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
 
+    import lib_openmolar.admin
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     dl.setMinimumSize(400,200)

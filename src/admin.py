@@ -21,81 +21,8 @@
 ###############################################################################
 
 '''
-this module puts the "lib_openmolar" onto the python path,
-and starts the admin gui
+starts the admin gui
 '''
 
-import gettext
-import os
-import sys
-import subprocess
-
-from PyQt4 import QtGui, QtCore
-
-def run():
-    '''
-    main function
-    '''
-    lang = os.environ.get("LANG")
-    if lang:
-        try:
-            print "trying to install your environment language", lang
-            lang1 = gettext.translation('openmolar', languages=[lang,])
-            lang1.install(unicode=True)
-        except IOError:
-            print "%s not found, using default"% lang
-            gettext.install('openmolar', unicode=True)
-    else:
-        print "no language environment found"
-        gettext.install('openmolar', unicode=True)
-
-    from lib_openmolar.admin.qt4gui import maingui
-    maingui.main()
-
-def populate_demo():
-    '''
-    will connect with no args (ie. default to openmolar_demo on localhost)
-    and populate it with demo data.
-    This can be done from within the app, but I need this functionality
-    available from the CLI for testing.
-    '''
-    def duck_log(output, timestamp=None):
-        print output
-
-    print "will now populate the demo database..."
-
-    from lib_openmolar.admin.connect import AdminConnection
-    admin_conn = AdminConnection()
-    admin_conn.connect()
-    admin_conn.populateDemo(duck_log)
-    admin_conn.close()
-
-def layout_tables():
-    '''
-    will connect with no args (ie. default to openmolar_demo on localhost)
-    and install the latest schema
-    '''
-    def duck_log(output, timestamp=None):
-        print output
-
-    print "installing schema..."
-
-    from lib_openmolar.admin.connect import AdminConnection
-    admin_conn = AdminConnection()
-    admin_conn.connect()
-    return admin_conn.create_openmolar_tables(duck_log)
-
-def initiate_demo_database():
-    '''
-    deprecated!!
-    '''
-    layout_tables()
-    populate_demo()
-
-
-if __name__ == "__main__":
-    if "--install-demo" in sys.argv:
-        initiate_demo_database()
-        sys.exit(True)
-    else:
-        run()
+from lib_openmolar.admin.qt4gui import maingui
+maingui.main()

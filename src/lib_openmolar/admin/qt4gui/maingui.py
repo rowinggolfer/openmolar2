@@ -22,7 +22,6 @@
 
 import datetime
 import cPickle
-import logging
 import re
 import sys
 import pickle
@@ -36,8 +35,6 @@ from lib_openmolar.common.connect import (
     ConnectDialog,
     OpenmolarConnection,
     OpenmolarConnectionError)
-
-from lib_openmolar.common import SETTINGS
 
 from lib_openmolar.admin import qrc_resources
 
@@ -292,7 +289,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         catches signal when user hits the connect action
         '''
-        connections = SETTINGS.connections
+        connections = AD_SETTINGS.connections
         dl = ConnectDialog(connections, self)
         while True:
             if not dl.exec_():
@@ -317,7 +314,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             _("to the host"), connection.host, _("port"), connection.port,
             _("Using password"), pass_used), True)
 
-            SETTINGS.set_connections(dl.known_connections)
+            AD_SETTINGS.set_connections(dl.known_connections)
             self.connect_server()
 
             self._can_connect()
@@ -427,9 +424,9 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         initiates the demo database
         '''
-        logging.info("creating demo database")
+        AD_SETTINGS.log.info("creating demo database")
         result = ProxyManager.create_demo_database(self)
-        logging.info(result)
+        AD_SETTINGS.log.info(result)
         if (result and
         QtGui.QMessageBox.question(self, _("Confirm"),
         u"%s"% _("Populate with demo data now?"),
@@ -549,19 +546,19 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         dict_ = str(qsettings.value("settings_dict").toString())
         if dict_:
             try:
-                SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
+                AD_SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
             except Exception as e:
-                logging.exception(
+                AD_SETTINGS.log.exception(
                     "exception caught loading python settings...")
 
     def saveSettings(self):
         BaseMainWindow.saveSettings(self)
         qsettings = QtCore.QSettings()
 
-        # SETTINGS.PERSISTANT_SETTINGS is a python dict of non qt-specific settings.
+        # AD_SETTINGS.PERSISTANT_SETTINGS is a python dict of non qt-specific settings.
         # unfortunately.. QVariant.toPyObject can't recreate a dictionary
         # so best to pickle this
-        pickled_dict = cPickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
+        pickled_dict = cPickle.dumps(AD_SETTINGS.PERSISTANT_SETTINGS)
         qsettings.setValue("settings_dict", pickled_dict)
 
     def show_about(self):
@@ -586,7 +583,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
 
             connections_pref = Preference(_("Database Connections"))
             dl.cp_widg = ConnectionsPreferenceWidget(
-                SETTINGS.connections, self)
+                AD_SETTINGS.connections, self)
             connections_pref.setWidget(dl.cp_widg)
             dl.insert_preference_dialog(0, connections_pref)
 
@@ -594,7 +591,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
 
     def show_preferences_dialog(self):
         self.preferences_dialog.exec_()
-        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
+        AD_SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def manage_shortcut(self, url):
         '''
@@ -605,10 +602,10 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         unrecognised signals are send to the user via the notification.
         '''
         if url == "init_proxy":
-            logging.debug("User shortcut - Re-try openmolar_server connection")
+            AD_SETTINGS.log.debug("User shortcut - Re-try openmolar_server connection")
             self.init_proxy()
         elif url == "install_demo":
-            logging.debug("Install demo called via shortcut")
+            AD_SETTINGS.log.debug("Install demo called via shortcut")
             self.create_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]
@@ -627,8 +624,6 @@ def main():
     app = None
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
-
     import gettext
     gettext.install("openmolar")
     sys.exit(main())
