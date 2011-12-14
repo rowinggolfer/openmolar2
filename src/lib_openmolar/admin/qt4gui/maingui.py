@@ -28,6 +28,8 @@ import pickle
 from xmlrpclib import Fault as ServerFault
 from PyQt4 import QtGui, QtCore
 
+from lib_openmolar.common import SETTINGS
+
 from lib_openmolar.common.connect import (
     ProxyUser,
     ConnectionError,
@@ -289,7 +291,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         catches signal when user hits the connect action
         '''
-        connections = AD_SETTINGS.connections
+        connections = SETTINGS.connections
         dl = ConnectDialog(connections, self)
         while True:
             if not dl.exec_():
@@ -314,7 +316,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             _("to the host"), connection.host, _("port"), connection.port,
             _("Using password"), pass_used), True)
 
-            AD_SETTINGS.set_connections(dl.known_connections)
+            SETTINGS.set_connections(dl.known_connections)
             self.connect_server()
 
             self._can_connect()
@@ -424,9 +426,9 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         initiates the demo database
         '''
-        AD_SETTINGS.log.info("creating demo database")
+        LOGGER.info("creating demo database")
         result = ProxyManager.create_demo_database(self)
-        AD_SETTINGS.log.info(result)
+        LOGGER.info(result)
         if (result and
         QtGui.QMessageBox.question(self, _("Confirm"),
         u"%s"% _("Populate with demo data now?"),
@@ -548,7 +550,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             try:
                 AD_SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
             except Exception as e:
-                AD_SETTINGS.log.exception(
+                LOGGER.exception(
                     "exception caught loading python settings...")
 
     def saveSettings(self):
@@ -602,10 +604,10 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         unrecognised signals are send to the user via the notification.
         '''
         if url == "init_proxy":
-            AD_SETTINGS.log.debug("User shortcut - Re-try openmolar_server connection")
+            LOGGER.debug("User shortcut - Re-try openmolar_server connection")
             self.init_proxy()
         elif url == "install_demo":
-            AD_SETTINGS.log.debug("Install demo called via shortcut")
+            LOGGER.debug("Install demo called via shortcut")
             self.create_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]

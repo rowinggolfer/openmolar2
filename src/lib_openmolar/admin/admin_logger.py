@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -20,45 +20,31 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
+import logging.handlers
 
-from PyQt4 import QtCore, QtGui, QtWebKit
+def get_logger(level):
+    #formatter = logging.Formatter("%(levelname)s:%(message)s")
 
-class Browser(QtWebKit.QWebView):
+    #handler = logging.StreamHandler()
+    #handler.setFormatter(formatter)
+
+    logging.basicConfig(level=level)
+
+    LOGGER = logging.getLogger("openmolar-admin")
+    #LOGGER.setLevel(level)
+    #LOGGER.addHandler(handler)
+
+    return LOGGER
+
+def install(level=logging.DEBUG):
     '''
-    A browser which is aware of some of the shortcuts offered by the server.
+    make an instance of this object acessible in the global namespace
+    >>>
     '''
-    shortcut_clicked = QtCore.pyqtSignal(object)
-
-    def __init__(self, parent=None):
-        QtWebKit.QWebView.__init__(self, parent)
-        self.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.linkClicked.connect(self._link_clicked)
-
-    def setHtml(self, html):
-        QtWebKit.QWebView.setHtml(self, html)
-        self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
-
-    def _link_clicked(self, url):
-        url_string = url.toString()
-        LOGGER.info("link clicked - '%s'"% url_string)
-        self.shortcut_clicked.emit(url_string)
+    import __builtin__
+    __builtin__.__dict__["LOGGER"] = get_logger(level)
+    LOGGER.debug("Installing an instance of LOGGER into globals")
 
 if __name__ == "__main__":
-
-    import lib_openmolar.admin
-    app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(400,200)
-
-    def sig_catcher(*args):
-        print args
-
-    browser = Browser()
-    browser.setHtml("hello<br /><a href='url'>click here</a>")
-
-    browser.shortcut_clicked.connect(sig_catcher)
-
-    layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(browser)
-
-    dl.exec_()
+    install()

@@ -29,8 +29,6 @@ the openmolar xmlrpc server
 import socket
 import xmlrpclib
 
-import logging
-
 class OpenmolarConnectionError(Exception):
     '''
     a custom Exception
@@ -84,21 +82,21 @@ class OpenmolarConnection(object):
         assert type(user) == ProxyUser, "incorrect connection params supplied"
 
         location = 'https://%s:%s@%s:%d'% (user.name, user.psword, host, port)
-        logging.debug("attempting connection to %s"%
+        LOGGER.debug("attempting connection to %s"%
             location.replace(user.psword, "********"))
         try:
             proxy = xmlrpclib.ServerProxy(location)
-            logging.debug("connected (this is good!)")
+            LOGGER.debug("connected (this is good!)")
             proxy.ping()
-            logging.debug("connected and pingable (this is very good!)")
+            LOGGER.debug("connected and pingable (this is very good!)")
             return proxy
         except xmlrpclib.ProtocolError:
             message = u"%s '%s'"% (_("connection refused for user"), user.name)
-            logging.error(message)
+            LOGGER.error(message)
             raise OpenmolarConnectionError(message)
 
         except socket.error as e:
-            logging.exception(
+            LOGGER.exception(
             "error connecting to the openmolar-xmlrpc server %s"% location)
 
             raise OpenmolarConnectionError(
@@ -107,11 +105,12 @@ class OpenmolarConnection(object):
 
 
 if __name__ == "__main__":
+    import logging
     import pickle
     from gettext import gettext as _
 
     logging.basicConfig(level=logging.DEBUG)
-
+    LOGGER = logging.getLogger()
     omc = OpenmolarConnection()
     proxy = omc.connect()
 

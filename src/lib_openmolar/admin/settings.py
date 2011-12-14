@@ -20,8 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
-import logging.handlers
 import os
 import shutil
 import sys
@@ -59,22 +57,8 @@ class AdminSettings(object):
     if multiple servers are found in the config, this variable can be used to
     choose between them
     '''
-    def __init__(self, level = logging.DEBUG):
-        self.init_log(level)
-
-    def init_log(self, level):
-
-        #log only to console
-        handler = logging.StreamHandler()
-        handler.setLevel(level)
-
-        formatter = logging.Formatter("%(levelname)s:%(message)s")
-        handler.setFormatter(formatter)
-
-        self.log = logging.getLogger("openmolar-admin")
-        self.log.setLevel(level)
-        self.log.addHandler(handler)
-        self.log.debug("started log")
+    def __init__(self):
+        pass
 
     @property
     def dom(self):
@@ -82,7 +66,7 @@ class AdminSettings(object):
             for filepath in CONF_FILES:
                 try:
                     self._dom = minidom.parse(filepath)
-                    self.log.debug("using %s as adminconfig"% filepath)
+                    LOGGER.debug("using %s as adminconfig"% filepath)
                     continue
                 except IOError:
                     try:
@@ -94,11 +78,11 @@ class AdminSettings(object):
                         f.write(DEFAULT_XML)
                         f.close()
                     except IOError:
-                        self.log.debug("unable to save adminconfig to %s"%
+                        LOGGER.debug("unable to save adminconfig to %s"%
                             filepath)
 
             if self._dom is None:
-                self.log.debug("falling back to default xml for admin config")
+                LOGGER.debug("falling back to default xml for admin config")
                 self._dom = minidom.parseString(DEFAULT_XML)
 
         return self._dom
@@ -142,9 +126,8 @@ def install():
     '''
     import __builtin__
     __builtin__.__dict__["AD_SETTINGS"] = AdminSettings()
-    AD_SETTINGS.log.debug("Installing an instance of AdminSettings into globals")
 
 if __name__ == "__main__":
+    import logging
+    LOGGER = logging.getLogger("openmolar-admin")
     install()
-    print AD_SETTINGS.server_location
-    print AD_SETTINGS.server_port

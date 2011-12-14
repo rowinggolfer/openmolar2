@@ -74,11 +74,11 @@ class ProxyManager(object):
         advise function. normally overwritten
         '''
         if importance is None:
-            AD_SETTINGS.log.debug(message)
+            LOGGER.debug(message)
         elif importance == 1:
-            AD_SETTINGS.log.info(message)
+            LOGGER.info(message)
         else:
-            AD_SETTINGS.log.warning(message)
+            LOGGER.warning(message)
 
     def log(self, message):
         '''
@@ -143,7 +143,7 @@ class ProxyManager(object):
                     raise PermissionError
                 message = payload.payload
             except ServerFault:
-                AD_SETTINGS.log.exception("error getting proxy message")
+                LOGGER.exception("error getting proxy message")
                 message = '''<h1>Unexpected server error!</h1>
                 please check the log and report a bug.'''
         else:
@@ -173,7 +173,7 @@ class ProxyManager(object):
                 self.advise(_("unable to create demo user"))
         except:
             message = "error creating demo_user"
-            AD_SETTINGS.log.exception(message)
+            LOGGER.exception(message)
             self.advise(message, 2)
             continue_= False
         finally:
@@ -205,7 +205,7 @@ class ProxyManager(object):
 
         if payload.payload:
             self.advise(_("success!"), 1)
-            AD_SETTINGS.log.info("database %s created"% dbname)
+            LOGGER.info("database %s created"% dbname)
 
         self.display_proxy_message()
         return payload.payload
@@ -242,10 +242,10 @@ class ProxyManager(object):
         unrecognised signals are send to the user via the notification.
         '''
         if url == "init_proxy":
-            AD_SETTINGS.log.debug("User shortcut - Re-try openmolar_server connection")
+            LOGGER.debug("User shortcut - Re-try openmolar_server connection")
             self.init_proxy()
         elif url == "install_demo":
-            AD_SETTINGS.log.debug("Install demo called via shortcut")
+            LOGGER.debug("Install demo called via shortcut")
             self.create_demo_database()
         elif re.match("connect_.*", url):
             dbname = re.match("connect_(.*)", url).groups()[0]
@@ -259,10 +259,10 @@ class ProxyManager(object):
 def _test():
     pm = ProxyManager()
 
-    AD_SETTINGS.log.debug(pm.init_proxy())
-    AD_SETTINGS.log.debug(pm.proxy_server)
-    #AD_SETTINGS.log.debug(pm.drop_db("openmolar_demo"))
-    #AD_SETTINGS.log.debug(pm.create_demo_database())
+    LOGGER.debug(pm.init_proxy())
+    LOGGER.debug(pm.proxy_server)
+    #LOGGER.debug(pm.drop_db("openmolar_demo"))
+    #LOGGER.debug(pm.create_demo_database())
 
 if __name__ == "__main__":
     import lib_openmolar.admin

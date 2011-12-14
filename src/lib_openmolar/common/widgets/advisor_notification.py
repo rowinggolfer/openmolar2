@@ -249,7 +249,8 @@ class Advisor(QtGui.QWidget):
         elif warning_level == 2:
             now = QtCore.QTime.currentTime()
             QtGui.QMessageBox.warning(self, _("Error"), message)
-            print "%d:%02d ERROR MESSAGE"%(now.hour(), now.minute()), message
+            print "%d:%02d ADVISOR ERROR MESSAGE"%(
+                now.hour(), now.minute()), message
 
     def wait(self, waiting=True):
         app = QtGui.QApplication.instance()
@@ -268,5 +269,5 @@ if __name__ == "__main__":
 
     advisor = Advisor()
     advisor.show()
-    advisor.advise("hello world")
+    advisor.advise("hello world",2)
     app.exec_()
