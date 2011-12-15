@@ -31,30 +31,23 @@ APPLICATION = "server"
 LOGNAME = "%s_%s"% (BASE, APPLICATION)
 LOCATION = "/var/log/%s/%s.log"% (BASE, APPLICATION)
 
-def setup(level=logging.DEBUG, console_echo=True):
+def setup(level=logging.DEBUG):
     """
     initiates the logger.
     allows caller to set the debug level and whether to echo the log to stdout
     """
-    logger = logging.getLogger(LOGNAME)
-    logger.setLevel(level)
 
     dirname = os.path.dirname(LOCATION)
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
-    formatter = logging.Formatter(
-    "%(asctime)s - %(levelname)s - %(message)s")
+    logging.basicConfig(level=level,
+        format='%(asctime)s %(levelname)s %(message)s')
+
+    logger = logging.getLogger(LOGNAME)
 
     handler = logging.handlers.TimedRotatingFileHandler(
         LOCATION, "D", 1, backupCount=10)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-    if console_echo:
-        handler = logging.StreamHandler()
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
 
 def _test():
     try:

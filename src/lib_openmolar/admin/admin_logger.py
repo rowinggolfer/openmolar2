@@ -29,7 +29,8 @@ def get_logger(level):
     #handler = logging.StreamHandler()
     #handler.setFormatter(formatter)
 
-    logging.basicConfig(level=level)
+    logging.basicConfig(level=level,
+                format='%(asctime)s %(levelname)s %(message)s')
 
     LOGGER = logging.getLogger("openmolar-admin")
     #LOGGER.setLevel(level)

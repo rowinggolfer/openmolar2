@@ -114,7 +114,7 @@ def first_run():
         installer.install()
 
 def main():
-    logger.setup(level = logging.INFO, console_echo=True)
+    logger.setup(level = logging.INFO) #, console_echo=True)
     log = logging.getLogger("openmolar_server")
     parser = OptionParser()
     parser.add_option("--start", action="store_true",

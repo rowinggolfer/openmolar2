@@ -1,3 +1,10 @@
+openmolar-common (2.0.0+hg86~0) unstable; urgency=low
+
+  * tiny change to the Advisor. Now using the logging module instead of print statements
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 14 Dec 2011 08:19:11 +0000
+
+
 openmolar-common (2.0.0+hg85~0) unstable; urgency=low
 
   * repackaging after hg commit

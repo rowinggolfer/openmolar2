@@ -26,6 +26,16 @@ import sys
 import psycopg2
 from lib_openmolar.server.functions.password_generator import new_password
 
+def log_exception(func):
+    def db_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            log = logging.getLogger("openmolar-server")
+            log.debug("unhandled exception")
+            return ""
+    return db_func
+
 class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
@@ -54,6 +64,7 @@ class DBFunctions(object):
         return "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
             self.MASTER_PWORD, dbname)
 
+    @log_exception
     def _execute(self, statement, dbname="openmolar_master"):
         '''
         execute an sql statement with default connection rights.
@@ -62,12 +73,12 @@ class DBFunctions(object):
         try:
             conn = psycopg2.connect(self.__conn_atts(dbname))
             try:
+                # functions such as create and drop do not support transactions
                 conn.autocommit = True
             except AttributeError:
                 log.warning(
                     "no autocommit attribute in pyscopg2 - old version?")
-                conn.set_isolation_level(
-                    psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+                conn.set_isolation_level(0)
 
             cursor = conn.cursor()
             #log.debug(statement)
@@ -82,10 +93,8 @@ class DBFunctions(object):
             log.exception("error executing statement")
             log.error(statement)
             raise exc
-        except Exceptions as exc:
-            log.exception("UNHANDLED EXCEPTION")
-            raise exc
 
+    @log_exception
     def available_databases(self):
         '''
         get a list of databases (owned by "openmolar")
@@ -118,6 +127,7 @@ class DBFunctions(object):
 
         return databases
 
+    @log_exception
     def refresh_saved_schema(self):
         '''
         gets the schema from the admin app.
@@ -135,6 +145,7 @@ class DBFunctions(object):
             return False
         return True
 
+    @log_exception
     def save_schema(self, sql):
         '''
         the admin app is responsible for the schema in use.
@@ -149,6 +160,7 @@ class DBFunctions(object):
         f.close()
         return True
 
+    @log_exception
     def install_fuzzymatch(self, dbname):
         '''
         installs fuzzymatch functions into database with the name given
@@ -168,6 +180,7 @@ class DBFunctions(object):
             return False
         return True
 
+    @log_exception
     def newDB_sql(self, dbname):
         '''
         returns the sql to layout the users and tables in a database.
@@ -206,36 +219,46 @@ class DBFunctions(object):
 
         return sql + permissions
 
+    @log_exception
     def create_demodb(self):
         '''
         creates a demo database (loose permission to do this)
         '''
         return self.create_db("openmolar_demo")
 
+    @log_exception
     def create_db(self, dbname):
         '''
         creates a database with the name given
         '''
         log = logging.getLogger("openmolar_server")
-        log.info("creating new database %s [with owner openmolar]"% dbname)
+        try:
+            log.info("creating new database %s [with owner openmolar]"% dbname)
+            self._execute("create database %s with owner openmolar"% dbname)
 
-        self._execute("create database %s with owner openmolar"% dbname)
+            return self._layout_schema(dbname)
+        except:
+            log.exception("exeption in %(module)s")
+        return False
 
-        self._layout_schema(dbname)
-        return True
-
+    @log_exception
     def _layout_schema(self, dbname):
         '''
         creates a blank openmolar table set in the database with the name given
         '''
-        sql = self.newDB_sql(dbname)
+        try:
+            sql = self.newDB_sql(dbname)
 
-        log = logging.getLogger("openmolar_server")
-        log.info("laying out schema for database '%s'"% dbname)
+            log = logging.getLogger("openmolar_server")
+            log.info("laying out schema for database '%s'"% dbname)
 
-        self._execute(sql, dbname)
-        return True
+            self._execute(sql, dbname)
+            return True
+        except:
+            log.exception("exeption in %(module)s")
+        return False
 
+    @log_exception
     def create_demo_user(self):
         '''
         create our demo user
@@ -251,12 +274,14 @@ class DBFunctions(object):
         return self.grant_user_permissions("om_demo", "openmolar_demo",
                 True, True)
 
+    @log_exception
     def drop_demodb(self):
         '''
         remove the openmolar_demo database
         '''
         return self.drop_db("openmolar_demo")
 
+    @log_exception
     def drop_db(self, dbname):
         '''
         remove the database with this name
@@ -281,6 +306,7 @@ class DBFunctions(object):
 
         return True
 
+    @log_exception
     def create_user(self, username, password=None):
         '''
         create a user (remote user)
@@ -300,6 +326,7 @@ class DBFunctions(object):
             log.exception("Serious Error")
         return False
 
+    @log_exception
     def grant_user_permissions(self, user, dbname, admin=True, client=True):
         '''
         grant permissions for a user to database dbname
@@ -319,12 +346,14 @@ class DBFunctions(object):
             log.exception("Serious Error")
         return False
 
+    @log_exception
     def drop_demo_user(self):
         '''
         drops the demo user
         '''
         return self.drop_user("om_demo")
 
+    @log_exception
     def drop_user(self, username):
         '''
         drops a user

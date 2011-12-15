@@ -1,3 +1,24 @@
+openmolar-server (2.0.0+hg86~2) unstable; urgency=low
+
+  * bugfix of last code.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 14 Dec 2011 17:48:22 +0000
+
+
+openmolar-server (2.0.0+hg86~1) unstable; urgency=low
+
+  * exception logging for all db_functions
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 14 Dec 2011 14:57:48 +0000
+
+
+openmolar-server (2.0.0+hg86~0) unstable; urgency=low
+
+  * trying to debug demo install on ubuntu lucid.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 14 Dec 2011 08:21:01 +0000
+
+
 openmolar-server (2.0.0+hg85~0) unstable; urgency=low
 
   * repackaging after hg commit
