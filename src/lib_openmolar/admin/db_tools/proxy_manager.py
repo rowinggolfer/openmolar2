@@ -97,12 +97,12 @@ class ProxyManager(object):
         attempt to connect to the server controller at startup
         '''
         self.advise(_("connecting..."))
-        self.log("connecting to the openmolar_server")
+        self.log("connecting to the openmolar_server....")
         if self.proxy_server is not None:
-            self.advise(_("Success!"))
+            self.log(_("Success!"))
             return True
         else:
-            self.advise(_("Failure!"))
+            self.log(_("Failure!"))
             return False
 
     @property
@@ -259,10 +259,11 @@ class ProxyManager(object):
 def _test():
     pm = ProxyManager()
 
+    #LOGGER is in the namespace due to lib_openmolar.admin import
     LOGGER.debug(pm.init_proxy())
     LOGGER.debug(pm.proxy_server)
-    #LOGGER.debug(pm.drop_db("openmolar_demo"))
-    #LOGGER.debug(pm.create_demo_database())
+    LOGGER.debug(pm.drop_db("openmolar_demo"))
+    LOGGER.debug(pm.create_demo_database())
 
 if __name__ == "__main__":
     import lib_openmolar.admin

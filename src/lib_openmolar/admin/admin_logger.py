@@ -38,7 +38,7 @@ def get_logger(level):
 
     return LOGGER
 
-def install(level=logging.DEBUG):
+def install(level=logging.INFO):
     '''
     make an instance of this object acessible in the global namespace
     >>>
