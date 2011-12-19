@@ -83,6 +83,9 @@ class OMServer(Service):
         self.server.register_introspection_functions()
         self.server.register_instance(ServerFunctions())
 
+        for manager, hash in config.managers:
+            self.server.add_user(manager, hash)
+
         server_thread = threading.Thread(target=self.server.serve_forever)
         server_thread.start()
 

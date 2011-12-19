@@ -27,6 +27,7 @@ by default, raises the admin gui, but does expose some cli options.
 import logging
 import os
 import optparse
+import sys
 
 class Parser(optparse.OptionParser):
     def __init__(self):
@@ -47,8 +48,8 @@ class Parser(optparse.OptionParser):
 
         option = self.add_option("-s", "--script",
                         dest = "script",
-                        action="store_true", default=False,
                         help = "run the cli application",
+                        type="string"
                         )
 
 def main():
@@ -69,8 +70,11 @@ def main():
         LOGGER.warning("minimal output chosen (with -q flag)")
 
     if options.script:
+        if not os.path.isfile(options.script):
+            sys.exit("no such script '%s'"% options.script)
+        LOGGER.debug("using script - '%s'"% options.script)
         from lib_openmolar.admin import main_cli
-        main_cli.main()
+        main_cli.main(options.script)
     else:
         from lib_openmolar.admin.qt4gui import maingui
         maingui.main()

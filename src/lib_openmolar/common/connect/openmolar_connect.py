@@ -27,6 +27,7 @@ OpenmolarConnection - a custom class which connects to
 the openmolar xmlrpc server
 '''
 import socket
+import time
 import xmlrpclib
 
 class OpenmolarConnectionError(Exception):

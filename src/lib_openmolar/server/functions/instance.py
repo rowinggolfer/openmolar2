@@ -92,14 +92,14 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         parse the tuples above into a dictionary of lists
         '''
         for method in LOOSE_METHODS:
-            self.PERMISSIONS[method] = ["manager", "default"]
+            self.PERMISSIONS[method] = ["admin", "default"]
         for method in MANAGER_METHODS:
             if self.PERMISSIONS.has_key(method):
                 self.log.debug(
                 "whoops... permissions has a duplicate entry for method '%s'"%
                 method)
             else:
-                self.PERMISSIONS[method] = ["manager"]
+                self.PERMISSIONS[method] = ["admin"]
 
     def _get_permission(self, method):
         '''

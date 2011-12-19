@@ -52,11 +52,18 @@ class AdminSettings(object):
     '''
     _dom = None
 
-    chosen_server=0
+    chosen_server = 0
     '''
     if multiple servers are found in the config, this variable can be used to
     choose between them
     '''
+
+    proxy_user = None
+    '''
+    the user of the proxy server, should be None to use the
+    default (unprivileged) user, or an instance of ..doc:`ProxyUser`
+    '''
+
     def __init__(self):
         pass
 
@@ -118,6 +125,7 @@ class AdminSettings(object):
         the port specified in the config
         '''
         return int(self._server_node.getAttributeNode("port").value)
+
 
 def install():
     '''

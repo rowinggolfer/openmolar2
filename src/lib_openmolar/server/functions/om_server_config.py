@@ -133,12 +133,24 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
     def port(self):
         return self.getint("server", "port")
 
+    @property
+    def managers(self):
+        '''
+        a list of user/passwords who authenticate with the server
+        passwords should be md5 hashes.
+        '''
+        managers = []
+        for manager, hash in self.items("managers"):
+            managers.append((manager, hash))
+        return managers
+
 def _test():
     conf = OMServerConfig()
     #conf.new_config()
     #conf.write()
     logging.debug("master pass '%s'"% conf.openmolar_pass)
     logging.debug("installed = %s"% conf.is_installed)
+    logging.debug("managers - %s"% conf.managers)
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)

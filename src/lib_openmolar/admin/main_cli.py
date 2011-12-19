@@ -20,15 +20,44 @@
 ##                                                                           ##
 ###############################################################################
 
+import ConfigParser
 from lib_openmolar.admin.db_tools.proxy_manager import ProxyManager
+from lib_openmolar.common.connect import ProxyUser
 
 class AdminMain(ProxyManager):
     '''
     This class is the core commandline application.
     '''
-
-    def __init__(self):
+    def __init__(self, filepath):
         self.log("cli is up and running!")
+
+        self.parser = ConfigParser.SafeConfigParser()
+        self.parser.readfp(open(filepath))
+
+        ProxyManager.__init__(self)
+
+        self.actions()
+
+    def set_user(self):
+        '''
+        set the user specified in the script (if any!)
+        '''
+        if self.parser.has_section("user"):
+            name = self.parser.get("user","name")
+            psword = self.parser.get("user", "password")
+            AD_SETTINGS.proxy_user = ProxyUser(name, psword)
+
+            #force reload of server at next use
+            self._proxy_server = None
+            return True
+        return False
+
+    def switch_server_user(self):
+        '''
+        a custom override of ..doc:`ProxyManager` function
+        '''
+        LOGGER.debug("switching server user")
+        return self.set_user()
 
     def log(self, message=""):
         '''
@@ -36,8 +65,29 @@ class AdminMain(ProxyManager):
         '''
         LOGGER.info(message)
 
-def main():
-    admin = AdminMain()
+    def actions(self):
+        actions = self.parser.items('actions')
+        LOGGER.debug("script file has actions %s"% actions)
+        for action, param in actions:
+            if action == "drop_db":
+                LOGGER.info(
+                "script calling for '%s' on database '%s'"% (action, param))
+                if self.drop_db(param):
+                    LOGGER.info("successfully dropped %s"% param)
+                else:
+                    LOGGER.error("drop FAILED")
+            elif action == "create_database":
+                LOGGER.info(
+                "script calling for '%s' on database '%s'"% (action, param))
+                if self.create_database(param):
+                    LOGGER.info("successfully created %s"% param)
+                else:
+                    LOGGER.error("creation FAILED")
+            else:
+                LOGGER.warning("unknown action '%s' specified"% action)
+
+def main(filepath):
+    admin = AdminMain(filepath)
     admin.init_proxy()
 
 if __name__ == "__main__":

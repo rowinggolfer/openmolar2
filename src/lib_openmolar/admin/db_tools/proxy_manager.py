@@ -113,7 +113,9 @@ class ProxyManager(object):
         try:
             if self._proxy_server is None:
                 self._proxy_server = OpenmolarConnection().connect(
-                    AD_SETTINGS.server_location, AD_SETTINGS.server_port)
+                    AD_SETTINGS.server_location,
+                    AD_SETTINGS.server_port,
+                    AD_SETTINGS.proxy_user)
             self._proxy_server.ping()
         except OpenmolarConnectionError as ex:
             self.advise(u"%s<hr />%s"%(
@@ -127,8 +129,10 @@ class ProxyManager(object):
     def switch_server_user(self):
         '''
         this needs to be a function to change the user of the proxy
+        should be overwritten by subclasses
         '''
         self.advise("we need to up your permissions for this", 1)
+        LOGGER.warning("ProxyManager.switch_server_user should be overwritten")
         return False
 
     @property
