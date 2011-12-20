@@ -1,3 +1,10 @@
+openmolar-server (2.0.0+hg90~0) unstable; urgency=low
+
+  * trial build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 19 Dec 2011 16:40:28 +0000
+
+
 openmolar-server (2.0.0+hg87~0) unstable; urgency=low
 
   * packaging after hg commit

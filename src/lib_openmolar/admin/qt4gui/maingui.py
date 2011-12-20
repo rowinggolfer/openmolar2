@@ -48,11 +48,12 @@ from lib_openmolar.common.widgets import (
     PreferencesDialog)
 
 from lib_openmolar.common.dialogs import (
-    NewUserPasswordDialog)
+    NewUserPasswordDialog, UserPasswordDialog)
 
 from lib_openmolar.admin.connect import AdminConnection
 
-from lib_openmolar.admin.db_tools.proxy_manager import ProxyManager
+from lib_openmolar.admin.db_tools.proxy_manager import (
+    ProxyManager, PermissionError)
 
 from lib_openmolar.admin.qt4gui.dialogs import *
 
@@ -595,6 +596,25 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         self.preferences_dialog.exec_()
         AD_SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
+    def switch_server_user(self):
+        '''
+        to change the user of the proxy up to admin
+        overwrites ..doc:`ProxyManager` function
+        '''
+        LOGGER.debug("switch_server_user called")
+        self.advise("we need to up your permissions for this", 1)
+        dl = UserPasswordDialog(self)
+        dl.set_name("admin")
+        if dl.exec_():
+            name = dl.name
+            psword = dl.password
+            AD_SETTINGS.proxy_user = ProxyUser(name, psword)
+
+            #force reload of server at next use
+            self._proxy_server = None
+            return True
+        return False
+
     def manage_shortcut(self, url):
         '''
         the admin browser
@@ -603,20 +623,23 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         when a url is clicked it finds it's way here for management.
         unrecognised signals are send to the user via the notification.
         '''
-        if url == "init_proxy":
-            LOGGER.debug("User shortcut - Re-try openmolar_server connection")
-            self.init_proxy()
-        elif url == "install_demo":
-            LOGGER.debug("Install demo called via shortcut")
-            self.create_demo_database()
-        elif re.match("connect_.*", url):
-            dbname = re.match("connect_(.*)", url).groups()[0]
-            self.advise("connect to database %s"% dbname)
-        elif re.match("manage_.*", url):
-            dbname = re.match("manage_(.*)", url).groups()[0]
-            self.manage_db(dbname)
-        else:
-            self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
+        try:
+            if url == "init_proxy":
+                LOGGER.debug("User shortcut - Re-try openmolar_server connection")
+                self.init_proxy()
+            elif url == "install_demo":
+                LOGGER.debug("Install demo called via shortcut")
+                self.create_demo_database()
+            elif re.match("connect_.*", url):
+                dbname = re.match("connect_(.*)", url).groups()[0]
+                self.advise("connect to database %s"% dbname)
+            elif re.match("manage_.*", url):
+                dbname = re.match("manage_(.*)", url).groups()[0]
+                self.manage_db(dbname)
+            else:
+                self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
+        except PermissionError as exc:
+            self.advise("%s<hr />%s" %(_("Permission denied"), exc), 2)
 
 def main():
     app = RestorableApplication("openmolar-admin")

@@ -131,7 +131,6 @@ class ProxyManager(object):
         this needs to be a function to change the user of the proxy
         should be overwritten by subclasses
         '''
-        self.advise("we need to up your permissions for this", 1)
         LOGGER.warning("ProxyManager.switch_server_user should be overwritten")
         return False
 
