@@ -105,7 +105,7 @@ modindex_common_prefix = ["lib_openmolar",
                           ]
 
 # Fontpath for blockdiag (truetype font)
-blockdiag_fontpath = '/usr/share/fonts/truetype/ttf-droid/DroidSerif-Bold.ttf'
+blockdiag_fontpath = '/usr/share/fonts/truetype/droid/DroidSerif-Bold.ttf'
 
 # -- Options for HTML output ---------------------------------------------------
 

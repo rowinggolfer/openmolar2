@@ -20,11 +20,12 @@
 ##                                                                           ##
 ###############################################################################
 
-import commands
+'''
+This module provides the OpenMolar Server.
+'''
+
 import logging
-import os
 import socket
-import sys
 import time
 import threading
 
@@ -37,13 +38,17 @@ from lib_openmolar.server.functions.om_server_config import OMServerConfig
 ##############################################################################
 ##  create a pair with openssl http://openssl.org/                          ##
 ##                                                                          ##
-##  ~$ openssl req -new -x509 -days 365 -nodes -out cert.pem \              ##
+##  ~$ openssl req -new -x509 -days 365 -nodes -out cert.pem  \             ##
 ##                             -keyout privatekey.pem                       ##
 ##                                                                          ##
 ##############################################################################
 
 class OMServer(Service):
+
     server = None
+    '''
+    A pointer to the :doc:`VerifyingServerSSL`
+    '''
     def __init__(self, verbose=False):
         self.log = logging.getLogger("openmolar_server")
         if verbose:
@@ -53,6 +58,9 @@ class OMServer(Service):
             self.log.setLevel(logging.INFO)
 
     def start(self):
+        '''
+        start the server
+        '''
         self.log.info("starting OMServer Process")
         config = OMServerConfig()
         loc = config.location
@@ -90,17 +98,28 @@ class OMServer(Service):
         server_thread.start()
 
     def stop(self):
+        '''
+        stop the server
+        '''
         self.log.info("Stopping server")
         try:
             self.server.shutdown()
-        except AttributeError: # could be a NoneType or pre 2.6 Baseserver
+        except AttributeError:
+            # will be thrown if self.server is None
+            # or pre 2.6 Baseserver(which lacks this function)
             pass
         self.stop_()
 
     def restart(self):
+        '''
+        restart the server
+        '''
         self.stop()
         time.sleep(1)
         self.start()
 
     def status(self):
+        '''
+        report the status of the server
+        '''
         self.status_()

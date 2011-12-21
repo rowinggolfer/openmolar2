@@ -125,4 +125,3 @@ if __name__ == "__main__":
             logging.debug("last backup %s"% payload.payload)
         else:
             logging.error(payload.error_message)
-

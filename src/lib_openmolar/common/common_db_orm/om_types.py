@@ -299,4 +299,3 @@ if __name__ == "__main__":
     OM_TYPES = OMTypes()
     for om_type in OM_TYPES.values():
         print om_type
-

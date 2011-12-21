@@ -80,4 +80,3 @@ if __name__ == "__main__":
     print "builder generator", builder.length
 
     print builder.demo_queries()
-

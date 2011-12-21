@@ -127,4 +127,3 @@ if __name__ == "__main__":
             for code in convert(line.strip()):
                 print code, code.pontics, line.strip()
     f.close()
-

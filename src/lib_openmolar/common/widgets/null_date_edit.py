@@ -73,6 +73,3 @@ if __name__ == "__main__":
     layout.addWidget(object1)
     layout.addWidget(object2)
     dl.exec_()
-
-
-

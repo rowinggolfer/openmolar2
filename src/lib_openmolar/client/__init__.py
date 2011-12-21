@@ -25,4 +25,3 @@ settings.install()
 import qrc_resources
 
 __all__ = ["Plugin", "qrc_resources"]
-

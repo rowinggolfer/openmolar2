@@ -157,4 +157,3 @@ if __name__ == "__main__":
     dl = PopulateDemoDialog(sc, DuckLog().log)
 
     print dl.exec_()
-

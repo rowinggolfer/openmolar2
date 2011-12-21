@@ -91,4 +91,3 @@ class TableSchema(object):
             cols.rstrip(", "), vals.rstrip(", "))
 
         return (sql, values)
-

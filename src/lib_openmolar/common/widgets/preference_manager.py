@@ -102,10 +102,10 @@ class PreferencesDialog(QtGui.QMainWindow, Advisor):
 
     def exec_(self):
         '''
-        With the advent of gnome3.. it became clear that this isn't a dialog at
-        all.
-        so I changed the base class to QMainWindow, and put exec_ here for
-        backwards compatibility
+        With the advent of gnome3..
+        it became clear that this isn't a dialog atall.
+        so I changed the base class to QMainWindow, so this function is
+        for backwards compatibility
         '''
         self.show()
 

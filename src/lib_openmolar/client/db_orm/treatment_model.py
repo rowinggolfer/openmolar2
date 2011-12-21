@@ -266,5 +266,3 @@ if __name__ == "__main__":
     for record in obj.treatment_items:
         print record
         print record.metadata
-
-

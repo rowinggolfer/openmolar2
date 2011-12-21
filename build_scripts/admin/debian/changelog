@@ -1,3 +1,10 @@
+openmolar-admin (2.0.0+hg91~0) unstable; urgency=low
+
+  * Gui admin can now raise permissions for the proxy (via a password prompt)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 20 Dec 2011 15:15:21 +0000
+
+
 openmolar-admin (2.0.0+hg90~0) unstable; urgency=low
 
   * trial build

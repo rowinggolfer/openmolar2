@@ -47,4 +47,3 @@ if __name__ == "__main__":
 
     ef = EditableField("addr1", _("Address Line 1"))
     print ef
-

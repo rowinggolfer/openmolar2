@@ -249,4 +249,3 @@ if __name__ == "__main__":
     print "should read 1,9,66,17"
 
     print SETTINGS.PROCEDURE_CODES
-

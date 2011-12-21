@@ -15,4 +15,3 @@ from lib_openmolar.client.qt4gui.client_widgets.treatment_tree_model import Trea
 #subpackages
 from lib_openmolar.client.qt4gui.client_widgets.chart_editor import *
 from lib_openmolar.client.qt4gui.client_widgets.chart_widgets import *
-

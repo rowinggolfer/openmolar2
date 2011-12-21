@@ -54,7 +54,7 @@ class AdminMain(ProxyManager):
 
     def switch_server_user(self):
         '''
-        a custom override of ..doc:`ProxyManager` function
+        a custom override of :doc:`ProxyManager` function
         '''
         LOGGER.debug("switching server user")
         return self.set_user()

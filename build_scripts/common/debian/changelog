@@ -1,3 +1,10 @@
+openmolar-common (2.0.0+hg91~0) unstable; urgency=low
+
+  * A new dialog for user/password entry
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 20 Dec 2011 15:14:24 +0000
+
+
 openmolar-common (2.0.0+hg90~0) unstable; urgency=low
 
   *trial build

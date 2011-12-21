@@ -123,4 +123,3 @@ if __name__ == "__main__":
     layout = QtGui.QVBoxLayout(dl)
     layout.addWidget(obj)
     dl.exec_()
-

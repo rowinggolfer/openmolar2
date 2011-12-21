@@ -586,7 +586,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
 
             connections_pref = Preference(_("Database Connections"))
             dl.cp_widg = ConnectionsPreferenceWidget(
-                AD_SETTINGS.connections, self)
+                SETTINGS.connections, self)
             connections_pref.setWidget(dl.cp_widg)
             dl.insert_preference_dialog(0, connections_pref)
 
@@ -594,12 +594,12 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
 
     def show_preferences_dialog(self):
         self.preferences_dialog.exec_()
-        AD_SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
+        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def switch_server_user(self):
         '''
         to change the user of the proxy up to admin
-        overwrites ..doc:`ProxyManager` function
+        overwrites :doc:`ProxyManager` function
         '''
         LOGGER.debug("switch_server_user called")
         self.advise("we need to up your permissions for this", 1)

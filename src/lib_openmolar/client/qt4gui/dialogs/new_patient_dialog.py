@@ -235,4 +235,3 @@ if __name__ == "__main__":
 
     dl = NewPatientDialog()
     dl.exec_()
-

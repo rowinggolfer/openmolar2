@@ -251,5 +251,3 @@ def convert(mysql_query, psql_query, sno_conditions=""):
             print "ERROR IMPORTING DENT KEY %s - %s"% (
                 mysql_query.value(0).toInt()[0],
                 psql_query.lastError().text())
-
-

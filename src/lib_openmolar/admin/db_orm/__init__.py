@@ -86,4 +86,3 @@ ADMIN_MODULES = (   admin_avatars,
                     admin_invoices,
                     admin_fees,
                     )
-

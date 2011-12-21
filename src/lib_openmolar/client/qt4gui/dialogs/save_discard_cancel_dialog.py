@@ -76,12 +76,11 @@ class SaveDiscardCancelDialog(ExtendableDialog):
 if __name__ == "__main__":
     def changes():
         return ["Sname","Fname"]
-    
-    
+
+
 
     app = QtGui.QApplication([])
     message = "You have unsaved changes"
 
     dl = SaveDiscardCancelDialog(message, changes)
     print dl.exec_()
-

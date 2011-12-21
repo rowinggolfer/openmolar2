@@ -153,8 +153,10 @@ a view aware editable model of data stored in various notes tables
 
     def clinical_by_id(self, id):
         '''
-         :param: id (int)
+        :param: id (int)
+
         returns the :doc:`NotesClinicalDB` with this id
+
        '''
         return self.clinical.record_by_id(id)
 
@@ -239,7 +241,9 @@ a view aware editable model of data stored in various notes tables
     def clerical_by_id(self, id):
         '''
         :param: id (int)
+
         returns the :doc:`NotesClericalDB` with this id
+
         '''
         return self.clerical.record_by_id(id)
 

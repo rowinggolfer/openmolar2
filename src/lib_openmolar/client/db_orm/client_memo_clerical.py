@@ -118,4 +118,3 @@ if __name__ == "__main__":
     for i in range(object.count()):
         field = object.field(i)
         print u"%s:%s"% (field.name(), field.value().toString())
-

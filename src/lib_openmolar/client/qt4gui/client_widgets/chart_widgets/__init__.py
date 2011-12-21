@@ -16,6 +16,3 @@ __all__ = [ "ChartWidgetBase",
             "ToothDataError",
             "ChartDataModel"
             ]
-
-
-

@@ -69,4 +69,3 @@ if __name__ == "__main__":
     print "builder generator", builder.length
     i = 0
     query = builder.demo_queries()
-

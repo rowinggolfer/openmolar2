@@ -121,4 +121,3 @@ if __name__ == "__main__":
         print q
         q = query.next()
         i += 1
-

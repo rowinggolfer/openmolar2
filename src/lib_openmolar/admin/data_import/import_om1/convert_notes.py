@@ -318,4 +318,3 @@ def tooth(data_string):
             retarg += " %s "% data.replace("\n","")
 
     return retarg.lstrip(" |")
-

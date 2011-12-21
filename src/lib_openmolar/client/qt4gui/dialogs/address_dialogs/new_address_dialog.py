@@ -237,4 +237,3 @@ if __name__ == "__main__":
 
     dl = NewAddressDialog()
     dl.exec_()
-

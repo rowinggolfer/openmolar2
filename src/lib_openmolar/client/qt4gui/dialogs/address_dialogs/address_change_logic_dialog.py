@@ -49,8 +49,8 @@ class Dialog(BaseDialog):
 
 
 if __name__ == "__main__":
-    
-    
+
+
 
     app = QtGui.QApplication([])
 
@@ -67,4 +67,3 @@ if __name__ == "__main__":
     dl = Dialog(addresses)
     if dl.exec_():
         QtGui.QMessageBox.information(dl, "info", "dialog accepted")
-

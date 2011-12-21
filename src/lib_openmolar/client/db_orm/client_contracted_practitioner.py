@@ -140,5 +140,3 @@ if __name__ == "__main__":
         print record
 
     print obj.details_html()
-
-

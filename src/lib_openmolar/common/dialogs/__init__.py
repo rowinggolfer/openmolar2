@@ -6,4 +6,3 @@ from base_dialog import BaseDialog
 from extendable_dialog import ExtendableDialog
 from new_user_dialog import NewUserPasswordDialog
 from user_dialog import UserPasswordDialog
-

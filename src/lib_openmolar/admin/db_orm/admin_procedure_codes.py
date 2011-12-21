@@ -50,4 +50,3 @@ class SchemaGenerator(table_schema.TableSchema):
     '''
     def __init__(self):
         table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
-

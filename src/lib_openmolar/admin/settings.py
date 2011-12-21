@@ -61,7 +61,7 @@ class AdminSettings(object):
     proxy_user = None
     '''
     the user of the proxy server, should be None to use the
-    default (unprivileged) user, or an instance of ..doc:`ProxyUser`
+    default (unprivileged) user, or an instance of :doc:`ProxyUser`
     '''
 
     def __init__(self):

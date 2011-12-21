@@ -72,4 +72,3 @@ def get_perioData(data):
 
 
     return perio_dict
-
