@@ -53,7 +53,7 @@ class AdminConnection(DatabaseConnection):
         '''
         return self.tables()
 
-    def populateDemo(self, log, ommitted_modules=[]):
+    def populateDemo(self, ommitted_modules=[]):
         '''
         checks connection is to openmolar_demo, and if so,
         adds demo data to the tables.
@@ -61,7 +61,7 @@ class AdminConnection(DatabaseConnection):
         if not self.isOpen():
             return (False, _("no connection"))
 
-        log("POPULATING DATABASE WITH DEMO DATA", True)
+        LOGGER.info("POPULATING DATABASE WITH DEMO DATA")
 
         ## iterate over the ORM modules
         ## order is important (foreign keys etc)
@@ -79,7 +79,7 @@ class AdminConnection(DatabaseConnection):
 
                 for query, values in builder.demo_queries():
                     if not logged:
-                        log(u"%s..."% query[:77])
+                        LOGGER.info(u"%s..."% query[:77])
                         logged = True
 
                     q_query = QtSql.QSqlQuery(self)
@@ -91,7 +91,7 @@ class AdminConnection(DatabaseConnection):
                     if q_query.lastError().isValid():
                         error = q_query.lastError().text()
                         self.emit_(QtCore.SIGNAL("Query Error"), error)
-                        log(error)
+                        LOGGER.error(error)
                         break
 
                     number_of_queries_executed += 1
@@ -108,13 +108,13 @@ class AdminConnection(DatabaseConnection):
                 self.emit_(QtCore.SIGNAL("Query Error"),
                     '''Error installing demo data from module %s<hr />%s'''% (
                         module.__name__, e))
-                log('CRITICAL ERROR')
-                log('\tERROR INSTALLING DATA from module %s'% module.__name__)
-                log('\t%s'% e)
+                LOGGER.error('ERROR INSTALLING DATA from module %s'%
+                    module.__name__)
+                LOGGER.exception('CRITICAL ERROR')
 
         self.emit_(QtCore.SIGNAL("demo install complete"))
 
-        log("DEMO INSTALL COMPLETE")
+        LOGGER.info("DEMO INSTALL COMPLETE")
         return True
 
     def emit_(self, *args):

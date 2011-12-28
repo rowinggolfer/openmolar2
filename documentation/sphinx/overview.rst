@@ -5,8 +5,6 @@ Overview
 :Release: |release|
 :Date: |today|
       
-OpenMolar is free software for dental practice management, and clinical record keeping.
-
 Dental Practices rely heavily on database technologies to maintain valuable and sensitive data.
 Dental Practices also need to apply common business tools such as double entry book-keeping, invoicing, scheduling and stock management.
 
@@ -17,7 +15,7 @@ History
 -------
 
 The application came to be when a UK Dentist, Neil Wallace, found himself disastisfied with both the software and 
-service provided by a well-established provided. 
+service provided by a well-established UK supplier. 
 With limited previous programming experience, but enough to realise that open source tools would need to form the backbone of his code, 
 he learned python, qt (the toolkit used by well known applications such as "google earth" and "skype"), and became familiar with the mysql and postgres databases.
 

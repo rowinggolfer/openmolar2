@@ -68,11 +68,10 @@ class AdvancedPanel(QtGui.QWidget):
         return ommitted
 
 class PopulateDemoDialog(ExtendableDialog):
-    def __init__(self, connection, log, parent=None):
-        super(PopulateDemoDialog, self).__init__(parent)
+    def __init__(self, connection, parent=None):
+        ExtendableDialog.__init__(self, parent)
 
         self.connection = connection
-        self.log = log
 
         self.setWindowTitle(_("Demo Generator"))
 
@@ -122,7 +121,7 @@ _("continuing may corrupt/overwrite any existing data in the database named"),
         creates a thread for the database population
         enabling user to remain informed of progress
         '''
-        self.connection.populateDemo(self.log, self.ommisions)
+        self.connection.populateDemo(self.ommisions)
 
     def populate_demo(self):
         '''
@@ -135,7 +134,7 @@ _("continuing may corrupt/overwrite any existing data in the database named"),
         dl = DemoProgressDialog(self.connection, self.ommisions, self.parent())
         if not dl.exec_():
             if self.work_thread.isRunning():
-                print "you quitted!"
+                LOGGER.error("you quitted!")
                 self.work_thread.terminate()
                 return False
         return True
@@ -154,6 +153,6 @@ if __name__ == "__main__":
     sc = AdminConnection()
     sc.connect()
 
-    dl = PopulateDemoDialog(sc, DuckLog().log)
+    dl = PopulateDemoDialog(sc)
 
     print dl.exec_()

@@ -1,3 +1,10 @@
+openmolar-admin (2.0.0+hg92~0) unstable; urgency=low
+
+  * fixed bug in remembering the database connections
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 21 Dec 2011 01:25:36 +0000
+
+
 openmolar-admin (2.0.0+hg91~0) unstable; urgency=low
 
   * Gui admin can now raise permissions for the proxy (via a password prompt)

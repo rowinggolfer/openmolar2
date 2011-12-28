@@ -22,6 +22,7 @@
 
 import datetime
 import cPickle
+import logging
 import re
 import sys
 import pickle
@@ -71,6 +72,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
     This class is the core application.
     '''
     _preferences_dialog = None
+    log = LOGGER
 
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
@@ -125,7 +127,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
 
         self.insertToolBarWidget(tb_database, True)
 
-        self.log_widget = LogWidget(self.parent())
+        self.log_widget = LogWidget(LOGGER, self.parent())
         self.log_widget.welcome()
         self.log_dock_widget = QtGui.QDockWidget(_("Log"), self)
         self.log_dock_widget.setObjectName("LogWidget") #for save state!
@@ -190,8 +192,11 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         attempt to connect to the server controller at startup
         '''
         self.wait()
-        self.browser.setHtml(self.proxy_message)
-        self.wait(False)
+        try:
+            message = self.proxy_message
+            self.browser.setHtml(message)
+        finally:
+            self.wait(False)
 
     def switch_server_user(self):
         self.advise("we need to up your permissions for this",1)
@@ -202,17 +207,6 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         if (tab and type(tab) == DatabaseTableViewer or
         type(tab) == RelationalDatabaseTableViewer) :
             tab.load_table_choice()
-
-    def log(self, message="", timestamp=False):
-        '''
-        pass a message onto the logger
-        '''
-        if timestamp:
-            stamp = u"%-12s"% QtCore.QTime.currentTime().toString()
-        else:
-            stamp = " "*12
-            message = message.replace("\n", "\n %s"%stamp)
-        self.log_widget.log(u"%s %s"% (stamp, message))
 
     def show_log(self):
         '''
@@ -237,7 +231,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         except ConnectionError as error:
             self.advise(u"%s<hr />%s"% (
                 _("Connection Error"), error), 2)
-            self.log("ERROR %s"%error, True)
+            LOGGER.exception("Connection Error")
 
     def disconnect_server(self, shutting_down=False):
         '''
@@ -249,7 +243,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             shutting_down or self.tab_widget.closeAll())):
                 self.connection.close()
                 self.connection = None
-                self.log(_("DISCONNECTED"), True)
+                LOGGER.info("DISCONNECTED")
             self.connection = None
         else:
             self.tab_widget.closeAll()
@@ -260,6 +254,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.tab_widget.addTab(self.browser, _("Messages"))
         self.add_table_tab()
         self.add_query_editor()
+        self.tab_widget.setCurrentIndex(1)
 
     def add_table_tab(self):
         if self.connection and self.connection.isOpen():
@@ -312,10 +307,10 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             else:
                 pass_used = "*" * len(connection.password)
 
-            self.log(u"%s '%s' %s %s %s %s %s %s"% (
+            LOGGER.info(u"%s '%s' %s %s %s %s %s %s"% (
             _("Attempting connection as"), connection.username,
             _("to the host"), connection.host, _("port"), connection.port,
-            _("Using password"), pass_used), True)
+            _("Using password"), pass_used))
 
             SETTINGS.set_connections(dl.known_connections)
             self.connect_server()
@@ -358,7 +353,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             message = message.replace("<br />", "")
             self.status_label.setText(message)
             message = re.compile('<.*?>').sub(" ", message)
-            self.log(message, True)
+            LOGGER.info(message)
             return True
         else:
             self.status_label.setText(_("Not Connected to a database"))
@@ -448,7 +443,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         message = "TODO - enable set_permissions for %s, %s"% (user, "****")
         self.advise(message, 1)
         if result:
-            self.log(message)
+            LOGGER.info(message)
 
     def populate_demo(self):
         '''
@@ -457,7 +452,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         if not self.has_connection():
             return
 
-        dl = PopulateDemoDialog(self.connection, self.log, self)
+        dl = PopulateDemoDialog(self.connection, self)
         if not dl.exec_():
             self.advise("Demo data population was abandoned", 1)
         self.addViews()
@@ -642,6 +637,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
             self.advise("%s<hr />%s" %(_("Permission denied"), exc), 2)
 
 def main():
+
     app = RestorableApplication("openmolar-admin")
     ui = AdminMainWindow()
     ui.show()

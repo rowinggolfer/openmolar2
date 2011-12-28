@@ -24,10 +24,16 @@
 provides the BaseMainWindow class
 a basic re-implementation of QtGui.QMainWindow that can save state etc..
 '''
+import logging
+import sys
+import traceback
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common.widgets import Advisor, DockAwareToolBar, \
-    DockableMenuBar
+from lib_openmolar.common.widgets import (  Advisor,
+                                            DockAwareToolBar,
+                                            DockableMenuBar  )
+
+logging.basicConfig(level=logging.DEBUG)
 
 class BaseMainWindow(QtGui.QMainWindow, Advisor):
     '''
@@ -35,9 +41,13 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
     Some of the layout signals/slots already connected.
     Provides about, about QT and license dialogs.
     '''
+    log = logging.getLogger()
     def __init__(self, parent=None):
+
         QtGui.QMainWindow.__init__(self, parent)
         Advisor.__init__(self, parent)
+
+        sys.excepthook = self.excepthook
 
         self.setMinimumSize(300, 300)
 
@@ -45,7 +55,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         #: a pointer to the :doc:`DockAwareToolBar`
         self.main_toolbar = DockAwareToolBar()
-        
+
         #: a pointer to the :doc:`DockableMenuBar`
         self.menubar = DockableMenuBar(self)
 
@@ -70,22 +80,22 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         #: a pointer to the QtGui.QStatusBar
         self.statusbar = QtGui.QStatusBar()
         self.setStatusBar(self.statusbar)
-        
+
         #: a pointer to the label in the statusbar
         self.status_label = QtGui.QLabel()
         self.statusbar.addPermanentWidget(self.status_label)
 
-        #: a pointer to the File menu 
+        #: a pointer to the File menu
         self.menu_file = QtGui.QMenu(_("&File"), self)
         self.menubar.addMenu(self.menu_file)
 
-        #: a pointer to the Edit menu         
+        #: a pointer to the Edit menu
         self.menu_edit = QtGui.QMenu(_("&Edit"), self)
         self.menubar.addMenu(self.menu_edit)
 
         #: a pointer to the View menu of :attr:`menubar`
         self.menu_view = self.menubar.menu_view
-        
+
         #: a pointer to the Help menu
         self.menu_help = QtGui.QMenu(_("&Help"), self)
         self.menubar.addMenu(self.menu_help)
@@ -109,7 +119,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.menu_edit.addAction(self.action_preferences)
 
         ####         view menu                                             ####
-        
+
         #: a pointer to the toggleViewAction of :attr:`main_toolbar`
         self.action_show_toolbar = self.main_toolbar.toggleViewAction()
         self.action_show_toolbar.setText(_("Show &ToolBar"))
@@ -118,7 +128,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.action_show_statusbar = QtGui.QAction(_("Show Status&bar"), self)
         self.action_show_statusbar.setCheckable(True)
         self.action_show_statusbar.setChecked(True)
-        
+
         #: a pointer to the toolbar default view qaction
         self.action_toolbar_opt4 = QtGui.QAction(_("Default View"), self)
         self.action_toolbar_opt4.setData(QtCore.Qt.ToolButtonFollowStyle)
@@ -174,7 +184,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.action_license = QtGui.QAction(icon, _("License"), self)
 
         icon = QtGui.QIcon.fromTheme("help", QtGui.QIcon("icons/help.png"))
-        
+
         #: a pointer to the help qaction
         self.action_help = QtGui.QAction(icon, _("Help"), self)
 
@@ -194,9 +204,9 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
     def connect_default_signals(self):
         '''
         this function connects the triggered signals from the default menu
-        it should not need to be called, as it is called during the 
+        it should not need to be called, as it is called during the
         :func:`__init__`
-        ''' 
+        '''
         self.connect(self.action_quit, QtCore.SIGNAL("triggered()"),
         QtGui.QApplication.instance().closeAllWindows)
 
@@ -219,9 +229,22 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         self.action_help.triggered.connect(self.show_help)
 
+    def excepthook(self, exc_type, exc_val, tracebackobj):
+        '''
+        PyQt4 prints unhandled exceptions to stdout and carries on regardless
+        I don't want this to happen.
+        so sys.excepthook is passed to this
+        '''
+        message = ""
+        for l in traceback.format_exception(exc_type, exc_val, tracebackobj):
+            message += l
+
+        self.log.error('UNHANDLED EXCEPTION!\n\n%s\n'% message)
+        self.advise('UNHANDLED EXCEPTION!<hr /><pre>%s'% message, 2)
+
     def resizeEvent(self, event):
         '''
-        this function is overwritten so that the advisor popup can be 
+        this function is overwritten so that the advisor popup can be
         put in the correct place
         '''
         QtGui.QMainWindow.resizeEvent(self, event)
@@ -267,7 +290,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
     def loadSettings(self):
         '''
-        load settings from QtCore.QSettings. 
+        load settings from QtCore.QSettings.
         '''
         settings = QtCore.QSettings()
         #Qt settings

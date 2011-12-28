@@ -24,7 +24,7 @@ import logging
 
 CSS = '''
 body {
-    background-color:#cccccc;
+    background-color:#ffffff;
     }
 
 .database ul{
@@ -35,12 +35,14 @@ body {
     }
 
 .database li.header{
-    width:100%;
-    background-color:#333;
-    color:white;
     list-style-type: none;
     padding-left: 0px;
     }
+
+h1 {color:#59212f;
+	padding-bottom:0px;}
+
+a {color:#2f2159;}
 '''
 
 HEADER = '''<!DOCTYPE html>
@@ -79,12 +81,8 @@ class MessageFunctions(object):
     def no_databases_message(self):
         return '''%s
         <h1>%s</h1>
-        <p>
-            <i>%s</i><br />
-        </p>
-        <br />
         <p>%s<br />
-        %s <a href="install_demo">%s</a>.<br />
+        %s <a href="install_demo">%s</a>.
         </p>
         <br />
         <p>
@@ -92,7 +90,6 @@ class MessageFunctions(object):
         </p>
         %s'''%(HEADER,
         _("Welcome to Openmolar"),
-        _("Connection to the Server Controller has been established."),
         _("You do not appear to have any openmolar databases installed."),
         _("To install a demo database now"), _("Click Here"),
         _("Other options are available from the menu above"),

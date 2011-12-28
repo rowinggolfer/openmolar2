@@ -20,6 +20,8 @@
 ##                                                                           ##
 ###############################################################################
 
+import logging
+
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.widgets import Advisor
@@ -28,11 +30,21 @@ class LogWidget(QtGui.QFrame, Advisor):
     '''
     provides a text edit with clear, save and print functions
     '''
-    def __init__(self, parent=None):
+    def __init__(self, logger=None, parent=None):
         QtGui.QFrame.__init__(self, parent)
         Advisor.__init__(self)
+
+        self.init_logger(logger)
+
         self.text_browser = QtGui.QTextBrowser()
-        self.text_browser.setFont(QtGui.QFont("courier"))
+        self.text_browser.setStyleSheet("background-color:black;color:white")
+        self.text_browser.setFont(QtGui.QFont("courier", 10))
+
+        verbosity_box = QtGui.QComboBox(self)
+        verbosity_box.addItems([
+            _("Verbosity"), "DEBUG (%s)"%_("maximum"),
+            "INFO (%s)"%_("default"), "WARNING (%s)"%_("minimum")])
+        verbosity_box.currentIndexChanged.connect(self.set_verbosity)
 
         self.clear_button = QtGui.QPushButton()
         icon = QtGui.QIcon.fromTheme("edit-clear")
@@ -53,6 +65,7 @@ class LogWidget(QtGui.QFrame, Advisor):
         layout = QtGui.QHBoxLayout(frame)
         layout.setMargin(0)
         spacer = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.Expanding)
+        layout.addWidget(verbosity_box)
         layout.addItem(spacer)
         layout.addWidget(self.clear_button)
         layout.addWidget(save_button)
@@ -71,13 +84,46 @@ class LogWidget(QtGui.QFrame, Advisor):
 
         self.dirty = False
 
-    def log(self, message="", dirty=True):
+    def sizeHint(self):
+        return QtCore.QSize(500,150)
+
+    def log(self, record, dirty=True):
         '''
         append message to the text in the browser
+        record has the following attrs..
+        'args', 'created', 'exc_info', 'exc_text', 'filename', 'funcName',
+        'getMessage', 'levelname', 'levelno', 'lineno', 'module', 'msecs',
+        'msg', 'name', 'pathname', 'process', 'processName',
+        'relativeCreated', 'thread', 'threadName'
         '''
         self.text_browser.moveCursor(QtGui.QTextCursor.End)
-        self.text_browser.insertPlainText(message + "\n")
+        message = "%s %s\n"% (record.levelname.ljust(8), record.getMessage())
+        self.text_browser.insertPlainText(message)
+        self.text_browser.moveCursor(QtGui.QTextCursor.End)
         self.dirty = self.dirty or dirty
+
+    def set_verbosity(self, level):
+        '''
+        alters the level of the logger
+        '''
+        if level == 1: #max
+            self.logger.setLevel(logging.DEBUG)
+            self.logger.info("Changed verbosity level to DEBUG")
+        elif level == 3: #min
+            self.logger.setLevel(logging.WARNING)
+            self.logger.warning("Changed verbosity level to WARNING")
+        else:
+            self.logger.setLevel(logging.INFO)
+            self.logger.info("Changed verbosity level to INFO")
+
+    def init_logger(self, logger):
+        if logger == None:
+            logging.basicConfig(level = logging.DEBUG)
+            logger = logging.getLogger("test logger")
+        self.logger = logger
+        handler = logging.StreamHandler()
+        handler.emit = self.log
+        logger.addHandler(handler)
 
     def clear(self):
         if QtGui.QMessageBox.question(self, _("confirm"),
@@ -118,17 +164,27 @@ class LogWidget(QtGui.QFrame, Advisor):
         if dl.exec_():
             self.text_browser.print_(printer)
 
+def _test():
+    def log_stuff():
+        obj.logger.info("random message")
+
+    app = QtGui.QApplication([])
+    mw = QtGui.QMainWindow()
+    obj = LogWidget()
+
+    but = QtGui.QPushButton("send something to the log")
+    but.clicked.connect(log_stuff)
+
+    frame = QtGui.QFrame()
+    layout = QtGui.QVBoxLayout(frame)
+    layout.addWidget(but)
+    layout.addWidget(obj)
+
+    mw.setCentralWidget(frame)
+    mw.show()
+    app.exec_()
 
 if __name__ == "__main__":
     import gettext
     gettext.install("")
-
-    app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-
-    obj = LogWidget(dl)
-
-    layout = QtGui.QHBoxLayout(dl)
-    layout.addWidget(obj)
-
-    dl.exec_()
+    _test()

@@ -97,12 +97,12 @@ class ProxyManager(object):
         attempt to connect to the server controller at startup
         '''
         self.advise(_("connecting..."))
-        self.log("connecting to the openmolar_server....")
+        LOGGER.info("connecting to the openmolar_server....")
         if self.proxy_server is not None:
-            self.log(_("Success!"))
+            LOGGER.info("Success!")
             return True
         else:
-            self.log(_("Failure!"))
+            LOGGER.error("Failure!")
             return False
 
     @property
@@ -149,6 +149,8 @@ class ProxyManager(object):
                 LOGGER.exception("error getting proxy message")
                 message = '''<h1>Unexpected server error!</h1>
                 please check the log and report a bug.'''
+            except Exception:
+                return "unknown error in proxy_message"
         else:
             message = self.FAILURE_MESSAGE
         return message
@@ -162,7 +164,7 @@ class ProxyManager(object):
         if not continue_:
             self.advise(_("failed"))
             return
-        self.log("creating demo user")
+        LOGGER.info("creating demo user")
         try:
             self.wait()
             self.advise("creating demo user")
@@ -172,8 +174,10 @@ class ProxyManager(object):
                 raise PermissionError, payload.error_message
             if payload.payload:
                 self.advise(_("successfully created demo user"))
+                LOGGER.info("successfully created demo user")
             else:
                 self.advise(_("unable to create demo user"))
+                LOGGER.error("unable to create demo user")
         except:
             message = "error creating demo_user"
             LOGGER.exception(message)
@@ -192,7 +196,7 @@ class ProxyManager(object):
         success = False
 
         demo = dbname == "openmolar_demo"
-
+        LOGGER.info("creating database %s"% dbname)
         self.advise("%s '%s' <br />%s"%(
             _("Creating a new database"), dbname,
             _("This may take some time")))

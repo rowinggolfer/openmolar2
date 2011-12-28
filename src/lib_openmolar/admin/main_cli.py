@@ -28,8 +28,9 @@ class AdminMain(ProxyManager):
     '''
     This class is the core commandline application.
     '''
+    log = LOGGER
     def __init__(self, filepath):
-        self.log("cli is up and running!")
+        LOGGER.debug("Using admin command line interface!")
 
         self.parser = ConfigParser.SafeConfigParser()
         self.parser.readfp(open(filepath))
@@ -58,12 +59,6 @@ class AdminMain(ProxyManager):
         '''
         LOGGER.debug("switching server user")
         return self.set_user()
-
-    def log(self, message=""):
-        '''
-        pass a message onto the logger
-        '''
-        LOGGER.info(message)
 
     def actions(self):
         actions = self.parser.items('actions')

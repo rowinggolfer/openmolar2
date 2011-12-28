@@ -22,7 +22,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.dialogs import ExtendableDialog
+from lib_openmolar.common.dialogs import BaseDialog
 
 class DialogThread(QtCore.QThread):
     def __init__(self, dialog):
@@ -48,21 +48,9 @@ class ProgressWidget(QtGui.QWidget):
     def setText(self, text):
         self.label.setText(text)
 
-
-class AdvancedPanel(QtGui.QLabel):
-    def __init__(self, parent = None):
-        super(AdvancedPanel, self).__init__(parent)
-        self.setText("nothing happening here yet:(")
-
-    def sizeHint(self):
-        return self.minimumSizeHint()
-
-    def minimumSizeHint(self):
-        return QtCore.QSize(100,80)
-
-class DemoProgressDialog(ExtendableDialog):
+class DemoProgressDialog(BaseDialog):
     def __init__(self, connection, ommisions, parent=None):
-        super(DemoProgressDialog, self).__init__(parent)
+        BaseDialog.__init__(self, parent)
 
         self.connection = connection
 
@@ -89,10 +77,6 @@ class DemoProgressDialog(ExtendableDialog):
         self.scroll_area.setWidgetResizable(True)
         self.insertWidget(self.scroll_area)
 
-        self.adv_widg = AdvancedPanel(self)
-        self.add_advanced_widget(self.adv_widg)
-
-        self.more_but.setText(_("Terminal"))
         self.apply_but.hide()
         self.dirty = True
         self.set_check_on_cancel(True)
@@ -135,9 +119,6 @@ class DemoProgressDialog(ExtendableDialog):
         current_pb = self.module_dict[module].progress_bar
         current_pb.setValue(percentage)
         self.scroll_area.ensureWidgetVisible(current_pb)
-
-    def exec_(self):
-        ExtendableDialog.exec_(self)
 
 if __name__ == "__main__":
     import time

@@ -54,6 +54,9 @@ class OMServer(Service):
         if verbose:
             self.log.setLevel(logging.DEBUG)
             self.log.debug("logging in verbose mode")
+            import lib_openmolar
+            self.log.debug(
+                "using module lib_openmolar from %s"% lib_openmolar.__file__)
         else:
             self.log.setLevel(logging.INFO)
 
