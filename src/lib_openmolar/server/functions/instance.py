@@ -131,7 +131,9 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             try:
                 pl.set_payload(getattr(self, method)(*params))
             except Exception as exc:
+                pl.set_payload("openmolar server error - check the server log")
                 pl.set_exception(exc)
+                self.log.exception("exception in method %s"% method)
 
         self.log.debug("returning (pickled) %s"% pl)
         return pickle.dumps(pl)

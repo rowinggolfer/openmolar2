@@ -84,6 +84,16 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         ## Main Menu
 
         ## "file"
+
+        icon = QtGui.QIcon.fromTheme("network-wired")
+        self.action_omconnect = QtGui.QAction(icon, "OM %s"% _("Connect"), self)
+        self.action_omconnect.setToolTip(_("Connect to a Server"))
+
+        icon = QtGui.QIcon.fromTheme("network-error")
+        self.action_omdisconnect = QtGui.QAction(icon, "OM %s"% _("Disconnect"),
+            self)
+        self.action_omdisconnect.setToolTip(_("Disconnect from Server"))
+
         icon = QtGui.QIcon.fromTheme("network-wired")
         self.action_connect = QtGui.QAction(icon, _("Connect"), self)
         self.action_connect.setToolTip(_("Connect to a Server"))
@@ -93,11 +103,17 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.action_disconnect.setToolTip(_("Disconnect from Server"))
 
         insertpoint = self.action_quit
+        self.menu_file.insertAction(insertpoint, self.action_omconnect)
+        self.menu_file.insertAction(insertpoint,self.action_omdisconnect)
+        self.menu_file.insertSeparator(insertpoint)
         self.menu_file.insertAction(insertpoint, self.action_connect)
         self.menu_file.insertAction(insertpoint,self.action_disconnect)
         self.menu_file.insertSeparator(insertpoint)
 
         insertpoint = self.action_help
+        self.main_toolbar.insertAction(insertpoint, self.action_omconnect)
+        self.main_toolbar.insertAction(insertpoint,self.action_omdisconnect)
+        self.main_toolbar.insertSeparator(insertpoint)
         self.main_toolbar.insertAction(insertpoint, self.action_connect)
         self.main_toolbar.insertAction(insertpoint, self.action_disconnect)
         self.main_toolbar.insertSeparator(insertpoint)
@@ -158,7 +174,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.show()
 
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
-        QtCore.QTimer.singleShot(100, self.display_proxy_message)
+        QtCore.QTimer.singleShot(100, self._init_proxy_message)
 
     def connect_signals(self):
         '''
@@ -167,6 +183,9 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
 
         ##some old style connects are used to ensure argument (bool=0)
         ##is not passed to the slot
+
+        self.action_omconnect.triggered.connect(self.om_connect)
+        self.action_omdisconnect.triggered.connect(self.om_disconnect)
 
         self.action_connect.triggered.connect(self.choose_connection)
         self.action_disconnect.triggered.connect(self.disconnect_server)
@@ -186,6 +205,13 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.tab_widget.currentChanged.connect(self.tab_widget_selected)
 
         self.browser.shortcut_clicked.connect(self.manage_shortcut)
+
+    def _init_proxy_message(self):
+        '''
+        called only at startup
+        '''
+        self.init_proxy()
+        self.display_proxy_message()
 
     def display_proxy_message(self):
         '''
@@ -621,7 +647,7 @@ Neil Wallace - rowinggolfer@googlemail.com</p>''')
         try:
             if url == "init_proxy":
                 LOGGER.debug("User shortcut - Re-try openmolar_server connection")
-                self.init_proxy()
+                self.om_connect()
             elif url == "install_demo":
                 LOGGER.debug("Install demo called via shortcut")
                 self.create_demo_database()

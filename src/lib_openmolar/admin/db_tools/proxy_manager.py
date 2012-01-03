@@ -56,8 +56,8 @@ class ProxyManager(object):
 
     FAILURE_MESSAGE = '''
     <html><body><h1>%s</h1><a href="init_proxy">%s</a></body></html>
-    '''% (_("Error connecting to the openmolar-server"),
-    _("Try Again?"))
+    '''% (_("Not connected to an openmolar-server"),
+    _("Connect Now?"))
 
     def __init__(self):
         # not called when this class is subclassed by AdminMainWindow
@@ -90,20 +90,37 @@ class ProxyManager(object):
         '''
         display the proxy message
         '''
+        LOGGER.warning("display_proxy_message should be overwritten")
         pass
 
     def init_proxy(self):
         '''
         attempt to connect to the server controller at startup
         '''
+        if self._proxy_server is not None:
+            return
         self.advise(_("connecting..."))
-        LOGGER.info("connecting to the openmolar_server....")
+        LOGGER.debug("attempting to connect to the openmolar_server....")
         if self.proxy_server is not None:
-            LOGGER.info("Success!")
-            return True
+            LOGGER.info("connected to the openmolar_server")
         else:
-            LOGGER.error("Failure!")
-            return False
+            LOGGER.error("not connected")
+
+    def om_connect(self):
+        '''
+        connect to a 230 server
+        '''
+        LOGGER.info("connecting to the openmolar_server....")
+        self.init_proxy()
+        self.display_proxy_message()
+
+    def om_disconnect(self):
+        '''
+        disconnect from the 230 server
+        '''
+        LOGGER.info("disconnecting from the openmolar_server....")
+        self._proxy_server = None
+        self.display_proxy_message()
 
     @property
     def proxy_server(self):
@@ -139,7 +156,7 @@ class ProxyManager(object):
         '''
         poll the openmolar xml_rpc server for messages
         '''
-        if self.proxy_server is not None:
+        if self._proxy_server is not None:
             try:
                 payload = pickle.loads(self.proxy_server.admin_welcome())
                 if not payload.permission:
@@ -264,16 +281,16 @@ class ProxyManager(object):
             self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
 
 def _test():
+    import lib_openmolar.admin
+    import gettext
+    gettext.install("openmolar")
     pm = ProxyManager()
 
     #LOGGER is in the namespace due to lib_openmolar.admin import
     LOGGER.debug(pm.init_proxy())
     LOGGER.debug(pm.proxy_server)
-    LOGGER.debug(pm.drop_db("openmolar_demo"))
-    LOGGER.debug(pm.create_demo_database())
+    #LOGGER.debug(pm.drop_db("openmolar_demo"))
+    #LOGGER.debug(pm.create_demo_database())
 
 if __name__ == "__main__":
-    import lib_openmolar.admin
-    import gettext
-    gettext.install("openmolar")
     _test()

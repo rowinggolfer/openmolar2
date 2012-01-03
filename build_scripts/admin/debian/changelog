@@ -1,3 +1,10 @@
+openmolar-admin (2.0.0+hg93~0) unstable; urgency=low
+
+  * new global exception catcher
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 30 Dec 2011 08:56:34 +0000
+
+
 openmolar-admin (2.0.0+hg92~0) unstable; urgency=low
 
   * fixed bug in remembering the database connections

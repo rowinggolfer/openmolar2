@@ -2,8 +2,9 @@ Source: openmolar-admin
 Section: misc
 Priority: extra
 Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
-Build-Depends: python-all, debhelper (>= 7)
+Build-Depends: python, debhelper (>= 7)
 Homepage: http://www.openmolar.com
+Vcs-browser: http://code.google.com/p/openmolar/
 
 Package: openmolar-admin
 Architecture: all
@@ -12,5 +13,7 @@ Priority: extra
 Depends: ${python:Depends}, openmolar-common, python-qscintilla2
 Description: Dental Practice Management Software - Admin Component
  .
- the openmolar-admin application provides functions for initialising a practice
- database, and managing many of the occasional maintenance tasks.
+ provides an assortment of command line and graphical tools for 
+ initialising a practice database, and managing many of the occasional 
+ maintenance tasks. Usually only one install per network 
+ (as opposed to openmolar-client which may have multiple installations).

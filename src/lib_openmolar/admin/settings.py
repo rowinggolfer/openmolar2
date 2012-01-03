@@ -111,12 +111,25 @@ class AdminSettings(object):
         return self._server_nodes[self.chosen_server]
 
     @property
+    def server_locations(self):
+        '''
+        a list of all server locations (as a tuple ip, port)
+        from values specified in the config.
+        '''
+        locations = []
+        for node in self._server_nodes:
+            loc = node.getAttributeNode("location").value
+            port = node.getAttributeNode("port").value
+            locations.append((loc, port))
+        return locations
+
+    @property
     def server_location(self):
         '''
-        the server location specified in the config.
+        the default server location
         '''
         if self.has_multiple_servers:
-            self.log.warning("multiple servers found in admin config")
+            LOGGER.warning("multiple servers found in admin config")
         return self._server_node.getAttributeNode("location").value
 
     @property
@@ -135,7 +148,19 @@ def install():
     import __builtin__
     __builtin__.__dict__["AD_SETTINGS"] = AdminSettings()
 
-if __name__ == "__main__":
+def _test():
     import logging
-    LOGGER = logging.getLogger("openmolar-admin")
+    import admin_logger
+    admin_logger.install()
+    LOGGER.setLevel(logging.DEBUG)
     install()
+    LOGGER.debug("testing %s"% __file__)
+    LOGGER.debug("using settings file\n\n%s\n\n"% AD_SETTINGS.dom.toxml())
+    LOGGER.debug("multiple servers = %s "% AD_SETTINGS.has_multiple_servers)
+    LOGGER.debug("server_locations = %s "% AD_SETTINGS.server_locations)
+    LOGGER.debug("server_location = %s "% AD_SETTINGS.server_location)
+    LOGGER.debug("server_port = %s "% AD_SETTINGS.server_port)
+
+
+if __name__ == "__main__":
+    _test()

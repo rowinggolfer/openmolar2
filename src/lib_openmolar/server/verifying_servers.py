@@ -92,9 +92,9 @@ class VerifyingServer(SimpleXMLRPCServer):
         add a user to the userdict
         password should be MD5 hashed.
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("adding user %s"% user)
         self.USERDICT[user] = hash
+        log = logging.getLogger("openmolar_server")
+        log.debug("current user list is %s"% sorted(self.USERDICT.keys()))
 
 class VerifyingServerSSL(VerifyingServer):
     '''

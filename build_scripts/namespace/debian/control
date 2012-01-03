@@ -4,6 +4,8 @@ Priority: extra
 Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
 Build-Depends: python, debhelper (>= 7)
 Homepage: http://www.openmolar.com
+Vcs-browser: http://code.google.com/p/openmolar/
+
 
 Package: openmolar-namespace
 Architecture: all

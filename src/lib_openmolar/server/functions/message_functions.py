@@ -21,6 +21,7 @@
 ###############################################################################
 
 import logging
+import socket
 
 CSS = '''
 body {
@@ -39,7 +40,7 @@ body {
     padding-left: 0px;
     }
 
-h1 {color:#59212f;
+h1, h2, h3, h4 {color:#59212f;
 	padding-bottom:0px;}
 
 a {color:#2f2159;}
@@ -63,24 +64,28 @@ class MessageFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
+    @property
+    def location_header(self):
+        return "<h3>%s %s '%s'</h3>"% (_("Connected to Openmolar-Server"),
+            _("on host"), socket.gethostname())
+
     def admin_welcome_template(self):
         '''
         return the html shown at admin_startup
         '''
         html = u'''%s
-        <h1>%s</h1>
+        %s
         %s
         {DATABASE LIST}
-        %s'''% (HEADER,
-            _("Welcome to Openmolar"),
-            _("The following databases are at your disposal"),
+        %s'''% (HEADER, self.location_header,
+            _("The following databases are at your disposal on this machine"),
             FOOTER)
 
         return html
 
     def no_databases_message(self):
         return '''%s
-        <h1>%s</h1>
+        %s
         <p>%s<br />
         %s <a href="install_demo">%s</a>.
         </p>
@@ -88,8 +93,7 @@ class MessageFunctions(object):
         <p>
         %s
         </p>
-        %s'''%(HEADER,
-        _("Welcome to Openmolar"),
+        %s'''%(HEADER, self.location_header,
         _("You do not appear to have any openmolar databases installed."),
         _("To install a demo database now"), _("Click Here"),
         _("Other options are available from the menu above"),
