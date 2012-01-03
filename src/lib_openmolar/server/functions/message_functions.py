@@ -66,8 +66,19 @@ class MessageFunctions(object):
     '''
     @property
     def location_header(self):
-        return "<h3>%s %s '%s'</h3>"% (_("Connected to Openmolar-Server"),
+        '''
+        an html header giving information about the server.
+        '''
+        header = "<h3>%s %s '%s'</h3>"% (_("Connected to Openmolar-Server"),
             _("on host"), socket.gethostname())
+        return header
+
+    @property
+    def version(self):
+        '''
+        return the version of lib_openmolar.server
+        '''
+        return "%s %s"% (_("Version"), "?")
 
     def admin_welcome_template(self):
         '''
