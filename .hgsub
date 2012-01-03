@@ -1,0 +1,4 @@
+src/lib_openmolar/admin = src/lib_openmolar/admin
+src/lib_openmolar/server = src/lib_openmolar/server
+src/lib_openmolar/client = src/lib_openmolar/client
+src/lib_openmolar/common = src/lib_openmolar/common
