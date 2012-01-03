@@ -58,7 +58,23 @@ HEADER = '''<!DOCTYPE html>
 <body>
 '''% CSS
 
-FOOTER = '''\n</body>\n</html>'''
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger("openmolar_server")
+
+try:
+    from lib_openmolar.server import version
+    VERSION = "2.0.0~hg%s revision date%s "% (
+        version.revision_number, version.date)
+    logger.info("VERSION %s"% VERSION)
+    logger.debug(version.revision_id)
+except ImportError:
+    VERSION = "Unknown"
+    logger.exception("unable to parse for server versioning")
+
+FOOTER = '\n<br /><br /><i>server library version %s</i></body>\n</html>'% (
+    VERSION)
+
+
 
 class MessageFunctions(object):
     '''
@@ -72,13 +88,6 @@ class MessageFunctions(object):
         header = "<h3>%s %s '%s'</h3>"% (_("Connected to Openmolar-Server"),
             _("on host"), socket.gethostname())
         return header
-
-    @property
-    def version(self):
-        '''
-        return the version of lib_openmolar.server
-        '''
-        return "%s %s"% (_("Version"), "?")
 
     def admin_welcome_template(self):
         '''
@@ -114,11 +123,9 @@ def _test():
     '''
     test the ShellFunctions class
     '''
-    logging.basicConfig(level=logging.DEBUG)
-    log = logging.getLogger("openmolar_server")
     sf = MessageFunctions()
-    log.debug(sf.admin_welcome_template())
-    log.debug(sf.no_databases_message())
+    logger.debug(sf.admin_welcome_template())
+    logger.debug(sf.no_databases_message())
 
 if __name__ == "__main__":
     from gettext import gettext as _
