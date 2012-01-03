@@ -1,2 +1,0 @@
-from new_address_widget import NewAddressWidget
-from existing_address_widget import ExistingAddressWidget
