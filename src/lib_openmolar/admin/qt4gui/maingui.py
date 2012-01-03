@@ -586,19 +586,23 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         qsettings.setValue("settings_dict", pickled_dict)
 
     def show_about(self):
-        ABOUT_TEXT = ('<p>' + _('''
+        '''
+        raise a dialog showing version info etc.
+        '''
+        ABOUT_TEXT = "<p>%s</p><pre>%s\n%s</pre><p>%s<br />%s</p>"% ( _('''
 This application provides tools to manage and configure your database server
 and can set up either a demo openmolar database, or a
-customised database for a specific dental practice situation.''') +
-'''<br /><br /><a href='https://launchpad.net/openmolar'>
-https://launchpad.net/openmolar</a><br />
-Neil Wallace - rowinggolfer@googlemail.com</p>''')
+customised database for a specific dental practice situation.'''),
+_("Version"), AD_SETTINGS.VERSION,
+"<a href='http://www.openmolar.com'>www.openmolar.com</a>",
+'Neil Wallace - rowinggolfer@googlemail.com')
         self.advise(ABOUT_TEXT, 1)
 
     def show_help(self):
-        HELP_TEXT = '''Website -
-<a href='http://www.openmolar.com'>www.openmolar.com</a>'''
-        self.advise(HELP_TEXT, 1)
+        '''
+        todo - this is the same as show_about
+        '''
+        self.show_about()
 
     @property
     def preferences_dialog(self):

@@ -65,7 +65,22 @@ class AdminSettings(object):
     '''
 
     def __init__(self):
-        pass
+        self.VERSION
+
+    @property
+    def VERSION(self):
+        try:
+            from lib_openmolar.admin import version
+            VERSION = "Admin version 2.0.0~hg%s revision date %s"% (
+                version.revision_number, version.date)
+            from lib_openmolar.common import version
+            VERSION += "\nCommon version 2.0.0~hg%s revision date %s"% (
+                version.revision_number, version.date)
+        except ImportError:
+            VERSION = "Unknown"
+            log.exception("unable to parse for admin versioning")
+        LOGGER.info("VERSION %s"% VERSION)
+        return VERSION
 
     @property
     def dom(self):
