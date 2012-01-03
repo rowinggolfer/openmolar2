@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+   <RCC version="1.0">
+      <qresource>
+         <file>proc_codes/om2_codes.xml</file>
+      </qresource>
+   </RCC>
+
