@@ -143,6 +143,21 @@ class Settings(settings.CommonSettings, PluginHandler):
                 f.close()
 
     @property
+    def VERSION(self):
+        try:
+            from lib_openmolar.client import version
+            VERSION = "Client version 2.0.0~hg%s revision date %s"% (
+                version.revision_number, version.date)
+            from lib_openmolar.common import version
+            VERSION += "\nCommon version 2.0.0~hg%s revision date %s"% (
+                version.revision_number, version.date)
+        except ImportError:
+            VERSION = "Unknown"
+            logging.exception("unable to parse for client versioning")
+        logging.info("VERSION %s"% VERSION)
+        return VERSION
+
+    @property
     def NOTES_CSS(self):
         '''
         location of the notes css file for the current OS user.
@@ -287,3 +302,4 @@ if __name__ == "__main__":
     print SETTINGS.tooth_decoder.decode(23456)
 
     print SETTINGS.allowed_crown_types
+    SETTINGS.VERSION

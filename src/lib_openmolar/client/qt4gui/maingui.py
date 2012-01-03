@@ -291,6 +291,22 @@ class ClientMainWindow(BaseMainWindow):
         self.preferences_dialog.exec_()
         SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
+    def show_about(self):
+        '''
+        raise a dialog showing version info etc.
+        '''
+        ABOUT_TEXT = "<pre>%s\n%s</pre><p>%s<br />%s</p>"% (
+            _("Version"), SETTINGS.VERSION,
+            "<a href='http://www.openmolar.com'>www.openmolar.com</a>",
+            'Neil Wallace - rowinggolfer@googlemail.com')
+        self.advise(ABOUT_TEXT, 1)
+
+    def show_help(self):
+        '''
+        todo - this is the same as show_about
+        '''
+        self.show_about()
+
     def add_dock_widget(self, dw):
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, dw)
 
