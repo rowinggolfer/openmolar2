@@ -2,10 +2,19 @@
 # uses standard major.minor.point versioning
 # hg information is appended by configure.py
 
-[version]
-namespace = 2.0.0
-server = 2.0.0
-client = 2.0.0
-admin  = 2.0.0
-common = 2.0.0
+[namespace]
+version = 2.0.1
 
+[server]
+version = 2.0.1
+
+[client]
+version = 2.0.1
+
+[admin]
+version = 2.0.1
+
+[common]
+version = 2.0.1
+
+[lang]

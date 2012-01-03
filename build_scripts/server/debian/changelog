@@ -1,3 +1,10 @@
+openmolar-server (2.0.1+hg000~0) unstable; urgency=low
+
+  * versioning now accessible to the user
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 03 Jan 2012 22:23:01 +0000
+
+
 openmolar-server (2.0.0+hg93~1) unstable; urgency=low
 
   * rebuild after unsucessfully trying to install a man page

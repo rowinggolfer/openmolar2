@@ -26,9 +26,8 @@ import os
 import StringIO
 import sys
 
-sys.path.insert(0, os.path.abspath("src"))
-from version import revision_number, revision_id
-
+sys.path.insert(0, os.path.abspath(os.path.join ("src", "lib_openmolar")))
+				
 class OMConfig(ConfigParser.RawConfigParser):
     '''
     subclass RawConfigParser with default values and an overwrite of the write
@@ -58,12 +57,13 @@ class OMConfig(ConfigParser.RawConfigParser):
         ConfigParser.RawConfigParser.__init__(self)
         self.read("VERSION.txt")
         for att in self.ATTS:
-            self.add_section(att)
             self.set(att, "include", self.DICT[att])
 
-        self.add_section("mercurial")
-        self.set("mercurial", "revision_number", revision_number)
-        self.set("mercurial", "revision_id", revision_id)
+            if att not in ("namespace", "lang"):
+                mod = __import__("%s.version"% att, fromlist=["version"])
+               
+                self.set(att, "revision_number", mod.revision_number)
+                self.set(att, "revision_id", mod.revision_id)
 
     def write(self, f):
         '''

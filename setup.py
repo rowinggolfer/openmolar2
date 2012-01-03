@@ -116,10 +116,16 @@ def get_version(name):
     '''
     returns a string with in the format X.Y.Z~hgN
     '''
-    return "%s+hg%s"% (
-        config.get("version", name),
-        config.get("mercurial", "revision_number"))
-
+    major_version = config.get(name, "version")
+    try:
+        return "%s+hg%03d"% ( major_version,
+            config.getint(name, "revision_number"))
+    except ConfigParser.NoSectionError:
+        print "no hg version"
+    except ConfigParser.NoOptionError:
+        print "no hg version"
+    return major_version
+        
 if INSTALL_NAMESPACE:
     logging.info("running namespace setup")
     if os.path.isfile("MANIFEST"):

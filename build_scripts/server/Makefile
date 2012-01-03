@@ -14,14 +14,13 @@ DEB_DIR=$(HEAD)/build_scripts/$(SUFFIX)/debian/
 
 PACKAGE=openmolar-$(SUFFIX)
 
-# grep setup.cnf for major versions and head revno
-version=`grep '$(SUFFIX) =' $(HEAD)setup.cnf | sed "s/.*= //"`
-rev_no=`grep revision_number $(HEAD)setup.cnf | sed "s/.*= //"`
-
-VERSION=$(version)+hg$(rev_no)
+VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
 
 clean_tmp:
 	rm -rf $(TMP_DIR)/*
+
+test:
+	echo $(VERSION) 
 
 sources:
 	cd $(HEAD) ;\
