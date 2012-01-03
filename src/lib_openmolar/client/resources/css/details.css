@@ -1,0 +1,46 @@
+/*-- stylesheet for openmolar2 notes 
+written by Neil Wallace < rowinggolfer@gmail.com >
+
+################################################################################
+#                                                                              #
+#  THIS FILE IS UPDATED BY THE OPENMOLAR APPLICATION.                          #
+#                                                                              #
+#  ANY CHANGES YOU MAKE TO THIS FILE WILL NOT BE PRESERVED.                    #
+#                                                                              #
+#                                                                              #
+#  IF YOU WOULD LIKE TO USE A CUSTOM CSS FILE                                  #
+#  PLEASE PLACE IT IN THIS FOLDER AND NAME IT                                  #
+#  "custom_notes.css"                                                          #
+#                                                                              #
+#  THE PRESENCE OF SUCH A FILE WILL MEAN THIS FILE IS IGNORED BY               #
+#  THE NOTES BROWSER.                                                          #
+#                                                                              #
+#                                                                              #
+################################################################################
+
+--*/
+
+body{background-color:#ffffff;}
+
+/*-- DIVS --*/
+div.center{text-align:center;}
+
+/* Headings */
+h1{
+    margin:3px;
+    color:#4322a8
+    }
+    
+/*-- images --*/
+img.pencil{
+    height:20px;
+    width:20px;
+    float:right; 
+    margin: 2px;}
+
+img.clinician{
+    height:40px;
+    width:40px;
+    float:left; 
+    margin: 4px;}
+

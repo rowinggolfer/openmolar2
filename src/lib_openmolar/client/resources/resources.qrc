@@ -1,0 +1,54 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource>
+
+    <file>icons/plugins.png</file>
+    <file>icons/applications-internet.png</file>
+
+    <file>icons/add_user.png</file>
+    <file>icons/agt_back.png</file>
+    <file>icons/agt_family.png</file>
+    <file>icons/agt_forward.png</file>
+    <file>icons/agt_home.png</file>
+    <file>icons/agt_reload.png</file>
+    <file>icons/openmolar.png</file>
+    <file>icons/openmolar-server.png</file>
+    <file>icons/database.png</file>
+    <file>icons/vcalendar.png</file>
+    <file>icons/search.png</file> 
+    <file>icons/soundex.svg</file>   
+    <file>icons/pencil.png</file>
+    <file>icons/phone.png</file>
+    <file>icons/chain-broken.png</file>
+    <file>icons/bpe_new.png</file>
+    <file>icons/bpe_list.png</file>
+    <file>icons/filling.png</file>
+    <file>icons/crown.png</file>
+    <file>icons/root.png</file>
+    <file>icons/fissure_sealant.png</file>
+    <file>teeth/ur8.svg</file>
+    <file>teeth/ur7.svg</file>
+    <file>teeth/ur6.svg</file>
+    <file>teeth/ur5.svg</file>
+    <file>teeth/ur4.svg</file>
+    <file>teeth/ur3.svg</file>
+    <file>teeth/ur2.svg</file>
+    <file>teeth/ur1.svg</file>
+    <file>teeth/lr8.svg</file>
+    <file>teeth/lr7.svg</file>
+    <file>teeth/lr6.svg</file>
+    <file>teeth/lr5.svg</file>
+    <file>teeth/lr4.svg</file>
+    <file>teeth/lr3.svg</file>
+    <file>teeth/lr2.svg</file>
+    <file>teeth/lr1.svg</file>
+    
+    <file>implants/upper_implant.svg</file>
+    <file>implants/lower_implant.svg</file>
+    
+    <file>css/notes.css</file>
+    <file>css/details.css</file>
+    
+</qresource>
+</RCC>
+
