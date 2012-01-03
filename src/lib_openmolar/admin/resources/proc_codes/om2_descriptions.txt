@@ -1,0 +1,5 @@
+0101|A routine examination of a regular patient
+0102|An Extensive examination of a new patient or irregular attender
+0103|Problem Focused examination
+
+
