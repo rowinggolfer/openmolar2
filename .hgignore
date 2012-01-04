@@ -19,10 +19,6 @@ setup.cnf
 setup_part.cnf
 blank_schema.sql
 src/version.py
-src/lib_openmolar/admin/version.py
-src/lib_openmolar/common/version.py
-src/lib_openmolar/client/version.py
-src/lib_openmolar/server/version.py
 releases/*
 tmp/*
 setup.cfg
