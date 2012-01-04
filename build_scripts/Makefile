@@ -1,10 +1,16 @@
 #if `hg status` then echo "uncommited changes, quitting"; exit	
 
-HOME=/home/neil/
+RELEASE_DIR = $(dir $(realpath .))releases/
 
-
+REPO_DIR = $(HOME)/www/repos/apt/debian/
+	
 server_sources:
-	cd server ; make sources
+	cd server ; 
+ifeq (`hg status`,)
+	make sources
+else
+	@echo "unable to build server sources you have uncommitted changes"
+endif
 		
 server_deb:
 	cd server ; make deb
@@ -34,12 +40,12 @@ namespace_deb:
 	cd namespace ; make deb
 	
 pushdebs:
-	cd $(HOME)www/repos/apt/debian/ ;\
-	reprepro includedeb squeeze $(HOME)openmolar/hg_openmolar/releases/namespace/debs/*.deb ;\
-	reprepro includedeb squeeze $(HOME)openmolar/hg_openmolar/releases/client/debs/*.deb ;\
-	reprepro includedeb squeeze $(HOME)openmolar/hg_openmolar/releases/common/debs/*.deb ;\
-	reprepro includedeb squeeze $(HOME)openmolar/hg_openmolar/releases/admin/debs/*.deb ;\
-	reprepro includedeb squeeze $(HOME)openmolar/hg_openmolar/releases/server/debs/*.deb
+	cd $(REPO_DIR) ;\
+	reprepro includedeb squeeze $(RELEASE_DIR)namespace/debs/*.deb ;\
+	reprepro includedeb squeeze $(RELEASE_DIR)client/debs/*.deb ;\
+	reprepro includedeb squeeze $(RELEASE_DIR)common/debs/*.deb ;\
+	reprepro includedeb squeeze $(RELEASE_DIR)admin/debs/*.deb ;\
+	reprepro includedeb squeeze $(RELEASE_DIR)server/debs/*.deb
 	
 
 all:
