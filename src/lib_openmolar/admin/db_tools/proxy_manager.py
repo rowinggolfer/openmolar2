@@ -257,29 +257,6 @@ class ProxyManager(object):
 
         self.display_proxy_message()
 
-    def manage_shortcut(self, url):
-        '''
-        the admin browser
-        (which commonly contains messages from the openmolar_server)
-        is connected to this slot.
-        when a url is clicked it finds it's way here for management.
-        unrecognised signals are send to the user via the notification.
-        '''
-        if url == "init_proxy":
-            LOGGER.debug("User shortcut - Re-try openmolar_server connection")
-            self.init_proxy()
-        elif url == "install_demo":
-            LOGGER.debug("Install demo called via shortcut")
-            self.create_demo_database()
-        elif re.match("connect_.*", url):
-            dbname = re.match("connect_(.*)", url).groups()[0]
-            self.advise("connect to database %s"% dbname)
-        elif re.match("manage_.*", url):
-            dbname = re.match("manage_(.*)", url).groups()[0]
-            self.manage_db(dbname)
-        else:
-            self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
-
 def _test():
     import lib_openmolar.admin
     import gettext

@@ -86,21 +86,23 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         ## "file"
 
         icon = QtGui.QIcon.fromTheme("network-wired")
-        self.action_omconnect = QtGui.QAction(icon, "OM %s"% _("Connect"), self)
-        self.action_omconnect.setToolTip(_("Connect to a Server"))
+        self.action_omconnect = QtGui.QAction(icon,
+            "OM %s"% _("Connect"), self)
+        self.action_omconnect.setToolTip(_("Connect (to an openmolar server)"))
 
         icon = QtGui.QIcon.fromTheme("network-error")
-        self.action_omdisconnect = QtGui.QAction(icon, "OM %s"% _("Disconnect"),
-            self)
-        self.action_omdisconnect.setToolTip(_("Disconnect from Server"))
+        self.action_omdisconnect = QtGui.QAction(icon,
+            "OM %s"% _("Disconnect"), self)
+        self.action_omdisconnect.setToolTip(
+            _("Disconnect (from an openmolar server)"))
 
-        icon = QtGui.QIcon.fromTheme("network-wired")
-        self.action_connect = QtGui.QAction(icon, _("Connect"), self)
-        self.action_connect.setToolTip(_("Connect to a Server"))
+        icon = QtGui.QIcon(":icons/postgresql_elephant.svg")
+        self.action_connect = QtGui.QAction(icon, _("Begin Session"), self)
+        self.action_connect.setToolTip(_("Start a PostgreSQL session"))
 
-        icon = QtGui.QIcon.fromTheme("network-error")
-        self.action_disconnect = QtGui.QAction(icon, _("Disconnect"), self)
-        self.action_disconnect.setToolTip(_("Disconnect from Server"))
+        icon = QtGui.QIcon(":icons/no_postgresql_elephant.svg")
+        self.action_disconnect = QtGui.QAction(icon, _("End Session"), self)
+        self.action_disconnect.setToolTip(_("End a PostgreSQL session"))
 
         insertpoint = self.action_quit
         self.menu_file.insertAction(insertpoint, self.action_omconnect)
@@ -313,6 +315,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         catches signal when user hits the connect action
         '''
+        LOGGER.debug("%s.choose_connection called"% __file__)
         connections = SETTINGS.connections
         dl = ConnectDialog(connections, self)
         while True:
@@ -657,7 +660,8 @@ _("Version"), AD_SETTINGS.VERSION,
                 self.create_demo_database()
             elif re.match("connect_.*", url):
                 dbname = re.match("connect_(.*)", url).groups()[0]
-                self.advise("connect to database %s"% dbname)
+                self.advise("start session on database %s"% dbname)
+                self.choose_connection()
             elif re.match("manage_.*", url):
                 dbname = re.match("manage_(.*)", url).groups()[0]
                 self.manage_db(dbname)
