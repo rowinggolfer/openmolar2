@@ -32,12 +32,12 @@ body {
     padding-left: 0px;
     }
 .database li{
-    padding-left: 20px;
+    padding-left: 28px;
     }
 
 .database li.header{
     list-style-type: none;
-    padding-left: 0px;
+    padding-left: 12px;
     }
 
 h1, h2, h3, h4 {color:#59212f;
@@ -68,10 +68,11 @@ def get_footer():
 
         try:
             from lib_openmolar.server import version
-            VERSION = "2.0.1~hg%s revision date%s "% (
-                version.revision_number, version.date)
-            logger.info("VERSION %s"% VERSION)
-            logger.debug(version.revision_id)
+            VERSION = "2.0.1~hg%s"% (
+                version.revision_number)
+            logger.info("SERVER VERSION %s"% VERSION)
+            logger.debug("VERSION DATE %s"% version.date)
+            logger.debug("REVISION %s"% version.revision_id)
         except ImportError:
             VERSION = "Unknown"
             logger.exception("unable to parse for server versioning")
@@ -115,13 +116,9 @@ class MessageFunctions(object):
         %s <a href="install_demo">%s</a>.
         </p>
         <br />
-        <p>
-        %s
-        </p>
         %s'''%(HEADER, self.location_header,
         _("You do not appear to have any openmolar databases installed."),
         _("To install a demo database now"), _("Click Here"),
-        _("Other options are available from the menu above"),
         get_footer())
 
 def _test():

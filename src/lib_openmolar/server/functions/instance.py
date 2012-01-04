@@ -154,14 +154,16 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
                     <ul>
                         <li class="header">%s</li>
                         <li class="connect">
-                            <a href='connect_%s?'>connect</a>
+                            <a href='connect_%s?'>%s</a>
                         </li>
                         <li class="manage">
-                            <a href='manage_%s'>manage</a>
+                            <a href='manage_%s'>%s</a>
                         </li>
                     </ul>
                 </div>
-                '''% (db, db, db)
+                '''% (
+                db, db, _("start a session on this database"), db,
+                _("management options"))
             message = message.replace("{DATABASE LIST}", db_list)
         return message
 
