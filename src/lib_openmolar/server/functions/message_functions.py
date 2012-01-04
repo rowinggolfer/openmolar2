@@ -58,23 +58,28 @@ HEADER = '''<!DOCTYPE html>
 <body>
 '''% CSS
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger("openmolar_server")
+FOOTER = None
 
-try:
-    from lib_openmolar.server import version
-    VERSION = "2.0.0~hg%s revision date%s "% (
-        version.revision_number, version.date)
-    logger.info("VERSION %s"% VERSION)
-    logger.debug(version.revision_id)
-except ImportError:
-    VERSION = "Unknown"
-    logger.exception("unable to parse for server versioning")
+def get_footer():
+    global FOOTER
+    if FOOTER is None:
 
-FOOTER = '\n<br /><br /><i>server library version %s</i></body>\n</html>'% (
-    VERSION)
+        logger = logging.getLogger("openmolar_server")
 
+        try:
+            from lib_openmolar.server import version
+            VERSION = "2.0.1~hg%s revision date%s "% (
+                version.revision_number, version.date)
+            logger.info("VERSION %s"% VERSION)
+            logger.debug(version.revision_id)
+        except ImportError:
+            VERSION = "Unknown"
+            logger.exception("unable to parse for server versioning")
 
+        FOOTER = '''\n<br /><br />
+        <i>server library version %s</i></body>\n</html>'''% VERSION
+
+    return FOOTER
 
 class MessageFunctions(object):
     '''
@@ -99,7 +104,7 @@ class MessageFunctions(object):
         {DATABASE LIST}
         %s'''% (HEADER, self.location_header,
             _("The following databases are at your disposal on this machine"),
-            FOOTER)
+            get_footer())
 
         return html
 
@@ -117,15 +122,16 @@ class MessageFunctions(object):
         _("You do not appear to have any openmolar databases installed."),
         _("To install a demo database now"), _("Click Here"),
         _("Other options are available from the menu above"),
-        FOOTER)
+        get_footer())
 
 def _test():
     '''
     test the ShellFunctions class
     '''
+    logging.basicConfig(level=logging.DEBUG)
     sf = MessageFunctions()
-    logger.debug(sf.admin_welcome_template())
-    logger.debug(sf.no_databases_message())
+    logging.debug(sf.admin_welcome_template())
+    logging.debug(sf.no_databases_message())
 
 if __name__ == "__main__":
     from gettext import gettext as _
