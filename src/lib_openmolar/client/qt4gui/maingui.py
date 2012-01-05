@@ -100,7 +100,7 @@ class ClientMainWindow(BaseMainWindow):
     def is_dirty(self):
         return self.patient_interface.is_dirty
 
-    def connect_server(self):
+    def start_pg_session(self):
         '''
         connect to a server
         '''
@@ -138,7 +138,7 @@ class ClientMainWindow(BaseMainWindow):
     def user2_changed(self, user):
         SETTINGS.set_user2(user)
 
-    def disconnect_server(self, shutting_down=False):
+    def end_pg_session(self, shutting_down=False):
         '''
         disconnect from server
         (if not connected - pass quietly).
@@ -150,7 +150,7 @@ class ClientMainWindow(BaseMainWindow):
         '''
         catches signal when user hits the connect action
         '''
-        self.disconnect_server()
+        self.end_pg_session()
         connections = SETTINGS.connections
         dl = ConnectDialog(connections, self)
 
@@ -170,7 +170,7 @@ class ClientMainWindow(BaseMainWindow):
         SETTINGS.database.from_connection_data(dl.chosen_connection)
 
         SETTINGS.set_connections(dl.known_connections)
-        self.connect_server()
+        self.start_pg_session()
 
     def connect_signals(self):
         self.action_patient.triggered.connect(self.page_changer)
@@ -240,7 +240,7 @@ class ClientMainWindow(BaseMainWindow):
             event.ignore()
         else:
             self.saveSettings()
-            self.disconnect_server(shutting_down=True)
+            self.end_pg_session(shutting_down=True)
 
     def page_changer(self):
         sender = self.sender()
