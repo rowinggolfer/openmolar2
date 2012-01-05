@@ -30,6 +30,8 @@ from lib_openmolar.common.connect import (
     OpenmolarConnection,
     OpenmolarConnectionError)
 
+from lib_openmolar.admin.connect import AdminConnection
+
 def user_perms(func):
     def userf(*args, **kwargs):
         try:
@@ -256,6 +258,7 @@ class ProxyManager(object):
                 _("unable to drop database"), payload.error_message), 2)
 
         self.display_proxy_message()
+
 
 def _test():
     import lib_openmolar.admin

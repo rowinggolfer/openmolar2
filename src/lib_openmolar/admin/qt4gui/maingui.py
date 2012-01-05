@@ -171,7 +171,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.browser = self.tab_widget.browser
         self.setCentralWidget(self.tab_widget)
 
-        self.disconnect_server()
+        self.end_pg_session()
         self.connect_signals()
         self.show()
 
@@ -190,7 +190,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.action_omdisconnect.triggered.connect(self.om_disconnect)
 
         self.action_connect.triggered.connect(self.choose_connection)
-        self.action_disconnect.triggered.connect(self.disconnect_server)
+        self.action_disconnect.triggered.connect(self.end_pg_session)
 
         self.action_show_log.triggered.connect(self.show_log)
 
@@ -245,7 +245,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         else:
             self.log_dock_widget.hide()
 
-    def connect_server(self):
+    def start_pg_session(self):
         '''
         connect to a server
         '''
@@ -260,8 +260,9 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             self.advise(u"%s<hr />%s"% (
                 _("Connection Error"), error), 2)
             LOGGER.exception("Connection Error")
+        self._can_connect()
 
-    def disconnect_server(self, shutting_down=False):
+    def end_pg_session(self, shutting_down=False):
         '''
         disconnect from server
         (if not connected - pass quietly).
@@ -321,7 +322,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         while True:
             if not dl.exec_():
                 return
-            self.disconnect_server()
+            self.end_pg_session()
             connection = dl.chosen_connection
 
             self.connection = AdminConnection(
@@ -342,9 +343,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             _("Using password"), pass_used))
 
             SETTINGS.set_connections(dl.known_connections)
-            self.connect_server()
-
-            self._can_connect()
+            self.start_pg_session()
 
             if self.connection.isOpen():
                 return True
@@ -408,6 +407,32 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             return (unicode(self.connection.databaseName()), True)
         self.advise(_("A Database must be selected to continue"), 1)
         return self.select_database()
+
+    def get_user_pass(self, dbname):
+        '''
+        return a tuple of result user, password
+        '''
+        LOGGER.debug("%s.get_user_pass %s"% (__file__, dbname))
+        if dbname == "openmolar_demo":
+            return (True, "om_demo", "password")
+        dl = UserPasswordDialog(self)
+        return dl.exec_(), dl.name, dl.password
+
+    def use_proxy_connection(self, dbname):
+        '''
+        user has clicked on a link requesting a session on dbname
+        '''
+        result, user, passwd = self.get_user_pass(dbname)
+        if not result:
+            return
+        self.connection = AdminConnection(
+            host = AD_SETTINGS.server_location,
+            user = user,
+            passwd = passwd,
+            port = 5432,
+            db_name = dbname)
+        self.start_pg_session()
+
 
     def select_database(self, reason=""):
         '''
@@ -511,7 +536,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             event.ignore()
         else:
             self.saveSettings()
-            self.disconnect_server(shutting_down=True)
+            self.end_pg_session(shutting_down=True)
 
     @property
     def confirmDataOverwrite(self):
@@ -661,7 +686,7 @@ _("Version"), AD_SETTINGS.VERSION,
             elif re.match("connect_.*", url):
                 dbname = re.match("connect_(.*)", url).groups()[0]
                 self.advise("start session on database %s"% dbname)
-                self.choose_connection()
+                self.use_proxy_connection(dbname)
             elif re.match("manage_.*", url):
                 dbname = re.match("manage_(.*)", url).groups()[0]
                 self.manage_db(dbname)
