@@ -1,3 +1,10 @@
+openmolar-admin (2.0.1+hg002~0) unstable; urgency=low
+
+  * new terminology for a "session" and postgres elephant makes an appearance.  
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 04 Jan 2012 23:16:07 +0000
+
+
 openmolar-admin (2.0.1+hg000~0) unstable; urgency=low
 
   * versioning now accessible to end user
