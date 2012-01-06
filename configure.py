@@ -55,15 +55,17 @@ class OMConfig(ConfigParser.RawConfigParser):
 
     def __init__(self):
         ConfigParser.RawConfigParser.__init__(self)
-        self.read("VERSION.txt")
         for att in self.ATTS:
+            self.add_option(att)
             self.set(att, "include", self.DICT[att])
 
             if att not in ("namespace", "lang"):
-                mod = __import__("%s.version"% att, fromlist=["version"])
-               
-                self.set(att, "revision_number", mod.revision_number)
-                self.set(att, "revision_id", mod.revision_id)
+                # this is the equiv of
+                # from admin import version 
+                version = __import__("%s.version"% att, fromlist=["version"])
+                self.set(att, "version", version.VERSION)
+                self.set(att, "revision_number", version.revision_number)
+                self.set(att, "revision_id", version.revision_id)
 
     def write(self, f):
         '''

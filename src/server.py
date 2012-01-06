@@ -139,8 +139,8 @@ def main():
     options, args = parser.parse_args()
 
     if options.show_version:
-        from lib_openmolar.server import version
-        print ("Openmolar Library HG Revision %s"% version.revision_number)
+        from lib_openmolar.server.version import VERSION, revision_number
+        print ("Openmolar-Server %s~hg%s"% (VERSION, revision_number))
         sys.exit(0)
 
     try:

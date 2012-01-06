@@ -50,6 +50,7 @@ VERSION_NUMBER = "2.0.1"
 
 
 TEMPLATE = '''\
+VERSION = %(version)r
 revision_id = %(revision_id)r
 revision_number = %(revision_number)r
 branch = %(branch)r
@@ -69,7 +70,7 @@ def hook(ui, repo, node=None, **params):
 
 def _write_version_info(changeset, versionfile):
     template_vars = {
-    	'VERSION':VERSION_NUMBER,
+    	'version':VERSION_NUMBER,
         'revision_id':changeset.node().encode('hex'),
         'revision_number':changeset.rev(),
         'branch':changeset.branch(),

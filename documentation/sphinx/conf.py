@@ -23,7 +23,7 @@ for folder in (
     ):
    sys.path.insert(0, os.path.abspath(folder))
 
-from version import revision_number
+from version import VERSION, revision_number
 
 # -- General configuration -----------------------------------------------------
 
@@ -58,7 +58,7 @@ copyright = u'2010-2011, Neil Wallace'
 # built documents.
 #
 # The short X.Y version.
-version = '2.0.1'
+version = VERSION
 # The full version, including alpha/beta/rc tags.
 release = version+"~hg%s"% revision_number
 
