@@ -1,3 +1,10 @@
+openmolar-admin (2.0.1+hg003~0) unstable; urgency=low
+
+  * user password dialog raised when connecting via link click
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 05 Jan 2012 23:29:04 +0000
+
+
 openmolar-admin (2.0.1+hg002~0) unstable; urgency=low
 
   * new terminology for a "session" and postgres elephant makes an appearance.  

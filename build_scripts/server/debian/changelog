@@ -1,3 +1,10 @@
+openmolar-server (2.0.1+hg004~0) unstable; urgency=low
+
+  * bugfix - link contained an ending question mark which confused the admin code.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 05 Jan 2012 23:31:28 +0000
+
+
 openmolar-server (2.0.1+hg003~0) unstable; urgency=low
 
   * new messages provided to admin

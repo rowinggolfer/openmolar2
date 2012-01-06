@@ -109,13 +109,11 @@ def first_run():
     log = logging.getLogger("openmolar_server")
     installer = Installer()
     if not installer.chk_install:
-        log.warning("First run of server")
+        log.warning("First run of openmolar_server")
         log.info("installing server")
         installer.install()
 
 def main():
-    logger.setup(level = logging.INFO) #, console_echo=True)
-    log = logging.getLogger("openmolar_server")
     parser = OptionParser()
     parser.add_option("--start", action="store_true",
         help="start the server")
@@ -126,16 +124,33 @@ def main():
     parser.add_option("--status", action="store_true",
         help="check the status of the server")
 
+    parser.add_option("--version",
+        action="store_true", dest="show_version", default=False,
+        help="show version and quit")
+
     parser.add_option("-v", "--verbose",
                   action="store_true", dest="verbose", default=True,
-                  help="print debug messages to stdout")
+                  help="log debug messages")
 
     parser.add_option("-q", "--quiet",
                   action="store_false", dest="verbose",
-                  help="don't print debug messages to stdout")
+                  help="ignore debug messages")
 
     options, args = parser.parse_args()
 
+    if options.show_version:
+        from lib_openmolar.server import version
+        print ("Openmolar Library HG Revision %s"% version.revision_number)
+        sys.exit(0)
+
+    try:
+        logger.setup(level = logging.INFO) #, console_echo=True)
+    except IOError as exc:
+        if exc.errno == 13:
+            sys.exit("You have to be root to run this script")
+        raise exc
+
+    log = logging.getLogger("openmolar_server")
     omserver = server.OMServer(options.verbose)
 
     if options.start:
