@@ -146,10 +146,10 @@ class Settings(settings.CommonSettings, PluginHandler):
     def VERSION(self):
         try:
             from lib_openmolar.client import version
-            VERSION = "Client version 2.0.0~hg%s"% (
+            VERSION = "Client version %s~hg%s"% (
                 version.VERSION, version.revision_number)
             from lib_openmolar.common import version
-            VERSION += "\nCommon version 2.0.0~hg%s"% (
+            VERSION += "\nCommon version %s~hg%s"% (
                 version.VERSION, version.revision_number)
         except ImportError:
             VERSION = "Unknown"
