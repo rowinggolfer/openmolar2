@@ -71,10 +71,10 @@ class AdminSettings(object):
     def VERSION(self):
         try:
             from lib_openmolar.admin import version
-            VERSION = "Admin version 2.0.0~hg%s"% (
+            VERSION = "Admin version %s~hg%s"% (
                 version.VERSION, version.revision_number)
             from lib_openmolar.common import version
-            VERSION += "\nCommon version 2.0.0~hg%s"% (
+            VERSION += "\nCommon version %s~hg%s"% (
                 version.VERSION, version.revision_number)
         except ImportError:
             VERSION = "Unknown"
