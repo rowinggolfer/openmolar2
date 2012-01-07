@@ -30,13 +30,13 @@ import subprocess
 import sys
 import optparse
 
-VERSION = "2.0.0"
+from version import VERSION, revision_number
 
 gettext.install('openmolar', unicode=True)
 
 class Parser(optparse.OptionParser):
     def __init__(self):
-        self.version_str = "%s"% (VERSION)
+        self.version_str = "%s~hg%s"% (VERSION, revision_number)
         optparse.OptionParser.__init__(self,
             prog="openmolar2",
             version=self.version_str)
