@@ -146,11 +146,11 @@ class Settings(settings.CommonSettings, PluginHandler):
     def VERSION(self):
         try:
             from lib_openmolar.client import version
-            VERSION = "Client version 2.0.0~hg%s revision date %s"% (
-                version.revision_number, version.date)
+            VERSION = "Client version 2.0.0~hg%s"% (
+                version.VERSION, version.revision_number)
             from lib_openmolar.common import version
-            VERSION += "\nCommon version 2.0.0~hg%s revision date %s"% (
-                version.revision_number, version.date)
+            VERSION += "\nCommon version 2.0.0~hg%s"% (
+                version.VERSION, version.revision_number)
         except ImportError:
             VERSION = "Unknown"
             logging.exception("unable to parse for client versioning")
