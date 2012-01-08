@@ -33,24 +33,29 @@ class Parser(optparse.OptionParser):
     def __init__(self):
         optparse.OptionParser.__init__(self,
             prog="openmolar-admin")
+        
+        self.add_option("--version",
+        action="store_true", dest="show_version", default=False,
+        help="show version and quit")
 
-        option = self.add_option("-v", "--verbose",
-                        dest = "verbose",
-                        action="store_true", default=False,
-                        help = "verbose output to stdout",
-                        )
+        self.add_option("-v", "--verbose",
+            dest = "verbose",
+            action="store_true", default=False,
+            help = "verbose logging messages",
+            )
 
-        option = self.add_option("-q", "--quiet",
-                        dest = "quiet",
-                        action="store_true", default=False,
-                        help = "minimal messages to stdout",
-                        )
+        self.add_option("-q", "--quiet",
+            dest = "quiet",
+            action="store_true", default=False,
+            help = "minimal logging messages",
+            )
 
-        option = self.add_option("-s", "--script",
-                        dest = "script",
-                        help = "run the cli application",
-                        type="string"
-                        )
+        self.add_option("-s", "--script",
+            dest = "script",
+            help = ("run the cli application"
+                    "performing actions specified in plain text file SCRIPT"),
+            type="string"
+            )
 
 def main():
     '''
@@ -61,6 +66,11 @@ def main():
     options, args = parser.parse_args()
 
     import lib_openmolar.admin
+
+    if options.show_version:
+        from lib_openmolar.admin.version import VERSION, revision_number
+        print ("Openmolar-Admin %s~hg%s"% (VERSION, revision_number))
+        sys.exit(0)
 
     if options.verbose:
         LOGGER.setLevel(logging.DEBUG)

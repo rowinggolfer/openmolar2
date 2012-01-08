@@ -1,5 +1,4 @@
-#HEAD=../
-HEAD=/home/neil/openmolar/hg_openmolar/
+HEAD=$(HOME)/openmolar/hg_openmolar/
 BUILD_SCRIPTS_DIR=$(HEAD)/build_scripts/
 
 SUFFIX=admin

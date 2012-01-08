@@ -1,3 +1,17 @@
+openmolar-admin (2.0.1+hg005~2) unstable; urgency=low
+
+  * Simple (inadequate) Manpage included
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 08 Jan 2012 10:58:33 +0000
+
+
+openmolar-admin (2.0.1+hg005~0) unstable; urgency=low
+
+  * new method for showing software versioning
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 07 Jan 2012 00:40:53 +0000
+
+
 openmolar-admin (2.0.1+hg003~0) unstable; urgency=low
 
   * user password dialog raised when connecting via link click

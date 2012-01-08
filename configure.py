@@ -56,7 +56,7 @@ class OMConfig(ConfigParser.RawConfigParser):
     def __init__(self):
         ConfigParser.RawConfigParser.__init__(self)
         for att in self.ATTS:
-            self.add_option(att)
+            self.add_section(att)
             self.set(att, "include", self.DICT[att])
 
             if att not in ("namespace", "lang"):

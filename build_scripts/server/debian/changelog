@@ -1,3 +1,24 @@
+openmolar-server (2.0.1+hg004~12) unstable; urgency=low
+
+  * moved manpage location (affects only the source package)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 08 Jan 2012 11:00:47 +0000
+
+
+openmolar-server (2.0.1+hg004~9) unstable; urgency=low
+
+  *  included a simple manpage
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 07 Jan 2012 09:59:27 +0000
+
+
+openmolar-server (2.0.1+hg004~1) unstable; urgency=low
+
+  * altered the openmolar-server script so that it can now show version
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 07 Jan 2012 00:43:49 +0000
+
+
 openmolar-server (2.0.1+hg004~0) unstable; urgency=low
 
   * bugfix - link contained an ending question mark which confused the admin code.

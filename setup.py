@@ -207,7 +207,7 @@ if INSTALL_ADMIN:
         new_config.write(f)
         f.close()
 
-        write_manifest_in(["misc/admin/*", "src/admin.py"])
+        write_manifest_in(["misc/admin/*", "man/admin/*", "src/admin.py"])
 
     setup(
         name = 'openmolar-admin',
@@ -254,7 +254,7 @@ if INSTALL_CLIENT:
         new_config.write(f)
         f.close()
 
-        write_manifest_in(["misc/client/*", "src/client.py"])
+        write_manifest_in(["misc/client/*", "man/client/*", "src/client.py"])
 
     setup(
         name = 'openmolar-client',
@@ -310,8 +310,12 @@ if INSTALL_SERVER:
         new_config.write(f)
         f.close()
 
-        write_manifest_in(
-            ["misc/server/*", "src/server.py", "src/shell_scripts/*"])
+        write_manifest_in([
+                "misc/server/*", 
+                "man/server/*", 
+                "src/server.py", 
+                "src/shell_scripts/*"
+                ])
 
     setup(
         name = 'openmolar-server',
