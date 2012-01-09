@@ -57,8 +57,9 @@ class DBFunctions(object):
         or at the very least a TCP/IP connection to only localhost.
         (function doesn't get picked up by register_instance)
         '''
-        return "host='%s' user='%s' password='%s' dbname='%s'"% (
+        return "host='%s' user='%s' port='%s' password='%s' dbname='%s'"% (
             self.config.postgres_host, self.config.postgres_user,
+            self.config.postgres_port,
             self.config.postgres_pass, dbname)
 
     @log_exception

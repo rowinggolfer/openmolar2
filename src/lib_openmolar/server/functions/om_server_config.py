@@ -218,7 +218,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         move up to the lastest version
         '''
         if self.config_version is None:
-            self._update_none_to_1_1()
+            self._update_none_to_1_0()
 
     def _update_none_to_1_0(self):
         '''
