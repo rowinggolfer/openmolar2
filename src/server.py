@@ -22,96 +22,23 @@
 
 import logging
 from optparse import OptionParser
-import os
 import sys
-import subprocess
+
 from lib_openmolar.server import server
 from lib_openmolar.server.functions import logger
 from lib_openmolar.server.functions.om_server_config import OMServerConfig
 
-LOGDIR = "/var/log/openmolar/server/"
-
-class Installer(object):
-    '''
-    A class to install the server application,
-    creates a master user with random password,
-    creates a master database,
-    sets out the directory structure.
-    '''
-    def __init__(self):
-        self.config = OMServerConfig()
-
-    @property
-    def chk_install(self):
-        return self.config.is_installed
-
-    def make_dirs(self):
-        for dir in (self.config.etc_dir, LOGDIR):
-            try:
-                print "making directory", dir
-                os.makedirs(dir)
-            except OSError as exc:
-                if exc.errno == 13:
-                    print ("You do not have permission to create %s"% dir)
-                    print ("Are you Root?")
-                    sys.exit(0)
-
-    def write_config(self):
-        '''
-        write the config file for openmolar
-        '''
-        self.config.new_config()
-        self.config.write()
-
-    def init_master_user(self):
-        '''
-        initialises the user "openmolar"
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("calling script openmolar-init-master-user")
-
-        p = subprocess.Popen(["openmolar-init-master-user"],
-            stdout=subprocess.PIPE )
-
-        while True:
-            line = p.stdout.readline()
-            if not line:
-                break
-            log.info(line)
-
-    def init_master_db(self):
-        '''
-        initialises the openmolar_master database
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("calling script openmolar-init-master-db")
-
-        p = subprocess.Popen(["openmolar-init-master-db"],
-            stdout=subprocess.PIPE )
-
-        while True:
-            line = p.stdout.readline()
-            if not line:
-                break
-            log.info(line)
-
-    def install(self):
-        '''
-        this should normally only be called on the very first running of the
-        server application
-        '''
-        self.make_dirs()
-        self.write_config()
-        self.init_master_user()
-        self.init_master_db()
 
 def first_run():
     log = logging.getLogger("openmolar_server")
-    installer = Installer()
-    if not installer.chk_install:
+    conf = OMServerConfig()
+    if not conf.is_installed:
         log.warning("First run of openmolar_server")
-        log.info("installing server")
+        from lib_openmolar.server.installer import Installer
+        installer = Installer()
         installer.install()
+    else:
+        conf.update()
 
 def main():
     parser = OptionParser()
@@ -150,7 +77,6 @@ def main():
             sys.exit("You have to be root to run this script")
         raise exc
 
-    log = logging.getLogger("openmolar_server")
     omserver = server.OMServer(options.verbose)
 
     if options.start:
@@ -158,6 +84,7 @@ def main():
         omserver.start()
     elif options.stop:
         omserver.stop()
+        logging.shutdown()
     elif options.restart:
         first_run()
         omserver.restart()

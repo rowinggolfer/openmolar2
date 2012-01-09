@@ -13,7 +13,7 @@ then
     exit 0
 fi
 
-PWORD=`grep 'openmolar = ' /etc/openmolar/server.conf | awk -F' = ' {'print $2'}`
+PWORD=`grep 'password = ' /etc/openmolar/server.conf | awk -F' = ' {'print $2'}`
 
 echo "CREATE ROLE openmolar WITH CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD '************';"
 echo "CREATE ROLE openmolar WITH CREATEDB CREATEROLE LOGIN ENCRYPTED PASSWORD '$PWORD';" | su postgres -c psql

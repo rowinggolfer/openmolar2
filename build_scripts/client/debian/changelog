@@ -1,5 +1,12 @@
 openmolar-client (2.0.1+hg004~0) unstable; urgency=low
 
+  * trial build with null manpage
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 08 Jan 2012 11:12:40 +0000
+
+
+openmolar-client (2.0.1+hg004~0) unstable; urgency=low
+
   * new method for versioning
 
  -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 07 Jan 2012 00:42:03 +0000
