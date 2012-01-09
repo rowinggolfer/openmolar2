@@ -41,17 +41,21 @@ def setup(level=logging.DEBUG):
     if not os.path.isdir(dirname):
         os.makedirs(dirname)
 
-    logging.basicConfig(level=level,
-        format='%(asctime)s %(levelname)s %(message)s')
-
     logger = logging.getLogger(LOGNAME)
 
+    logging.basicConfig(level=level)
+
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
     handler = logging.handlers.TimedRotatingFileHandler(
-        LOCATION, "D", 1, backupCount=10)
+        LOCATION, when="D", interval=1, backupCount=10, utc=True)
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
 
 def _test():
     try:
         setup()
+        print LOGNAME, LOCATION
         my_logger = logging.getLogger(LOGNAME)
         my_logger.debug("debug message")
         my_logger.info("info message")

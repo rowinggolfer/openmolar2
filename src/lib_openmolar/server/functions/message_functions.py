@@ -104,7 +104,7 @@ class MessageFunctions(object):
         %s
         {DATABASE LIST}
         %s'''% (HEADER, self.location_header,
-            _("The following databases are at your disposal on this machine"),
+            _("The following openmolar schemas are at your disposal on this postgres server"),
             get_footer())
 
         return html
@@ -121,6 +121,18 @@ class MessageFunctions(object):
         _("To install a demo database now"), _("Click Here"),
         get_footer())
 
+    def postgres_error_message(self):
+        return '''%s
+        %s
+        <p>
+        <b>%s</b>
+        <pre>ERROR</pre>
+        </p>
+        <br />
+        %s'''%(HEADER, self.location_header,
+        _("Cannot connect to the postgres server on this machine!"),
+        get_footer())
+
 def _test():
     '''
     test the ShellFunctions class
@@ -129,6 +141,7 @@ def _test():
     sf = MessageFunctions()
     logging.debug(sf.admin_welcome_template())
     logging.debug(sf.no_databases_message())
+    logging.debug(sf.postgres_error_message())
 
 if __name__ == "__main__":
     from gettext import gettext as _

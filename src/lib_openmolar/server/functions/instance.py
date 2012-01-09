@@ -143,7 +143,10 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         the html shown on startup to the admin application
         '''
         dbs = self.available_databases()
-        if dbs == []:
+
+        if dbs == "NONE":
+            message = self.postgres_error_message()
+        elif dbs == []:
             message = self.no_databases_message()
         else:
             message = self.admin_welcome_template()

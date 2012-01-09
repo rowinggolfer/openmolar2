@@ -26,6 +26,8 @@ import sys
 import psycopg2
 from lib_openmolar.server.functions.password_generator import new_password
 
+from lib_openmolar.server.functions.om_server_config import OMServerConfig
+
 def log_exception(func):
     def db_func(*args, **kwargs):
         try:
@@ -40,15 +42,8 @@ class DBFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
-    MASTER_PWORD = ""
-
     def __init__(self):
-        if __name__ == "__main__":
-            ## this is useful for testing purposes only
-            ## when subclassed by instance, this attribute is handled
-            f = open("/home/neil/openmolar/master_pword.txt")
-            self.MASTER_PWORD = f.read()
-            f.close()
+        self.config = OMServerConfig()
 
     @property
     def default_conn_atts(self):
@@ -57,12 +52,14 @@ class DBFunctions(object):
     def __conn_atts(self, dbname="openmolar_master"):
         '''
         has to be a private function because of the password!
-        a well set up server will restrict user "openmolar" to TCP/IP
-        connections restricted to localhost though.
-        (doesn't get picked up by register_instance)
+        a well set up server will restrict user "openmolar"
+        to a unix socket connection (ie local machine only)
+        or at the very least a TCP/IP connection to only localhost.
+        (function doesn't get picked up by register_instance)
         '''
-        return "host=127.0.0.1 user=openmolar password=%s dbname=%s"% (
-            self.MASTER_PWORD, dbname)
+        return "host='%s' user='%s' password='%s' dbname='%s'"% (
+            self.config.postgres_host, self.config.postgres_user,
+            self.config.postgres_pass, dbname)
 
     @log_exception
     def _execute(self, statement, dbname="openmolar_master"):
@@ -122,9 +119,9 @@ class DBFunctions(object):
             for result in cursor.fetchall():
                 databases.append(result[0])
             conn.close()
-        except Exception:
+        except Exception as exc:
             log.exception("Serious Error")
-
+            return "NONE"
         return databases
 
     @log_exception
@@ -195,8 +192,8 @@ class DBFunctions(object):
         groups = {}
         perms, sql = "",""
 
-        for group in ('Admin', 'Client'):
-            groupname = "OM%sGROUP_%s"% (group, dbname)
+        for group in ('admin', 'client'):
+            groupname = "om_%s_group_%s"% (group, dbname)
 
             sql += "drop user if exists %s;\n"% groupname
             sql += "create user %s;\n"% groupname
@@ -214,8 +211,8 @@ class DBFunctions(object):
         except IOError:
             log.exception("error reading sql files.")
 
-        permissions = perms.replace("ADMIN_GROUP", groups["Admin"]).replace(
-                            "CLIENT_GROUP", groups["Client"])
+        permissions = perms.replace("ADMIN_GROUP", groups["admin"]).replace(
+                            "CLIENT_GROUP", groups["client"])
 
         return sql + permissions
 
@@ -296,8 +293,8 @@ class DBFunctions(object):
         else:
             return False
 
-        for group in ("Admin", "Client"):
-            user_group = 'om%sgroup_%s;'% (group, dbname)
+        for group in ("admin", "client"):
+            user_group = 'om_%s_%s;'% (group, dbname)
             logging.warning("removing role (if exists) '%s'"% user_group)
             if self._execute('drop user if exists %s'% user_group ):
                 logging.info("role '%s' removed"% user_group)
@@ -312,7 +309,7 @@ class DBFunctions(object):
         create a user (remote user)
         '''
         log = logging.getLogger("openmolar_server")
-        log.info("add a user(role) with name '%s'"% username)
+        log.info("add a login user with name '%s' and password"% username)
 
         if password is None:
             password = new_password()
@@ -336,9 +333,9 @@ class DBFunctions(object):
 
         SQL = ""
         if admin:
-            SQL += "GRANT OMAdminGroup_%s to %s;\n"% (dbname, user)
+            SQL += "GRANT om_admin_group_%s to %s;\n"% (dbname, user)
         if client:
-            SQL += "GRANT OMClientGroup_%s to %s;\n"% (dbname, user)
+            SQL += "GRANT om_client_group_%s to %s;\n"% (dbname, user)
         try:
             self._execute(SQL, dbname)
             return True
@@ -376,12 +373,12 @@ def _test():
 
     dbname = "openmolar_demo"
     #log.debug(sf.newDB_sql(dbname))
-    sf.drop_db(dbname)
-    sf.drop_demo_user()
+    #sf.drop_db(dbname)
+    #sf.drop_demo_user()
     sf.create_db(dbname)
     sf.create_demo_user()
-    sf.drop_db(dbname)
-    sf.drop_demo_user()
+    #sf.drop_db(dbname)
+    #sf.drop_demo_user()
 
 
 if __name__ == "__main__":
