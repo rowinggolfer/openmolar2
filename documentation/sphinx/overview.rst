@@ -1,7 +1,7 @@
 Overview
 ========
 
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace neil@openmolar.com
       
 Dental Practices rely heavily on database technologies to maintain valuable and sensitive data.
 Dental Practices also need to apply common business tools such as double entry book-keeping, invoicing, scheduling and stock management.
@@ -22,13 +22,5 @@ This solution did, however, provide a very stable and customised application for
 
 In 2011, a complete re-write of openmolar was undertaken, with a completely redesigned schema utilising the more standards compliant Postgresql database. 
 
-The User Manual and Technical Documentation linked to below relate solely to that version.
-   
-   
-   
-.. toctree::
-    :maxdepth: 1
+These documents relate solely to that version.
 
-    installation/index
-    tutorial/index
-    technical/index

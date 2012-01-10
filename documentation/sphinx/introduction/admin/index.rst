@@ -1,11 +1,12 @@
 The Admin Application
 =====================
 
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
-:Release: |release|
-:Date: |today|
+:Author: Neil Wallace neil@openmolar.com
 
-
+.. image::  ../../images/screenshots/admin_table_viewer.png
+   :align:   center
+   :width:   50%
+   
 The Admin Application is a power users tool for advanced management of your practice database.
 
 -  Installation of a database schema
@@ -14,7 +15,4 @@ The Admin Application is a power users tool for advanced management of your prac
 -  Advanced querying/editing of the database
 -  Export facilities (currently to excel files and/or csv)
 
-.. _admin_screenshot:
-.. figure::  ../../images/screenshots/admin_table_viewer.png
-   :align:   center
-   :width:   50%
+

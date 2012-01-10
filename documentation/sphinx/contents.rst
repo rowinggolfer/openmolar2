@@ -1,11 +1,22 @@
-*************
-Contents Page
-*************
-   
+***********************
+Openmolar Documentation
+***********************
+
+:Author: Neil Wallace neil@openmolar.com
+:Version: |release|
+:Date: |today|
+
+Welcome to the documentation for Openmolar.
+
+Chapters
+--------
+
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     overview
+    introduction/index
     installation/index
-    tutorial/index
+    tutorials/index
     technical/index
+
