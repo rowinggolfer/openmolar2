@@ -102,6 +102,7 @@ modindex_common_prefix = ["lib_openmolar",
                           "lib_openmolar.common",
                           "lib_openmolar.admin",
                           "lib_openmolar.client.qt4gui",
+                          "lib_openmolar.server",
                           ]
 
 # Fontpath for blockdiag (truetype font)
@@ -118,6 +119,12 @@ html_theme = 'default'
 # documentation.
 #html_theme_options = {}
 
+html_theme_options = {
+    "rightsidebar":"false",
+    "stickysidebar":"false",
+    "sidebarwidth":210
+    } 
+
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
@@ -125,14 +132,14 @@ html_theme = 'default'
 # "<project> v<release> documentation".
 #html_title = None
 
-#html_title"Openmolar"
+html_title = "Openmolar Documentation"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-#html_short_title = None
+html_short_title = "Openmolar"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "images/openmolar_logo.png"
+html_logo = "images/openmolar_logo_small.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -158,7 +165,9 @@ html_static_path = ['_static']
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 #html_additional_pages = {}
-html_additional_pages = { 'index':'index.html' }
+
+#hmmm... didn't like this.
+#html_additional_pages = { 'index':'index.html' }
 
 # If false, no module index is generated.
 #html_use_modindex = True

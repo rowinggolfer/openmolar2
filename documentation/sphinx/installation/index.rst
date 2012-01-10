@@ -12,3 +12,10 @@ At this moment in time... don't.
 
 
 :doc:`../contents`
+
+.. toctree::
+    :maxdepth: 1
+
+    debian/index
+
+

@@ -1,3 +1,17 @@
+openmolar-server (2.0.1+hg006~0) unstable; urgency=low
+
+  * bugfix - misnamed a function call. Also postgres port specified in server.conf is used.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 09 Jan 2012 02:14:32 +0000
+
+
+openmolar-server (2.0.1+hg005~0) unstable; urgency=low
+
+  * Moved the "installer" class into lib_openmolar. new config file also. 
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 09 Jan 2012 01:53:02 +0000
+
+
 openmolar-server (2.0.1+hg004~13) unstable; urgency=low
 
   * renamed manpage

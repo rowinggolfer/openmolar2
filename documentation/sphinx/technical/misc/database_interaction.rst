@@ -2,8 +2,6 @@ Interacting with the Database
 =============================
 
 :Author: Neil Wallace (rowinggolfer AT googlemail.com)
-:Release: |release|
-:Date: |today|
 
 
 Introduction

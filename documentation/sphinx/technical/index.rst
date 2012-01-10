@@ -10,48 +10,28 @@ Technical Documentation
 Welcome to the technical documentation for OpenMolar.
 
 .. note::
-    I use these documents daily whenever I work on openmolar. The :doc:`classes/classindex` in particular is an essential reference guide for
-    me to remember how this application works!
     
-
-Basic Information
------------------
-
- - *LANGUAGE* Written in `Python <http://python.org>`_ (requires 2.6), 
+ These documents described in technical language how the application is designed and how the design is implemented.
  
- - *VERSION CONTROL* using the mercurial version control system. To obtain the latest sources execute::
-        
-        hg clone https://openmolar.googlecode.com/hg/ openmolar
-
- - *GUI TOOLKIT* `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/intro>`_
-
- - *DATA STORAGE* Levers the power of the excellent and mature open-source Postgresql Database. (for current schema see :doc:`misc/postgres`)
-
- - *EASILY EXTENSIBLE* openmolar uses a custom plugin system, allowing per site or per station customisation. 
+ 
+ In addition, all python classes used by the application have been catalogued using autodoc. This has proved so useful, that the index to these documents is permalinked in the top right corner of every technical page here.
+ 
+ 
+ - *DESIGN* :doc:`design/index`
+ 
+ - *IMPLEMENTATION* :doc:`implementation/index`
+ 
+ - *CLASSES* :doc:`classes/classindex`
 
  
- - *TRANSLATION* provided via gnu gettext. All translatable strings are wrapped in the function _()::
-          
-        #example
-        label = QtGui.QLabel(_("Please Translate me if necessary"))
-  
-    
-  for those interested in contributing to the translation of openmolar, please visit 
-  the translation page on `launchpad <https://translation.launchpad.net/openmolar>`_   
-     
-
- 
-
 Detailed Documentation
 ----------------------
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
-    misc/tooth_notation
-    misc/postgres
-    misc/database_interaction
-
+    design/index
+    implementation/index
     classes/classindex
     
 

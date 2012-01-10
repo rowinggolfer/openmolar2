@@ -184,8 +184,7 @@ def main():
     write_index(index_files)
 
 if __name__ == "__main__":
-    import sys
-
+   
     if len(sys.argv)<2:
         sys.exit('Usage: %s <folder>' % sys.argv[0])
 

@@ -2,8 +2,6 @@ Overview
 ========
 
 :Author: Neil Wallace (rowinggolfer AT googlemail.com)
-:Release: |release|
-:Date: |today|
       
 Dental Practices rely heavily on database technologies to maintain valuable and sensitive data.
 Dental Practices also need to apply common business tools such as double entry book-keeping, invoicing, scheduling and stock management.

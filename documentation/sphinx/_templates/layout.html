@@ -3,21 +3,24 @@
 
 {# update static links in the relbar #}
 {% block rootrellink %}
-    <li><a href={{ pathto('index') }}>Docs Home </a> &raquo;</li>
+    <li><a href="http://www.openmolar.com">Home</a>&nbsp;|&nbsp;</li>
     
     {%- if 'technical' in pagename %} 
         {%- if hasdoc('technical/classes/classindex') %}
-        <li class="right"><a title="{{ _('All Classes') }}" href="{{ pathto('technical/classes/classindex') }}"">Class Index</a> |</li>
+        <li class="right"><a title="{{ _('All Classes') }}" href="{{ pathto('technical/classes/classindex') }}"">Classes</a> |</li>
         {%- endif %}
     {%- endif %}
     {{ super() }}
     
 {% endblock %}
 
+{% block header %}
+<!-- put something here?? -->
+{% endblock %}
 
 {%- block sidebarlogo %}
   {%- if logo %}
-  <p class="logo"><a href="{{ pathto('index') }}">
+  <p class="logo"><a href={{ pathto('contents') }}>
     <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo"/>
   </a></p>
   {%- endif %}

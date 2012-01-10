@@ -2,8 +2,6 @@ Tooth Notation
 ==============
 
 :Author: Neil Wallace (rowinggolfer AT googlemail.com)
-:Release: |release|
-:Date: |today|
    
 
 I have chosen to use the following numbering system a the core reference
