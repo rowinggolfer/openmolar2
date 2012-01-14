@@ -32,7 +32,7 @@ def run():
     '''
     main function
     '''
-    from lib_openmolar.client.qt4gui import maingui
+    from lib_openmolar.client.qt4 import maingui
     sys.exit(maingui.main())
 
 if __name__ == "__main__":

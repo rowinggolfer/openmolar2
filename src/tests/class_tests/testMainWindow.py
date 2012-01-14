@@ -26,7 +26,7 @@ lib_openmolar_path = os.path.abspath("../../")
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
-from lib_openmolar.common.widgets import BaseMainWindow
+from lib_openmolar.common.qt4.widgets import BaseMainWindow
 
 import unittest
 from PyQt4 import QtGui

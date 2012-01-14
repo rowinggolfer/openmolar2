@@ -35,14 +35,14 @@ def klass_rst(module, klass):
 
     Advisor
     -------
-    .. module:: lib_openmolar.common.widgets
+    .. module:: lib_openmolar.common.qt4.widgets
         rst from the modules docstring
-    .. autoclass:: lib_openmolar.common.widgets.Advisor
+    .. autoclass:: lib_openmolar.common.qt4.widgets.Advisor
         :members:
         :undoc-members:
         :show-inheritance:
 
-        .. automethod:: lib_openmolar.common.widgets.Advisor.__init__
+        .. automethod:: lib_openmolar.common.qt4.widgets.Advisor.__init__
 
     '''
 

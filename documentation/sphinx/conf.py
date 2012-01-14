@@ -101,7 +101,7 @@ modindex_common_prefix = ["lib_openmolar",
                           "lib_openmolar.client",
                           "lib_openmolar.common",
                           "lib_openmolar.admin",
-                          "lib_openmolar.client.qt4gui",
+                          "lib_openmolar.client.qt4",
                           "lib_openmolar.server",
                           ]
 

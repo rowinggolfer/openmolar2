@@ -30,7 +30,7 @@ from lib_openmolar.common.common_db_orm.treatment_item import TreatmentItem
 
 from lib_openmolar.client.connect import ClientConnection
 from lib_openmolar.client.db_orm.patient_model import PatientModel
-from lib_openmolar.client.qt4gui.client_widgets import ToothData
+from lib_openmolar.client.qt4.client_widgets import ToothData
 
 
 import unittest
