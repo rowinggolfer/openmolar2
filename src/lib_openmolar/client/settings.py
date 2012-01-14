@@ -27,7 +27,7 @@ from lib_openmolar.common import settings
 
 from lib_openmolar.client.classes import PluginHandler
 from lib_openmolar.client.scripts import dent_key
-from lib_openmolar.client.qt4gui.colours import colours
+from lib_openmolar.client.qt4.colours import colours
 
 from lib_openmolar.client.db_orm import TreatmentModel
 from lib_openmolar.client.db_orm.client_practitioner import Practitioners

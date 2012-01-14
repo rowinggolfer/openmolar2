@@ -30,9 +30,9 @@ from PyQt4 import QtCore, QtSql
 from lib_openmolar.common.settings import om_types
 from lib_openmolar.common import common_db_orm
 
-from lib_openmolar.client.qt4gui.client_widgets import ChartDataModel
-from lib_openmolar.client.qt4gui.client_widgets import ToothData
-from lib_openmolar.client.qt4gui.client_widgets import TreatmentTreeModel
+from lib_openmolar.client.qt4.client_widgets import ChartDataModel
+from lib_openmolar.client.qt4.client_widgets import ToothData
+from lib_openmolar.client.qt4.client_widgets import TreatmentTreeModel
 
 
 class TreatmentModel(object):
