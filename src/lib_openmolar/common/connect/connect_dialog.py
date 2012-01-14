@@ -26,7 +26,9 @@ import logging
 
 from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.dialogs import ExtendableDialog
-from lib_openmolar.common.connect.connection_data import ConnectionData
+from lib_openmolar.common.connect.connection_data import from lib_openmolar.common.qt4 import widgets
+from lib_openmolar.common.qt4 import widgets
+ConnectionData
 from lib_openmolar.common.connect.edit_known_connections \
     import ChooseConnectionWidget
 
