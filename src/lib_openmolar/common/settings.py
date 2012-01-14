@@ -193,13 +193,6 @@ class CommonSettings(object):
         return QtCore.Qt.SystemLocaleLongDate
 
     @property
-    def connections(self):
-        return self.PERSISTANT_SETTINGS.get("connections", [])
-
-    def set_connections(self, connections):
-        self.PERSISTANT_SETTINGS["connections"] = connections
-
-    @property
     def all_teeth(self):
         return self.front_teeth + self.back_teeth
 

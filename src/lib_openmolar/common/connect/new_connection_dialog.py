@@ -27,7 +27,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.abspath("../../"))
     print sys.path
 
-from lib_openmolar.common.widgets.password_lineedit import PasswordLineEdit
+from lib_openmolar.common.qt4.widgets.password_lineedit import PasswordLineEdit
 from lib_openmolar.common.dialogs import BaseDialog
 from lib_openmolar.common.connect.connection_data import ConnectionData
 

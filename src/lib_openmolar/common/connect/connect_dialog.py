@@ -20,6 +20,10 @@
 ##                                                                           ##
 ###############################################################################
 
+import ConfigParser
+import os
+import logging
+
 from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.dialogs import ExtendableDialog
 from lib_openmolar.common.connect.connection_data import ConnectionData
@@ -31,9 +35,12 @@ class ConnectDialog(ExtendableDialog):
     this dialog will invite the user to enter the parameters required to
     connect to a database
     '''
-    def __init__(self, known_connections=[], parent=None):
+
+    _known_connections = None
+
+    def __init__(self, parent=None):
         ExtendableDialog.__init__(self, parent)
-        self.known_connections = known_connections
+
         self.connection = self.default_connection
 
         self.setWindowTitle(_("Connect to Database"))
@@ -52,6 +59,31 @@ class ConnectDialog(ExtendableDialog):
 
         self.connect(self.choice_widg, QtCore.SIGNAL("connection chosen"),
             self.alternate_chosen)
+
+    @property
+    def known_connections(self):
+        '''
+        parse the allowed locations for connections.
+        '''
+        if self._known_connections is None:
+            self._known_connections = []
+            parser = ConfigParser.SafeConfigParser()
+            for root, dir_, files in os.walk(
+                "/home/neil/.openmolar2/connections-enabled"):
+                for file_ in files:
+                    logging.debug("checking %s for config"% file_)
+                    parser.readfp(open(os.path.join(root, file_)))
+
+                    conn = ConnectionData()
+                    conn.host = parser.get("CONNECTION", "host", "localhost")
+                    conn.port = parser.get("CONNECTION", "port", "5432")
+                    conn.db_name = parser.get("CONNECTION", "db_name", "port")
+                    conn.username = parser.get("CONNECTION", "user")
+                    conn.password = parser.get("CONNECTION", "password")
+
+                    self._known_connections.append(conn)
+
+        return self._known_connections
 
     @property
     def default_connection(self):
@@ -73,7 +105,7 @@ class ConnectDialog(ExtendableDialog):
             connection = ConnectionData()
             connection.demo_connection()
             connection.is_default = True
-            self.known_connections = [connection]
+            self._known_connections = [connection]
             return connection
 
     def set_label(self):

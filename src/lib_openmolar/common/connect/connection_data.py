@@ -27,13 +27,23 @@ class ConnectionData(object):
     def __init__(self, human_name="", username="", password="", host="",
     port="", db_name=""):
         self.human_name = human_name
+        'a readable (unique) name for this connection'
+
         self.username = username
+        'the username'
+
         self.password = password
+
         self.host = host
+
         self.port = port
+
         self.db_name = db_name
+
         self.is_default = False
+
         self.remember = False
+
         self.remember_pass = False
 
     def demo_connection(self):
