@@ -22,7 +22,7 @@
 
 import re
 from PyQt4 import QtCore, QtGui, QtSql, Qsci
-from lib_openmolar.common.dialogs import BaseDialog
+from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.import_export import export_csv
 from lib_openmolar.common.import_export import export_xls
 

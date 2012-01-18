@@ -24,7 +24,7 @@ import logging
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.widgets import Advisor
+from lib_openmolar.common.qt4.widgets import Advisor
 
 class LogWidget(QtGui.QFrame, Advisor):
     '''

@@ -30,8 +30,7 @@ from PyQt4 import QtSql
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.connect import DatabaseConnection, ConnectionError
-from lib_openmolar.common.settings import om_types
-from lib_openmolar.common import SETTINGS
+from lib_openmolar.common.datatypes import OMTypes, ConnectionData
 
 from lib_openmolar.admin.db_orm import *
 
@@ -132,5 +131,9 @@ if __name__ == "__main__":
     gettext.install("openmolar")
 
     app = QtGui.QApplication([])
-    sc = AdminConnection()
+
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
+
+    sc = AdminConnection(conn_data)
     sc.connect()

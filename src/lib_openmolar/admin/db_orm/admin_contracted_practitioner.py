@@ -27,7 +27,7 @@ contracted practitioner table
 from random import randint, choice
 from PyQt4 import QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 TABLENAME = "contracted_practitioners"
@@ -44,12 +44,12 @@ CONSTRAINT pk_contracted_practitioners PRIMARY KEY (ix)
 '''
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('links a patient to their regular practitioner')
 
 class DemoGenerator(object):

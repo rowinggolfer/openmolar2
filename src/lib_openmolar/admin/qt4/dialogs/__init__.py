@@ -1,5 +1,5 @@
 '''
-make classes under lib_openmolar.admin.qt4gui.dialogs easily importable
+make classes under lib_openmolar.admin.qt4.dialogs easily importable
 '''
 from populate_demo_dialog import PopulateDemoDialog
 from plain_text_dialog import PlainTextDialog

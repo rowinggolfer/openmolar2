@@ -25,8 +25,8 @@ import re
 from PyQt4 import QtCore, QtGui, QtSql
 
 
-from lib_openmolar.admin.qt4gui.classes import MyModel, MyRelationalModel
-from lib_openmolar.admin.qt4gui.dialogs.new_db_row_dialog import NewRowDialog
+from lib_openmolar.admin.qt4.classes import MyModel, MyRelationalModel
+from lib_openmolar.admin.qt4.dialogs.new_db_row_dialog import NewRowDialog
 
 
 class DatabaseTableViewer(QtGui.QWidget):

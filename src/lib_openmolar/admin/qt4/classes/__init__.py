@@ -1,5 +1,5 @@
 '''
-make classes under lib_openmolar.admin.qt4gui.classes easily importable
+make classes under lib_openmolar.admin.qt4.classes easily importable
 '''
 from query_table import SqlQueryTable
 from database_models import MyModel, MyRelationalModel

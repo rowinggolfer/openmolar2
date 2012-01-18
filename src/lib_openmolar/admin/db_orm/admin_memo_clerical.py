@@ -26,7 +26,7 @@ Provides a SchemaGenerator and DemoGenerator for clincal_memos table
 
 from PyQt4 import QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -42,12 +42,12 @@ CONSTRAINT unique_clerical_memos UNIQUE (patient_id)
 TABLENAME = "clerical_memos"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "clerical_memos", SCHEMA)
+        TableSchema.__init__(self, "clerical_memos", SCHEMA)
         self.comment = _(
 '''a 255 character field displayed prominently on the reception page''')
 

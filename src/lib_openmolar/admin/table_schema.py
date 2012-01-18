@@ -21,7 +21,8 @@
 ###############################################################################
 
 '''
-Provides base classes for the other admin orm classes
+Provides a base class TableSchema which is inherited by
+all the other admin orm classes
 '''
 import re
 
@@ -52,7 +53,7 @@ class TableSchema(object):
                 self.primary_key = key_col
 
     def __repr__(self):
-        return "Class table_schema.TableSchema - '%s' - %d columns"% (
+        return "Class TableSchema - '%s' - %d columns"% (
             self.tablename, len(self.columns))
 
     @property
@@ -74,20 +75,3 @@ class TableSchema(object):
         sql += ")"
 
         return [sql]
-
-    @property
-    def insert_query(self):
-        '''
-        often overwritten if row has a time stamp
-        '''
-        cols, vals = "", ""
-        values = []
-        for column_name in self.column_order:
-            if column_name != self.primary_key:
-                cols +=  "%s, "% column_name
-                vals += "?,"
-                values.append(self.values_dict.get([column_name]))
-        sql = 'INSERT INTO %s (%s) VALUES (%s)'% (self.tablename,
-            cols.rstrip(", "), vals.rstrip(", "))
-
-        return (sql, values)

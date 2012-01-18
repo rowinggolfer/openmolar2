@@ -20,75 +20,65 @@
 ##                                                                           ##
 ###############################################################################
 
-import re
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.dialogs import ExtendableDialog
+from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 
-class NewDatabaseDialog(ExtendableDialog):
-    def __init__(self, parent=None):
+class ManageDatabaseDialog(ExtendableDialog):
+
+    manage_users = False
+    drop_db = False
+
+    def __init__(self, dbname, parent=None):
         ExtendableDialog.__init__(self, parent)
 
-        self.setWindowTitle(_("New Database"))
+        self.dbname = dbname
+        self.setWindowTitle(u"%s %s"% (_("Manage Database"), dbname))
 
-        label = QtGui.QLabel("<b>%s %s %s</b>"% (
-        _('You are about to install a new database'),
-        _("(correctly called a 'schema')"),
-        _("onto your postgresql server")))
+        label = QtGui.QLabel("<b>%s</b>"% (
+            _('The following options can be performed.')))
         label.setWordWrap(True)
 
-        label1 = QtGui.QLabel(_("Please enter a name for this new database"))
-        label1.setWordWrap(True)
-
-        self.lineedit = QtGui.QLineEdit()
+        drop_but = QtGui.QPushButton(_("Drop (delete) this database"))
+        users_but = QtGui.QPushButton(_("Manage users for this database"))
 
         self.insertWidget(label)
-        self.insertWidget(label1)
-        self.insertWidget(self.lineedit)
+        self.insertWidget(drop_but)
+        self.insertWidget(users_but)
 
         advanced_label = QtGui.QLabel("no advanced options as yet")
 
         self.add_advanced_widget(advanced_label)
 
-        self.enableApply()
+        self.apply_but.hide()
+        #self.enableApply()
+
+        drop_but.clicked.connect(self.drop_but_clicked)
+        users_but.clicked.connect(self.users_but_clicked)
 
     def sizeHint(self):
         return QtCore.QSize(400, 400)
 
-    @property
-    def database_name(self):
-        '''
-        the name the user has enetered
-        '''
-        return unicode(self.lineedit.text()).strip(" ")
+    def drop_but_clicked(self):
+        if QtGui.QMessageBox.question(self, _("Confirm"),
+        u"%s '%s'?<br /><b>%s</b>"% (
+            _("Drop Database"),
+            self.dbname,
+        _   ("This operation cannot be undone!")),
+        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
+        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
+            self.drop_db = True
+            self.accept()
 
-    def set_database_name(self, name):
-        '''
-        set the name the user has enetered
-        '''
-        self.lineedit.setText(name)
+    def users_but_clicked(self):
+        self.manage_users = True
+        self.accept()
 
-    def exec_(self):
-        while True:
-            if ExtendableDialog.exec_(self):
-                if self.database_name == "":
-                    QtGui.QMessageBox.warning(self, _("Error"),
-                    _("Please enter a name for this new database"))
-                elif " " in self.database_name:
-                    QtGui.QMessageBox.warning(self, _("Error"),
-                    _("Database names cannot contain spaces"))
-                else:
-                    break
-            else:
-                return False
-
-        return True
+def _test():
+    app = QtGui.QApplication([])
+    dl = ManageDatabaseDialog("foo")
+    dl.exec_()
 
 if __name__ == "__main__":
     from gettext import gettext as _
-
-    app = QtGui.QApplication([])
-
-    dl = NewDatabaseDialog()
-
-    dl.exec_()
+    _test()

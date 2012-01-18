@@ -24,7 +24,7 @@
 Provides a SchemaGenerator for diary_slots which is a dummy table
 '''
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 
 from PyQt4 import QtSql, QtCore
 
@@ -41,12 +41,12 @@ length INTERVAL
 TABLENAME = "diary_slots"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for the patient table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "diary_slots", SCHEMA)
+        TableSchema.__init__(self, "diary_slots", SCHEMA)
         self.comment = _('''dummy table,
         populated via a function working on the diary table proper''')
 

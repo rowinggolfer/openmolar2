@@ -78,7 +78,7 @@ class AdminSettings(object):
                 version.VERSION, version.revision_number)
         except ImportError:
             VERSION = "Unknown"
-            log.exception("unable to parse for admin versioning")
+            LOGGER.exception("unable to parse for admin versioning")
         LOGGER.info("VERSION %s"% VERSION)
         return VERSION
 
@@ -153,6 +153,14 @@ class AdminSettings(object):
         the port specified in the config
         '''
         return int(self._server_node.getAttributeNode("port").value)
+
+    @property
+    def connections(self):
+        '''
+        TODO - populate this list!!
+        '''
+        return []
+
 
 
 def install():

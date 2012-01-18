@@ -23,8 +23,8 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.widgets.closeable_tab_widget import ClosableTabWidget
-from lib_openmolar.admin.qt4gui.classes.browser import Browser
+from lib_openmolar.common.qt4.widgets.closeable_tab_widget import ClosableTabWidget
+from lib_openmolar.admin.qt4.classes.browser import Browser
 
 class AdminTabWidget(ClosableTabWidget):
     '''

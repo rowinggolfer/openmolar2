@@ -22,7 +22,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.dialogs import ExtendableDialog
+from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 
 from demo_progress_dialog import DemoProgressDialog, DialogThread
 

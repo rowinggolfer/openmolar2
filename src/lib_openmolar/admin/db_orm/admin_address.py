@@ -26,7 +26,7 @@ This module provides the Address Class
 
 from random import randint
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 TABLENAME = "addresses"
@@ -80,12 +80,12 @@ def random_addy():
     return (addr1.upper(), addr2.upper(), city.upper(), pcde.upper())
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "addresses", SCHEMA)
+        TableSchema.__init__(self, "addresses", SCHEMA)
         self.comment = _(
 '''storage for ALL addresses in the database,
 for patients, clinicians, suppliers etc...''')

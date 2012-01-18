@@ -26,7 +26,7 @@ Provides a SchemaGenerator and DemoGenerator for the address_link table
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -44,12 +44,12 @@ CONSTRAINT pk_address_link PRIMARY KEY (ix)
 TABLENAME = "address_link"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "address_link", SCHEMA)
+        TableSchema.__init__(self, "address_link", SCHEMA)
         self.comment = _(
 '''links the unique id of an address to the unique id of a patient,
 along with some other information (home, work etc..)

@@ -22,7 +22,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.dialogs import BaseDialog
+from lib_openmolar.common.qt4.dialogs import BaseDialog
 
 class DefaultLineEdit(QtGui.QWidget):
     def __init__(self, parent=None):
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     app = QtGui.QApplication([])
 
     from lib_openmolar.admin.connect import AdminConnection
-    from lib_openmolar.admin.qt4gui.classes import MyModel
+    from lib_openmolar.admin.qt4.classes import MyModel
     sc = AdminConnection()
     sc.connect()
 

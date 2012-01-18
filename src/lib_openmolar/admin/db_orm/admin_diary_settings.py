@@ -27,7 +27,7 @@ which stores calendar start dates and limits for each practice
 
 from PyQt4 import QtCore, QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -43,12 +43,12 @@ CONSTRAINT ck_diary_limits CHECK (book_start<last_day and last_day<=book_end)
 TABLENAME = "diary_settings"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "diary_settings", SCHEMA)
+        TableSchema.__init__(self, "diary_settings", SCHEMA)
         self.comment = _('diary settings')
 
 class DemoGenerator(object):

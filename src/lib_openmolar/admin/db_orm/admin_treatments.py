@@ -24,7 +24,7 @@
 This module provides Demo sql queries for the treatments table
 '''
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 
@@ -48,12 +48,12 @@ CONSTRAINT completed_treatment_rule2 CHECK (NOT completed or tx_date is NOT NULL
 TABLENAME = "treatments"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''base table for treatments planned or completed''')
 
 class DemoGenerator(object):

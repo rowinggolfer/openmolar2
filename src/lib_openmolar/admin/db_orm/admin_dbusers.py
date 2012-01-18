@@ -25,7 +25,7 @@ This module provides the Demo User Queries
 '''
 
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -40,12 +40,12 @@ CONSTRAINT unique_dbuser UNIQUE (username)
 TABLENAME = "dbusers"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''data on who is allowed to access the database.''')
 
 

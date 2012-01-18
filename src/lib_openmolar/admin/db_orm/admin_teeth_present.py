@@ -29,7 +29,7 @@ data on which teeth are present in the patients mouth
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -43,12 +43,12 @@ CONSTRAINT pk_teeth_present PRIMARY KEY (ix)
 
 TABLENAME = "teeth_present"
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database):

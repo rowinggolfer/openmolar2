@@ -24,7 +24,7 @@
 Provides a SchemaGenerator and DemoGenerator for the patients diary
 '''
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 from PyQt4 import QtSql, QtCore
@@ -51,12 +51,12 @@ CONSTRAINT ck_diary_periods CHECK (
 TABLENAME = "diary_patients"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for the patient table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''storage for patients appointments''')
 
 class DemoGenerator(object):

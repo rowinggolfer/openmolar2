@@ -25,7 +25,7 @@ Provides schema and insert queries for the practitioner table
 information about the practitioners (dentists hygienists etc..)
 '''
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -43,12 +43,12 @@ CONSTRAINT pk_practitioners PRIMARY KEY (ix)
 TABLENAME = "practitioners"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, "practitioners", SCHEMA)
+        TableSchema.__init__(self, "practitioners", SCHEMA)
         self.comment = _('''data on known practitioners.''')
 
 

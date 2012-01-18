@@ -25,7 +25,7 @@ This module provides Demo sql queries for the practice table
 '''
 from random import randint
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -43,12 +43,12 @@ CONSTRAINT pk_practices PRIMARY KEY (ix)
 '''
 
 TABLENAME = "practices"
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''data on all known clinics''')
 
 class DemoGenerator(object):

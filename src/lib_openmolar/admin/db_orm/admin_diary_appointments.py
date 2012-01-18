@@ -25,7 +25,7 @@ Provides a SchemaGenerator and DemoGenerator for the diary
 '''
 from random import randint
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 
@@ -52,12 +52,12 @@ CONSTRAINT pk_diary_appointments UNIQUE (ix)
 TABLENAME = "diary_appointments"
 
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for the patient table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''storage for clinical notes.''')
 
 class DemoGenerator(object):

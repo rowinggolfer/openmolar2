@@ -21,7 +21,7 @@
 ###############################################################################
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.admin.qt4gui.classes import LogWidget
+from lib_openmolar.admin.qt4.classes import LogWidget
 
 class PlainTextDialog(QtGui.QDialog):
     '''

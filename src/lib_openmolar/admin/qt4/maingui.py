@@ -21,7 +21,6 @@
 ###############################################################################
 
 import datetime
-import cPickle
 import logging
 import re
 import sys
@@ -41,14 +40,14 @@ from lib_openmolar.common.connect import (
 
 from lib_openmolar.admin import qrc_resources
 
-from lib_openmolar.common.widgets import (
+from lib_openmolar.common.qt4.widgets import (
     RestorableApplication,
     Advisor,
     BaseMainWindow,
     Preference,
     PreferencesDialog)
 
-from lib_openmolar.common.dialogs import (
+from lib_openmolar.common.qt4.dialogs import (
     NewUserPasswordDialog, UserPasswordDialog)
 
 from lib_openmolar.admin.connect import AdminConnection
@@ -56,14 +55,14 @@ from lib_openmolar.admin.connect import AdminConnection
 from lib_openmolar.admin.db_tools.proxy_manager import (
     ProxyManager, PermissionError)
 
-from lib_openmolar.admin.qt4gui.dialogs import *
+from lib_openmolar.admin.qt4.dialogs import *
 
-from lib_openmolar.admin.qt4gui.classes import (
+from lib_openmolar.admin.qt4.classes import (
     SqlQueryTable,
     AdminTabWidget,
     LogWidget)
 
-from lib_openmolar.admin.qt4gui.classes.database_table import (
+from lib_openmolar.admin.qt4.classes.database_table import (
     DatabaseTableViewer,
     RelationalDatabaseTableViewer)
 
@@ -317,32 +316,18 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         catches signal when user hits the connect action
         '''
         LOGGER.debug("%s.choose_connection called"% __file__)
-        connections = SETTINGS.connections
-        dl = ConnectDialog(connections, self)
+        dl = ConnectDialog(self)
         while True:
             if not dl.exec_():
                 return
             self.end_pg_session()
-            connection = dl.chosen_connection
+            conn_data = dl.chosen_connection
 
-            self.connection = AdminConnection(
-                    host = connection.host,
-                    user = connection.username,
-                    passwd = connection.password,
-                    port = connection.port,
-                    db_name = connection.db_name)
+            self.connection = AdminConnection(conn_data)
 
-            if connection.password == "":
-                pass_used = "NO"
-            else:
-                pass_used = "*" * len(connection.password)
+            LOGGER.info(u"%s '%s'"% (
+            _("Attempting connection using data"), conn_data))
 
-            LOGGER.info(u"%s '%s' %s %s %s %s %s %s"% (
-            _("Attempting connection as"), connection.username,
-            _("to the host"), connection.host, _("port"), connection.port,
-            _("Using password"), pass_used))
-
-            SETTINGS.set_connections(dl.known_connections)
             self.start_pg_session()
 
             if self.connection.isOpen():
@@ -596,12 +581,14 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
 
         #python dict of settings
         dict_ = str(qsettings.value("settings_dict").toString())
+        pdict = {}
         if dict_:
             try:
-                AD_SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
+                pdict = pickle.loads(dict_)
             except Exception as e:
                 LOGGER.exception(
                     "exception caught loading python settings...")
+        AD_SETTINGS.PERSISTANT_SETTINGS = pdict
 
     def saveSettings(self):
         BaseMainWindow.saveSettings(self)
@@ -610,7 +597,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         # AD_SETTINGS.PERSISTANT_SETTINGS is a python dict of non qt-specific settings.
         # unfortunately.. QVariant.toPyObject can't recreate a dictionary
         # so best to pickle this
-        pickled_dict = cPickle.dumps(AD_SETTINGS.PERSISTANT_SETTINGS)
+        pickled_dict = pickle.dumps(AD_SETTINGS.PERSISTANT_SETTINGS)
         qsettings.setValue("settings_dict", pickled_dict)
 
     def show_about(self):
@@ -638,16 +625,20 @@ _("Version"), AD_SETTINGS.VERSION,
             dl = self._preferences_dialog = PreferencesDialog(self)
 
             connections_pref = Preference(_("Database Connections"))
-            dl.cp_widg = ConnectionsPreferenceWidget(
-                SETTINGS.connections, self)
+            dl.cp_widg = ConnectionsPreferenceWidget(self)
             connections_pref.setWidget(dl.cp_widg)
             dl.insert_preference_dialog(0, connections_pref)
 
         return self._preferences_dialog
 
     def show_preferences_dialog(self):
+        '''
+        user wishes to launch the preferences dialog
+        '''
         self.preferences_dialog.exec_()
-        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
+
+        ##TODO remove deprecated code
+        #SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def switch_server_user(self):
         '''

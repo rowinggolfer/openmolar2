@@ -26,7 +26,7 @@ Provides a SchemaGenerator and DemoGenerator for the Staff table
 
 from PyQt4 import QtCore
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 SCHEMA = '''
@@ -54,12 +54,12 @@ CONSTRAINT unique_abbrv_name UNIQUE (abbrv_name)
 
 TABLENAME = "users"
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
         self.comment = _('''users of the system''')
 
 class DemoGenerator(object):

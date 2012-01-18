@@ -25,7 +25,7 @@ Provides a SchemaGenerator and DemoGenerator for procedure_codes table
 '''
 from PyQt4 import QtCore, QtSql
 
-from lib_openmolar.admin import table_schema
+from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common import common_db_orm
 
 
@@ -44,9 +44,9 @@ CONSTRAINT unique_procedure_codes UNIQUE (code)
 
 TABLENAME = "procedure_codes"
 
-class SchemaGenerator(table_schema.TableSchema):
+class SchemaGenerator(TableSchema):
     '''
     A custom object which lays out the schema for this table.
     '''
     def __init__(self):
-        table_schema.TableSchema.__init__(self, TABLENAME, SCHEMA)
+        TableSchema.__init__(self, TABLENAME, SCHEMA)
