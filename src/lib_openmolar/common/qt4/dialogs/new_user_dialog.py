@@ -21,7 +21,7 @@
 ###############################################################################
 
 from PyQt4 import QtCore, QtGui
-from lib_openmolar.common.dialogs import BaseDialog
+from lib_openmolar.common.qt4.dialogs import BaseDialog
 
 class NewUserPasswordDialog(BaseDialog):
     '''

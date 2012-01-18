@@ -27,8 +27,9 @@ DatabaseConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 '''
 import logging
 
-from PyQt4 import QtSql
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtSql, QtGui, QtCore
+
+from lib_openmolar.common.datatypes import ConnectionData
 
 class ConnectionError(Exception):
     '''
@@ -44,27 +45,30 @@ class DatabaseConnection(QtSql.QSqlDatabase):
     Will Raise a Connection error if connection has not been established
     within 10 seconds
     '''
-    def __init__(self, host="127.0.0.1", user="om_demo", passwd="password",
-    db_name="openmolar_demo", port=5432, options="requiressl=1",
-    connect_timeout=10):
-        super(DatabaseConnection, self).__init__("QPSQL")
-        self.setHostName(host)
-        self.setPort(port)
-        self.setConnectOptions(options)
-        self.setUserName(user)
-        self.setPassword(passwd)
-        self.setDatabaseName(db_name)
+    def __init__(self, connection_data):
+        #connect_timeout=10):
+        assert type(connection_data) == ConnectionData, (
+            "argument for database connection MUST be of type ConnectionData")
+
+        QtSql.QSqlDatabase.__init__(self, "QPSQL")
+        self.setHostName(connection_data.host)
+        self.setPort(connection_data.port)
+        if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
+            self.setConnectOptions("requiressl=1")
+        self.setUserName(connection_data.user)
+        self.setPassword(connection_data.password)
+        self.setDatabaseName(connection_data.db_name)
 
         self.driver().notification.connect(self.notification_received)
 
     def from_connection_data(self, cd):
         '''
-        load the connection from a connection_data object
+        load the connection from a :doc:`ConnectionData` object
         '''
-        logging.debug("loading connection params from connection data object")
+        logging.debug("loading connection params from ConnectionData object")
         self.setHostName(cd.host)
         self.setPort(cd.port)
-        self.setUserName(cd.username)
+        self.setUserName(cd.user)
         self.setPassword(cd.password)
         self.setDatabaseName(cd.db_name)
 
@@ -126,7 +130,8 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         the query is simple
         NOTIFY new_appointment_made
         '''
-        print "re-implement DatabaseConnection.subscribeToNotifications"
+        logging.info("classes inheriting from DatabaseConnection should "
+        "re-implement function subscribeToNotifications")
         #self.driver().subscribeToNotification("new_appointment_made")
 
     def notification_received(self, notification):
@@ -135,7 +140,8 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         that we are subscribed to.
         we emit a qt signal, that should be connected by any application.
         '''
-        print "db notification received by base class '%s'"% notification
+        logging.info("db notification received '%s'"% notification)
+
         QtGui.QApplication.instance().emit(
             QtCore.SIGNAL("db notification"), notification)
 
@@ -145,12 +151,14 @@ class DatabaseConnection(QtSql.QSqlDatabase):
             print "error", q_query.lastError().text()
 
 
-if __name__ == "__main__":
+def _test():
     logging.basicConfig(level=logging.DEBUG)
 
     app = QtGui.QApplication([])
     parent = QtGui.QWidget()
-    db = DatabaseConnection()
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
+    db = DatabaseConnection(conn_data)
     logging.debug(db)
     message =  '<body>'
     try:
@@ -166,3 +174,6 @@ if __name__ == "__main__":
     QtGui.QMessageBox.information(parent, "result", message)
 
     app.closeAllWindows()
+
+if __name__ == "__main__":
+    _test()

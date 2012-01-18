@@ -30,7 +30,7 @@ import types
 
 from PyQt4 import QtSql, QtCore
 
-from lib_openmolar.common.classes import proc_codes
+from lib_openmolar.common.datatypes import proc_codes
 from insertable_record import InsertableRecord
 
 PROCEDURE_CODES = proc_codes.ProcedureCodesInstance()
@@ -367,7 +367,7 @@ left join treatment_fills  on treatment_fills.tooth_tx_id = treatment_teeth.ix
 left join treatment_crowns on treatment_crowns.tooth_tx_id = treatment_teeth.ix
 where treatment_teeth.treatment_id = ?
 '''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(self.id)
         q_query.exec_()

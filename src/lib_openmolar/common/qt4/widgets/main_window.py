@@ -29,7 +29,7 @@ import sys
 import traceback
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common.widgets import (  Advisor,
+from lib_openmolar.common.qt4.widgets import (  Advisor,
                                             DockAwareToolBar,
                                             DockableMenuBar  )
 

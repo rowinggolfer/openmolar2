@@ -28,8 +28,8 @@ if __name__ == "__main__":
     print sys.path
 
 from lib_openmolar.common.qt4.widgets.password_lineedit import PasswordLineEdit
-from lib_openmolar.common.dialogs import BaseDialog
-from lib_openmolar.common.connect.connection_data import ConnectionData
+from lib_openmolar.common.qt4.dialogs import BaseDialog
+from lib_openmolar.common.datatypes import ConnectionData
 
 class NewConnectionDialog(BaseDialog):
     '''

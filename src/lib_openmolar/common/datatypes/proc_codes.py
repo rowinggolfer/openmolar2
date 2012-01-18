@@ -34,7 +34,7 @@ specific tooth on a specific patient.
 from xml.dom import minidom
 import re
 
-from lib_openmolar.common import qrc_resources
+from lib_openmolar.common.qt4 import qrc_resources
 from PyQt4 import QtCore
 from proc_code import ProcCode
 

@@ -43,8 +43,8 @@ class BaseDialog(QtGui.QDialog):
         self.button_box.setCenterButtons(True)
 
         self.layout = QtGui.QVBoxLayout(self)
-        self.connect(self.button_box,
-            QtCore.SIGNAL(" clicked (QAbstractButton *)"), self.clicked)
+        
+        self.button_box.clicked.connect(self._clicked)
 
         self.check_before_reject_if_dirty = False
         self.dirty = False
@@ -60,13 +60,20 @@ class BaseDialog(QtGui.QDialog):
             self.remove_spacer()
 
     def sizeHint(self):
+        '''
+        Overwrite this function inherited from QWidget
+        '''
         return self.minimumSizeHint()
 
     def minimumSizeHint(self):
-        return QtCore.QSize(200, 300)
+        '''
+        Overwrite this function inherited from QWidget
+        '''
+        return QtCore.QSize(300, 300)
 
     def remove_spacer(self):
         '''
+        If this is called, then the spacer added at init is removed.
         sometimes the spacer mucks up dialogs
         '''
         self.layout.removeItem(self.spacer)
@@ -94,11 +101,17 @@ class BaseDialog(QtGui.QDialog):
         self.cancel_but.setText(text)
 
     def insertWidget(self, widg):
+        '''
+        insert widget at the bottom of the layout
+        '''
         count = self.layout.count()
         insertpoint = count - self.insertpoint_offset
         self.layout.insertWidget(insertpoint, widg)
 
-    def clicked(self, but):
+    def _clicked(self, but):
+        '''
+        "private" function called when button box is clicked
+        '''
         role = self.button_box.buttonRole(but)
         if role == QtGui.QDialogButtonBox.ApplyRole:
             self.accept()
@@ -112,6 +125,9 @@ class BaseDialog(QtGui.QDialog):
                 self.reject()
 
     def enableApply(self, enable=True):
+        '''
+        call this to enable the apply button (which is disabled by default)
+        '''
         self.apply_but.setEnabled(enable)
 
 if __name__ == "__main__":

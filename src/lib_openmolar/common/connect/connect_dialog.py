@@ -20,15 +20,13 @@
 ##                                                                           ##
 ###############################################################################
 
-import ConfigParser
 import os
 import logging
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common.dialogs import ExtendableDialog
-from lib_openmolar.common.connect.connection_data import from lib_openmolar.common.qt4 import widgets
+from lib_openmolar.common.datatypes import ConnectionData
 from lib_openmolar.common.qt4 import widgets
-ConnectionData
+from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 from lib_openmolar.common.connect.edit_known_connections \
     import ChooseConnectionWidget
 
@@ -43,13 +41,11 @@ class ConnectDialog(ExtendableDialog):
     def __init__(self, parent=None):
         ExtendableDialog.__init__(self, parent)
 
-        self.connection = self.default_connection
-
         self.setWindowTitle(_("Connect to Database"))
 
         self.enableApply()
 
-        self.choice_widg = ChooseConnectionWidget(self.known_connections, self)
+        self.choice_widg = ChooseConnectionWidget(self)
 
         self.add_advanced_widget(self.choice_widg)
 
@@ -69,34 +65,25 @@ class ConnectDialog(ExtendableDialog):
         '''
         if self._known_connections is None:
             self._known_connections = []
-            parser = ConfigParser.SafeConfigParser()
-            for root, dir_, files in os.walk(
-                "/home/neil/.openmolar2/connections-enabled"):
-                for file_ in files:
-                    logging.debug("checking %s for config"% file_)
-                    parser.readfp(open(os.path.join(root, file_)))
+            try:
+                for root, dir_, files in os.walk(
+                    "/home/neil/.openmolar2/connections-enabled"):
+                    for file_ in files:
+                        filepath = os.path.join(root, file_)
+                        logging.debug("checking %s for config"% filepath)
 
-                    conn = ConnectionData()
-                    conn.host = parser.get("CONNECTION", "host", "localhost")
-                    conn.port = parser.get("CONNECTION", "port", "5432")
-                    conn.db_name = parser.get("CONNECTION", "db_name", "port")
-                    conn.username = parser.get("CONNECTION", "user")
-                    conn.password = parser.get("CONNECTION", "password")
+                        conn_data = ConnectionData()
+                        conn_data.from_conf_file(filepath)
 
-                    self._known_connections.append(conn)
+                        self._known_connections.append(conn_data)
+            except Exception:
+                logging.exception("error getting known_connections")
 
         return self._known_connections
 
     @property
-    def default_connection(self):
+    def connection(self):
         if self.known_connections:
-            default_found = False
-            for connection in self.known_connections:
-                if connection.is_default:
-                    default_found = True
-                    break
-            if default_found:
-                return connection
             return self.known_connections[0]
         else:
             QtGui.QMessageBox.information(self.parent(), _("information"),
@@ -104,11 +91,10 @@ class ConnectDialog(ExtendableDialog):
             _('NO PREVIOUS database details found'),
             _('will default to the demo database on localhost.')))
 
-            connection = ConnectionData()
-            connection.demo_connection()
-            connection.is_default = True
-            self._known_connections = [connection]
-            return connection
+            conn_data = ConnectionData()
+            conn_data.demo_connection()
+            self._known_connections = [conn_data]
+            return conn_data
 
     def set_label(self):
         header = _('Connect to this database?')
@@ -120,10 +106,10 @@ class ConnectDialog(ExtendableDialog):
         <li>user - <b>%s</b></li>
         <li>use password - <b>%s</b></li>
         <li>database - <b>%s</b></li></ul>'''% (header,
-            self.connection.human_name,
+            self.connection.brief_name,
             self.connection.host,
             self.connection.port,
-            self.connection.username,
+            self.connection.user,
             _("YES") if self.connection.password !="" else _("NO"),
             self.connection.db_name)
 

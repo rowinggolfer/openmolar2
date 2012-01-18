@@ -21,51 +21,56 @@
 ###############################################################################
 
 from PyQt4 import QtCore, QtGui
-from lib_openmolar.common.dialogs import BaseDialog
+from lib_openmolar.common.qt4.dialogs import BaseDialog
 
-class ExtendableDialog(BaseDialog):
+class UserPasswordDialog(BaseDialog):
     '''
-    builds on BaseDialog, adding an area for advanced options
-    unlike BaseDialog.. this dialog has no spacer item by default
+    a dialog which gets a username and password
     '''
-    def __init__(self, parent=None, remove_stretch=True):
-        BaseDialog.__init__(self, parent, remove_stretch)
+    def __init__(self, parent=None):
+        BaseDialog.__init__(self, parent)
+        self.setWindowTitle(_("Input Required"))
+        frame = QtGui.QFrame()
+        form = QtGui.QFormLayout(frame)
+        self.name_lineEdit = QtGui.QLineEdit()
+        self.pass_lineEdit = QtGui.QLineEdit()
 
-        self.button_box.setCenterButtons(False)
+        self.name_lineEdit.setMaxLength(30)
+        self.pass_lineEdit.setMaxLength(30)
 
-        icon = QtGui.QIcon.fromTheme("go-down")
-        #: a pointer to the Advanced button
-        self.more_but = QtGui.QPushButton(icon, "&Advanced")
-        self.more_but.setFlat(True)
+        self.pass_lineEdit.setEchoMode(QtGui.QLineEdit.Password)
 
-        self.more_but.setCheckable(True)
-        self.more_but.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.button_box.addButton(self.more_but, self.button_box.HelpRole)
+        form.addRow(_("Name"),self.name_lineEdit)
+        form.addRow(_("Password"),self.pass_lineEdit)
 
-        self.setOrientation(QtCore.Qt.Vertical)
+        self.insertWidget(frame)
 
-        frame = QtGui.QFrame(self)
-        layout = QtGui.QVBoxLayout(frame)
-        self.setExtension(frame)
+        self.name_lineEdit.cursorPositionChanged.connect(self._check)
 
-    def set_advanced_but_text(self, txt):
-        self.more_but.setText(txt)
+    def sizeHint(self):
+        return QtCore.QSize(300,150)
 
-    def clicked(self, but):
-        if but == self.more_but:
-            self.showExtension(but.isChecked())
-            return
-        BaseDialog.clicked(self, but)
+    def _check(self):
+        self.enableApply(self.name_lineEdit.text() != "")
 
-    def add_advanced_widget(self, widg):
-        self.extension().layout().addWidget(widg)
+    def set_name(self, name):
+        self.name_lineEdit.setText(name)
+        self._check()
+
+    @property
+    def name(self):
+        return unicode(self.name_lineEdit.text())
+
+    @property
+    def password(self):
+        return unicode(self.pass_lineEdit.text())
+
 
 if __name__ == "__main__":
+    import gettext
+    gettext.install("openmolar")
     app = QtGui.QApplication([])
-    dl = ExtendableDialog()
-    label = QtGui.QLabel("Test")
-    dl.insertWidget(label)
-    cb = QtGui.QCheckBox("advanced option")
-    dl.add_advanced_widget(cb)
-    dl.exec_()
+    dl = UserPasswordDialog()
+    if dl.exec_():
+        print dl.name, dl.password
     app.closeAllWindows()

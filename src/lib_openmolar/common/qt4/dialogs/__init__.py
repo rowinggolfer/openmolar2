@@ -1,5 +1,5 @@
 '''
-make classes under lib_openmolar.common.dialogs easily importable
+make classes under lib_openmolar.common.qt4.dialogs easily importable
 '''
 
 from base_dialog import BaseDialog

@@ -33,8 +33,7 @@ gettext.install("openmolar")
 
 import re
 
-from lib_openmolar.common import classes
-from lib_openmolar.common.common_db_orm import om_types
+from lib_openmolar.common.datatypes import *
 
 from PyQt4 import QtCore
 
@@ -129,7 +128,7 @@ class CommonSettings(object):
     def __init__(self):
 
         #: a pointer to the instance of :doc:`OMTypes`
-        self.OM_TYPES = om_types.OMTypes()
+        self.OM_TYPES = OMTypes()
 
         #initiate some placeholders
         self._proc_codes = None
@@ -211,7 +210,7 @@ class CommonSettings(object):
         load only when required
         '''
         if self._proc_codes == None:
-            self._proc_codes = classes.ProcedureCodesInstance()
+            self._proc_codes = ProcedureCodesInstance()
         return self._proc_codes
 
     @property
