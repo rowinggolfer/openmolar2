@@ -128,7 +128,7 @@ def get_modules(folder):
                 mod = __import__(module)
                 yield mod 
 
-def write_index(index_files):
+def write_index(rst_files):
     '''
     Args:
         index_files (list of strings)
@@ -136,23 +136,63 @@ def write_index(index_files):
     writes index.rst in the OUTDIR
     '''
 
-    toc_text = "\n\n"
-
-    start_char = ""
-
     f = open(os.path.join(KLASS_OUTDIR, "classindex.rst"), "w")
-    f.write("Class Index\n")
-    f.write("===========\n\n")
+    f.write('''Classes
+=======
+
+..note :: 
+    Openmolar is almost entirely Object orientated, and so it makes sense to
+    structure this documentation by classes, not modules.
+
+If you are looking for a full list of classes in alphabetical order::
+    - :doc:`all_classes`
+
+Otherwise, for the sake of readability of the documentation, classes are gathered into packages::
+    - Common 
+    - Client 
+    - Admin  
+    - Server
+    
+.. toctree::
+    :maxdepth: 2
+
+    common_classes
+    client_classes
+    admin_classes
+    server_classes\n\n''')
+    f.close()
+    
+    f = open(os.path.join(KLASS_OUTDIR, "all_classes.rst"), "w")
+    f.write("Complete Class Index\n")
+    f.write("====================\n\n")
     f.write(".. toctree::\n")
     f.write("    :maxdepth: 1\n\n")
 
-    for index in sorted(index_files):
-        if index[0] != start_char:
-            start_char = index[0]
+    start_char = ""
+    
+    for rst_file, module in sorted(rst_files):
+        link = "    classes/%s\n"% rst_file
+        if rst_file[0] != start_char:
+            start_char = rst_file[0]
             f.write("\n")
-        f.write("    classes/%s\n"%index)
-
+            
+        f.write(link)
     f.close()
+    
+    for package in ["admin", "common", "client", "server"]:
+        f = open(os.path.join(KLASS_OUTDIR, "%s_classes.rst"% package), "w")
+        header = "%s%s Classes"% (package[0].upper(), package[1:]) 
+        f.write("%s\n"% header)
+        f.write("%s\n\n"% ("="*len(header)))
+        f.write(".. toctree::\n")
+        f.write("    :maxdepth: 1\n\n")
+        
+        for rst_file, module in sorted(rst_files):
+            if "lib_openmolar/%s"% package in module:
+                link = "    classes/%s\n"% rst_file
+                f.write(link)
+            
+        f.close()
 
 def main():
     '''
@@ -178,7 +218,7 @@ def main():
             f.write(klass_rst(mod, klass))
             f.close()
 
-            index_files.append(klass + ".rst")
+            index_files.append((klass + ".rst", mod.__file__))
 
     print "%d Classes found %d WARNINGS"% (klass_no, warnings)
     write_index(index_files)

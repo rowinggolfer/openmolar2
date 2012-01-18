@@ -1,3 +1,10 @@
+openmolar-common (2.0.1+hg003~0) unstable; urgency=low
+
+  * some folder re-organisationing
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 14 Jan 2012 20:59:38 +0000
+
+
 openmolar-common (2.0.1+hg000~1) unstable; urgency=low
 
   * new version method

@@ -1,6 +1,4 @@
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
-:Release: |release|
-:Date: |today|
+:Author: Neil Wallace (neil@openmolar.com)
 
 This class is how I get openmolar to give notifications to the user.
 

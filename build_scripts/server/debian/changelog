@@ -1,5 +1,12 @@
 openmolar-server (2.0.1+hg006~0) unstable; urgency=low
 
+  * rebuild after refactoring
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 14 Jan 2012 21:03:38 +0000
+
+
+openmolar-server (2.0.1+hg006~0) unstable; urgency=low
+
   * bugfix - misnamed a function call. Also postgres port specified in server.conf is used.
 
  -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 09 Jan 2012 02:14:32 +0000
