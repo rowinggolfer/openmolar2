@@ -31,7 +31,7 @@ TABLENAME = "static_fills"
 
 class FillRecord(common_db_orm.InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database, TABLENAME)
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn, TABLENAME)
 
     @property
     def tooth_id(self):
@@ -64,7 +64,7 @@ class StaticFillsDB(object):
         query = '''select tooth, surfaces, material, comment
         from %s where patient_id=?'''% TABLENAME
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()
@@ -108,7 +108,7 @@ class StaticFillsDB(object):
             if not record in self._orig_record_list:
                 query, values = record.insert_query
 
-                q_query = QtSql.QSqlQuery(SETTINGS.database)
+                q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
                 q_query.prepare(query)
                 for value in values:
                     q_query.addBindValue(value)
@@ -116,7 +116,7 @@ class StaticFillsDB(object):
                     self._orig_record_list.append(record)
                 else:
                     print q_query.lastError().text()
-                    SETTINGS.database.emit_caught_error(q_query.lastError())
+                    SETTINGS.psql_conn.emit_caught_error(q_query.lastError())
 
 
     def add_filling_records(self, fill_list):

@@ -185,7 +185,7 @@ class Practitioners(object):
         qualifications, type, abbrv_name, svg_data, status
         from view_practitioners order by display_order, last_name'''
 
-        q_query = QtSql.QSqlQuery(query, SETTINGS.database)
+        q_query = QtSql.QSqlQuery(query, SETTINGS.psql_conn)
         while q_query.next():
             record = q_query.record()
             practitioner = PractitionerObject(record)

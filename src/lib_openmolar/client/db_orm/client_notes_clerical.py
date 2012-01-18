@@ -43,7 +43,7 @@ class NotesClericalDB(object):
         if self._new_note is None:
             print "creating clerical new note with authors %s and %s"% (
                 SETTINGS.user1, SETTINGS.user2)
-            self._new_note = InsertableRecord(SETTINGS.database, TABLENAME)
+            self._new_note = InsertableRecord(SETTINGS.psql_conn, TABLENAME)
             self._new_note.is_clinical = True
             self._new_note.setValue("open_time", QtCore.QDateTime.currentDateTime())
 
@@ -79,7 +79,7 @@ class NotesClericalDB(object):
 
         query = '''SELECT * from notes_clerical WHERE patient_id = ?
         ORDER BY open_time'''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(self.patient_id)
         q_query.exec_()

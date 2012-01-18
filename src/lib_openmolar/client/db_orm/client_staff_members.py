@@ -92,7 +92,7 @@ class StaffMembers(list):
         role, abbrv_name, svg_data
         from staff left join avatars on avatar_id = avatars.ix'''
 
-        q_query = QtSql.QSqlQuery(query, SETTINGS.database)
+        q_query = QtSql.QSqlQuery(query, SETTINGS.psql_conn)
         while q_query.next():
             record = q_query.record()
             practitioner = StaffObject(record)

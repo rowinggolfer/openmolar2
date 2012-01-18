@@ -39,7 +39,7 @@ class ClientConnection(DatabaseConnection):
 
     def __init__(self, *args):
         super(ClientConnection, self).__init__(*args)
-        SETTINGS.database = self
+        SETTINGS.psql_conn = self
 
     @property
     def blank_address_record(self):

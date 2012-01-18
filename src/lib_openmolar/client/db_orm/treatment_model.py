@@ -27,7 +27,7 @@ Provides the TreatmentModel Class
 import logging
 from PyQt4 import QtCore, QtSql
 
-from lib_openmolar.common.settings import om_types
+from lib_openmolar.common.datatypes import OMType
 from lib_openmolar.common import common_db_orm
 
 from lib_openmolar.client.qt4.client_widgets import ChartDataModel
@@ -89,7 +89,7 @@ from treatments
 left join procedure_codes on procedure_codes.code = treatments.om_code
 where patient_id = ?'''
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(self.patient_id)
         q_query.exec_()
@@ -248,7 +248,7 @@ where patient_id = ?'''
         '''
         Commit the item to the database
         '''
-        return item.commit_to_db(SETTINGS.database)
+        return item.commit_to_db(SETTINGS.psql_conn)
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)

@@ -27,7 +27,7 @@ This module provides the PatientDB Class
 
 from PyQt4 import QtCore, QtSql
 
-from lib_openmolar.common.common_db_orm.editable_field import EditableField
+from lib_openmolar.common.datatypes import EditableField
 
 from lib_openmolar.common import common_db_orm
 
@@ -102,7 +102,7 @@ class PatientDB(QtSql.QSqlRecord):
         self.patient_id = patient_id
 
         query = 'SELECT * from %s WHERE ix = ?'% TABLENAME
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()
@@ -131,7 +131,7 @@ class PatientDB(QtSql.QSqlRecord):
 
         changes = changes.rstrip(",")
         query = "UPDATE %s set %s WHERE ix=?"% (TABLENAME, changes)
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         for value in values+[self.patient_id]:
             q_query.addBindValue(value)
@@ -140,7 +140,7 @@ class PatientDB(QtSql.QSqlRecord):
             return True
         else:
             print q_query.lastError().text()
-            SETTINGS.database.emit_caught_error(q_query.lastError())
+            SETTINGS.psql_conn.emit_caught_error(q_query.lastError())
 
     @property
     def full_name(self):
@@ -252,7 +252,7 @@ class PatientDB(QtSql.QSqlRecord):
 
 class NewPatientDB(PatientDB, common_db_orm.InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database,
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn,
             TABLENAME)
         self.patient_id = None
         self.orig = None

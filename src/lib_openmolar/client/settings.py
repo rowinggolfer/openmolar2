@@ -73,7 +73,7 @@ class Settings(settings.CommonSettings, PluginHandler):
         self.user2 = None
 
         #: a pointer to the :doc:`ClientConnection` in use
-        self.database = None
+        self.psql_conn = None
 
         #: an enumeration of chart styles
         self.chart_styles = (
@@ -284,6 +284,13 @@ class Settings(settings.CommonSettings, PluginHandler):
         a pointer to the currently loaded patient
         '''
         return self._current_patient
+
+    @property
+    def connections(self):
+        '''
+        TODO - populate this list!!
+        '''
+        return []
 
 def install():
     '''

@@ -33,14 +33,14 @@ TABLENAME = "teeth_present"
 
 class TeethPresentDB(common_db_orm.InsertableRecord):
     def __init__(self, patient_id):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database,
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn,
             TABLENAME)
 
         #:
         self.patient_id = patient_id
         query = '''SELECT * from %s WHERE patient_id = ?
         order by ix desc limit 1'''% TABLENAME
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()
@@ -62,7 +62,7 @@ class TeethPresentDB(common_db_orm.InsertableRecord):
             return
         query = self.insert_query[0]
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
 
         for i in range(self.count()):
@@ -77,7 +77,7 @@ class TeethPresentDB(common_db_orm.InsertableRecord):
             return True
         else:
             print q_query.lastError().text()
-            SETTINGS.database.emit_caught_error(q_query.lastError())
+            SETTINGS.psql_conn.emit_caught_error(q_query.lastError())
 
 if __name__ == "__main__":
 

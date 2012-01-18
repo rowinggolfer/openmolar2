@@ -153,7 +153,7 @@ class DayData(object):
         '''
         loads all appointments of type "session" for this day
         '''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
 
         query = '''select start, finish
         from  diary_sessions where practice_id = ? and date(start) = ?'''
@@ -182,7 +182,7 @@ class DayData(object):
         loads all appointments of type "session" for this day
         '''
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
 
         query = '''select diary_id, start, finish, type, comments
         from diary_appointments where diary_id = ? and date(start) = ?
@@ -222,7 +222,7 @@ class DiaryDataModel(_DiarySettings):
         for key in self._data:
             data_repr += "%s:%s\n"% (key, self._data[key])
         return "DiaryDataModel\ndb=%s\npractice=%s\nstart=%s\nend=%s\n%s"% (
-            SETTINGS.database.databaseName(),
+            SETTINGS.psql_conn.databaseName(),
             self.practice_id,
             self.start_date,
             self.end_date,
@@ -239,7 +239,7 @@ class DiaryDataModel(_DiarySettings):
         '''
         query = '''select book_start, book_end, last_day
         from diary_settings where practice_id = ?'''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(self.practice_id)
         q_query.exec_()
@@ -257,7 +257,7 @@ class DiaryDataModel(_DiarySettings):
         where keys are all dates between the start and end values
         and the values are DayDataObjects with only public holiday data loaded
         '''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
 
         #due to database constraints, this list will be a
         #set of key value pairs.

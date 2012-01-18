@@ -41,7 +41,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
         self.exists_in_db = True
 
         query = 'SELECT * from %s WHERE patient_id = ? limit 1'% TABLENAME
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()
@@ -75,7 +75,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
             self.setValue("checked_date", QtCore.QDate.currentDate())
 
             query, values = self.insert_query
-            q_query = QtSql.QSqlQuery(SETTINGS.database)
+            q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
             q_query.prepare(query)
             for value in values:
                 q_query.addBindValue(value)
@@ -86,7 +86,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
             return True
         else:
             print q_query.lastError().text()
-            SETTINGS.database.emit_caught_error(q_query.lastError())
+            SETTINGS.psql_conn.emit_caught_error(q_query.lastError())
 
     def _update_query(self):
         changes, values = "", []
@@ -98,7 +98,7 @@ class MemoClericalDB(common_db_orm.InsertableRecord):
         changes = changes.rstrip(",")
         query = "UPDATE %s set %s WHERE patient_id=?"% (TABLENAME, changes)
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         for value in values:
             q_query.addBindValue(value)

@@ -31,7 +31,7 @@ TABLENAME = "perio_pocketing"
 
 class NewPerioPocketingRecord(common_db_orm.InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.database, TABLENAME)
+        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn, TABLENAME)
 
     @property
     def comment(self):
@@ -41,13 +41,13 @@ class NewPerioPocketingRecord(common_db_orm.InsertableRecord):
         self.remove(self.indexOf("checked_date"))
         query, values = self.insert_query
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         for value in values:
             q_query.addBindValue(value)
         if not q_query.exec_():
             print q_query.lastError().text()
-            SETTINGS.database.emit_caught_error(q_query.lastError())
+            SETTINGS.psql_conn.emit_caught_error(q_query.lastError())
 
 
 class PerioPocketingDB(object):
@@ -61,7 +61,7 @@ class PerioPocketingDB(object):
         query = '''select checked_date, tooth, values, comment, checked_by
         from %s where patient_id=? order by checked_date'''% TABLENAME
 
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()

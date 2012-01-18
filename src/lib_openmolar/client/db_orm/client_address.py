@@ -27,9 +27,8 @@ This module provides the AddressObjects Class, and AddressRecord Class
 
 from PyQt4 import QtSql, QtCore
 
-from lib_openmolar.common.settings import om_types
 from lib_openmolar.common import common_db_orm
-from lib_openmolar.common.common_db_orm.editable_field import EditableField
+from lib_openmolar.common.datatypes import EditableField, OMType
 
 
 class AddressRecord(QtSql.QSqlRecord):
@@ -41,7 +40,7 @@ class AddressRecord(QtSql.QSqlRecord):
 
     def __init__(self, record=None):
         if record is None:
-            blank_record = SETTINGS.database.blank_address_record
+            blank_record = SETTINGS.psql_conn.blank_address_record
             QtSql.QSqlRecord.__init__(self, blank_record)
         else:
             QtSql.QSqlRecord.__init__(self, record)
@@ -133,7 +132,7 @@ class AddressRecord(QtSql.QSqlRecord):
                 self.setValue(field_name, widg.date())
             elif field_type == QtCore.QVariant.String:
                 self.setValue(field_name, widg.text())
-            elif type(field_type) == om_types.OMType:
+            elif type(field_type) == OMType:
                 val = widg.itemData(widg.currentIndex())
                 self.setValue(field_name, val)
             else:
@@ -172,7 +171,7 @@ class AddressObjects(object):
         # this query LOOKS simple.. but the underlying view is VERY complex.
         query = '''
     select * from view_addresses where patient_id=? order by mailing_pref'''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(self.patient_id)
         q_query.exec_()
@@ -205,7 +204,7 @@ class AddressObjects(object):
         new_link.setValue("modified_by", SETTINGS.user)
         new_link.setValue("address_cat", category)
         query, values = new_link.insert_query
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         for value in values:
             q_query.addBindValue(value)
@@ -223,7 +222,7 @@ class AddressObjects(object):
         print address
         query = "UPDATE address_link set to_date=? WHERE ix=?"
         print query
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(address.value('to_date'))
         q_query.addBindValue(address.value('ix'))
@@ -294,7 +293,7 @@ class AddressObjects(object):
                 changes = changes.rstrip(",")
                 query = "UPDATE view_addresses set %s WHERE address_id=?"% changes
                 print query
-                q_query = QtSql.QSqlQuery(SETTINGS.database)
+                q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
                 q_query.prepare(query)
                 for value in values + [record.value('address_id')]:
                     q_query.addBindValue(value)
@@ -349,7 +348,7 @@ and to_date <= CURRENT_DATE order by dob desc'''
 
         for query, list_ in (
         (present_query, present_list), (past_query, past_list)):
-            q_query = QtSql.QSqlQuery(SETTINGS.database)
+            q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
             q_query.prepare(query)
             q_query.addBindValue(address_id)
             q_query.addBindValue(self.patient_id)

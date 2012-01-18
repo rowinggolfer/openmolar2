@@ -32,7 +32,7 @@ class PatientDiaryModel(QtSql.QSqlQueryModel):
         reason1, reason2, length, parent, period, comment
         from diary_patients join diary_appointments
         on appt_ix = diary_appointments.ix where patient=?'''
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()

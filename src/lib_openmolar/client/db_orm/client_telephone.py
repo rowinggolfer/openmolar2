@@ -38,7 +38,7 @@ class TelephoneDB(object):
         query = '''SELECT number, sms_capable, checked_date, tel_cat
 from %s join telephone_link on telephone.ix = telephone_link.tel_id
 WHERE patient_id = ? order by checked_date desc'''% TABLENAME
-        q_query = QtSql.QSqlQuery(SETTINGS.database)
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
         q_query.exec_()
