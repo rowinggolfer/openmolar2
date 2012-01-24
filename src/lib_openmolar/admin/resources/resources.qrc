@@ -3,9 +3,7 @@
       <qresource>
          <file>icons/openmolar-server.png</file>
          <file>icons/database.png</file>
-         <file>icons/postgresql_elephant.svg</file> 
-	 <file>icons/no_postgresql_elephant.svg</file>
-	 <file>avatars/demo_blondie.svg</file> 
+         <file>avatars/demo_blondie.svg</file> 
          <file>avatars/demo_iceman.svg</file>    
          <file>avatars/demo_me.svg</file>
          <file>avatars/demo_frog.svg</file>

@@ -44,7 +44,7 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.abspath("../../../../../"))
 
 from lib_openmolar.admin.data_import.import_om1 import *
-from lib_openmolar.common.connect import DatabaseConnection, ConnectionError
+from lib_openmolar.common.connect import PostgresDatabase, ConnectionError
 
 from PyQt4 import QtCore, QtGui
 
@@ -178,7 +178,7 @@ def main():
         "unable to connect to Mysql <hr />%s "% e)
         sys.exit()
 
-    new_connection = DatabaseConnection(    host=dl.pg_hostname,
+    new_connection = PostgresDatabase(    host=dl.pg_hostname,
                                         user=dl.pg_username,
                                         passwd=dl.pg_password,
                                         db_name=dl.pg_dbname,

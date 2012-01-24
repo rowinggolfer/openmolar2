@@ -20,35 +20,16 @@
 ##                                                                           ##
 ###############################################################################
 
-import datetime
-import logging
 import re
 import sys
-import pickle
 from xmlrpclib import Fault as ServerFault
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common import SETTINGS
-
-from lib_openmolar.common.connect import (
-    ProxyUser,
-    ConnectionError,
-    ConnectionsPreferenceWidget,
-    ConnectDialog,
-    OpenmolarConnection,
-    OpenmolarConnectionError)
+from lib_openmolar.common.connect import ProxyUser
+from lib_openmolar.common.datatypes import ConnectionData
+from lib_openmolar.common.qt4.widgets import RestorableApplication
 
 from lib_openmolar.admin import qrc_resources
-
-from lib_openmolar.common.qt4.widgets import (
-    RestorableApplication,
-    Advisor,
-    BaseMainWindow,
-    Preference,
-    PreferencesDialog)
-
-from lib_openmolar.common.qt4.dialogs import (
-    NewUserPasswordDialog, UserPasswordDialog)
 
 from lib_openmolar.admin.connect import AdminConnection
 
@@ -66,15 +47,19 @@ from lib_openmolar.admin.qt4.classes.database_table import (
     DatabaseTableViewer,
     RelationalDatabaseTableViewer)
 
-class AdminMainWindow(BaseMainWindow, ProxyManager):
+from lib_openmolar.common.qt4.postgres.postgres_application import \
+    PostgresMainWindow
+
+class AdminMainWindow(PostgresMainWindow, ProxyManager):
     '''
     This class is the core application.
     '''
-    _preferences_dialog = None
     log = LOGGER
 
+    CONN_CLASS = AdminConnection
+
     def __init__(self, parent=None):
-        BaseMainWindow.__init__(self, parent)
+        PostgresMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
         self.dirty = False
         self.setWindowTitle("Openmolar Admin")
@@ -95,28 +80,14 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.action_omdisconnect.setToolTip(
             _("Disconnect (from an openmolar server)"))
 
-        icon = QtGui.QIcon(":icons/postgresql_elephant.svg")
-        self.action_connect = QtGui.QAction(icon, _("Begin Session"), self)
-        self.action_connect.setToolTip(_("Start a PostgreSQL session"))
-
-        icon = QtGui.QIcon(":icons/no_postgresql_elephant.svg")
-        self.action_disconnect = QtGui.QAction(icon, _("End Session"), self)
-        self.action_disconnect.setToolTip(_("End a PostgreSQL session"))
-
-        insertpoint = self.action_quit
+        insertpoint = self.action_connect
         self.menu_file.insertAction(insertpoint, self.action_omconnect)
         self.menu_file.insertAction(insertpoint,self.action_omdisconnect)
         self.menu_file.insertSeparator(insertpoint)
-        self.menu_file.insertAction(insertpoint, self.action_connect)
-        self.menu_file.insertAction(insertpoint,self.action_disconnect)
-        self.menu_file.insertSeparator(insertpoint)
 
-        insertpoint = self.action_help
+        insertpoint = self.action_connect
         self.main_toolbar.insertAction(insertpoint, self.action_omconnect)
         self.main_toolbar.insertAction(insertpoint,self.action_omdisconnect)
-        self.main_toolbar.insertSeparator(insertpoint)
-        self.main_toolbar.insertAction(insertpoint, self.action_connect)
-        self.main_toolbar.insertAction(insertpoint, self.action_disconnect)
         self.main_toolbar.insertSeparator(insertpoint)
 
         ## "Database Tools"
@@ -188,9 +159,6 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.action_omconnect.triggered.connect(self.om_connect)
         self.action_omdisconnect.triggered.connect(self.om_disconnect)
 
-        self.action_connect.triggered.connect(self.choose_connection)
-        self.action_disconnect.triggered.connect(self.end_pg_session)
-
         self.action_show_log.triggered.connect(self.show_log)
 
         self.action_new_database.triggered.connect(self.create_new_database)
@@ -248,31 +216,16 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         connect to a server
         '''
-        try:
-            self.connection.connect()
-            self.connect(QtGui.QApplication.instance(),
-                QtCore.SIGNAL("Query Error"), self.advise_dl)
-
-            self.addViews()
-
-        except ConnectionError as error:
-            self.advise(u"%s<hr />%s"% (
-                _("Connection Error"), error), 2)
-            LOGGER.exception("Connection Error")
-        self._can_connect()
+        PostgresMainWindow.start_pg_session(self)
+        self.addViews()
 
     def end_pg_session(self, shutting_down=False):
         '''
-        disconnect from server
-        (if not connected - pass quietly).
+        overwrite baseclass function
         '''
-        if self.connection:
-            if (self.connection.isOpen() and (
-            shutting_down or self.tab_widget.closeAll())):
-                self.connection.close()
-                self.connection = None
-                LOGGER.info("DISCONNECTED")
-            self.connection = None
+        if shutting_down or (
+        self.has_pg_connection and self.tab_widget.closeAll()):
+            PostgresMainWindow.end_pg_session(self)
         else:
             self.tab_widget.closeAll()
         self._can_connect()
@@ -285,7 +238,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         self.tab_widget.setCurrentIndex(1)
 
     def add_table_tab(self):
-        if self.connection and self.connection.isOpen():
+        if self.has_pg_connection:
             ## add a relational database table
             ##todo - find out if this class is better for my needs!
             #table = DatabaseTableViewer(self.connection)
@@ -297,7 +250,7 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             self.tab_widget.addTab(widg, icon, _("Table (Relational)"))
 
     def add_query_editor(self):
-        if self.connection and self.connection.isOpen():
+        if self.has_pg_connection:
             ## add a query table
             widg = SqlQueryTable(self.connection)
             self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
@@ -311,140 +264,30 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             tab.deleteLater()
             self.tabs.remove(tab)
 
-    def choose_connection(self):
-        '''
-        catches signal when user hits the connect action
-        '''
-        LOGGER.debug("%s.choose_connection called"% __file__)
-        dl = ConnectDialog(self)
-        while True:
-            if not dl.exec_():
-                return
-            self.end_pg_session()
-            conn_data = dl.chosen_connection
-
-            self.connection = AdminConnection(conn_data)
-
-            LOGGER.info(u"%s '%s'"% (
-            _("Attempting connection using data"), conn_data))
-
-            self.start_pg_session()
-
-            if self.connection.isOpen():
-                return True
-            else:
-                break
-        return False
-
-    def _can_connect(self):
-        '''
-        toggles the connect buttons/menu actions
-        '''
-        connected = self._connection_status()
-        self.action_connect.setEnabled(not connected)
-        self.action_disconnect.setEnabled(connected)
-
-    def _connection_status(self):
-        '''
-        updates the status bar
-        (called after connect/disconnect or database specified)
-        '''
-        if self.connection and self.connection.isOpen():
-            username = self.connection.userName()
-            host = self.connection.hostName()
-            port = self.connection.port()
-            database = self.connection.databaseName()
-            message = (u"%s <b>'%s'</b> %s <b>'%s:%s'</b><br /><i> "% (
-            _("Connected as"), username, _("to host server"),
-            host, port))
-            if not database:
-                message += u"%s</i>"% _("No Database Selected")
-            else:
-                message += u"%s '%s'</i>"% (_("Using Database"), database)
-            #self.tab_widget_selected() #update widgets.
-            self.advise(message)
-            message = message.replace("<br />", "")
-            self.status_label.setText(message)
-            message = re.compile('<.*?>').sub(" ", message)
-            LOGGER.info(message)
-            return True
-        else:
-            self.status_label.setText(_("Not Connected to a database"))
-            return False
-
-    def has_connection(self):
-        '''
-        checks the connection to db.. if not present prompts user to get one
-        '''
-        if self.connection and self.connection.isOpen():
-            return True
-        self.advise(_("database connection required to continue"), 1)
-        return self.choose_connection()
-
-    def has_database(self):
-        '''
-        checks if a database has been selected yet..
-        if not present prompts user to get one
-        '''
-        if not self.has_connection():
-            return (None, False)
-        if self.connection.databaseName():
-            return (unicode(self.connection.databaseName()), True)
-        self.advise(_("A Database must be selected to continue"), 1)
-        return self.select_database()
-
-    def get_user_pass(self, dbname):
-        '''
-        return a tuple of result user, password
-        '''
-        LOGGER.debug("%s.get_user_pass %s"% (__file__, dbname))
-        if dbname == "openmolar_demo":
-            return (True, "om_demo", "password")
-        dl = UserPasswordDialog(self)
-        return dl.exec_(), dl.name, dl.password
-
-    def use_proxy_connection(self, dbname):
+    def use_proxy_database(self, db_name):
         '''
         user has clicked on a link requesting a session on dbname
         '''
-        result, user, passwd = self.get_user_pass(dbname)
+        ## TODO this should use information pulled from the proxy server
+
+        result, user, passwd = self.get_user_pass(db_name)
         if not result:
             return
-        self.connection = AdminConnection(
-            host = AD_SETTINGS.server_location,
+
+        host = AD_SETTINGS.server_location
+        port = 5432
+        connection_data = ConnectionData(
+            connection_name = "%s_%s:%s"% (db_name, host, 5432),
+            host = host,
             user = user,
-            passwd = passwd,
+            password = passwd,
             port = 5432,
-            db_name = dbname)
-        self.start_pg_session()
+            db_name = db_name)
 
-
-    def select_database(self, reason=""):
-        '''
-        allow the user to choose a database
-        '''
-        if not self.has_connection():
-            return
-        if not reason:
-            reason = _("Select a Database")
-        databases = self.connection.get_available_databases()
-        if databases:
-            dl = QtGui.QInputDialog(self)
-            dl.setOption(dl.UseListViewForComboBoxItems)
-            dl.setComboBoxItems(databases)
-            dl.setLabelText(reason)
-            dl.setWindowTitle(_("Choice"))
-            if dl.exec_():
-                chosen = unicode(dl.textValue().toAscii())
-                if self.connection.databaseName() != chosen:
-                    self.connection.close()
-                    self.connection.setDatabaseName(chosen)
-                    self.connection.connect()
-                    self._connection_status()
-                return (chosen, True)
-        else:
-            self.advise(_("No Databases found"),2)
-        return ("", False)
+        self.connection = AdminConnection(connection_data)
+        self.attempt_connection()
+        self._can_connect()
+        self.addViews()
 
     def create_new_database(self):
         '''
@@ -488,9 +331,6 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
         '''
         catches signal when user hits the demo action
         '''
-        if not self.has_connection():
-            return
-
         dl = PopulateDemoDialog(self.connection, self)
         if not dl.exec_():
             self.advise("Demo data population was abandoned", 1)
@@ -576,29 +416,14 @@ class AdminMainWindow(BaseMainWindow, ProxyManager):
             self.advise(_("operation cancelled"), 1)
 
     def loadSettings(self):
-        BaseMainWindow.loadSettings(self)
+        PostgresMainWindow.loadSettings(self)
         qsettings = QtCore.QSettings()
 
-        #python dict of settings
-        dict_ = str(qsettings.value("settings_dict").toString())
-        pdict = {}
-        if dict_:
-            try:
-                pdict = pickle.loads(dict_)
-            except Exception as e:
-                LOGGER.exception(
-                    "exception caught loading python settings...")
-        AD_SETTINGS.PERSISTANT_SETTINGS = pdict
+        qsettings.setValue("connection_conf_dir",
+            "/etc/openmolar/admin-connections")
 
     def saveSettings(self):
-        BaseMainWindow.saveSettings(self)
-        qsettings = QtCore.QSettings()
-
-        # AD_SETTINGS.PERSISTANT_SETTINGS is a python dict of non qt-specific settings.
-        # unfortunately.. QVariant.toPyObject can't recreate a dictionary
-        # so best to pickle this
-        pickled_dict = pickle.dumps(AD_SETTINGS.PERSISTANT_SETTINGS)
-        qsettings.setValue("settings_dict", pickled_dict)
+        PostgresMainWindow.saveSettings(self)
 
     def show_about(self):
         '''
@@ -618,27 +443,6 @@ _("Version"), AD_SETTINGS.VERSION,
         todo - this is the same as show_about
         '''
         self.show_about()
-
-    @property
-    def preferences_dialog(self):
-        if self._preferences_dialog is None:
-            dl = self._preferences_dialog = PreferencesDialog(self)
-
-            connections_pref = Preference(_("Database Connections"))
-            dl.cp_widg = ConnectionsPreferenceWidget(self)
-            connections_pref.setWidget(dl.cp_widg)
-            dl.insert_preference_dialog(0, connections_pref)
-
-        return self._preferences_dialog
-
-    def show_preferences_dialog(self):
-        '''
-        user wishes to launch the preferences dialog
-        '''
-        self.preferences_dialog.exec_()
-
-        ##TODO remove deprecated code
-        #SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def switch_server_user(self):
         '''
@@ -677,7 +481,7 @@ _("Version"), AD_SETTINGS.VERSION,
             elif re.match("connect_.*", url):
                 dbname = re.match("connect_(.*)", url).groups()[0]
                 self.advise("start session on database %s"% dbname)
-                self.use_proxy_connection(dbname)
+                self.use_proxy_database(dbname)
             elif re.match("manage_.*", url):
                 dbname = re.match("manage_(.*)", url).groups()[0]
                 self.manage_db(dbname)

@@ -21,22 +21,23 @@
 ###############################################################################
 
 '''
-AdminDatabaseConnection -
-a custom class inheriting from lib_openmolar.common.DatabaseConnection
+AdminPostgresDatabase -
+a custom class inheriting from :doc:`PostgresDatabase`
 '''
 from __future__ import division
 
 from PyQt4 import QtSql
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.connect import DatabaseConnection, ConnectionError
 from lib_openmolar.common.datatypes import OMTypes, ConnectionData
+from lib_openmolar.common.qt4.postgres.postgres_database import \
+    PostgresDatabase
 
 from lib_openmolar.admin.db_orm import *
 
-class AdminConnection(DatabaseConnection):
+class AdminConnection(PostgresDatabase):
     '''
-    inherits from lib_openmolar.common.connect.DatabaseConnection,
+    inherits from lib_openmolar.common.connect.PostgresDatabase,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
     @property
