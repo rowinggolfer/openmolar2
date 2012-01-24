@@ -27,32 +27,42 @@ class Preference(object):
     '''
     A custom data structure used by PreferencesDialog
     '''
+    icon = QtGui.QIcon.fromTheme("help-about")
+
     def __init__(self, title):
         self.title = title
-        self.icon = QtGui.QIcon.fromTheme("help-about")
         self.widget = QtGui.QLabel(title + " hello world")
 
     def setIcon(self, icon):
-        self.icon = icon
+        if not icon.isNull():
+            self.icon = icon
 
     def setWidget(self, widget):
         self.widget = widget
 
-class PreferencesDialog(QtGui.QMainWindow, Advisor):
+class PreferencesDialog(QtGui.QDialog, Advisor):
     '''
     A custom dialog providing a listWidget and a connected panel
     '''
     def __init__(self, parent=None):
-        super(PreferencesDialog, self).__init__(parent)
-        Advisor.__init__(self)
+        QtGui.QDialog.__init__(self, parent)
+        Advisor.__init__(self, parent)
         self.setWindowTitle(u"Openmolar %s"% _("Preferences"))
-        self.setMinimumSize(400, 400)
 
         self.listwidget = QtGui.QListWidget()
+        close_but = QtGui.QPushButton(_("Close"))
+
+        left_frame = QtGui.QFrame()
+
+        layout = QtGui.QVBoxLayout(left_frame)
+        layout.addWidget(QtGui.QLabel(_("Preference Options")))
+        layout.addWidget(self.listwidget)
+        layout.addWidget(close_but)
+
         self.stackedwidget = QtGui.QStackedWidget(self)
 
         splitter = QtGui.QSplitter(self)
-        splitter.addWidget(self.listwidget)
+        splitter.addWidget(left_frame)
         splitter.addWidget(self.stackedwidget)
 
         self.connect(self.listwidget,
@@ -61,7 +71,10 @@ class PreferencesDialog(QtGui.QMainWindow, Advisor):
 
         self.add_font_option()
 
-        self.setCentralWidget(splitter)
+        layout = QtGui.QVBoxLayout(self)
+        layout.addWidget(splitter)
+
+        close_but.clicked.connect(self.accept)
 
     def add_font_option(self):
         '''
@@ -71,6 +84,12 @@ class PreferencesDialog(QtGui.QMainWindow, Advisor):
         pref.setWidget(FontOptionsWidget(self.parent()))
         pref.setIcon(QtGui.QIcon.fromTheme("applications-fonts"))
         self.add_preference_dialog(pref)
+
+    def minimumSizeHint(self):
+        return QtCore.QSize(400, 400)
+
+    def sizeHint(self):
+        return QtCore.QSize(800, 500)
 
     def add_preference_dialog(self, preference):
         '''

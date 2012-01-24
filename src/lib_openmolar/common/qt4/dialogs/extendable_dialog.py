@@ -51,11 +51,15 @@ class ExtendableDialog(BaseDialog):
     def set_advanced_but_text(self, txt):
         self.more_but.setText(txt)
 
-    def clicked(self, but):
+    def _clicked(self, but):
+        '''
+        overwrite :doc:`BaseDialog` _clicked
+        checking to see if addvanced panel is to be displayed.
+        '''
         if but == self.more_but:
             self.showExtension(but.isChecked())
             return
-        BaseDialog.clicked(self, but)
+        BaseDialog._clicked(self, but)
 
     def add_advanced_widget(self, widg):
         self.extension().layout().addWidget(widg)

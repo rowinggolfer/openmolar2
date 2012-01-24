@@ -345,7 +345,7 @@ class TreatmentItem(object):
         An extension of __init__, loading data from the database
         when initiated by a QSqlRecord.
         '''
-        logging.debug("converting QsqlRecord to TreatmentItem")
+        LOGGER.debug("converting QsqlRecord to TreatmentItem")
         self.set_px_clinician(self.qsql_record.value("px_clinician").toInt()[0])
         tx_clinician, valid = self.qsql_record.value("tx_clinician").toInt()
         self.set_comment(unicode(self.qsql_record.value("comment").toString()))

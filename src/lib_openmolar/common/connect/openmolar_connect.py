@@ -104,14 +104,11 @@ class OpenmolarConnection(object):
             'Is the host %s running and accepting connections on port %d?'% (
             host, port))
 
-
-if __name__ == "__main__":
-    import logging
+def _test():
     import pickle
-    from gettext import gettext as _
+    import gettext
+    gettext.install("openmolar")
 
-    logging.basicConfig(level=logging.DEBUG)
-    LOGGER = logging.getLogger()
     omc = OpenmolarConnection()
     proxy = omc.connect()
 
@@ -125,3 +122,10 @@ if __name__ == "__main__":
             logging.debug("last backup %s"% payload.payload)
         else:
             logging.error(payload.error_message)
+
+
+if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    LOGGER = logging.getLogger()
+    _test()

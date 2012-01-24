@@ -26,6 +26,8 @@ A custom datatype, capable of parsing conf files in the following format
 '''
 
 import ConfigParser
+import getpass
+import types
 
 class ConnectionData(object):
     '''
@@ -44,6 +46,9 @@ class ConnectionData(object):
     on a known host and port)
     '''
 
+    conf_file = None
+    'an attribute to store the location of the conf file for this connection'
+
     def __init__(self, connection_name="", user="", password="", host="",
     port=5432, db_name=""):
 
@@ -51,8 +56,7 @@ class ConnectionData(object):
 
         #:
         self.user = user
-        #:
-        self.password = password
+        self._password = password
         #:
         self.host = host
         #:
@@ -68,21 +72,22 @@ class ConnectionData(object):
         self.CONNECTION_TYPE = self.TCP_IP
         self._connection_name = "openmolar_demo"
         self.user = "om_demo"
-        self.password = "password"
+        self._password = "password"
         self.host = "localhost"
         self.port = 5432
         self.db_name = "openmolar_demo"
 
-    def from_conf_file(self, conffile):
+    def from_conf_file(self, conf_file):
         '''
         parse a conf_filefor connection params
         '''
-        f = open(conffile)
+        f = open(conf_file)
         parser = ConfigParser.SafeConfigParser()
         parser.readfp(f)
 
         if parser.get("CONNECTION", "type") == "TCP/IP":
             self._from_tcpconf(parser)
+            self.conf_file = conf_file
         else:
             raise IOError("unable to parse %s"% f)
 
@@ -93,10 +98,29 @@ class ConnectionData(object):
         self.CONNECTION_TYPE = self.TCP_IP
         self._connection_name = parser.get("CONNECTION", "name")
         self.user = parser.get("CONNECTION", "user")
-        self.password = parser.get("CONNECTION", "password")
         self.host = parser.get("CONNECTION", "host")
-        self.port = parser.getInt("CONNECTION", "port")
+        self.port = parser.getint("CONNECTION", "port")
         self.db_name = parser.get("CONNECTION", "db_name")
+        if parser.get("CONNECTION", "auth") == "plain_password":
+            self._password = parser.get("CONNECTION", "password")
+        else:
+            self._password = (self.get_password,
+                    "Please enter a password for the connection %s"%(
+                    self.connection_name))
+
+    @property
+    def password(self):
+        if type(self._password) == types.TupleType:
+            self._password = self._password[0].__call__(self._password[1])
+
+        return self._password
+
+    def get_password(self, prompt_):
+        '''
+        prompt the user for a password.
+        (should be overwritten if subclassing)
+        '''
+        return getpass.getpass(prompt=prompt_)
 
     @property
     def brief_name(self):
@@ -120,6 +144,25 @@ class ConnectionData(object):
         set a readable name for this connection
         '''
         self._connection_name = name
+
+    def to_html(self):
+        '''
+        returns an html table to show the params (password hidden)
+        '''
+        html = u'''<h2 align="center">%s</h2>
+        <table width="100%%" border="1">
+        <tr><td>host</td><td><b>%s</b></td></tr>
+        <tr><td>port</td><td><b>%s</b></td></tr>
+        <tr><td>user</td><td><b>%s</b></td></tr>
+        <tr><td>password</td><td><b>%s</b></td></tr>
+        <tr><td>database</td><td><b>%s</b></td></tr></table>'''% (
+            self.brief_name,
+            self.host,
+            self.port,
+            self.user,
+            ("*" * len(self.password))[:4],
+            self.db_name)
+        return html
 
     def __repr__(self):
         return "ConnectionData - '%s'"% self.connection_name
@@ -145,9 +188,11 @@ def _test():
     obj.demo_connection()
 
     obj2 = ConnectionData()
-    obj2.from_confile("/home/neil/.openmolar2/connections-enabled/demo.conf")
+    obj2.from_conf_file("/etc/openmolar/client-connections/demo")
 
     print obj == obj2
+    print obj.to_html()
+
 
 if __name__ == "__main__":
     _test()
