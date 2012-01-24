@@ -153,8 +153,8 @@ class Settings(settings.CommonSettings, PluginHandler):
                 version.VERSION, version.revision_number)
         except ImportError:
             VERSION = "Unknown"
-            logging.exception("unable to parse for client versioning")
-        logging.info("VERSION %s"% VERSION)
+            LOGGER.exception("unable to parse for client versioning")
+        LOGGER.info("VERSION %s"% VERSION)
         return VERSION
 
     @property
@@ -243,7 +243,7 @@ class Settings(settings.CommonSettings, PluginHandler):
             return "?month?"
 
     def set_user1(self, user):
-        logging.info("setting user1 as %s"% user)
+        LOGGER.info("setting user1 as %s"% user)
         self.user1 = user
         try:
             practitioner = self.practitioners.practitioner_from_user(user)
@@ -276,7 +276,7 @@ class Settings(settings.CommonSettings, PluginHandler):
         this means other modules can always access this important object
         '''
         self._current_patient = patient
-        logging.debug("setting current patient - %s"% patient)
+        LOGGER.debug("setting current patient - %s"% patient)
 
     @property
     def current_patient(self):

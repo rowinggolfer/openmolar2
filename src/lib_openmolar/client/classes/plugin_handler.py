@@ -69,13 +69,13 @@ class PluginHandler(object):
             full_path = os.path.join(str(plugin_dir), file_)
 
             if file_.endswith(".py"):
-                logging.info("NAKED PLUGIN FOUND '%s'"% full_path)
+                LOGGER.info("NAKED PLUGIN FOUND '%s'"% full_path)
                 if self.PERSISTANT_SETTINGS.get("compile_plugins", False):
                     module = file_.replace('.py','')
                     mod = __import__(module)
                     yield mod
                 else:
-                    logging.info(
+                    LOGGER.info(
                     'NOT COMPILING (as you have naked plugins disabled)')
             elif zipfile.is_zipfile(full_path):
                 module = file_.replace('.zip','')
@@ -84,7 +84,7 @@ class PluginHandler(object):
                     mod = z.load_module(module)
                     yield mod
                 except (zipimport.ZipImportError, zipfile.BadZipfile) as e:
-                    logging.exception ("incompatible plugin '%s'"% full_path)
+                    LOGGER.exception ("incompatible plugin '%s'"% full_path)
 
     def get_plugins(self, plugin_dir):
         '''
@@ -102,17 +102,17 @@ class PluginHandler(object):
         '''
         this function is called by the client application to load plugins
         '''
-        logging.info ("loading plugins...")
+        LOGGER.info ("loading plugins...")
         i = 0
         for plugin_dir in self.PLUGIN_DIRS:
-            logging.info ("looking for plugins in directory %s"% plugin_dir)
+            LOGGER.info ("looking for plugins in directory %s"% plugin_dir)
             try:
                 i += self.get_plugins(plugin_dir)
 
             except Exception as e:
-                logging.exception ("Exception loading plugin")
+                LOGGER.exception ("Exception loading plugin")
 
-        logging.info("%d plugin(s) loaded"% i)
+        LOGGER.info("%d plugin(s) loaded"% i)
 
     def install_plugin(self, plugin):
         '''
@@ -124,7 +124,7 @@ class PluginHandler(object):
         try:
             plugin.setup_plugin()
         except Exception, e:
-            logging.exception(
+            LOGGER.exception(
             "Exception during plugin.setup_plugin '%s'"% plugin.name)
 
         self._plugins.append(plugin)
@@ -140,7 +140,7 @@ class PluginHandler(object):
         '''
         installs a fee_scale (of type BasePlugin)
         '''
-        logging.info ("installing fee_scale %s"% fee_scale)
+        LOGGER.info ("installing fee_scale %s"% fee_scale)
         self._fee_scales.append(fee_scale)
 
     @property

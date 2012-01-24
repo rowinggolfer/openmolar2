@@ -277,7 +277,7 @@ class ToothData(object):
         this input has come from a line edit.. so has to be checked for sanity
         '''
 
-        logging.debug("from_user_input - '%s'"% input)
+        LOGGER.debug("from_user_input - '%s'"% input)
 
         if input.startsWith("CR"):
             self.parse_crown_input(input)

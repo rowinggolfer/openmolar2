@@ -176,7 +176,7 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
         self.parents = {0 : self.rootItem}
 
         if SETTINGS.current_patient is None:
-            logging.debug("TreatmentTreeModel - no patient")
+            LOGGER.debug("TreatmentTreeModel - no patient")
             treatment_items = []
         else:
             model = SETTINGS.current_patient.treatment_model

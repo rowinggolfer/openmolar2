@@ -165,7 +165,7 @@ class ToothDataEditor(QtGui.QWidget):
 
     def add_property_to_current_tooth(self):
         if not self.current_tooth:
-            logging.debug("not adding property.. no current tooth selected")
+            LOGGER.debug("not adding property.. no current tooth selected")
             return
 
         tooth_data = chart_widgets.ToothData(self.current_tooth.tooth_id)

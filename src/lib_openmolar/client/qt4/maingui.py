@@ -20,40 +20,35 @@
 ##                                                                           ##
 ###############################################################################
 
-import cPickle
+import pickle
 import logging
 import sys
 from PyQt4 import QtGui, QtCore
-
-from lib_openmolar.common.connect import (
-    ConnectionError,
-    ConnectionsPreferenceWidget,
-    ConnectDialog)
 
 from lib_openmolar.client.connect import ClientConnection
 
 from lib_openmolar.common.qt4.widgets import (
     RestorableApplication,
-    BaseMainWindow,
     Preference,
     PreferencesDialog)
+
+from lib_openmolar.common.qt4.postgres.postgres_application import \
+    PostgresMainWindow
 
 from lib_openmolar.client.qt4 import client_widgets
 from lib_openmolar.client.qt4.interfaces import PatientInterface
 from lib_openmolar.client.qt4.interfaces import DiaryInterface
 
-class ClientMainWindow(BaseMainWindow):
-    _preferences_dialog = None
+class ClientMainWindow(PostgresMainWindow):
+
+    CONN_CLASS = ClientConnection
+
     def __init__(self, parent=None):
-        BaseMainWindow.__init__(self, parent)
+        PostgresMainWindow.__init__(self, parent)
 
         self.setWindowIcon(QtGui.QIcon(":icons/openmolar.png"))
         self.setWindowTitle(_("OpenMolar - YOUR dental database application"))
         self.setMinimumSize(700,400)
-
-        # initiate the connection.
-        # A pointer to this object is set up at SETTINGS.psql_conn
-        #ClientConnection()
 
         self.system_font = self.font()
         self.loadSettings()
@@ -82,16 +77,9 @@ class ClientMainWindow(BaseMainWindow):
         self.status_widget = client_widgets.StatusBarWidget()
         self.statusbar.addPermanentWidget(self.status_widget)
 
-        icon = QtGui.QIcon.fromTheme("network-wired")
-        self.action_connect = QtGui.QAction(icon, _("Connect"), self)
-        self.action_connect.setToolTip(_("Connect to a Server"))
-        insertpoint = self.action_quit
-        self.menu_file.insertAction(insertpoint, self.action_connect)
-        self.menu_file.insertSeparator(insertpoint)
-
         self.connect_signals()
 
-        QtCore.QTimer.singleShot(100, self.choose_connection)
+        QtCore.QTimer.singleShot(100, self.start_pg_session)
 
         SETTINGS.mainui = self
         SETTINGS.load_plugins()
@@ -99,35 +87,6 @@ class ClientMainWindow(BaseMainWindow):
     @property
     def is_dirty(self):
         return self.patient_interface.is_dirty
-
-    def start_pg_session(self):
-        '''
-        connect to a server
-        '''
-        try:
-            SETTINGS.psql_conn.connect()
-
-            self.connect(QtGui.QApplication.instance(),
-            QtCore.SIGNAL("db error"), self.advise_dl)
-
-            self.connect(QtGui.QApplication.instance(),
-            QtCore.SIGNAL("db notification"), self.advise)
-
-            if SETTINGS.psql_conn.isOpen():
-                message = u"%s<br /><b>%s</b><br />%s <b>%s</b>"% (
-                _("sucessfully connected to"),
-                SETTINGS.psql_conn.databaseName(), _("on server"),
-                SETTINGS.psql_conn.hostName())
-                self.advise(message)
-                QtGui.QApplication.instance().emit(
-                    QtCore.SIGNAL("db_connected"))
-                self.diary_interface.refresh()
-                self.set_users()
-            else:
-                raise ConnectionError("whoops")
-        except ConnectionError as error:
-            self.advise(u"%s<hr />%s"% (
-                _("Connection Error"), error), 2)
 
     def set_users(self):
         self.status_widget.set_users()
@@ -140,40 +99,10 @@ class ClientMainWindow(BaseMainWindow):
 
     def end_pg_session(self, shutting_down=False):
         '''
-        disconnect from server
-        (if not connected - pass quietly).
+        overwrite baseclass function
         '''
-        if SETTINGS.psql_conn and SETTINGS.psql_conn.isOpen():
-            SETTINGS.psql_conn.close()
+        PostgresMainWindow.end_pg_session(self)
         SETTINGS.psql_conn = None
-
-    def choose_connection(self):
-        '''
-        catches signal when user hits the connect action
-        '''
-        self.end_pg_session()
-        dl = ConnectDialog(self)
-
-        if not dl.exec_():
-            self.advise(_("working offline!"), 1)
-            return
-
-        #TODO - reinstate this
-        '''
-        if (not dl.chosen_connection.is_default and
-            QtGui.QMessageBox.warning(self, _("confirm"),
-            u"%s<br />%s"% (_("WARNING - this is NOT your default database."),
-            _("only connect if you know what you are doing")),
-            QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
-            QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Cancel
-        ):
-            self.choose_connection()
-            return
-        '''
-
-        ClientConnection(dl.chosen_connection)
-
-        self.start_pg_session()
 
     def connect_signals(self):
         self.action_patient.triggered.connect(self.page_changer)
@@ -200,17 +129,17 @@ class ClientMainWindow(BaseMainWindow):
         self.connect(self.status_widget, QtCore.SIGNAL("user2 changed"),
             self.user2_changed)
 
-        self.action_connect.triggered.connect(self.choose_connection)
-
     def loadSettings(self):
-        BaseMainWindow.loadSettings(self)
+        PostgresMainWindow.loadSettings(self)
         qsettings = QtCore.QSettings()
+        qsettings.setValue("connection_conf_dir",
+            "/etc/openmolar/client-connections")
 
         #python dict of settings
         dict_ = str(qsettings.value("settings_dict").toString())
         if dict_:
             try:
-                SETTINGS.PERSISTANT_SETTINGS = cPickle.loads(dict_)
+                SETTINGS.PERSISTANT_SETTINGS = pickle.loads(dict_)
             except Exception as e:
                 print "exception caught loading python settings...", e
 
@@ -218,7 +147,7 @@ class ClientMainWindow(BaseMainWindow):
             "plugin_dirs").toStringList()
 
     def saveSettings(self):
-        BaseMainWindow.saveSettings(self)
+        PostgresMainWindow.saveSettings(self)
         qsettings = QtCore.QSettings()
 
         #Qt settings
@@ -226,7 +155,7 @@ class ClientMainWindow(BaseMainWindow):
         # SETTINGS is a python dict of non qt-specific settings.
         # unfortunately.. QVariant.toPyObject can't recreate a dictionary
         # so best to pickle this
-        pickled_dict = cPickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
+        pickled_dict = pickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
         qsettings.setValue("settings_dict", pickled_dict)
         qsettings.setValue("plugin_dirs", SETTINGS.PLUGIN_DIRS)
 
@@ -235,7 +164,10 @@ class ClientMainWindow(BaseMainWindow):
         re-implement the close event of QtGui.QMainWindow, and check the user
         really meant to do this.
         '''
-        self.is_dirty
+        ##TODO fix this.
+        if self.is_dirty:
+            self.advise("you have unsaved changes")
+
         if (QtGui.QMessageBox.question(self, _("Confirm"),
         _("Quit Application?"),
         QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
@@ -317,8 +249,10 @@ def main():
     '''
     main entry point for lib_openmolar.client
     '''
-    if not "-v" in sys.argv:
-        logging.basicConfig(level = logging.info)
+    if "-v" in sys.argv:
+        LOGGER.setLevel(logging.DEBUG)
+    else:
+        LOGGER.setLevel(logging.INFO)
 
     app = RestorableApplication("openmolar-client")
     ui = ClientMainWindow()

@@ -26,19 +26,20 @@ ClientConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 
 from PyQt4 import QtGui, QtCore, QtSql
 
-from lib_openmolar.common.connect import DatabaseConnection
+from lib_openmolar.common.qt4.postgres.postgres_database import \
+    PostgresDatabase
 
 from lib_openmolar.client.db_orm.client_patient import DuckPatient
 
-class ClientConnection(DatabaseConnection):
+class ClientConnection(PostgresDatabase):
     '''
-    inherits from lib_openmolar.common.connect.DatabaseConnection,
+    inherits from lib_openmolar.common.connect.PostgresDatabase,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
     _blank_address_record = None
 
     def __init__(self, *args):
-        super(ClientConnection, self).__init__(*args)
+        PostgresDatabase.__init__(self, *args)
         SETTINGS.psql_conn = self
 
     @property
@@ -249,9 +250,14 @@ class ClientConnection(DatabaseConnection):
 
 if __name__ == "__main__":
     from lib_openmolar import client
+    from lib_openmolar.common.datatypes import ConnectionData
 
     app = QtGui.QApplication([])
-    cc = ClientConnection()
+
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
+
+    cc = ClientConnection(conn_data)
     cc.connect()
 
     values = {"sname":"POTTA", "soundex_sname":True}

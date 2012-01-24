@@ -470,7 +470,7 @@ class ChartTooth(Tooth):
             if shape:
                 self.fill_shapes.append((shape, brush))
             else:
-                logging.debug ("shape error! '%s'"% surfaces)
+                LOGGER.debug ("shape error! '%s'"% surfaces)
 
         self.fill_shapes_current = True
 

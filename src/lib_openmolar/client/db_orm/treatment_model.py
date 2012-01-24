@@ -65,7 +65,7 @@ class TreatmentModel(object):
         '''
         reset this model
         '''
-        logging.debug("clearing treatment_model")
+        LOGGER.debug("clearing treatment_model")
         self._treatment_items = []
         self._deleted_items = []
         self.plan_tx_chartmodel.clear()
@@ -139,7 +139,7 @@ where patient_id = ?'''
             self.tree_model.update_treatments()
             return True
 
-        logging.debug(treatment_item.errors)
+        LOGGER.debug(treatment_item.errors)
 
         if treatment_item.in_database:
             raise IOError, "invalid treatment in database treatments id=%s"% (
