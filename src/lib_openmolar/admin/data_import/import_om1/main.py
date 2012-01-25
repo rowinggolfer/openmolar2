@@ -44,7 +44,8 @@ if __name__ == "__main__":
     sys.path.insert(0, os.path.abspath("../../../../../"))
 
 from lib_openmolar.admin.data_import.import_om1 import *
-from lib_openmolar.common.connect import PostgresDatabase, ConnectionError
+from lib_openmolar.common.qt4.postgres.postgres_database import (
+    PostgresDatabase, ConnectionError)
 
 from PyQt4 import QtCore, QtGui
 
