@@ -1,9 +1,8 @@
-openmolar-server (2.0.1+hg006~0) unstable; urgency=low
+openmolar-server (2.0.1+hg006~1) unstable; urgency=low
 
-  * rebuild after refactoring
+  * rebuild after some code refactoring
 
- -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 14 Jan 2012 21:03:38 +0000
-
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 25 Jan 2012 00:26:13 +0000
 
 openmolar-server (2.0.1+hg006~0) unstable; urgency=low
 

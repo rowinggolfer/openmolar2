@@ -180,14 +180,15 @@ if INSTALL_COMMON:
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.common',
-                    'lib_openmolar.common.datatypes',
                     'lib_openmolar.common.common_db_orm',
                     'lib_openmolar.common.connect',
-                    'lib_openmolar.common.qt4.dialogs',
+                    'lib_openmolar.common.datatypes',
                     'lib_openmolar.common.import_export',
+                    'lib_openmolar.common.qt4.dialogs',
+                    'lib_openmolar.common.qt4.postgres',
+                    'lib_openmolar.common.qt4.printing',
                     'lib_openmolar.common.qt4.widgets',
                     ],
-        scripts = ['misc/openmolar2'],
         )
 
 ###############################################################################

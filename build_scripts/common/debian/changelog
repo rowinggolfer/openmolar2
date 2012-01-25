@@ -1,3 +1,10 @@
+openmolar-common (2.0.1+hg005~0) unstable; urgency=low
+
+  * new common code allowing easier management of database connection
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 25 Jan 2012 00:22:12 +0000
+
+
 openmolar-common (2.0.1+hg003~0) unstable; urgency=low
 
   * some folder re-organisationing

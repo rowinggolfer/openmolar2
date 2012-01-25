@@ -42,7 +42,7 @@ from mercurial import util
 ##                                                                           ##
 ##          ADJUST VERSION NUMBERS HERE.                                     ##
 ##                                                                           ##
-VERSION_NUMBER = "2.0.1"
+VERSION_NUMBER = "2.0.2"
 ##                                                                           ##
 ##          ALL DONE!!                                                       ##
 ##                                                                           ##
