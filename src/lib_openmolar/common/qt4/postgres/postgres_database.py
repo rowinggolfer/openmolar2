@@ -23,7 +23,7 @@
 '''
 provides 2 classes.
 ConnectionError - a custom python exception, raised if connection times out
-DatabaseConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
+PostgresDatabase - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 '''
 import logging
 
@@ -37,7 +37,7 @@ class ConnectionError(Exception):
     '''
     pass
 
-class DatabaseConnection(QtSql.QSqlDatabase):
+class PostgresDatabase(QtSql.QSqlDatabase):
     '''
     inherits from PyQt4.QSql.QSqlDatabase
     adds a function "connect", which opens the connection whilst
@@ -51,6 +51,9 @@ class DatabaseConnection(QtSql.QSqlDatabase):
             "argument for database connection MUST be of type ConnectionData")
 
         QtSql.QSqlDatabase.__init__(self, "QPSQL")
+
+        self.connection_data = connection_data
+
         self.setHostName(connection_data.host)
         self.setPort(connection_data.port)
         if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
@@ -60,17 +63,6 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         self.setDatabaseName(connection_data.db_name)
 
         self.driver().notification.connect(self.notification_received)
-
-    def from_connection_data(self, cd):
-        '''
-        load the connection from a :doc:`ConnectionData` object
-        '''
-        logging.debug("loading connection params from ConnectionData object")
-        self.setHostName(cd.host)
-        self.setPort(cd.port)
-        self.setUserName(cd.user)
-        self.setPassword(cd.password)
-        self.setDatabaseName(cd.db_name)
 
     def _wait_cursor(self, waiting=False):
         '''
@@ -130,7 +122,7 @@ class DatabaseConnection(QtSql.QSqlDatabase):
         the query is simple
         NOTIFY new_appointment_made
         '''
-        logging.info("classes inheriting from DatabaseConnection should "
+        logging.info("classes inheriting from PostgresDatabase should "
         "re-implement function subscribeToNotifications")
         #self.driver().subscribeToNotification("new_appointment_made")
 
@@ -158,7 +150,7 @@ def _test():
     parent = QtGui.QWidget()
     conn_data = ConnectionData()
     conn_data.demo_connection()
-    db = DatabaseConnection(conn_data)
+    db = PostgresDatabase(conn_data)
     logging.debug(db)
     message =  '<body>'
     try:

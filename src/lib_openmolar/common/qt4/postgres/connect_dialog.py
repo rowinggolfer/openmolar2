@@ -20,15 +20,15 @@
 ##                                                                           ##
 ###############################################################################
 
-import os
 import logging
+import types
 
 from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.datatypes import ConnectionData
-from lib_openmolar.common.qt4 import widgets
+
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
-from lib_openmolar.common.connect.edit_known_connections \
-    import ChooseConnectionWidget
+
+from multiple_database_widget import MultipleDatabaseWidget
 
 class ConnectDialog(ExtendableDialog):
     '''
@@ -36,7 +36,8 @@ class ConnectDialog(ExtendableDialog):
     connect to a database
     '''
 
-    _known_connections = None
+    _known_connections = []
+    _chosen_index = 0
 
     def __init__(self, parent=None):
         ExtendableDialog.__init__(self, parent)
@@ -45,98 +46,103 @@ class ConnectDialog(ExtendableDialog):
 
         self.enableApply()
 
-        self.choice_widg = ChooseConnectionWidget(self)
+        self.multiple_db_widg = MultipleDatabaseWidget(self)
 
-        self.add_advanced_widget(self.choice_widg)
+        self.add_advanced_widget(self.multiple_db_widg)
 
         self.label = QtGui.QLabel()
 
         self.insertWidget(self.label)
 
-        self.set_label()
+        self.set_advanced_but_text(_("other databases"))
 
-        self.connect(self.choice_widg, QtCore.SIGNAL("connection chosen"),
+    def _connect_signals(self):
+        self.connect(self.multiple_db_widg, QtCore.SIGNAL("connection chosen"),
             self.alternate_chosen)
 
     @property
     def known_connections(self):
         '''
-        parse the allowed locations for connections.
+        returns a list of type :doc:`ConnectionData`
         '''
-        if self._known_connections is None:
-            self._known_connections = []
-            try:
-                for root, dir_, files in os.walk(
-                    "/home/neil/.openmolar2/connections-enabled"):
-                    for file_ in files:
-                        filepath = os.path.join(root, file_)
-                        logging.debug("checking %s for config"% filepath)
-
-                        conn_data = ConnectionData()
-                        conn_data.from_conf_file(filepath)
-
-                        self._known_connections.append(conn_data)
-            except Exception:
-                logging.exception("error getting known_connections")
-
         return self._known_connections
+
+    def set_known_connections(self, connections):
+        '''
+        set connections
+        '''
+        logging.debug("setting known connections")
+        assert type(connections) == types.ListType, "connections must be list"
+        for conn_data in connections:
+            logging.debug(conn_data)
+            assert type(conn_data) == ConnectionData, "connection type unknown"
+
+        self._known_connections = connections
+        self.multiple_db_widg.set_connections(connections)
 
     @property
     def connection(self):
-        if self.known_connections:
-            return self.known_connections[0]
-        else:
+        if not self.known_connections:
             QtGui.QMessageBox.information(self.parent(), _("information"),
             u'<b>%s</b><br/>%s'%(
-            _('NO PREVIOUS database details found'),
-            _('will default to the demo database on localhost.')))
+            _('NO database details found'),
+            _('will offer connection to the demo database on localhost.')))
 
             conn_data = ConnectionData()
             conn_data.demo_connection()
             self._known_connections = [conn_data]
             return conn_data
 
+        return self.known_connections[self._chosen_index]
+
+    def _clicked(self, but):
+        '''
+        Overwrite :doc:`ExtendableDialog` function to enable the active widget
+        '''
+        self.multiple_db_widg.setEnabled(True)
+        ExtendableDialog._clicked(self, but)
+
     def set_label(self):
         header = _('Connect to this database?')
 
-        message = u'''<div align="center">%s</div><ul>
-        <li>alias - <b>"%s"</b></li>
-        <li>host - <b>%s</b></li>
-        <li>port - <b>%s</b></li>
-        <li>user - <b>%s</b></li>
-        <li>use password - <b>%s</b></li>
-        <li>database - <b>%s</b></li></ul>'''% (header,
-            self.connection.brief_name,
-            self.connection.host,
-            self.connection.port,
-            self.connection.user,
-            _("YES") if self.connection.password !="" else _("NO"),
-            self.connection.db_name)
+        message = u'<div align="center"><b>%s</b></div><ul>%s'% (header,
+            self.connection.to_html())
 
         self.label.setText(message)
 
     def sizeHint(self):
         return QtCore.QSize(400,150)
 
-    def load_connections(self, connections):
-        self.known_connections = connections
-        self.set_label()
-
     def alternate_chosen(self, connection):
-        self.connection = connection
+        self._chosen_index = self.known_connections.index(connection)
+
         self.set_label()
+        self.multiple_db_widg.setEnabled(False)
         QtCore.QTimer.singleShot(2000, self.more_but.click)
 
     @property
     def chosen_connection(self):
         return self.connection
 
+    def exec_(self):
+        self.set_label()
+        self._connect_signals()
+        return ExtendableDialog.exec_(self)
+
 if __name__ == "__main__":
     import gettext
     gettext.install("openmolar")
 
     app = QtGui.QApplication([])
+
     dl = ConnectDialog()
+
+    cd1, cd2 = ConnectionData(), ConnectionData()
+    cd1.demo_connection()
+    cd2.demo_connection()
+    cd2._connection_name = "alternate"
+    dl.set_known_connections([cd1, cd2])
+
     if dl.exec_():
         print dl.chosen_connection
     app.closeAllWindows()

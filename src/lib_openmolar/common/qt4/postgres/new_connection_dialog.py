@@ -22,11 +22,6 @@
 
 from PyQt4 import QtGui, QtCore
 
-if __name__ == "__main__":
-    import os, sys
-    sys.path.insert(0, os.path.abspath("../../"))
-    print sys.path
-
 from lib_openmolar.common.qt4.widgets.password_lineedit import PasswordLineEdit
 from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.datatypes import ConnectionData
@@ -50,7 +45,6 @@ class NewConnectionDialog(BaseDialog):
         self.port_edit = QtGui.QLineEdit(self)
         self.db_name_edit = QtGui.QLineEdit(self)
 
-
         frame = QtGui.QFrame(self)
         form = QtGui.QFormLayout(frame)
         form.addRow(_("ALIAS (eg. 'main server')"), self.humanname_edit)
@@ -60,10 +54,8 @@ class NewConnectionDialog(BaseDialog):
         form.addRow(_("Port (default is 5432)"), self.port_edit)
         form.addRow(_("Database Name"), self.db_name_edit)
 
-
         self.layout.insertWidget(0, self.label)
         self.layout.insertWidget(1, frame)
-        #self.layout.insertWidget(2, self.default_checkbox)
 
         self.username_edit.setFocus()
         self.enableApply()
@@ -77,8 +69,8 @@ class NewConnectionDialog(BaseDialog):
         returns a ConnectionData object
         '''
         cd = ConnectionData(
-            human_name=self.human_name,
-            username=self.username,
+            connection_name=self.connection_name,
+            user=self.username,
             password=self.password,
             host=self.host,
             port=self.port,
@@ -86,7 +78,7 @@ class NewConnectionDialog(BaseDialog):
         return cd
 
     @property
-    def human_name(self):
+    def connection_name(self):
         return unicode(self.humanname_edit.text())
     @property
     def username(self):
@@ -102,36 +94,23 @@ class NewConnectionDialog(BaseDialog):
 
     @property
     def port(self):
-        return self.port_edit.text().toInt()[0]
+        port, result = self.port_edit.text().toInt()
+        if result:
+            return port
+        return 5432
 
     @property
     def db_name(self):
         return unicode(self.db_name_edit.text())
-
-
-class EditConnectionDialog(NewConnectionDialog):
-    def __init__(self, parent=None):
-        super(EditConnectionDialog, self).__init__(parent)
-        self.label.setText(_("Edit connection"))
-
-    def fromConnectionData(self, cd):
-        '''
-        loads ConnectionData object (for editing)
-        '''
-        self.humanname_edit.setText(cd.human_name)
-        self.username_edit.setText(cd.username)
-        self.password_edit.setText(cd.password)
-        self.host_edit.setText(cd.host)
-        self.port_edit.setText(unicode(cd.port))
-        self.db_name_edit.setText(cd.db_name)
-
 
 if __name__ == "__main__":
     import gettext
     gettext.install("openmolar")
 
     app = QtGui.QApplication([])
+
     dl = NewConnectionDialog()
     if dl.exec_():
         print dl.toConnectionData
-    app.closeAllWindows()
+
+

@@ -22,12 +22,11 @@
 
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.connect.new_connection_dialog import (
-    NewConnectionDialog,
-    EditConnectionDialog)
-
-
-class ChooseConnectionWidget(QtGui.QWidget):
+class MultipleDatabaseWidget(QtGui.QWidget):
+    '''
+    A widget which provides enough information for a user to select from a
+    number of connections.
+    '''
     _connections = []
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -80,11 +79,12 @@ go to edit-> preferences -> database connections'''))
         set known connections (a list of :doc:`ConnectionData` )
         '''
         self._connections = connections
+        self._load_connections()
 
     def _load_connections(self):
         self.list_widget.clear()
         for connection in self.connections:
-            description = '%s  '% connection.connection_name
+            description = '%s  '% connection.brief_name
             item = QtGui.QListWidgetItem(description, self.list_widget)
         if self.list_widget.currentRow() == -1:
             self.list_widget.setCurrentRow(0)
@@ -110,141 +110,29 @@ go to edit-> preferences -> database connections'''))
         if not valid_selection:
             message = _("please choose a connection")
         else:
-            message = u'''<h2>%s</h2>
-        <table width="100%%" border="1">
-        <tr><td>host</td><td><b>%s</b></td></tr>
-        <tr><td>port</td><td><b>%s</b></td></tr>
-        <tr><td>user</td><td><b>%s</b></td></tr>
-        <tr><td>password</td><td><b>%s</b></td></tr>
-        <tr><td>database</td><td><b>%s</b></td></tr></table>'''% (
-            conn_data.connection_name,
-            conn_data.host,
-            conn_data.port,
-            conn_data.user,
-            ("*" * len(conn_data.password)),
-            conn_data.db_name)
+            message = conn_data.to_html()
 
         self.details_browser.setText(message)
         self.emit(QtCore.SIGNAL("connection chosen"), conn_data)
 
-class ConnectionsPreferenceWidget(ChooseConnectionWidget):
-    '''
-    a widget, added at runtime to the preferences dialog.
-    '''
-    def __init__(self, connections, parent):
-        ChooseConnectionWidget.__init__(self, parent)
-
-        self.toplabel.setText(_("Known connections"))
-        self.bottomlabel.hide() #setText("")
-
-        self.new_but = QtGui.QPushButton(_("Enter a New Connection"))
-
-        self.edit_button = QtGui.QPushButton(_("Edit this connection"))
-        self.del_button = QtGui.QPushButton(_("Forget this connection"))
-        self.default_button = QtGui.QPushButton(_("Set as default connection"))
-
-        self.grid_layout.addWidget(self.list_widget, 0, 0, 4, 1)
-        self.grid_layout.addWidget(self.details_browser,0, 1)
-        self.grid_layout.addWidget(self.edit_button, 1, 1)
-        self.grid_layout.addWidget(self.del_button, 2, 1)
-        self.grid_layout.addWidget(self.default_button, 3, 1)
-
-        line = QtGui.QFrame(self)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred,
-            QtGui.QSizePolicy.Fixed)
-        line.setSizePolicy(sizePolicy)
-        line.setMinimumSize(QtCore.QSize(0, 16))
-        line.setFrameShape(QtGui.QFrame.HLine)
-        line.setFrameShadow(QtGui.QFrame.Sunken)
-
-        self.layout.addWidget(line)
-        self.layout.addWidget(self.new_but)
-        self.connect_signals()
-
-    def sizeHint(self):
-        return QtCore.QSize(500,300)
-
-    def connect_signals(self):
-        self.new_but.clicked.connect(self.new_connection)
-        self.edit_button.clicked.connect(self.edit_connection)
-        self.del_button.clicked.connect(self._delete_connection)
-        self.default_button.clicked.connect(self._default_connection)
-
-    def new_connection(self):
-        dl = NewConnectionDialog(self.parent())
-        if dl.exec_():
-            connection = dl.toConnectionData
-            self.connections.append(connection)
-            self._load_connections()
-            self.emit(QtCore.SIGNAL("connections changed"),
-                self.connections)
-            self.list_widget.setCurrentRow(len(self.connections)-1)
-
-    def edit_connection(self):
-        valid_selection, connection = self.get_current_selection()
-        if not valid_selection:
-            return
-        dl = EditConnectionDialog(self.parent())
-        dl.fromConnectionData(connection)
-        if dl.exec_():
-            i = self.list_widget.currentRow()
-            self.connections[i] = dl.toConnectionData
-            self.emit(QtCore.SIGNAL("connections changed"), self.connections)
-            self._load_connections()
-            self.list_widget.setCurrentRow(i)
-
-    def _delete_connection(self):
-        valid_selection, connection = self.get_current_selection()
-        if not valid_selection:
-            return
-        if QtGui.QMessageBox.question(self, _("Question"),
-        _("Delete this connection?"),
-        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
-
-            self.connections.remove(connection)
-            self.emit(QtCore.SIGNAL("connections changed"), self.connections)
-            self._load_connections()
-
-    def _default_connection(self):
-        valid_selection, connection = self.get_current_selection()
-        if not valid_selection:
-            return
-
-        for conn in self.connections:
-            conn.is_default = False
-        connection.is_default = True
-
-        self.emit(QtCore.SIGNAL("connections changed"),self.connections)
-
-        self._load_connections()
-
-
-
 if __name__ == "__main__":
     import gettext
-
-    def advise(*args):
-        print args
+    gettext.install("")
 
     from lib_openmolar.common.datatypes import ConnectionData
 
     app = QtGui.QApplication([])
 
-    gettext.install("")
-
     dl = QtGui.QDialog()
-    dl.advise = advise
 
     cd1, cd2 = ConnectionData(), ConnectionData()
     cd1.demo_connection()
     cd2.demo_connection()
 
-    cd1.is_default = True
-    obj = ChooseConnectionWidget(dl)
-    obj.set_connections([cd1, cd2])
+    widg = MultipleDatabaseWidget(dl)
+    widg.set_connections([cd1, cd2])
 
     layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(obj)
+    layout.addWidget(widg)
 
     dl.exec_()
