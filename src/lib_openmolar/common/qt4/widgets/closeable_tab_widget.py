@@ -43,7 +43,6 @@ class ClosableTabWidget(QtGui.QTabWidget):
         for i in range(self.count()):
             widg = self.widget(0)
             QtGui.QTabWidget.removeTab(self, 0)
-            self.emit(QtCore.SIGNAL("Widget Removed"), widg)
         return True
 
     def closeAll(self, message=""):
@@ -62,7 +61,6 @@ class ClosableTabWidget(QtGui.QTabWidget):
         QtGui.QMessageBox.Yes) == QtGui.QMessageBox.Yes:
             widg = self.widget(i)
             QtGui.QTabWidget.removeTab(self, i)
-            self.emit(QtCore.SIGNAL("Widget Removed"), widg)
 
 if __name__ == "__main__":
     import gettext

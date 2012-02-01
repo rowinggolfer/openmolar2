@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import re
 import os
 import sys
 from PyQt4 import QtGui, QtCore
@@ -51,7 +52,8 @@ class PostgresMainWindow(BaseMainWindow):
         BaseMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
 
-        self.setWindowTitle("Postgres Application")
+        self.setWindowTitle("%s (%s)"% (
+            _("Postgres Application"), _("OFFLINE")))
 
         ## Main Menu
 
@@ -214,20 +216,21 @@ class PostgresMainWindow(BaseMainWindow):
             message = message.replace("<br />", "")
             self.status_label.setText(message)
 
-            title_ = self.windowTitle()
-            self.setWindowTitle("%s ('%s' %s:%s)" %(title_, name, host, port))
-
+            connection_metadata = "'%s' %s:%s" %(name, host, port)
+            result = True
             LOGGER.info(message)
-            return True
         else:
             self.status_label.setText(_("Not Connected to a database"))
-            try:
-                title_ = unicode(self.windowTitle())
-                title_ = title_[:title_.index(" ('")]
-                self.setWindowTitle(title_)
-            except ValueError as exc:
-                LOGGER.debug("unable to alter window title %s"% exc)
-            return False
+            connection_metadata = _("OFFLINE")
+            result = False
+        try:
+            title_ = unicode(self.windowTitle())
+            title_ = re.sub("\(.*\)", "(%s)"% connection_metadata, title_)
+            self.setWindowTitle(title_)
+        except ValueError as exc:
+            LOGGER.debug("unable to alter window title %s"% exc)
+
+        return result
 
     @property
     def has_pg_connection(self):
@@ -254,7 +257,6 @@ class PostgresMainWindow(BaseMainWindow):
         self.saveSettings()
         self.end_pg_session()
 
-    @property
     def preferences_dialog(self):
         if self._preferences_dialog is None:
             dl = self._preferences_dialog = PreferencesDialog(self)
@@ -273,7 +275,7 @@ class PostgresMainWindow(BaseMainWindow):
         user wishes to launch the preferences dialog
         '''
         LOGGER.debug("launching preference dialog")
-        self.preferences_dialog.exec_()
+        self.preferences_dialog().exec_()
 
 def _test():
 
