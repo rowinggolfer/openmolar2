@@ -494,7 +494,7 @@ class PatientInterface(QtGui.QWidget):
 
     @property
     def ok_to_leave_record(self):
-        if self.pt == None:
+        if self.pt is None:
             return True
         self.update_patient()
         if self.pt.is_dirty:
@@ -509,7 +509,7 @@ class PatientInterface(QtGui.QWidget):
         self.charts_page.update_patient()
 
     def save_patient(self, closing=False):
-        if self.pt == None:
+        if self.pt is None:
             return
         self.update_patient()
         if self.pt.is_dirty:

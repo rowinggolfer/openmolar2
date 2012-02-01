@@ -32,7 +32,7 @@ from lib_openmolar.common.qt4.widgets import (
     Preference,
     PreferencesDialog)
 
-from lib_openmolar.common.qt4.postgres.postgres_application import \
+from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
 from lib_openmolar.client.qt4 import client_widgets
@@ -47,7 +47,7 @@ class ClientMainWindow(PostgresMainWindow):
         PostgresMainWindow.__init__(self, parent)
 
         self.setWindowIcon(QtGui.QIcon(":icons/openmolar.png"))
-        self.setWindowTitle(_("OpenMolar - YOUR dental database application"))
+        self.setWindowTitle("OpenMolar Client (%s)"% _("OFFLINE"))
         self.setMinimumSize(700,400)
 
         self.system_font = self.font()
@@ -195,10 +195,11 @@ class ClientMainWindow(PostgresMainWindow):
             message = _("No Patient Loaded")
         self.status_label.setText(message)
 
-    @property
     def preferences_dialog(self):
         if self._preferences_dialog is None:
-            dl = self._preferences_dialog = PreferencesDialog(self)
+            dl = self._preferences_dialog = \
+                PostgresMainWindow.preferences_dialog(self)
+
             plugin_icon = QtGui.QIcon(":icons/plugins.png")
 
             plugins_pref = Preference(_("Plugins"))
@@ -214,17 +215,7 @@ class ClientMainWindow(PostgresMainWindow):
             plugins_dir_pref.setWidget(pl_dir_widg)
             dl.insert_preference_dialog(0, plugins_dir_pref)
 
-            connections_pref = Preference(_("Database Connections"))
-            dl.cp_widg = ConnectionsPreferenceWidget(
-                SETTINGS.connections, self)
-            connections_pref.setWidget(dl.cp_widg)
-            dl.insert_preference_dialog(0, connections_pref)
-
         return self._preferences_dialog
-
-    def show_preferences_dialog(self):
-        self.preferences_dialog.exec_()
-        SETTINGS.set_connections(self.preferences_dialog.cp_widg.connections)
 
     def show_about(self):
         '''
