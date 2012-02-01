@@ -20,25 +20,16 @@
 ##                                                                           ##
 ###############################################################################
 
+import ConfigParser
 import os
 import shutil
 import sys
 
-from xml.dom import minidom
+from lib_openmolar.common.datatypes import Connection230Data
 
-CONFDIR = os.path.join(os.path.expanduser("~"),".openmolar")
-SAFEDIR = "/etc/openmolar"
-
-CONF_FILES = []
-CONF_FILES.append(os.path.join(SAFEDIR, "admin.conf"))
-CONF_FILES.append(os.path.join(CONFDIR, "admin.conf"))
-
-DEFAULT_XML = '''<?xml version="1.0" ?>
-<settings>
-    <version>1.0</version>
-    <server name="localhost" location="localhost" port="230" />
-</settings>
-'''
+#CONFDIR = os.path.join(os.path.expanduser("~"),".openmolar")
+CONFDIR = "/etc/openmolar/admin/"
+CONF230S = os.path.join(CONFDIR, "230connections")
 
 class SettingsError(Exception):
     '''
@@ -50,13 +41,7 @@ class AdminSettings(object):
     '''
     A class installed into the global namespace as AD_SETTINGS.
     '''
-    _dom = None
-
-    chosen_server = 0
-    '''
-    if multiple servers are found in the config, this variable can be used to
-    choose between them
-    '''
+    connection230s = []
 
     proxy_user = None
     '''
@@ -66,6 +51,7 @@ class AdminSettings(object):
 
     def __init__(self):
         self.VERSION
+        self.load()
 
     @property
     def VERSION(self):
@@ -82,86 +68,27 @@ class AdminSettings(object):
         LOGGER.info("VERSION %s"% VERSION)
         return VERSION
 
-    @property
-    def dom(self):
-        if self._dom is None:
-            for filepath in CONF_FILES:
-                try:
-                    self._dom = minidom.parse(filepath)
-                    LOGGER.debug("using %s as adminconfig"% filepath)
-                    continue
-                except IOError:
-                    try:
-                        try:
-                            os.makedirs(os.path.dirname(filepath))
-                        except OSError:
-                            pass
-                        f = open(filepath, "w")
-                        f.write(DEFAULT_XML)
-                        f.close()
-                    except IOError:
-                        LOGGER.debug("unable to save adminconfig to %s"%
-                            filepath)
+    def load(self):
+        for root, dir_, files in os.walk(CONF230S):
+            for file_ in sorted(files):
+                filepath = os.path.join(root, file_)
+                conndata = Connection230Data()
+                conndata.from_conf_file(filepath)
+                self.connection230s.append(conndata)
 
-            if self._dom is None:
-                LOGGER.debug("falling back to default xml for admin config")
-                self._dom = minidom.parseString(DEFAULT_XML)
-
-        return self._dom
+        if self.connection230s == []:
+            LOGGER.warning("no 230 connections found in %s"% CONF230S)
+            LOGGER.warning("defaulting to localhost")
+            conndata = Connection230Data()
+            conndata.default_connection()
+            self.connection230s.append(conndata)
 
     @property
-    def has_multiple_servers(self):
+    def om_connections(self):
         '''
-        returns true if the config file specifies more than one server
-        a normal practice probably won't.
+        A list of connections (loaded at __init__)
         '''
-        return len(self._server_nodes) > 1
-
-    @property
-    def _server_nodes(self):
-        return self.dom.getElementsByTagName("server")
-
-    @property
-    def _server_node(self):
-        return self._server_nodes[self.chosen_server]
-
-    @property
-    def server_locations(self):
-        '''
-        a list of all server locations (as a tuple ip, port)
-        from values specified in the config.
-        '''
-        locations = []
-        for node in self._server_nodes:
-            loc = node.getAttributeNode("location").value
-            port = node.getAttributeNode("port").value
-            locations.append((loc, port))
-        return locations
-
-    @property
-    def server_location(self):
-        '''
-        the default server location
-        '''
-        if self.has_multiple_servers:
-            LOGGER.warning("multiple servers found in admin config")
-        return self._server_node.getAttributeNode("location").value
-
-    @property
-    def server_port(self):
-        '''
-        the port specified in the config
-        '''
-        return int(self._server_node.getAttributeNode("port").value)
-
-    @property
-    def connections(self):
-        '''
-        TODO - populate this list!!
-        '''
-        return []
-
-
+        return self.connection230s
 
 def install():
     '''
@@ -178,12 +105,7 @@ def _test():
     LOGGER.setLevel(logging.DEBUG)
     install()
     LOGGER.debug("testing %s"% __file__)
-    LOGGER.debug("using settings file\n\n%s\n\n"% AD_SETTINGS.dom.toxml())
-    LOGGER.debug("multiple servers = %s "% AD_SETTINGS.has_multiple_servers)
-    LOGGER.debug("server_locations = %s "% AD_SETTINGS.server_locations)
-    LOGGER.debug("server_location = %s "% AD_SETTINGS.server_location)
-    LOGGER.debug("server_port = %s "% AD_SETTINGS.server_port)
-
+    LOGGER.debug("proxy_servers = %s "% AD_SETTINGS.om_connections)
 
 if __name__ == "__main__":
     _test()

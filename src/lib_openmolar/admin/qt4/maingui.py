@@ -25,7 +25,8 @@ import sys
 from xmlrpclib import Fault as ServerFault
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.connect import ProxyUser
+from lib_openmolar.common.connect import ProxyClient
+
 from lib_openmolar.common.datatypes import ConnectionData
 from lib_openmolar.common.qt4.widgets import RestorableApplication
 
@@ -33,8 +34,7 @@ from lib_openmolar.admin import qrc_resources
 
 from lib_openmolar.admin.connect import AdminConnection
 
-from lib_openmolar.admin.db_tools.proxy_manager import (
-    ProxyManager, PermissionError)
+from lib_openmolar.admin.db_tools.proxy_manager import ProxyManager
 
 from lib_openmolar.admin.qt4.dialogs import *
 
@@ -47,7 +47,7 @@ from lib_openmolar.admin.qt4.classes.database_table import (
     DatabaseTableViewer,
     RelationalDatabaseTableViewer)
 
-from lib_openmolar.common.qt4.postgres.postgres_application import \
+from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
 class AdminMainWindow(PostgresMainWindow, ProxyManager):
@@ -62,7 +62,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         PostgresMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
         self.dirty = False
-        self.setWindowTitle("Openmolar Admin")
+        self.setWindowTitle("%s (%s)"% ("Openmolar Admin", _("OFFLINE")))
         self.setWindowIcon(QtGui.QIcon(":icons/openmolar-server.png"))
 
         ## Main Menu
@@ -72,7 +72,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         icon = QtGui.QIcon.fromTheme("network-wired")
         self.action_omconnect = QtGui.QAction(icon,
             "OM %s"% _("Connect"), self)
-        self.action_omconnect.setToolTip(_("Connect (to an openmolar server)"))
+        self.action_omconnect.setToolTip(
+                                _("Connect (to an openmolar server)"))
 
         icon = QtGui.QIcon.fromTheme("network-error")
         self.action_omdisconnect = QtGui.QAction(icon,
@@ -135,10 +136,9 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         tb_database.setToolButtonStyle(self.main_toolbar.toolButtonStyle())
 
         self.connection = None
-        self.tabs = []
 
         self.tab_widget = AdminTabWidget(self)
-        self.browser = self.tab_widget.browser
+        self.known_server_widget = self.tab_widget.known_server_widget
         self.setCentralWidget(self.tab_widget)
 
         self.end_pg_session()
@@ -146,7 +146,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.show()
 
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
-        QtCore.QTimer.singleShot(100, self._init_proxy_message)
+        QtCore.QTimer.singleShot(100, self._init_proxies)
 
     def connect_signals(self):
         '''
@@ -156,42 +156,33 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         ##some old style connects are used to ensure argument (bool=0)
         ##is not passed to the slot
 
-        self.action_omconnect.triggered.connect(self.om_connect)
-        self.action_omdisconnect.triggered.connect(self.om_disconnect)
+        #self.action_omconnect.triggered.connect(self.om_connect)
+        #self.action_omdisconnect.triggered.connect(self.om_disconnect)
 
         self.action_show_log.triggered.connect(self.show_log)
 
-        self.action_new_database.triggered.connect(self.create_new_database)
-        self.action_populate_demo.triggered.connect(self.populate_demo)
+        #self.action_new_database.triggered.connect(self.create_new_database)
+        #self.action_populate_demo.triggered.connect(self.populate_demo)
 
-        self.connect(self.tab_widget, QtCore.SIGNAL("Widget Removed"),
-            self.remove_tab)
         self.connect(self.tab_widget, QtCore.SIGNAL("new query tab"),
             self.add_query_editor)
         self.connect(self.tab_widget, QtCore.SIGNAL("new table tab"),
             self.add_table_tab)
+        self.connect(self.tab_widget, QtCore.SIGNAL("end_pg_session"),
+            self.end_pg_session)
 
         self.tab_widget.currentChanged.connect(self.tab_widget_selected)
 
-        self.browser.shortcut_clicked.connect(self.manage_shortcut)
+        self.known_server_widget.shortcut_clicked.connect(self.manage_shortcut)
+        self.known_server_widget.server_changed.connect(self.set_proxy_index)
 
-    def _init_proxy_message(self):
+    def _init_proxies(self):
         '''
         called only at startup
         '''
-        self.init_proxy()
-        self.display_proxy_message()
-
-    def display_proxy_message(self):
-        '''
-        attempt to connect to the server controller at startup
-        '''
-        self.wait()
-        try:
-            message = self.proxy_message
-            self.browser.setHtml(message)
-        finally:
-            self.wait(False)
+        ProxyManager._init_proxies(self)
+        for client in self.proxy_clients:
+            self.known_server_widget.add_proxy_client(client)
 
     def switch_server_user(self):
         self.advise("we need to up your permissions for this",1)
@@ -227,12 +218,11 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.has_pg_connection and self.tab_widget.closeAll()):
             PostgresMainWindow.end_pg_session(self)
         else:
-            self.tab_widget.closeAll()
+            if self.tab_widget.closeAll():
+                PostgresMainWindow.end_pg_session(self)
         self._can_connect()
 
     def addViews(self):
-        self.tab_widget.closeAllWithoutQuestion()
-        self.tab_widget.addTab(self.browser, _("Messages"))
         self.add_table_tab()
         self.add_query_editor()
         self.tab_widget.setCurrentIndex(1)
@@ -245,7 +235,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             widg = RelationalDatabaseTableViewer(self.connection, self.tab_widget)
             self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
             self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-            self.tabs.append(widg)
+            #self.tabs.append(widg)
             icon = QtGui.QIcon.fromTheme("text-x-generic")
             self.tab_widget.addTab(widg, icon, _("Table (Relational)"))
 
@@ -255,18 +245,14 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             widg = SqlQueryTable(self.connection)
             self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
             self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-            self.tabs.append(widg)
+            #self.tabs.append(widg)
             icon = QtGui.QIcon.fromTheme("text-x-generic")
             self.tab_widget.addTab(widg, icon, _("Query Tool"))
 
-    def remove_tab(self, tab):
-        if tab in self.tabs:
-            tab.deleteLater()
-            self.tabs.remove(tab)
-
     def use_proxy_database(self, db_name):
         '''
-        user has clicked on a link requesting a session on dbname
+        user has clicked on a link provided by a proxyClient
+        requesting a session on dbname
         '''
         ## TODO this should use information pulled from the proxy server
 
@@ -274,7 +260,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         if not result:
             return
 
-        host = AD_SETTINGS.server_location
+        client = self.known_server_widget.current_client
+        host = client.host
         port = 5432
         connection_data = ConnectionData(
             connection_name = "%s_%s:%s"% (db_name, host, 5432),
@@ -456,7 +443,8 @@ _("Version"), AD_SETTINGS.VERSION,
         if dl.exec_():
             name = dl.name
             psword = dl.password
-            AD_SETTINGS.proxy_user = ProxyUser(name, psword)
+            self.advise("NOW WHAT", 2)
+            #AD_SETTINGS.proxy_user = ProxyUser(name, psword)
 
             #force reload of server at next use
             self._proxy_server = None
@@ -471,11 +459,9 @@ _("Version"), AD_SETTINGS.VERSION,
         when a url is clicked it finds it's way here for management.
         unrecognised signals are send to the user via the notification.
         '''
+        LOGGER.debug("manage_shortcut %s"% url)
         try:
-            if url == "init_proxy":
-                LOGGER.debug("User shortcut - Re-try openmolar_server connection")
-                self.om_connect()
-            elif url == "install_demo":
+            if url == "install_demo":
                 LOGGER.debug("Install demo called via shortcut")
                 self.create_demo_database()
             elif re.match("connect_.*", url):
@@ -487,7 +473,7 @@ _("Version"), AD_SETTINGS.VERSION,
                 self.manage_db(dbname)
             else:
                 self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
-        except PermissionError as exc:
+        except ProxyManager.PermissionError as exc:
             self.advise("%s<hr />%s" %(_("Permission denied"), exc), 2)
 
 def main():

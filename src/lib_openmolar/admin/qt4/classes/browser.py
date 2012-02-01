@@ -39,7 +39,7 @@ class Browser(QtWebKit.QWebView):
         self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
 
     def _link_clicked(self, url):
-        url_string = url.toString()
+        url_string = unicode(url.toString())
         LOGGER.info("link clicked - '%s'"% url_string)
         self.shortcut_clicked.emit(url_string)
 

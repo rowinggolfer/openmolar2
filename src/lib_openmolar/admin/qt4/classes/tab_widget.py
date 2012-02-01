@@ -20,11 +20,12 @@
 ##                                                                           ##
 ###############################################################################
 
-
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.common.qt4.widgets.closeable_tab_widget import ClosableTabWidget
-from lib_openmolar.admin.qt4.classes.browser import Browser
+from lib_openmolar.common.qt4.widgets.closeable_tab_widget \
+    import ClosableTabWidget
+from lib_openmolar.admin.qt4.classes.known_server_widget \
+    import KnownServerWidget
 
 class AdminTabWidget(ClosableTabWidget):
     '''
@@ -61,16 +62,22 @@ class AdminTabWidget(ClosableTabWidget):
 
         self.currentChanged.connect(self._tab_changed)
 
-        self.browser = Browser()
-        self.addTab(self.browser, _("Messages"))
+        self.known_server_widget = KnownServerWidget()
+        self.addTab(self.known_server_widget, _("Known Servers"))
 
         self.toggle_tabbar()
 
     def closeAll(self):
-        result = False
+        '''
+        re-implement the base class method
+        '''
+        result = self.count() <= 1
         if self.count() > 1:
             result = ClosableTabWidget.closeAll(self, _("Disconnect and"))
-            self.addTab(self.browser, _("Messages"))
+            if result:
+                self.addTab(self.known_server_widget, _("Known Servers"))
+                LOGGER.debug("emitting end_pg_session signal")
+                self.emit(QtCore.SIGNAL("end_pg_session"))
         self.toggle_tabbar()
         return result
 
@@ -102,22 +109,23 @@ class AdminTabWidget(ClosableTabWidget):
         #self.tabBar().setVisible(self.count()>1)
 
 
-if __name__ == "__main__":
+def _test():
     import gettext
     gettext.install("")
 
     app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(400,200)
-    atw = AdminTabWidget(dl)
+    mw = QtGui.QMainWindow()
 
-    atw.browser.setHtml("hello")
+    atw = AdminTabWidget()
+
     label1 = QtGui.QLabel("Placeholder1")
     label2 = QtGui.QLabel("Placeholder2")
     atw.addTab(label1, "one")
     atw.addTab(label2, "two")
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(atw)
+    mw.setCentralWidget(atw)
+    mw.show()
+    app.exec_()
 
-    dl.exec_()
+if __name__ == "__main__":
+    _test()

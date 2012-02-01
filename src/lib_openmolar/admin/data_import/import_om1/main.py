@@ -53,7 +53,7 @@ import optparse
 
 class Parser(optparse.OptionParser):
     '''
-    Inherits from optparse.OptionParser), and checks the cli arguments
+    Inherits from optparse.OptionParser, and checks the cli arguments
     '''
     def __init__(self):
         '''
