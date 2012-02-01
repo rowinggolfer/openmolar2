@@ -1,8 +1,15 @@
-openmolar-common (2.0.1+hg005~0) unstable; urgency=low
+openmolar-common (2.0.2+hg006~1) unstable; urgency=low
+
+  * added qt4 package
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 25 Jan 2012 01:21:56 +0000
+
+
+openmolar-common (2.0.2+hg006~0) unstable; urgency=low
 
   * new common code allowing easier management of database connection
 
- -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 25 Jan 2012 00:22:12 +0000
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 25 Jan 2012 00:51:42 +0000
 
 
 openmolar-common (2.0.1+hg003~0) unstable; urgency=low
