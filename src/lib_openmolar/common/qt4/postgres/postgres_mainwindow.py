@@ -37,23 +37,28 @@ from lib_openmolar.common.qt4.widgets import (
 from connect_dialog import ConnectDialog
 from postgres_database import ConnectionError, PostgresDatabase
 from manage_databases_widget import ManageDatabasesWidget
+from postgres_session_widget import PostgresSessionWidget
+
 #from new_connection_dialog import NewUserPasswordDialog, UserPasswordDialog
 
 class PostgresMainWindow(BaseMainWindow):
     '''
     A main window with functions to connect to postgres
     '''
+    _central_widget = None
     _preferences_dialog = None
     _connection_dialog = None
-    _known_connections = None
+    _known_session_params = None
     CONN_CLASS = PostgresDatabase
+
+    #: True if more than one pg session is allowed (False for client)
+    ALLOW_MULTIPLE_SESSIONS = True
 
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
 
-        self.setWindowTitle("%s (%s)"% (
-            _("Postgres Application"), _("OFFLINE")))
+        self.setWindowTitle(_("Postgres Application"))
 
         ## Main Menu
 
@@ -64,8 +69,8 @@ class PostgresMainWindow(BaseMainWindow):
         self.action_connect.setToolTip(_("Start a PostgreSQL session"))
 
         icon = QtGui.QIcon(":icons/no_postgresql_elephant.svg")
-        self.action_disconnect = QtGui.QAction(icon, _("End Session"), self)
-        self.action_disconnect.setToolTip(_("End a PostgreSQL session"))
+        self.action_disconnect = QtGui.QAction(icon, _("End Session(s)"), self)
+        self.action_disconnect.setToolTip(_("End all PostgreSQL sessions"))
 
         insertpoint = self.action_quit
         self.menu_file.insertAction(insertpoint, self.action_connect)
@@ -80,30 +85,67 @@ class PostgresMainWindow(BaseMainWindow):
         ####       now load stored settings                                ####
         self.loadSettings()
 
-        self.connection = None
-
-        mock_widget = QtGui.QLabel("postgres app")
-        mock_widget.setAlignment(QtCore.Qt.AlignCenter)
-        self.setCentralWidget(mock_widget)
-
-        self.action_connect.triggered.connect(self.start_pg_session)
-        self.action_disconnect.triggered.connect(self.end_pg_session)
+        self.action_connect.triggered.connect(self.new_pg_session)
+        self.action_disconnect.triggered.connect(self.end_pg_sessions)
 
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
 
+        self.session_widgets = []
+
+        self.setCentralWidget(self.central_widget)
+
+        self.update_session_status()
+
     @property
-    def known_connections(self):
+    def central_widget(self):
+        '''
+        should be Overwritten
+        the central widget should have functions frequently associated with
+        a tab widget.
+        namely addTab etc..
+        '''
+        if self._central_widget is None:
+            LOGGER.debug("PostgresMainWindow.. creating central widget")
+            self._central_widget = QtGui.QTabWidget()
+            self._central_widget.add = self._central_widget.addTab
+            self._central_widget.remove = self._central_widget.removeTab
+        return self._central_widget
+
+    @property
+    def new_session_widget(self):
+        '''
+        return a widget for which set_session can be added.
+        this property can be overwritten.
+        multi-session clients should return a new widget
+        (and keep a reference to it)
+        '''
+        return PostgresSessionWidget()
+
+    def add_session(self, session):
+        '''
+        create a session widget, and add to the ui.
+        '''
+        widg = self.new_session_widget
+        widg.set_session(session)
+        self.session_widgets.append(widg)
+        self.central_widget.add(widg, widg.pg_session.description())
+        return widg
+
+    @property
+    def known_session_params(self):
         '''
         parse the allowed locations for connections.
+        returns a list of :doc:`ConnectionData`
         '''
-        if self._known_connections is None:
-            self._known_connections = []
+        if self._known_session_params is None:
+            self._known_session_params = []
             try:
-                settings = QtCore.QSettings()
                 conf_dir = str(
-                    settings.value("connection_conf_dir").toString())
-                #conf_dir = "/etc/openmolar/client-connections"
-                LOGGER.debug("checking %s for connection config files")
+                    QtCore.QSettings().value("connection_conf_dir").toString())
+
+                LOGGER.debug(
+                    "checking %s for connection config files"% conf_dir)
+
                 for root, dir_, files in os.walk(conf_dir):
                     for file_ in sorted(files):
                         filepath = os.path.join(root, file_)
@@ -114,11 +156,11 @@ class PostgresMainWindow(BaseMainWindow):
                         conn_data.from_conf_file(filepath)
 
                         LOGGER.info("loaded connection %s"% conn_data)
-                        self._known_connections.append(conn_data)
+                        self._known_session_params.append(conn_data)
             except Exception:
-                LOGGER.exception("error getting known_connections")
+                LOGGER.exception("error getting known_session_params")
 
-        return self._known_connections
+        return self._known_session_params
 
     def get_password(self, prompt):
         '''
@@ -135,109 +177,79 @@ class PostgresMainWindow(BaseMainWindow):
         if self._connection_dialog is None:
             self._connection_dialog = ConnectDialog(self)
             self._connection_dialog.set_known_connections(
-                self.known_connections)
+                self.known_session_params)
 
         return self._connection_dialog
 
-    def start_pg_session(self):
+    def new_pg_session(self):
         '''
-        connect to postgres
+        connect a new postgres session
         '''
-        LOGGER.debug("%s.start_pg_session"% __file__)
-        dl = self.connection_dialog
-        while True:
-            if not dl.exec_():
-                return
-            self.end_pg_session()
-            conn_data = dl.chosen_connection
+        if self.ALLOW_MULTIPLE_SESSIONS or not self.has_pg_connection:
+            LOGGER.debug("%s.new_pg_session"% __file__)
+            dl = self.connection_dialog
+            while True:
+                if not dl.exec_():
+                    return
+                if not self.ALLOW_MULTIPLE_SESSIONS:
+                    self.end_pg_sessions()
+                conn_data = dl.chosen_connection
 
-            self.connection = self.CONN_CLASS(conn_data)
-            if self.attempt_connection():
-                break
+                session = self.CONN_CLASS(conn_data)
+                if self._attempt_connection(session):
+                    self.add_session(session)
+                    break
 
-        self._can_connect()
+        self.update_session_status()
 
-    def attempt_connection(self):
+    def _attempt_connection(self, session):
         '''
-        attempt to connect (ie. call QSqlDatabase.connect())
+        attempt to open session (ie call :doc:`PostgresDatabase` .connect() )
         '''
         LOGGER.info(u"%s '%s'"% (_("Attempting connection using data"),
-            self.connection.connection_data))
+            session.connection_data))
 
         try:
-            self.connection.connect()
+            session.connect()
             self.connect(QtGui.QApplication.instance(),
                 QtCore.SIGNAL("Query Error"), self.advise_dl)
             return True
         except ConnectionError as error:
-            self.advise(u"%s<hr />%s"% (
+            self.advise(u"%s<hr /><pre>%s</pre>"% (
                 _("Connection Error"), error), 2)
             LOGGER.exception("Connection Error")
         return False
 
-    def end_pg_session(self):
+    def end_pg_sessions(self):
         '''
         disconnect from postgres server
         (if not connected - pass quietly).
         '''
-        if self.connection:
-            if self.connection.isOpen():
-                self.connection.close()
-                self.connection = None
-                LOGGER.info("DISCONNECTED")
-            self.connection = None
-        self._can_connect()
+        for widg in self.session_widgets:
+            if widg.is_connected:
+                widg.pg_session.close()
+                LOGGER.info("DISCONNECTED session %s"% widg.pg_session)
+            self.central_widget.removeTab(self.central_widget.indexOf(widg))
+        self.session_widgets = []
+        self.update_session_status()
 
-    def _can_connect(self):
+    def update_session_status(self):
         '''
-        toggles the connect buttons/menu actions
+        toggles the connect buttons/menu actions,
+        updates the sessions displayed.
         '''
-        connected = self._connection_status()
-        self.action_connect.setEnabled(not connected)
-        self.action_disconnect.setEnabled(connected)
-
-    def _connection_status(self):
-        '''
-        updates the status bar
-        (called after connect/disconnect or database specified)
-        '''
-        if self.has_pg_connection:
-
-            name = self.connection.databaseName()
-            host = self.connection.hostName()
-            port = self.connection.port()
-
-            message = u"%s '%s' %s %s@%s:%s"% (
-                _("Connected to Database"), name,
-                _("using"), self.connection.userName(),
-                host, port)
-            self.advise(message)
-
-            message = message.replace("<br />", "")
-            self.status_label.setText(message)
-
-            connection_metadata = "'%s' %s:%s" %(name, host, port)
-            result = True
-            LOGGER.info(message)
-        else:
-            self.status_label.setText(_("Not Connected to a database"))
-            connection_metadata = _("OFFLINE")
-            result = False
-        try:
-            title_ = unicode(self.windowTitle())
-            title_ = re.sub("\(.*\)", "(%s)"% connection_metadata, title_)
-            self.setWindowTitle(title_)
-        except ValueError as exc:
-            LOGGER.debug("unable to alter window title %s"% exc)
-
-        return result
+        for session_widg in self.session_widgets:
+            session_widg.update_status()
+        self.action_connect.setEnabled(
+            self.ALLOW_MULTIPLE_SESSIONS or self.has_pg_connection)
+        self.action_disconnect.setEnabled(self.session_widgets != [])
 
     @property
     def has_pg_connection(self):
         '''
-        returns a bool which states if the database connection is open.
+        returns a bool which states if an active connection exists.
         '''
-        return self.connection and self.connection.isOpen()
+        return self.session_widgets != []
 
     def get_user_pass(self, dbname):
         '''
@@ -255,7 +267,7 @@ class PostgresMainWindow(BaseMainWindow):
         really meant to do this.
         '''
         self.saveSettings()
-        self.end_pg_session()
+        self.end_pg_sessions()
 
     def preferences_dialog(self):
         if self._preferences_dialog is None:
@@ -264,7 +276,7 @@ class PostgresMainWindow(BaseMainWindow):
             connections_pref = Preference(_("Database Connections"))
 
             m_d_widg = ManageDatabasesWidget(self)
-            m_d_widg.set_connections(self.known_connections)
+            m_d_widg.set_connections(self.known_session_params)
             connections_pref.setWidget(m_d_widg)
             dl.insert_preference_dialog(0, connections_pref)
 
@@ -282,7 +294,7 @@ def _test():
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
     settings.setValue("connection_conf_dir",
-        "/etc/openmolar/client-connections")
+        "/etc/openmolar/client/connections")
 
     mw = PostgresMainWindow()
     mw.show()

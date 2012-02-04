@@ -26,8 +26,7 @@ class ClosableTabWidget(QtGui.QTabWidget):
     def __init__(self, parent=None):
         super(ClosableTabWidget, self).__init__(parent)
         self.setTabsClosable(True)
-        self.connect(self, QtCore.SIGNAL("tabCloseRequested (int)"),
-                                                    self.removeTab)
+        self.tabCloseRequested.connect(self.removeTab)
 
         closeAll_but = QtGui.QPushButton(_("Close All"), self)
         self.connect(closeAll_but, QtCore.SIGNAL("clicked()"), self.closeAll)
@@ -44,6 +43,16 @@ class ClosableTabWidget(QtGui.QTabWidget):
             widg = self.widget(0)
             QtGui.QTabWidget.removeTab(self, 0)
         return True
+
+    def currentWidget(self):
+        '''
+        return the currently selected widget
+        (why does is this not implemented in QtGui.QTabWidget?)
+        '''
+        i = self.currentIndex()
+        if i == -1:
+            return None
+        return self.widget(i)
 
     def closeAll(self, message=""):
         message += u" %s"% self.message_close_all

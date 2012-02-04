@@ -8,3 +8,4 @@ from main_window import BaseMainWindow
 from preference_manager import Preference, PreferencesDialog
 from completer_textedit import CompletionTextEdit
 from upper_case_lineedit import UpperCaseLineEdit
+from closeable_tab_widget import ClosableTabWidget

@@ -142,6 +142,12 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         if q_query.lastError().isValid():
             print "error", q_query.lastError().text()
 
+    def description(self):
+        '''
+        databasename, host and port
+        '''
+        return u"%s %s:%s"% (
+            self.databaseName(), self.hostName(), self.port())
 
 def _test():
     logging.basicConfig(level=logging.DEBUG)

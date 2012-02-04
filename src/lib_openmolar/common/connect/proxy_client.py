@@ -122,6 +122,14 @@ class ProxyClient(object):
         return self._server
 
     @property
+    def is_connected(self):
+        '''
+        A boolean value stating whether the client is connected
+        (to a proxy server)
+        '''
+        return self._server is not None
+
+    @property
     def brief_name(self):
         return self.connection230_data.name
 
