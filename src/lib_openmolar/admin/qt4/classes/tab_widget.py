@@ -33,32 +33,7 @@ class AdminTabWidget(ClosableTabWidget):
     uses a toolbutton as the right widget, and has some custom signals
     '''
     def __init__(self, parent=None):
-        super(AdminTabWidget, self).__init__(parent)
-
-        action_close = QtGui.QAction(_("Close Tabs"), self)
-        action_close.triggered.connect(self.closeAll)
-
-        action_new_table = QtGui.QAction(_("New Table Viewer"), self)
-        action_new_table.triggered.connect(self.new_table)
-
-        action_new_query = QtGui.QAction(_("New Query Tool"), self)
-        action_new_query.triggered.connect(self.new_query)
-
-        menu = QtGui.QMenu(self)
-        menu.addAction(action_close)
-        menu.addSeparator()
-        menu.addAction(action_new_table)
-        menu.addAction(action_new_query)
-
-        icon = QtGui.QIcon.fromTheme("preferences-desktop")
-        menu_button = QtGui.QToolButton(self)
-        menu_button.setIcon(icon)
-        menu_button.setText(_("Options"))
-        menu_button.setPopupMode(menu_button.InstantPopup)
-        menu_button.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-        menu_button.setMenu(menu)
-
-        self.setCornerWidget(menu_button)
+        ClosableTabWidget.__init__(self, parent)
 
         self.currentChanged.connect(self._tab_changed)
 
@@ -73,7 +48,8 @@ class AdminTabWidget(ClosableTabWidget):
         '''
         result = self.count() <= 1
         if self.count() > 1:
-            result = ClosableTabWidget.closeAll(self, _("Disconnect and"))
+            result = ClosableTabWidget.closeAll(self,
+                _("End All Postgres Sessions and"))
             if result:
                 self.addTab(self.known_server_widget, _("Known Servers"))
                 LOGGER.debug("emitting end_pg_session signal")
@@ -91,10 +67,22 @@ class AdminTabWidget(ClosableTabWidget):
             pass
 
     def new_query(self):
-        self.emit(QtCore.SIGNAL("new query tab"))
+        LOGGER.debug("%s new_query called"% self)
+        try:
+            tool = self.currentWidget()
+            tool.add_query_editor()
+            tool.set_session(tool.pg_session)
+        except AttributeError:
+            LOGGER.debug("cannot add a new query to %s"% tool)
 
     def new_table(self):
-        self.emit(QtCore.SIGNAL("new table tab"))
+        LOGGER.debug("%s new_table called"% self)
+        try:
+            tool = self.currentWidget()
+            tool.add_table()
+            tool.set_session(tool.pg_session)
+        except AttributeError:
+            LOGGER.debug("cannot add a new table to %s"% tool)
 
     def addTab(self, *args):
         ClosableTabWidget.addTab(self, *args)

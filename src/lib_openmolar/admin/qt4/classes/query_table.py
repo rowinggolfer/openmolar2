@@ -66,10 +66,10 @@ class ManageHistoryDialog(BaseDialog):
 
 
 class SqlQueryTable(QtGui.QWidget):
-    def __init__(self, connection, parent=None):
-        super(SqlQueryTable, self).__init__(parent)
-
-        self.connection = connection
+    pg_session = None
+    name = _("SqlQuery Tool")
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
 
         self.query_editor = Qsci.QsciScintilla()
 
@@ -178,6 +178,8 @@ class SqlQueryTable(QtGui.QWidget):
 
         self.hist_combobox.currentIndexChanged.connect(self.hist_cb_manage)
 
+    def set_connection(self, connection):
+        self.pg_session = connection
 
     def get_history(self):
         settings = QtCore.QSettings()
@@ -203,7 +205,6 @@ class SqlQueryTable(QtGui.QWidget):
                 else:
                     self.hist_combobox.addItem(item)
 
-
     def set_history(self):
         settings = QtCore.QSettings()
         settings.setValue('query_table_history', self.history)
@@ -220,7 +221,7 @@ class SqlQueryTable(QtGui.QWidget):
         query = self.query_editor.text()
         self.add_history(query)
 
-        q_query = QtSql.QSqlQuery(query, self.connection)
+        q_query = QtSql.QSqlQuery(query, self.pg_session)
 
         self.model.setQuery(q_query)
 
@@ -331,28 +332,35 @@ class SqlQueryTable(QtGui.QWidget):
                 (u"%s<hr />%s"% (_("Error Exporting to Excel Format"), e)))
 
 
+def _test():
+    from lib_openmolar.common.datatypes import ConnectionData
+    from lib_openmolar.admin.connect import AdminConnection
+    def show_error(error):
+        QtGui.QMessageBox.warning(mw, "error", error)
+
+    app = QtGui.QApplication([])
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
+
+    ac = AdminConnection(conn_data)
+    ac.connect()
+
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(400,400)
+
+    table = SqlQueryTable(mw)
+    table.set_connection(ac)
+
+    mw.setCentralWidget(table)
+
+    mw.connect(table, QtCore.SIGNAL("Query Error"), show_error)
+    mw.show()
+
+    app.exec_()
+
 
 if __name__ == "__main__":
     import gettext
     gettext.install("")
 
-    def show_error(error):
-        QtGui.QMessageBox.warning(dl, "error", error)
-
-    from lib_openmolar.admin.connect import AdminConnection
-
-    app = QtGui.QApplication([])
-
-    sc = AdminConnection()
-    if sc.open():
-        dl = QtGui.QDialog()
-        dl.setMinimumSize(400,400)
-        table = SqlQueryTable(sc, dl)
-        layout = QtGui.QVBoxLayout(dl)
-        layout.addWidget(table)
-        dl.connect(table, QtCore.SIGNAL("Query Error"), show_error)
-
-        dl.exec_()
-
-    else:
-        print "couldn't connect"
+    _test()

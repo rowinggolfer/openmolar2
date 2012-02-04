@@ -30,9 +30,10 @@ from lib_openmolar.admin.qt4.dialogs.new_db_row_dialog import NewRowDialog
 
 
 class DatabaseTableViewer(QtGui.QWidget):
-    def __init__(self, connection, parent=None):
-        super(DatabaseTableViewer, self).__init__(parent)
-        self.connection = connection
+    connection = None
+    name = _("Table Viewer")
+    def __init__(self, parent=None):
+        QtGui.QWidget.__init__(self, parent)
 
         self.table_list = QtGui.QListWidget(self)
         tool_bar = QtGui.QToolBar()
@@ -77,7 +78,6 @@ class DatabaseTableViewer(QtGui.QWidget):
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(splitter)
         splitter.setSizes([150,400])
-        self.setModel()
 
         self.table_list.itemSelectionChanged.connect(self.load_data)
 
@@ -85,11 +85,18 @@ class DatabaseTableViewer(QtGui.QWidget):
         action_import.triggered.connect(self.import_data)
         action_export.triggered.connect(self.export_data)
 
+    def set_connection(self, connection):
+        self.connection = connection
+        self.load_table_choice()
+        self.setModel()
+
     def setModel(self):
         self.model = MyModel(self, self.connection)
 
     def load_table_choice(self):
         self.table_list.clear()
+        if not self.connection:
+            return
         tables = self.connection.get_available_tables()
         tables.sort()
         if tables:
@@ -196,8 +203,8 @@ class RelationalDatabaseTableViewer(DatabaseTableViewer):
     a custom class consisting of a list widget and a table view connected
     to a RelationalDatabase Model
     '''
-    def __init__(self, connection, parent=None):
-        DatabaseTableViewer.__init__(self, connection, parent)
+    def __init__(self, parent=None):
+        DatabaseTableViewer.__init__(self, parent)
 
     def setModel(self):
         '''
@@ -206,34 +213,53 @@ class RelationalDatabaseTableViewer(DatabaseTableViewer):
         self.model = MyRelationalModel(self, self.connection)
 
 
+
+def _test():
+    from lib_openmolar.common.datatypes import ConnectionData
+    from lib_openmolar.admin.connect import AdminConnection
+    def show_error(error):
+        QtGui.QMessageBox.warning(mw, "error", error)
+
+    app = QtGui.QApplication([])
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
+
+    ac = AdminConnection(conn_data)
+    ac.connect()
+
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(400,400)
+
+    label1 = QtGui.QLabel("table viewer")
+    widg1 = DatabaseTableViewer(mw)
+    widg1.set_connection(ac)
+    widg1.load_table_choice()
+
+    label2 = QtGui.QLabel("relational table viewer")
+    widg2 = RelationalDatabaseTableViewer(mw)
+    widg2.set_connection(ac)
+    widg2.load_table_choice()
+
+    frame = QtGui.QFrame()
+    layout = QtGui.QVBoxLayout(frame)
+
+    layout.addWidget(label1)
+    layout.addWidget(widg1)
+    layout.addWidget(label2)
+    layout.addWidget(widg2)
+
+    mw.setCentralWidget(frame)
+
+    mw.connect(widg1, QtCore.SIGNAL("Query Error"), show_error)
+    mw.connect(widg2, QtCore.SIGNAL("Query Error"), show_error)
+    mw.show()
+
+    app.exec_()
+
+
 if __name__ == "__main__":
     import gettext
     gettext.install("")
 
-    from lib_openmolar.admin.connect import AdminConnection
+    _test()
 
-    app = QtGui.QApplication([])
-    sc = AdminConnection()
-
-    if sc.open():
-        dl = QtGui.QDialog()
-        dl.setMinimumSize(400,400)
-        label = QtGui.QLabel("normal table viewer")
-        widg = DatabaseTableViewer(sc, dl)
-        widg.load_table_choice()
-
-        label2 = QtGui.QLabel("relational table viewer")
-        widg2 = RelationalDatabaseTableViewer(sc, dl)
-        widg2.load_table_choice()
-
-        layout = QtGui.QVBoxLayout(dl)
-
-        layout.addWidget(label)
-        layout.addWidget(widg)
-        layout.addWidget(label2)
-        layout.addWidget(widg2)
-
-        dl.exec_()
-
-    else:
-        print "couldn't connect"

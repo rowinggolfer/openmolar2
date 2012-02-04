@@ -65,20 +65,32 @@ class KnownServerWidget(QtGui.QFrame):
     def sizeHint(self):
         return QtCore.QSize(400,400)
 
+    def clear(self):
+        self._servers = []
+        self.listWidget.clear()
+
     def add_proxy_client(self, proxy_client):
         '''
         add a :doc:`proxyClient`
         '''
         self._servers.append(proxy_client)
-        item = QtGui.QListWidgetItem(proxy_client.brief_name, self.listWidget)
+        if proxy_client.is_connected:
+            icon = QtGui.QIcon(":icons/openmolar-server.png")
+        else:
+            icon = QtGui.QIcon(":icons/database.png")
+
+        item = QtGui.QListWidgetItem(icon, proxy_client.brief_name,
+            self.listWidget)
         item.setToolTip(proxy_client.name)
         if self.listWidget.currentItem() is None:
             self.listWidget.setCurrentRow(0)
 
     def _server_chosen(self, row):
-
-        pm = self._servers[row]
-        self.browser.setHtml(pm.html)
+        try:
+            pm = self._servers[row]
+            self.browser.setHtml(pm.html)
+        except IndexError:
+            self.browser.setHtml("<h1>No proxy server chosen</h1>")
         self.server_changed.emit(row)
 
     @property
@@ -100,6 +112,7 @@ def _test():
             self.brief_name = "item %d"% i
             self.name = "test tool tip for client %d"% i
             self.html = "<h1>Client %d Works!</h1>"% i
+            self.is_connected = False
 
     import gettext
     gettext.install("")

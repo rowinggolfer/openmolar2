@@ -39,16 +39,13 @@ from lib_openmolar.admin.db_tools.proxy_manager import ProxyManager
 from lib_openmolar.admin.qt4.dialogs import *
 
 from lib_openmolar.admin.qt4.classes import (
-    SqlQueryTable,
     AdminTabWidget,
-    LogWidget)
-
-from lib_openmolar.admin.qt4.classes.database_table import (
-    DatabaseTableViewer,
-    RelationalDatabaseTableViewer)
+    LogWidget,
+    AdminSessionWidget)
 
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
+
 
 class AdminMainWindow(PostgresMainWindow, ProxyManager):
     '''
@@ -61,8 +58,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
     def __init__(self, parent=None):
         PostgresMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
-        self.dirty = False
-        self.setWindowTitle("%s (%s)"% ("Openmolar Admin", _("OFFLINE")))
+
+        self.setWindowTitle("Openmolar Admin")
         self.setWindowIcon(QtGui.QIcon(":icons/openmolar-server.png"))
 
         ## Main Menu
@@ -135,13 +132,9 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.loadSettings()
         tb_database.setToolButtonStyle(self.main_toolbar.toolButtonStyle())
 
-        self.connection = None
+        self.pg_sessions = []
 
-        self.tab_widget = AdminTabWidget(self)
-        self.known_server_widget = self.tab_widget.known_server_widget
-        self.setCentralWidget(self.tab_widget)
-
-        self.end_pg_session()
+        self.end_pg_sessions()
         self.connect_signals()
         self.show()
 
@@ -156,43 +149,62 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         ##some old style connects are used to ensure argument (bool=0)
         ##is not passed to the slot
 
-        #self.action_omconnect.triggered.connect(self.om_connect)
-        #self.action_omdisconnect.triggered.connect(self.om_disconnect)
+        self.action_omconnect.triggered.connect(self.om_connect)
+        self.action_omdisconnect.triggered.connect(self.om_disconnect)
 
         self.action_show_log.triggered.connect(self.show_log)
 
         #self.action_new_database.triggered.connect(self.create_new_database)
-        #self.action_populate_demo.triggered.connect(self.populate_demo)
+        self.action_populate_demo.triggered.connect(self.populate_demo)
 
-        self.connect(self.tab_widget, QtCore.SIGNAL("new query tab"),
-            self.add_query_editor)
-        self.connect(self.tab_widget, QtCore.SIGNAL("new table tab"),
-            self.add_table_tab)
-        self.connect(self.tab_widget, QtCore.SIGNAL("end_pg_session"),
-            self.end_pg_session)
-
-        self.tab_widget.currentChanged.connect(self.tab_widget_selected)
+        self.connect(self.central_widget, QtCore.SIGNAL("end_pg_sessions"),
+            self.end_pg_sessions)
 
         self.known_server_widget.shortcut_clicked.connect(self.manage_shortcut)
         self.known_server_widget.server_changed.connect(self.set_proxy_index)
 
+    @property
+    def central_widget(self):
+        '''
+        overwrite the property of the Base Class
+        '''
+        if self._central_widget is None:
+            LOGGER.debug("AdminMainWindow.. creating central widget")
+            self._central_widget = AdminTabWidget(self)
+            self.known_server_widget = self._central_widget.known_server_widget
+
+            self._central_widget.add = self._central_widget.addTab
+            self._central_widget.remove = self._central_widget.removeTab
+
+        return self._central_widget
+
+    @property
+    def new_session_widget(self):
+        '''
+        overwrite the property of the Base Class
+        '''
+        admin_session_widget = AdminSessionWidget(self)
+
+        return admin_session_widget
+
     def _init_proxies(self):
         '''
-        called only at startup
+        called at startup, and by the om_connect action
         '''
         ProxyManager._init_proxies(self)
+        self.known_server_widget.clear()
         for client in self.proxy_clients:
             self.known_server_widget.add_proxy_client(client)
+        self.known_server_widget.setEnabled(True)
+
+    def om_disconnect(self):
+        ProxyManager.om_disconnect(self)
+        self.known_server_widget.clear()
+        self.known_server_widget.setEnabled(False)
 
     def switch_server_user(self):
         self.advise("we need to up your permissions for this",1)
         return False
-
-    def tab_widget_selected(self, i=-1):
-        tab = self.tab_widget.currentWidget()
-        if (tab and type(tab) == DatabaseTableViewer or
-        type(tab) == RelationalDatabaseTableViewer) :
-            tab.load_table_choice()
 
     def show_log(self):
         '''
@@ -203,51 +215,17 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         else:
             self.log_dock_widget.hide()
 
-    def start_pg_session(self):
-        '''
-        connect to a server
-        '''
-        PostgresMainWindow.start_pg_session(self)
-        self.addViews()
-
-    def end_pg_session(self, shutting_down=False):
+    def end_pg_sessions(self, shutting_down=False):
         '''
         overwrite baseclass function
         '''
         if shutting_down or (
-        self.has_pg_connection and self.tab_widget.closeAll()):
-            PostgresMainWindow.end_pg_session(self)
+        self.has_pg_connection and self.central_widget.closeAll()):
+            PostgresMainWindow.end_pg_sessions(self)
         else:
-            if self.tab_widget.closeAll():
-                PostgresMainWindow.end_pg_session(self)
-        self._can_connect()
-
-    def addViews(self):
-        self.add_table_tab()
-        self.add_query_editor()
-        self.tab_widget.setCurrentIndex(1)
-
-    def add_table_tab(self):
-        if self.has_pg_connection:
-            ## add a relational database table
-            ##todo - find out if this class is better for my needs!
-            #table = DatabaseTableViewer(self.connection)
-            widg = RelationalDatabaseTableViewer(self.connection, self.tab_widget)
-            self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
-            self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-            #self.tabs.append(widg)
-            icon = QtGui.QIcon.fromTheme("text-x-generic")
-            self.tab_widget.addTab(widg, icon, _("Table (Relational)"))
-
-    def add_query_editor(self):
-        if self.has_pg_connection:
-            ## add a query table
-            widg = SqlQueryTable(self.connection)
-            self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
-            self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-            #self.tabs.append(widg)
-            icon = QtGui.QIcon.fromTheme("text-x-generic")
-            self.tab_widget.addTab(widg, icon, _("Query Tool"))
+            if self.central_widget.closeAll():
+                PostgresMainWindow.end_pg_sessions(self)
+        self.update_session_status()
 
     def use_proxy_database(self, db_name):
         '''
@@ -271,10 +249,9 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             port = 5432,
             db_name = db_name)
 
-        self.connection = AdminConnection(connection_data)
-        self.attempt_connection()
-        self._can_connect()
-        self.addViews()
+        pg_session = AdminConnection(connection_data)
+        if self._attempt_connection(pg_session):
+            self.add_session(pg_session)
 
     def create_new_database(self):
         '''
@@ -348,7 +325,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             event.ignore()
         else:
             self.saveSettings()
-            self.end_pg_session(shutting_down=True)
+            self.end_pg_sessions(shutting_down=True)
 
     @property
     def confirmDataOverwrite(self):
@@ -407,7 +384,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         qsettings = QtCore.QSettings()
 
         qsettings.setValue("connection_conf_dir",
-            "/etc/openmolar/admin-connections")
+            "/etc/openmolar/admin/connections")
 
     def saveSettings(self):
         PostgresMainWindow.saveSettings(self)

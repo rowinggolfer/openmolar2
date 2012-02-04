@@ -95,27 +95,28 @@ class ProxyManager(object):
         '''
         load the proxies.
         '''
+        self.forget_proxies()
         for connection230_data in AD_SETTINGS.om_connections:
             client = ProxyClient(connection230_data)
             LOGGER.debug("loading proxy_client %s"% client)
             self._proxy_clients.append(client)
-        #self._proxy_clients.append(ProxyClient("127.0.0.1", 230))
+
+    def forget_proxies(self):
+        self._proxy_clients = []
 
     def om_connect(self):
         '''
         connect to a 230 server
         '''
         LOGGER.info("connecting to the openmolar_server....")
-        self.init_proxy()
-        self.display_proxy_message()
+        self._init_proxies()
 
     def om_disconnect(self):
         '''
         disconnect from the 230 server
         '''
         LOGGER.info("disconnecting from the openmolar_server....")
-        self._proxy_server = None
-        self.display_proxy_message()
+        self.forget_proxies()
 
     @property
     def proxy_server(self):
