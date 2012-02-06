@@ -226,10 +226,13 @@ class PostgresMainWindow(BaseMainWindow):
         (if not connected - pass quietly).
         '''
         for widg in self.session_widgets:
+            i = self.central_widget.indexOf(widg)
             if widg.is_connected:
                 widg.pg_session.close()
                 LOGGER.info("DISCONNECTED session %s"% widg.pg_session)
-            self.central_widget.removeTab(self.central_widget.indexOf(widg))
+            if i != -1:
+                #widg has already been removed?
+                self.central_widget.removeTab(i)
         self.session_widgets = []
         self.update_session_status()
 
@@ -241,7 +244,7 @@ class PostgresMainWindow(BaseMainWindow):
         for session_widg in self.session_widgets:
             session_widg.update_status()
         self.action_connect.setEnabled(
-            self.ALLOW_MULTIPLE_SESSIONS or self.has_pg_connection)
+            self.ALLOW_MULTIPLE_SESSIONS or not self.has_pg_connection)
         self.action_disconnect.setEnabled(self.session_widgets != [])
 
     @property

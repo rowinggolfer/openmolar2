@@ -30,14 +30,14 @@ from lib_openmolar.common.connect import ProxyUser
 
 class _ConnectionError(Exception):
     '''
-    a custom Exception - becomes a property of Proxyclient
+    a custom Exception - becomes a property of :doc:`ProxyClient`
     '''
     pass
 
 class _PermissionError(Exception):
     '''
     A custom exception raised when user privileges are insufficient
-    becomes a property of Proxyclient
+    becomes a property of :doc:`ProxyClient`
     '''
     pass
 
