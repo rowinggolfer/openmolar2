@@ -57,7 +57,7 @@ class ProxyManager(object):
     @property
     def proxy_clients(self):
         '''
-        A list of :doc:`ProxyClients`
+        A list of :doc:`ProxyClient`
         '''
         return self._proxy_clients
 

@@ -85,7 +85,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         insertpoint = self.action_connect
         self.main_toolbar.insertAction(insertpoint, self.action_omconnect)
-        self.main_toolbar.insertAction(insertpoint,self.action_omdisconnect)
+        self.main_toolbar.insertAction(insertpoint, self.action_omdisconnect)
         self.main_toolbar.insertSeparator(insertpoint)
 
         ## "Database Tools"
@@ -229,7 +229,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
     def use_proxy_database(self, db_name):
         '''
-        user has clicked on a link provided by a proxyClient
+        user has clicked on a link provided by a :doc:`ProxyClient`
         requesting a session on dbname
         '''
         ## TODO this should use information pulled from the proxy server

@@ -71,7 +71,7 @@ class KnownServerWidget(QtGui.QFrame):
 
     def add_proxy_client(self, proxy_client):
         '''
-        add a :doc:`proxyClient`
+        add a :doc:`ProxyClient`
         '''
         self._servers.append(proxy_client)
         if proxy_client.is_connected:
@@ -96,7 +96,7 @@ class KnownServerWidget(QtGui.QFrame):
     @property
     def current_client(self):
         '''
-        the active :doc:`Proxyclient`
+        the active :doc:`ProxyClient`
         '''
         return self._servers[self.listWidget.currentRow()]
 
