@@ -36,12 +36,19 @@ from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
 from lib_openmolar.client.qt4 import client_widgets
+
+from lib_openmolar.client.qt4.interfaces import ClientSessionWidget
 from lib_openmolar.client.qt4.interfaces import PatientInterface
 from lib_openmolar.client.qt4.interfaces import DiaryInterface
 
 class ClientMainWindow(PostgresMainWindow):
 
+    _stacked_widget = None
+
+    #:customise the base class
     CONN_CLASS = ClientConnection
+
+    ALLOW_MULTIPLE_SESSIONS = False
 
     def __init__(self, parent=None):
         PostgresMainWindow.__init__(self, parent)
@@ -52,10 +59,6 @@ class ClientMainWindow(PostgresMainWindow):
 
         self.system_font = self.font()
         self.loadSettings()
-
-        ## add the patient page
-        self.patient_interface = PatientInterface(self)
-        self.diary_interface = DiaryInterface(self)
 
         icon = QtGui.QIcon(':icons/database.png')
         self.action_patient = QtGui.QAction(icon, _("Patient Database"), self)
@@ -68,11 +71,13 @@ class ClientMainWindow(PostgresMainWindow):
         self.main_toolbar.insertAction(insertpoint, self.action_patient)
         self.main_toolbar.insertAction(insertpoint, self.action_diary)
 
-        self.stacked_widget = QtGui.QStackedWidget(self)
-        self.stacked_widget.addWidget(self.patient_interface)
-        self.stacked_widget.addWidget(self.diary_interface)
+        #: the :doc:`PatientInterface`
+        self.patient_interface = PatientInterface(self)
+        #: the :doc:`DiaryInterface`
+        self.diary_interface = DiaryInterface(self)
 
-        self.setCentralWidget(self.stacked_widget)
+        self.central_widget.add(self.patient_interface, "")
+        self.central_widget.add(self.diary_interface, "")
 
         self.status_widget = client_widgets.StatusBarWidget()
         self.statusbar.addPermanentWidget(self.status_widget)
@@ -83,6 +88,20 @@ class ClientMainWindow(PostgresMainWindow):
 
         SETTINGS.mainui = self
         SETTINGS.load_plugins()
+
+    @property
+    def central_widget(self):
+        if self._central_widget is None:
+            self._central_widget = ClientSessionWidget()
+        return self._central_widget
+
+    def add_session(self, session):
+        '''
+        Overwrite the method of PostgresMainWindow
+        Client is a single session widget.
+        '''
+        self.session_widgets = [self.central_widget]
+        self.central_widget.set_session(session)
 
     @property
     def is_dirty(self):
@@ -97,11 +116,11 @@ class ClientMainWindow(PostgresMainWindow):
     def user2_changed(self, user):
         SETTINGS.set_user2(user)
 
-    def end_pg_session(self, shutting_down=False):
+    def end_pg_sessions(self, shutting_down=False):
         '''
         overwrite baseclass function
         '''
-        PostgresMainWindow.end_pg_session(self)
+        PostgresMainWindow.end_pg_sessions(self)
         SETTINGS.psql_conn = None
 
     def connect_signals(self):
@@ -175,7 +194,7 @@ class ClientMainWindow(PostgresMainWindow):
             event.ignore()
         else:
             self.saveSettings()
-            self.end_pg_session(shutting_down=True)
+            self.end_pg_sessions(shutting_down=True)
 
     def page_changer(self):
         sender = self.sender()
@@ -183,7 +202,7 @@ class ClientMainWindow(PostgresMainWindow):
             i = 0
         elif sender == self.action_diary:
             i = 1
-        self.stacked_widget.setCurrentIndex(i)
+        self.central_widget.setCurrentIndex(i)
 
     def _patient_loaded(self, patient):
         '''
