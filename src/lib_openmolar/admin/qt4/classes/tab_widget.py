@@ -40,8 +40,6 @@ class AdminTabWidget(ClosableTabWidget):
         self.known_server_widget = KnownServerWidget()
         self.addTab(self.known_server_widget, _("Known Servers"))
 
-        self.toggle_tabbar()
-
     def closeAll(self):
         '''
         re-implement the base class method
@@ -54,7 +52,6 @@ class AdminTabWidget(ClosableTabWidget):
                 self.addTab(self.known_server_widget, _("Known Servers"))
                 LOGGER.debug("emitting end_pg_session signal")
                 self.emit(QtCore.SIGNAL("end_pg_session"))
-        self.toggle_tabbar()
         return result
 
     def _tab_changed(self, i):
@@ -86,15 +83,7 @@ class AdminTabWidget(ClosableTabWidget):
 
     def addTab(self, *args):
         ClosableTabWidget.addTab(self, *args)
-        self.toggle_tabbar()
-
-    def removeTab(self, i):
-        ClosableTabWidget.removeTab(self, i)
-        self.toggle_tabbar()
-
-    def toggle_tabbar(self):
-        pass
-        #self.tabBar().setVisible(self.count()>1)
+        self.setCurrentIndex(self.count()-1)
 
 
 def _test():
