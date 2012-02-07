@@ -1,3 +1,10 @@
+openmolar-admin (2.0.2+hg011~0) unstable; urgency=low
+
+  * moved to a multi-postgres session design
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 06 Feb 2012 13:59:50 +0000
+
+
 openmolar-admin (2.0.2+hg008~0) unstable; urgency=low
 
   * new common code allowing easier management of database connection

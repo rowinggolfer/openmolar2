@@ -1,3 +1,10 @@
+openmolar-client (2.0.2+hg010~0) unstable; urgency=low
+
+  * moved to a multi-postgres session design for the admin client, modifed client to allow this
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 06 Feb 2012 14:00:45 +0000
+
+
 openmolar-client (2.0.2+hg007~0) unstable; urgency=low
 
   * roll minor version number

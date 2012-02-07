@@ -1,3 +1,10 @@
+openmolar-common (2.0.2+hg009~0) unstable; urgency=low
+
+  * moved to a multi-postgres session design
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 06 Feb 2012 13:58:21 +0000
+
+
 openmolar-common (2.0.2+hg006~1) unstable; urgency=low
 
   * added qt4 package
