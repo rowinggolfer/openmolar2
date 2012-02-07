@@ -33,7 +33,6 @@ class InsertableRecord(QtSql.QSqlRecord):
         record = database.record(tablename)
         QtSql.QSqlRecord.__init__(self, record)
 
-
     @property
     def insert_query(self):
         cols, vals = u"", u""
