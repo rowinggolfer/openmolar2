@@ -27,14 +27,14 @@ This module provides the AddressObjects Class, and AddressRecord Class
 
 from PyQt4 import QtSql, QtCore
 
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.common_db_orm import InsertableRecord
 from lib_openmolar.common.datatypes import EditableField, OMType
 
 
-class AddressRecord(QtSql.QSqlRecord):
+class AddressRecord(InsertableRecord):
     '''
-    A re-implementation of QtSql.QSqlRecord which is self aware
-    for editing purposes
+    A re-implementation of :doc:`InsertableRecord`
+    which is self aware for editing purposes
     '''
     _editable_fields = None
 
@@ -160,12 +160,15 @@ class AddressObjects(object):
     view_addresses pseudo table
     '''
     def __init__(self, patient_id):
-
         #: a pointer to the id of the :doc:`PatientModel`
         self.patient_id = patient_id
         self.get_records()
 
     def get_records(self):
+        '''
+        poll the database to get all address records associated with the
+        patient_id given at init
+        '''
         self.record_list, self.orig_record_list = [], []
 
         # this query LOOKS simple.. but the underlying view is VERY complex.

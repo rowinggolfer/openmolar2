@@ -61,6 +61,9 @@ class NewAddressDialog(BaseDialog):
         self.set_accept_button_text(_("Create New Record"))
 
         self.address_record = AddressRecord() # A blank record
+        '''
+        A pointer to the dialog's :doc:`AddressRecord`
+        '''
         self.address_record.setValue("modified_by", SETTINGS.user)
         self.address_record.setValue("status", "active")
 
@@ -72,8 +75,6 @@ class NewAddressDialog(BaseDialog):
         palette = QtGui.QPalette(self.palette())
         brush = QtGui.QBrush(colours.REQUIRED_FIELD)
         palette.setBrush(QtGui.QPalette.Base, brush)
-
-        ##TODO this is bust!!
 
         standard_fields, advanced_fields = self.address_record.editable_fields
 
@@ -163,7 +164,6 @@ class NewAddressDialog(BaseDialog):
         '''
         applies the entered data to the new object
         '''
-
         # step 1.. get the values the user has entered.
         for field_name in self.value_store:
             widg, field_type = self.value_store[field_name]
@@ -175,13 +175,16 @@ class NewAddressDialog(BaseDialog):
                 val = widg.itemData(widg.currentIndex())
                 self.address_record.setValue(field_name, val)
             else:
-                print "Whoops!" ## <-shouldn't happen
+                ## shouldn't happen
+                LOGGER.error("Whoops! misunderstood field name")
 
         # step 2.. see if all required fields are completed
-
         self.ommisions = []
         all_completed = True
-        for editable_field in self.address_record.editable_fields:
+
+        standard_fields, advanced_fields = self.address_record.editable_fields
+
+        for editable_field in standard_fields+advanced_fields:
             if editable_field.required:
                 field_name = editable_field.fieldname
 
@@ -226,14 +229,21 @@ class ShowAddyMatchDialog(AddressSelectionDialog):
         self.set_reject_button_text(_("No, Create a new Record now."))
 
 
-if __name__ == "__main__":
+def _test():
+
+    from lib_openmolar.common.datatypes import ConnectionData
+    from lib_openmolar.client.connect import ClientConnection
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import ClientConnection
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
 
-    cc = ClientConnection()
+    cc = ClientConnection(conn_data)
     cc.connect()
 
     dl = NewAddressDialog()
     dl.exec_()
+
+if __name__ == "__main__":
+    _test()

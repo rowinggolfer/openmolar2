@@ -22,12 +22,11 @@
 
 from PyQt4 import QtCore, QtGui, QtSql
 
-from lib_openmolar.common.datatypes import OMTypes
+from lib_openmolar.common.datatypes import OMType, OMTypes
 
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
-from lib_openmolar.common.qt4.widgets.upper_case_lineedit import UpperCaseLineEdit
-
-
+from lib_openmolar.common.qt4.widgets.upper_case_lineedit import \
+    UpperCaseLineEdit
 
 from lib_openmolar.client.qt4.colours import colours
 
@@ -222,16 +221,21 @@ class ShowMatchDialog(find_patient_dialog.FinalSelectionDialog):
         self.set_reject_button_text(_("No, Create a new Record now."))
 
 
-if __name__ == "__main__":
+def _test():
 
-
+    from lib_openmolar.common.datatypes import ConnectionData
+    from lib_openmolar.client.connect import ClientConnection
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import ClientConnection
+    conn_data = ConnectionData()
+    conn_data.demo_connection()
 
-    cc = ClientConnection()
+    cc = ClientConnection(conn_data)
     cc.connect()
 
     dl = NewPatientDialog()
     dl.exec_()
+
+if __name__ == "__main__":
+    _test()

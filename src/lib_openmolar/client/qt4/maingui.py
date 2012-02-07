@@ -152,7 +152,7 @@ class ClientMainWindow(PostgresMainWindow):
         PostgresMainWindow.loadSettings(self)
         qsettings = QtCore.QSettings()
         qsettings.setValue("connection_conf_dir",
-            "/etc/openmolar/client-connections")
+            "/etc/openmolar/client/connections")
 
         #python dict of settings
         dict_ = str(qsettings.value("settings_dict").toString())
