@@ -52,10 +52,8 @@ class TestCase(unittest.TestCase):
         for proc_code in SETTINGS.PROCEDURE_CODES:
             item = TreatmentItem(proc_code)
             item.set_px_clinician(1)
-            if item.description_required:
-                item.set_description("hello")
             if item.tooth_required:
-                item.set_tooth([7])
+                item.set_teeth([7])
             if item.surfaces_required:
                 fill, surfs = "MODBL",""
                 for char in fill:

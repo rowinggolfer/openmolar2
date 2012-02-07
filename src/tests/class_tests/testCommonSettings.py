@@ -22,26 +22,25 @@
 
 import os, sys
 
-lib_openmolar_path = os.path.abspath("../../") 
+lib_openmolar_path = os.path.abspath("../../")
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
 from lib_openmolar.common.settings import CommonSettings
 
 import unittest
-from PyQt4 import QtGui
-        
+
 class TestCase(unittest.TestCase):
     def setUp(self):
         self.settings = CommonSettings()
-        
+
     def tearDown(self):
         pass
-                
+
     def test_convert_tooth_shortname(self):
         self.assertEqual(self.settings.convert_tooth_shortname("UR8"), 1)
-        
-        
-        
+
+
+
 if __name__ == "__main__":
     unittest.main()
