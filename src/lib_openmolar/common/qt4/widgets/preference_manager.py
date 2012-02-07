@@ -27,11 +27,10 @@ class Preference(object):
     '''
     A custom data structure used by PreferencesDialog
     '''
-    icon = QtGui.QIcon.fromTheme("help-about")
-
     def __init__(self, title):
         self.title = title
         self.widget = QtGui.QLabel(title + " hello world")
+        self.icon = QtGui.QIcon.fromTheme("help-about")
 
     def setIcon(self, icon):
         if not icon.isNull():
@@ -119,14 +118,6 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
 
         self.listwidget.setCurrentRow(index)
 
-    def exec_(self):
-        '''
-        With the advent of gnome3..
-        it became clear that this isn't a dialog atall.
-        so I changed the base class to QMainWindow, so this function is
-        for backwards compatibility
-        '''
-        self.show()
 
 class FontOptionsWidget(QtGui.QWidget):
     '''
