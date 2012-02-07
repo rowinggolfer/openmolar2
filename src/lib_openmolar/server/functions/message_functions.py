@@ -68,11 +68,10 @@ def get_footer():
 
         try:
             from lib_openmolar.server import version
-            VERSION = "2.0.1~hg%s"% (
-                version.revision_number)
+            VERSION = "%s~hg%s"% (version.VERSION, version.revision_number)
             logger.info("SERVER VERSION %s"% VERSION)
             logger.debug("VERSION DATE %s"% version.date)
-            logger.debug("REVISION %s"% version.revision_id)
+            logger.debug("REVISION ID %s"% version.revision_id)
         except ImportError:
             VERSION = "Unknown"
             logger.exception("unable to parse for server versioning")
