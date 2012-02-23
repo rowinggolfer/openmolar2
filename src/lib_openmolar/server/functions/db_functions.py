@@ -135,7 +135,7 @@ class DBFunctions(object):
         log = logging.getLogger("openmolar_server")
         log.info("polling admin application for latest schema")
         try:
-            from lib_openmolar.admin.connect import AdminConnection
+            from lib_openmolar.admin.connect import DemoAdminConnection
             sql =  AdminConnection().virgin_sql
             self.save_schema(sql)
         except ImportError as exc:
