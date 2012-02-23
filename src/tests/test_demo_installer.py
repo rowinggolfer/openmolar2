@@ -22,19 +22,19 @@
 
 import os, sys, unittest
 
-lib_openmolar_path = os.path.abspath("../") 
+lib_openmolar_path = os.path.abspath("../")
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
-import admin_app
-        
+import admin as admin_app
+
 class TestCase(unittest.TestCase):
     def setUp(self):
-        print "WARNING - overwriting openmolar_demo database"   
-    
+        print "WARNING - overwriting openmolar_demo database"
+
     def tearDown(self):
-        pass        
-    
+        pass
+
     def test_mainwindow(self):
         admin_app.initiate_demo_database()
 

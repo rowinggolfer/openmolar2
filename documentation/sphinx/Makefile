@@ -33,14 +33,16 @@ autogen:
 	@echo "Removing old generated rst files." 
 	-rm -rf $(KLASS_RST_DIR)
 	./technical/autogen_scripts/get_all_classes.py "../../src/lib_openmolar/"
-	
+
 	@echo "autogen complete"
-	
+
 clean:
 	-rm -rf $(BUILDDIR)/*
-	
+
 html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/tmp/html 
+	rm -rf $(BUILDDIR)/html 
+	mv $(BUILDDIR)/tmp/html $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
@@ -96,5 +98,4 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
-	     
-	
+

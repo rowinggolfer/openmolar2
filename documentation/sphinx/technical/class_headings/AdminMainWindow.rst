@@ -1,6 +1,5 @@
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace (neil@openmolar.co)
 :Release: |release|
-:Date: |today|
 
 This class is the MainWindow for the admin application.
 
