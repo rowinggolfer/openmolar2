@@ -114,8 +114,8 @@ class PostgresMainWindow(BaseMainWindow):
     @property
     def new_session_widget(self):
         '''
-        return a widget for which set_session can be added.
-        this property can be overwritten.
+        return a widget (of type :doc:`PostgresSessionWidget` )
+        single-session widgets should return the existing session widget.
         multi-session clients should return a new widget
         (and keep a reference to it)
         '''
@@ -123,7 +123,12 @@ class PostgresMainWindow(BaseMainWindow):
 
     def add_session(self, session):
         '''
-        create a session widget, and add to the ui.
+        get self.new_session_widget give it the session and to the ui.
+
+        .. note::
+            returns whatever self.new_session_widget created so that calling
+            functions have a reference to it.
+
         '''
         widg = self.new_session_widget
         widg.set_session(session)

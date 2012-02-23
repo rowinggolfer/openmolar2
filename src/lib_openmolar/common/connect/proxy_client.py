@@ -77,6 +77,10 @@ class ProxyClient(object):
         else:
             LOGGER.error("not connected")
 
+    def __repr__(self):
+        return "%s %s connected = %s"% (
+            self.__class__, self.name, self.is_connected)
+
     def connect(self):
         '''
         attempt to connect to xmlrpc_server, and return this object

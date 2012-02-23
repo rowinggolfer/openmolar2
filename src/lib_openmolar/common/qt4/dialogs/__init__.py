@@ -7,3 +7,8 @@ from extendable_dialog import ExtendableDialog
 from new_user_dialog import NewUserPasswordDialog
 from user_dialog import UserPasswordDialog
 
+__all__ = [ 'BaseDialog',
+            'ExtendableDialog',
+            'NewUserPasswordDialog',
+            'UserPasswordDialog'
+            ]
