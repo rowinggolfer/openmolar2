@@ -104,9 +104,9 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.admin.connect import AdminConnection
+    from lib_openmolar.admin.connect import DemoAdminConnection
     from lib_openmolar.admin.qt4.classes import MyModel
-    sc = AdminConnection()
+    sc = DemoAdminConnection()
     sc.connect()
 
     model = MyModel(db=sc)

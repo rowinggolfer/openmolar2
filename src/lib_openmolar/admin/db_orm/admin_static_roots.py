@@ -60,7 +60,9 @@ class DemoGenerator(object):
         else:
             self.min_patient_id, self.max_patient_id = 0,0
 
-        self.length = 100
+        self.length = (self.max_patient_id - self.min_patient_id) * 24
+        if self.length > 100:
+            self.length = 100
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
@@ -89,8 +91,8 @@ class DemoGenerator(object):
             yield self.record.insert_query
 
 if __name__ == "__main__":
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    sc = DemoAdminConnection()
     sc.connect()
 
     builder = DemoGenerator(sc)

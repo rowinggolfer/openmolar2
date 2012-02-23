@@ -149,8 +149,8 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    sc = DemoAdminConnection()
     sc.connect()
 
     dl = PopulateDemoDialog(sc)

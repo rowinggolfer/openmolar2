@@ -36,6 +36,7 @@ from lib_openmolar.admin.connect import AdminConnection
 
 from lib_openmolar.admin.db_tools.proxy_manager import ProxyManager
 
+from lib_openmolar.common.qt4.dialogs import *
 from lib_openmolar.admin.qt4.dialogs import *
 
 from lib_openmolar.admin.qt4.classes import (
@@ -154,7 +155,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.action_show_log.triggered.connect(self.show_log)
 
-        #self.action_new_database.triggered.connect(self.create_new_database)
+        self.action_new_database.triggered.connect(self.create_new_database)
         self.action_populate_demo.triggered.connect(self.populate_demo)
 
         self.connect(self.central_widget, QtCore.SIGNAL("end_pg_sessions"),
@@ -295,10 +296,20 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         '''
         catches signal when user hits the demo action
         '''
-        dl = PopulateDemoDialog(self.connection, self)
+        if self.session_widgets == []:
+            self.advise("no session started",1)
+            return
+
+        if len(self.session_widgets) == 1:
+            i = 0
+        else:
+            i = self.central_widget.currentIndex()
+
+        conn = self.session_widgets[i].pg_session
+        LOGGER.info("calling populate demo on session %s"% conn)
+        dl = PopulateDemoDialog(conn, self)
         if not dl.exec_():
             self.advise("Demo data population was abandoned", 1)
-        self.addViews()
 
     def manage_db(self, dbname):
         '''
@@ -422,7 +433,6 @@ _("Version"), AD_SETTINGS.VERSION,
             psword = dl.password
             self.advise("NOW WHAT", 2)
             #AD_SETTINGS.proxy_user = ProxyUser(name, psword)
-
             #force reload of server at next use
             self._proxy_server = None
             return True

@@ -72,8 +72,8 @@ class DemoGenerator(object):
         return []
 
 if __name__ == "__main__":
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    sc = DemoAdminConnection()
     sc.connect()
 
     builder = DemoGenerator(sc)

@@ -132,12 +132,10 @@ class AdminSessionWidget(PostgresSessionWidget):
             tab.load_table_choice()
 
 def _test():
-    from lib_openmolar.common.datatypes import ConnectionData
-    from lib_openmolar.admin.connect import AdminConnection
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    
     app = QtGui.QApplication([])
-    conn_data = ConnectionData()
-    conn_data.demo_connection()
-    session = AdminConnection(conn_data)
+    session = DemoAdminConnection()
     session.connect()
     psw = AdminSessionWidget()
     psw.set_session(session)

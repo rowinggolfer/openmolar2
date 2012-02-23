@@ -334,7 +334,7 @@ class SqlQueryTable(QtGui.QWidget):
 
 def _test():
     from lib_openmolar.common.datatypes import ConnectionData
-    from lib_openmolar.admin.connect import AdminConnection
+    from lib_openmolar.admin.connect import DemoAdminConnection
     def show_error(error):
         QtGui.QMessageBox.warning(mw, "error", error)
 

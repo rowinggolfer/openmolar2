@@ -127,14 +127,23 @@ class AdminConnection(PostgresDatabase):
         QtGui.QApplication.instance().emit(*args)
 
 
+class DemoAdminConnection(AdminConnection):
+    '''
+    A connection to the demo database (on localhost)
+    used for testing purposes.
+    '''
+    def __init__(self):
+        conn_data = ConnectionData()
+        conn_data.demo_connection()
+
+        AdminConnection.__init__(self, conn_data)
+    
+
 if __name__ == "__main__":
     import gettext
     gettext.install("openmolar")
 
     app = QtGui.QApplication([])
 
-    conn_data = ConnectionData()
-    conn_data.demo_connection()
-
-    sc = AdminConnection(conn_data)
+    sc = DemoAdminConnection()
     sc.connect()

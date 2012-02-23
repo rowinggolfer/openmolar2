@@ -231,6 +231,9 @@ class ProxyManager(object):
 def _test():
     import lib_openmolar.admin
     import gettext
+    import logging
+
+    LOGGER.setLevel(logging.DEBUG)
     gettext.install("openmolar")
     pm = ProxyManager()
 
@@ -238,6 +241,7 @@ def _test():
     LOGGER.debug(pm.proxy_server)
     #LOGGER.debug(pm.drop_db("openmolar_demo"))
     #LOGGER.debug(pm.create_demo_database())
+    LOGGER.debug(pm.proxy_clients)
 
 if __name__ == "__main__":
     _test()

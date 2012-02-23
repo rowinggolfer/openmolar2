@@ -86,6 +86,7 @@ def main(filepath):
     admin.init_proxy()
 
 if __name__ == "__main__":
+    import sys
     import gettext
     gettext.install("openmolar")
     sys.exit(main())

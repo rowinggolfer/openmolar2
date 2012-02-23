@@ -60,10 +60,13 @@ class DemoGenerator(object):
         if q_query.first():
             self.min_patient_id = q_query.value(0).toInt()[0]
             self.max_patient_id = q_query.value(1).toInt()[0]
+            
         else:
             self.min_patient_id, self.max_patient_id = 0,0
-
-        self.length = 100
+        
+        self.length = (self.max_patient_id - self.min_patient_id) * 24
+        if self.length > 100:
+            self.length = 100
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
@@ -74,14 +77,14 @@ class DemoGenerator(object):
         '''
         unique_roots =  set([])
         while len(unique_roots) < self.length:
-            pt = randint(self.min_patient_id, self.max_patient_id)
+            pt_id = randint(self.min_patient_id, self.max_patient_id)
             root = randint(1,32)
-            unique_roots.add((pt, root))
-
-        for pt, root in unique_roots:
+            unique_roots.add((pt_id, root))
+        
+        for pt_id, root in unique_roots:
             self.record.clearValues()
             #set values, or allow defaults
-            self.record.setValue('patient_id', pt)
+            self.record.setValue('patient_id', pt_id)
             self.record.setValue('tooth', root)
             self.record.setValue('checked_by', 'demo_installer')
             self.record.setValue('values', "123456")
@@ -89,8 +92,8 @@ class DemoGenerator(object):
             yield self.record.insert_query
 
 if __name__ == "__main__":
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    sc = DemoAdminConnection()
     sc.connect()
 
     builder = DemoGenerator(sc)

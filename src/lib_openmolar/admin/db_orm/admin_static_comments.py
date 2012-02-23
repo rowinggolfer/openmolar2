@@ -61,7 +61,9 @@ class DemoGenerator(object):
         else:
             self.min_patient_id, self.max_patient_id = 0,0
 
-        self.length = 100
+        self.length = (self.max_patient_id - self.min_patient_id) * 24
+        if self.length > 100:
+            self.length = 100
 
         self.record = common_db_orm.InsertableRecord(database, TABLENAME)
 
@@ -72,7 +74,7 @@ class DemoGenerator(object):
         comments = ["big tooth", "little tooth", "rotated tooth"]
         list_len = len(comments)-1
 
-        unique_teeth =  set([])
+        unique_teeth = set([])
         while len(unique_teeth) < self.length:
             pt = randint(self.min_patient_id, self.max_patient_id)
             tooth = randint(1,32)
@@ -92,8 +94,8 @@ class DemoGenerator(object):
             yield self.record.insert_query
 
 if __name__ == "__main__":
-    from lib_openmolar.admin.connect import AdminConnection
-    sc = AdminConnection()
+    from lib_openmolar.admin.connect import DemoAdminConnection
+    sc = DemoAdminConnection()
     sc.connect()
 
     builder = DemoGenerator(sc)

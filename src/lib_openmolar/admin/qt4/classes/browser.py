@@ -44,21 +44,22 @@ class Browser(QtWebKit.QWebView):
         self.shortcut_clicked.emit(url_string)
 
 if __name__ == "__main__":
-
-    import lib_openmolar.admin
-    app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(400,200)
-
+    import lib_openmolar.admin # for LOGGER
+    
     def sig_catcher(*args):
-        print args
+        print (args)
+
+    app = QtGui.QApplication([])
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(400,200)
 
     browser = Browser()
     browser.setHtml("hello<br /><a href='url'>click here</a>")
 
     browser.shortcut_clicked.connect(sig_catcher)
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(browser)
+    mw.setCentralWidget(browser)
 
-    dl.exec_()
+    mw.show()
+    
+    app.exec_()

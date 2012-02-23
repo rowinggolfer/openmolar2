@@ -21,6 +21,7 @@
 ###############################################################################
 
 import logging
+import re
 
 from PyQt4 import QtCore, QtGui
 
@@ -85,7 +86,7 @@ class LogWidget(QtGui.QFrame, Advisor):
         self.dirty = False
 
     def sizeHint(self):
-        return QtCore.QSize(500,150)
+        return QtCore.QSize(500, 150)
 
     def log(self, record, dirty=True):
         '''

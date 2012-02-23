@@ -96,7 +96,8 @@ class SchemaManager(object):
 
 
 if __name__ == "__main__":
-    LOGGER.basicConfig(level=LOGGER.DEBUG)
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
 
     s = SchemaManager()
     s.MD5
