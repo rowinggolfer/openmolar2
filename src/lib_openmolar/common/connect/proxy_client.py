@@ -71,15 +71,15 @@ class ProxyClient(object):
         self.connection230_data = connection230_data
         self.user = user #AD_SETTINGS.proxy_user
 
-        LOGGER.debug("attempting to connect to the openmolar_server....")
+        LOGGER.debug("attempting to connect to the %s"% connection230_data)
         if self.server is not None:
-            LOGGER.info("connected to the openmolar_server")
+            LOGGER.info("connected to the %s"% connection230_data)
         else:
-            LOGGER.error("not connected")
+            LOGGER.error("not connected to %s"% connection230_data)
 
     def __repr__(self):
-        return "%s %s connected = %s"% (
-            self.__class__, self.name, self.is_connected)
+        return "%s connected = %s"% (
+            self.name, self.is_connected)
 
     def connect(self):
         '''
@@ -97,7 +97,7 @@ class ProxyClient(object):
             location.replace(self.user.psword, "********"))
         try:
             _server = xmlrpclib.ServerProxy(location)
-            LOGGER.debug("connected (this is good!)")
+            #LOGGER.debug("server proxy created (this is good!)")
             _server.ping()
             LOGGER.debug("connected and pingable (this is very good!)")
             self._server = _server
@@ -108,12 +108,9 @@ class ProxyClient(object):
             raise self.ConnectionError(message)
 
         except socket.error as e:
-            LOGGER.error(
-            "error connecting to the openmolar-xmlrpc server %s"% location)
-
-            #raise self.ConnectionError(
-            #'Is the host %s running and accepting connections on port %d?'% (
-            #self.connection230_data.host, self.connection230_data.port))
+            raise self.ConnectionError(
+            'Is the host %s running and accepting connections on port %d?'% (
+            self.connection230_data.host, self.connection230_data.port))
 
     @property
     def server(self):
@@ -121,8 +118,11 @@ class ProxyClient(object):
         a bridge to remote functions on the XMLRPC server
         '''
         if self._server is None:
-            self.connect()
-
+            try:
+                self.connect()
+            except self.ConnectionError:
+                LOGGER.exception
+                self._server = None
         return self._server
 
     @property
