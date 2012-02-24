@@ -97,6 +97,7 @@ class ProxyManager(object):
         '''
         self.forget_proxies()
         for connection230_data in AD_SETTINGS.om_connections:
+            LOGGER.debug("found connection data %s"% connection230_data)
             client = ProxyClient(connection230_data)
             LOGGER.debug("loading proxy_client %s"% client)
             self._proxy_clients.append(client)
@@ -238,10 +239,10 @@ def _test():
     pm = ProxyManager()
 
     #LOGGER is in the namespace due to lib_openmolar.admin import
-    LOGGER.debug(pm.proxy_server)
+    #LOGGER.debug(pm.proxy_server)
     #LOGGER.debug(pm.drop_db("openmolar_demo"))
     #LOGGER.debug(pm.create_demo_database())
-    LOGGER.debug(pm.proxy_clients)
+    #LOGGER.debug(pm.proxy_clients)
 
 if __name__ == "__main__":
     _test()

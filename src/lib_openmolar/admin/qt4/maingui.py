@@ -233,7 +233,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         user has clicked on a link provided by a :doc:`ProxyClient`
         requesting a session on dbname
         '''
-        ## TODO this should use information pulled from the proxy server
+        ## TODO this should use more information pulled from the proxy server
 
         result, user, passwd = self.get_user_pass(db_name)
         if not result:
@@ -253,6 +253,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         pg_session = AdminConnection(connection_data)
         if self._attempt_connection(pg_session):
             self.add_session(pg_session)
+        self.update_session_status()
 
     def create_new_database(self):
         '''
@@ -303,7 +304,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         if len(self.session_widgets) == 1:
             i = 0
         else:
-            i = self.central_widget.currentIndex()
+            i = self.central_widget.currentIndex()-1
 
         conn = self.session_widgets[i].pg_session
         LOGGER.info("calling populate demo on session %s"% conn)
