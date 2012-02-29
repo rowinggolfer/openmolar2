@@ -22,19 +22,21 @@
 
 '''
 A simple application with a shrinkable menu bar.
-(similar functionality to firefox4)
+(similar functionality to firefox)
 
 At any point either the tiny menu or menubar should be visible.
 Therefore if the toolbar is hidden, the menu will re-appear.
 
 to experience this... either
 
-    click View>Tiny Menu or hit ctrl M
+    click View -> Tiny Menu
+    or use the keyboard shortcut "ctrl M"
 '''
+
 import logging
 from PyQt4 import QtGui, QtCore
 
-class DockableToolButton(QtGui.QToolButton):
+class _DockableToolButton(QtGui.QToolButton):
     '''
     A toolbutton which acts nicely with a toolbar.
     '''
@@ -50,28 +52,103 @@ class DockableToolButton(QtGui.QToolButton):
         self.setText(_("Menu"))
         self.setToolButtonStyle(QtCore.Qt.ToolButtonFollowStyle)
 
+class _MenuToolBar(QtGui.QToolBar):
+    def __init__(self, parent=None):
+        QtGui.QToolBar.__init__(self, parent)
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
+        self.setObjectName("_MenuToolbar") #for QSettings
+
+        # this should happen by default IMO.
+        self.toggleViewAction().setText(_("TinyMenu"))
+        self.toggleViewAction().setShortcut('ctrl+M')
+        #self.toggleViewAction().toggled.connect(self.clear_mini_menu)
+        self._menu_button = None
+        self.hide()
+
+    def add_mini_menu(self, menu_button):
+        if not self._menu_button is None:
+            self.clear_mini_menu(True)
+        self._menu_button = menu_button
+        if self.actions():
+            self.insertWidget(self.actions()[0], menu_button)
+        else:
+            self.addWidget(menu_button)
+        self.show()
+
+    def clear_mini_menu(self, clear=False):
+        '''
+        by default this does nothing,
+        if called by a positive action (only possible if the menu is already
+        initiated) then the menu is cleared and hidden
+        '''
+        if clear:
+            self._menu_button.hide()
+            self._menu_button.setParent(None)
+            self._menu_button.deleteLater()
+            self._menu_button = None
+            self.hide()
+
 class DockableMenuBar(QtGui.QMenuBar):
     '''
     inherits from QMenuBar, adding the functionality to become a
     standalone widget (thus saving screen estate)
     '''
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         QtGui.QMenuBar.__init__(self, parent)
-
         self._menu_button = None
+        #: the toolbar for the mini menu
+        self.menu_toolbar = _MenuToolBar(parent)
+        self.parent().addToolBar(self.menu_toolbar)
 
-        self.toggleViewAction = QtGui.QAction(_("Tiny &Menu"), parent)
-        self.toggleViewAction.setShortcut('ctrl+M')
-        self.toggleViewAction.setCheckable(True)
-        self.toggleViewAction.triggered.connect(self.toggle_visability)
+        self.menu_toolbar.toggleViewAction().triggered.connect(
+            self.toggle_visability)
 
+        #:
         self.menu_view = QtGui.QMenu(_("&View"), self)
-        self.menu_view.addAction(self.toggleViewAction)
         self.addMenu(self.menu_view)
+        self.menu_view.addAction(self.menu_toolbar.toggleViewAction())
+        self.menu_view.addSeparator()
+        #:
+        self.toolbar_menu = QtGui.QMenu(_("&Toolbars"), self)
+        self.menu_view.addMenu(self.toolbar_menu)
+        #:
+        self.toolbar_options_menu = QtGui.QMenu(_("&Options"), self)
+        self._populate_toolbar_options()
+        self.toolbar_menu.addMenu(self.toolbar_options_menu)
+
+        self.update_toolbars()
+
+    def _populate_toolbar_options(self):
+
+        action_toolbar_opt4 = QtGui.QAction(_("Default View"), self)
+        action_toolbar_opt4.setData(QtCore.Qt.ToolButtonFollowStyle)
+
+        action_toolbar_opt0 = QtGui.QAction(_("Icon Only"), self)
+        action_toolbar_opt0.setData(QtCore.Qt.ToolButtonIconOnly)
+
+        action_toolbar_opt1 = QtGui.QAction(_("Text Only"), self)
+        action_toolbar_opt1.setData(QtCore.Qt.ToolButtonTextOnly)
+
+        action_toolbar_opt2 = QtGui.QAction(_("Text Beside Icon"), self)
+        action_toolbar_opt2.setData(QtCore.Qt.ToolButtonTextBesideIcon)
+
+        action_toolbar_opt3 = QtGui.QAction(_("Text Under Icon"), self)
+        action_toolbar_opt3.setData(QtCore.Qt.ToolButtonTextUnderIcon)
+
+        self.toolbar_options_menu.addAction(action_toolbar_opt4)
+        self.toolbar_options_menu.addAction(action_toolbar_opt0)
+        self.toolbar_options_menu.addAction(action_toolbar_opt1)
+        self.toolbar_options_menu.addAction(action_toolbar_opt2)
+        self.toolbar_options_menu.addAction(action_toolbar_opt3)
+
+        for action in (action_toolbar_opt4, action_toolbar_opt3,
+        action_toolbar_opt2, action_toolbar_opt1,
+        action_toolbar_opt0):
+            action.triggered.connect(self.toolbarButtonType)
 
     @property
     def menu_button(self):
-        self._menu_button = DockableToolButton(self.parent())
+        self._menu_button = _DockableToolButton(self.parent())
         self._menu_button.setMenu(self.mini_menu)
         return self._menu_button
 
@@ -91,9 +168,38 @@ class DockableMenuBar(QtGui.QMenuBar):
 
     def addViewOption(self, action):
         '''
-        add an action to the 'view' category of the toolbar
+        add an action to the 'view' category of the menubar
         '''
         self.menu_view.addAction(action)
+        self.refresh_mini_menu()
+
+    def known_toolbars(self):
+        '''
+        yield all toolbars of the parent application
+        '''
+        for child in self.parent().children():
+            if type(child) == QtGui.QToolBar:
+                yield child
+
+    def update_toolbars(self):
+        '''
+        updates the view menu for all the parent application's toolbars
+        '''
+        for toolbar in self.known_toolbars():
+            self.toolbar_menu.addAction(toolbar.toggleViewAction())
+        self.refresh_mini_menu()
+
+    def toolbarButtonType(self):
+        '''
+        change the appearance of the toolbars
+        '''
+        styleVariant = self.sender().data()
+        style, result = styleVariant.toInt()
+        for toolbar in self.known_toolbars():
+            toolbar.setToolButtonStyle(style)
+            for widg in toolbar.children():
+                if type(widg) == QtGui.QToolButton:
+                    widg.setToolButtonStyle(style)
 
     def addMenu(self, *args):
         try:
@@ -114,10 +220,11 @@ class DockableMenuBar(QtGui.QMenuBar):
 
     def toggle_visability(self, set_visible):
         self.setVisible(not set_visible)
+        self.menu_toolbar.setVisible(set_visible)
         if set_visible:
-            self.emit(QtCore.SIGNAL("mini menu required"), self.menu_button)
+            self.menu_toolbar.add_mini_menu(self.menu_button)
         else:
-            self.emit(QtCore.SIGNAL("hide mini menu"), True)
+            self.menu_toolbar.clear_mini_menu()
 
     def setNotVisible(self, menu_bar_visible):
         '''
@@ -127,88 +234,73 @@ class DockableMenuBar(QtGui.QMenuBar):
             self.setVisible(True)
             self.toggleViewAction.setChecked(False)
 
-class DockAwareToolBar(QtGui.QToolBar):
-    def __init__(self, parent=None):
-        QtGui.QToolBar.__init__(self, parent)
-        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextBesideIcon)
-        self.setObjectName("DockAwareToolbar") #for QSettings
+def _test():
+    class _TestMainWindow(QtGui.QMainWindow):
+        def __init__(self, parent=None):
+            QtGui.QMainWindow.__init__(self, parent)
+            self.setWindowIcon(QtGui.QIcon.fromTheme("application-exit"))
 
-        # this should happen by default IMO.
-        self.toggleViewAction().setText(_("&ToolBar"))
-        self.toggleViewAction().triggered.connect(self.clear_mini_menu)
-        self._menu_button = None
+            menu_bar = DockableMenuBar(self)
+            self.setMenuBar(menu_bar)
 
-    def add_mini_menu(self, menu_button):
-        if not self._menu_button is None:
-            self.clear_mini_menu(True)
-        self._menu_button = menu_button
-        if self.actions():
-            self.insertWidget(self.actions()[0], menu_button)
-        else:
-            self.addWidget(menu_button)
-        self.show()
+            ## initiate instances of our classes
 
-    def clear_mini_menu(self, clear=False):
-        if clear:
-            self._menu_button.hide()
-            self._menu_button.setParent(None)
-            self._menu_button.deleteLater()
-            self._menu_button = None
+            self.toolbar1 = QtGui.QToolBar(self)
+            self.toolbar1.toggleViewAction().setText("%s %s"% (_("&ToolBar"), 1))
 
-class _TestMainWindow(QtGui.QMainWindow):
-    def __init__(self, parent=None):
-        QtGui.QMainWindow.__init__(self, parent)
-        self.setWindowIcon(QtGui.QIcon.fromTheme("application-exit"))
+            self.toolbar2 = QtGui.QToolBar(self)
+            self.toolbar2.toggleViewAction().setText("%s %s"% (_("&ToolBar"), 2))
 
-        ## initiate instances of our classes
+            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar1)
+            self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar2)
 
-        self.toolbar = DockAwareToolBar(self)
-        menu_bar = DockableMenuBar(self)
+            menu_bar.update_toolbars()
 
-        ## the menu bar needs this action adding
-        menu_bar.addViewOption(self.toolbar.toggleViewAction())
+            ## some arbitrary stuff to make the app more realistic
+            file_action = QtGui.QAction("&File", self)
+            self.menuBar().addAction(file_action)
 
-        ## add them to the app
-        self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar)
-        self.setMenuBar(menu_bar)
+            edit_action = QtGui.QAction("&Edit", self)
+            self.menuBar().addAction(edit_action)
 
-        ## make them aware of one another
-        self.connect(self.menuBar(), QtCore.SIGNAL("mini menu required"),
-            self.toolbar.add_mini_menu)
-        self.connect(self.menuBar(), QtCore.SIGNAL("hide mini menu"),
-            self.toolbar.clear_mini_menu)
-        self.toolbar.toggleViewAction().triggered.connect(
-            self.menuBar().setNotVisible)
+            help_icon = QtGui.QIcon.fromTheme("help")
+            self.action_help = QtGui.QAction(help_icon, _("Help"), self)
 
-        ## some arbitrary stuff to make the app more realistic
-        file_action = QtGui.QAction("&File", self)
-        self.menuBar().addAction(file_action)
+            menu_help = QtGui.QMenu(_("&Help"), self)
+            menu_help.addAction(self.action_help)
+            self.menuBar().addMenu(menu_help)
 
-        edit_action = QtGui.QAction("&Edit", self)
-        self.menuBar().addAction(edit_action)
+            ## and a couple of extras for the toolbar
+            icon = QtGui.QIcon.fromTheme("system-file-manager")
+            random_action = QtGui.QAction(icon, "function", self)
+            self.toolbar1.addAction(random_action)
 
-        ## and a couple of extras for the toolbar
-        icon = QtGui.QIcon.fromTheme("system-file-manager")
-        random_action = QtGui.QAction(icon, "function", self)
-        self.toolbar.addAction(random_action)
+            ## a typical web address widget
+            address_widget = QtGui.QWidget()
+            layout = QtGui.QHBoxLayout(address_widget)
+            layout.setMargin(0)
+            line_edit = QtGui.QLineEdit("http://google.com")
+            go_but = QtGui.QPushButton("Go!")
+            go_but.setFixedWidth(60)
+            layout.addWidget(line_edit)
+            layout.addWidget(go_but)
+            self.toolbar1.addWidget(address_widget)
 
-        ## a typical web address widget
-        address_widget = QtGui.QWidget()
-        layout = QtGui.QHBoxLayout(address_widget)
-        layout.setMargin(0)
-        line_edit = QtGui.QLineEdit("http://google.com")
-        go_but = QtGui.QPushButton("Go!")
-        go_but.setFixedWidth(60)
-        layout.addWidget(line_edit)
-        layout.addWidget(go_but)
-        self.toolbar.addWidget(address_widget)
+            ## and give the second toolbar some content
+            self.toolbar2.addAction(self.action_help)
 
-        te = QtGui.QTextEdit()
-        self.setCentralWidget(te)
-        te.setText(__doc__)
+            ## set a central widget
+            te = QtGui.QTextEdit()
+            self.setCentralWidget(te)
+            te.setText(__doc__)
 
-    def sizeHint(self):
-        return QtCore.QSize(400,400)
+        def sizeHint(self):
+            return QtCore.QSize(400,400)
+
+    app = QtGui.QApplication([])
+    mw = _TestMainWindow()
+    mw.show()
+    app.exec_()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
@@ -216,7 +308,4 @@ if __name__ == "__main__":
     import gettext
     gettext.install("")
 
-    app = QtGui.QApplication([])
-    mw = _TestMainWindow()
-    mw.show()
-    app.exec_()
+    _test()

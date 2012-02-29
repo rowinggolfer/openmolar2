@@ -29,9 +29,7 @@ import sys
 import traceback
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common.qt4.widgets import (  Advisor,
-                                            DockAwareToolBar,
-                                            DockableMenuBar  )
+from lib_openmolar.common.qt4.widgets import Advisor, DockableMenuBar
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -42,6 +40,8 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
     Provides about, about QT and license dialogs.
     '''
     log = logging.getLogger()
+    _toolbars = []
+
     def __init__(self, parent=None):
 
         QtGui.QMainWindow.__init__(self, parent)
@@ -54,26 +54,17 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         #####          setup menu and headers                              ####
 
         #: a pointer to the :doc:`DockAwareToolBar`
-        self.main_toolbar = DockAwareToolBar()
+        self.main_toolbar = QtGui.QToolBar()
+        self.main_toolbar.setObjectName("Main Toolbar")
+        self.main_toolbar.toggleViewAction().setText(_("Toolbar"))
 
         #: a pointer to the :doc:`DockableMenuBar`
-        self.menubar = DockableMenuBar(self)
-
-        ## the menu bar needs this action adding
-        self.menubar.addViewOption(self.main_toolbar.toggleViewAction())
+        menubar = DockableMenuBar(self)
 
         ## add them to the app
-        self.setMenuBar(self.menubar)
+        self.setMenuBar(menubar)
 
         self.addToolBar(QtCore.Qt.TopToolBarArea, self.main_toolbar)
-
-        ## make them aware of one another
-        self.connect(self.menuBar(), QtCore.SIGNAL("mini menu required"),
-            self.main_toolbar.add_mini_menu)
-        self.connect(self.menuBar(), QtCore.SIGNAL("hide mini menu"),
-            self.main_toolbar.clear_mini_menu)
-        self.main_toolbar.toggleViewAction().triggered.connect(
-            self.menuBar().setNotVisible)
 
         ####          setup a statusbar with a label                       ####
 
@@ -87,18 +78,18 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         #: a pointer to the File menu
         self.menu_file = QtGui.QMenu(_("&File"), self)
-        self.menubar.addMenu(self.menu_file)
+        menubar.addMenu(self.menu_file)
 
         #: a pointer to the Edit menu
         self.menu_edit = QtGui.QMenu(_("&Edit"), self)
-        self.menubar.addMenu(self.menu_edit)
+        menubar.addMenu(self.menu_edit)
 
         #: a pointer to the View menu of :attr:`menubar`
-        self.menu_view = self.menubar.menu_view
+        self.menu_view = menubar.menu_view
 
         #: a pointer to the Help menu
         self.menu_help = QtGui.QMenu(_("&Help"), self)
-        self.menubar.addMenu(self.menu_help)
+        menubar.addMenu(self.menu_help)
 
         ####          file menu                                            ####
 
@@ -120,34 +111,10 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         ####         view menu                                             ####
 
-        #: a pointer to the toggleViewAction of :attr:`main_toolbar`
-        self.action_show_toolbar = self.main_toolbar.toggleViewAction()
-        self.action_show_toolbar.setText(_("Show &ToolBar"))
-
         #: a pointer to the show statusbar qaction
         self.action_show_statusbar = QtGui.QAction(_("Show Status&bar"), self)
         self.action_show_statusbar.setCheckable(True)
         self.action_show_statusbar.setChecked(True)
-
-        #: a pointer to the toolbar default view qaction
-        self.action_toolbar_opt4 = QtGui.QAction(_("Default View"), self)
-        self.action_toolbar_opt4.setData(QtCore.Qt.ToolButtonFollowStyle)
-
-        #: a pointer to the toolbar icon only view qaction
-        self.action_toolbar_opt0 = QtGui.QAction(_("Icon Only"), self)
-        self.action_toolbar_opt0.setData(QtCore.Qt.ToolButtonIconOnly)
-
-        #: a pointer to the toolbar text only view qaction
-        self.action_toolbar_opt1 = QtGui.QAction(_("Text Only"), self)
-        self.action_toolbar_opt1.setData(QtCore.Qt.ToolButtonTextOnly)
-
-        #: a pointer to the toolbar text beside icon view qaction
-        self.action_toolbar_opt2 = QtGui.QAction(_("Text Beside Icon"), self)
-        self.action_toolbar_opt2.setData(QtCore.Qt.ToolButtonTextBesideIcon)
-
-        #: a pointer to the toolbar text under icon view qaction
-        self.action_toolbar_opt3 = QtGui.QAction(_("Text Under Icon"), self)
-        self.action_toolbar_opt3.setData(QtCore.Qt.ToolButtonTextUnderIcon)
 
         icon = QtGui.QIcon.fromTheme("view-fullscreen")
         #: a pointer to the fullscreen mode qaction
@@ -155,20 +122,8 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.action_fullscreen.setCheckable(True)
         self.action_fullscreen.setShortcut("f11")
 
-        self.menu_view.addAction(self.action_show_toolbar)
+        self.menu_view.addSeparator()
         self.menu_view.addAction(self.action_show_statusbar)
-
-        self.menu_view.addSeparator()
-        #submenu2 - toolbar options is a child of view
-        self.menu_toolbar = QtGui.QMenu(_("&Toolbar"), self)
-        self.menu_view.addMenu(self.menu_toolbar)
-        self.menu_toolbar.addAction(self.action_toolbar_opt4)
-        self.menu_toolbar.addAction(self.action_toolbar_opt0)
-        self.menu_toolbar.addAction(self.action_toolbar_opt1)
-        self.menu_toolbar.addAction(self.action_toolbar_opt2)
-        self.menu_toolbar.addAction(self.action_toolbar_opt3)
-
-        self.menu_view.addSeparator()
         self.menu_view.addAction(self.action_fullscreen)
 
         ####         about menu                                            ####
@@ -197,7 +152,12 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         ####         toolbar                                               ####
         ####         add selected menu items to the toolbar                ####
 
-        self.main_toolbar.addAction(self.action_help)
+        #:
+        self.help_toolbar = QtGui.QToolBar()
+        self.help_toolbar.setObjectName("help toolbar")
+        self.help_toolbar.toggleViewAction().setText(_("Help Toolbar"))
+        self.help_toolbar.addAction(self.action_help)
+        self.addToolBar(self.help_toolbar)
 
         self.connect_default_signals()
 
@@ -211,14 +171,9 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         QtGui.QApplication.instance().closeAllWindows)
 
         self.action_preferences.triggered.connect(self.show_preferences_dialog)
-        self.action_show_toolbar.triggered.connect(self.show_toolbar)
+
         self.action_show_statusbar.triggered.connect(self.show_statusbar)
         self.action_fullscreen.triggered.connect(self.fullscreen)
-
-        for action in (self.action_toolbar_opt4, self.action_toolbar_opt3,
-        self.action_toolbar_opt2, self.action_toolbar_opt1,
-        self.action_toolbar_opt0):
-            action.triggered.connect(self.toolbarButtonType)
 
         self.action_fullscreen.triggered.connect(self.fullscreen)
         self.action_about.triggered.connect(self.show_about)
@@ -255,12 +210,22 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         make the Advisor sub class aware of the windows geometry.
         set it top right, and right_to_left
         '''
-        widg = self.menubar
+        widg = self.menuBar()
         brief_pos_x = (widg.pos().x() + widg.width())
         brief_pos_y = (widg.pos().y() + widg.height())
 
         brief_pos = QtCore.QPoint(brief_pos_x, brief_pos_y)
         self.setBriefMessagePosition(brief_pos, True)
+
+    def addToolBar(self, *args):
+        QtGui.QMainWindow.addToolBar(self, *args)
+        if self.menuWidget():
+            self.menuBar().update_toolbars()
+
+    def insertToolBar(self, *args):
+        QtGui.QMainWindow.insertToolBar(self, *args)
+        if self.menuWidget():
+            self.menuBar().update_toolbars()
 
     def insertMenu_(self, menu):
         '''
@@ -268,7 +233,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         "help" menu item on the menubar
         '''
         insertpoint = self.menu_help.menuAction()
-        return self.menubar.insertMenu(insertpoint, menu)
+        return self.menuBar().insertMenu(insertpoint, menu)
 
     def insertToolBarWidget(self, action, sep=False):
         '''
@@ -307,8 +272,8 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         self.main_toolbar.setToolButtonStyle(toolbar.toInt()[0])
         tiny_menu = settings.value("TinyMenu").toBool()
         if tiny_menu:
-            self.menubar.toggle_visability(True)
-            self.menubar.toggleViewAction.setChecked(True)
+            self.menuBar().toggle_visability(True)
+            self.menuBar().menu_toolbar.toggleViewAction().setChecked(True)
 
     def saveSettings(self):
         '''
@@ -321,7 +286,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         settings.setValue("statusbar_hidden", self.statusbar.isHidden())
         settings.setValue("Font", self.font())
         settings.setValue("Toolbar", self.main_toolbar.toolButtonStyle())
-        settings.setValue("TinyMenu", not self.menubar.isVisible())
+        settings.setValue("TinyMenu", not self.menuBar().isVisible())
 
 
     def show_toolbar(self):
@@ -335,14 +300,6 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
             self.statusbar.show()
         else:
             self.statusbar.hide()
-
-    def toolbarButtonType(self):
-        styleVariant = self.sender().data()
-        style, result = styleVariant.toInt()
-        self.main_toolbar.setToolButtonStyle(style)
-        for widg in self.main_toolbar.children():
-            if type(widg) == QtGui.QToolButton:
-                widg.setToolButtonStyle(style)
 
     def reimplement_needed(self, func_name):
         QtGui.QMessageBox.information(self, "please re-implement",
@@ -424,5 +381,6 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
     mw = BaseMainWindow()
+    mw.main_toolbar.addAction(QtGui.QAction("Placeholder", mw))
     mw.show()
     app.exec_()

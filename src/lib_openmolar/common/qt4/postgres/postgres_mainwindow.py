@@ -77,10 +77,10 @@ class PostgresMainWindow(BaseMainWindow):
         self.menu_file.insertAction(insertpoint,self.action_disconnect)
         self.menu_file.insertSeparator(insertpoint)
 
-        insertpoint = self.action_help
+        #:
         self.main_toolbar.insertAction(insertpoint, self.action_connect)
         self.main_toolbar.insertAction(insertpoint, self.action_disconnect)
-        self.main_toolbar.insertSeparator(insertpoint)
+        #self.addToolBar(self.session_toolbar)
 
         ####       now load stored settings                                ####
         self.loadSettings()

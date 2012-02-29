@@ -48,7 +48,7 @@ class ProxyClient(object):
     (the openmolar xmlrpc server)
     '''
     _server = None
-
+    _is_connecting = False
     #:
     PermissionError = _PermissionError
 
@@ -62,24 +62,25 @@ class ProxyClient(object):
         :param:user :doc:`ProxyUser` or None
         '''
 
-        if user is None:
-            user = ProxyUser()
-
-        assert (type(user) == ProxyUser and type(connection230_data)
-        == Connection230Data), "incorrect connection params supplied"
+        assert type(connection230_data) == Connection230Data, \
+        "ProxyClient must be initiated with a Connection230Data object"
 
         self.connection230_data = connection230_data
-        self.user = user #AD_SETTINGS.proxy_user
 
-        LOGGER.debug("attempting to connect to the %s"% connection230_data)
-        if self.server is not None:
-            LOGGER.info("connected to the %s"% connection230_data)
-        else:
-            LOGGER.error("not connected to %s"% connection230_data)
+        if user is None:
+            user = ProxyUser()
+        self.set_user(user)
+
+        #socket.setdefaulttimeout(5.0)
 
     def __repr__(self):
-        return "%s connected = %s"% (
-            self.name, self.is_connected)
+        return "%s (connected = %s) (connecting = %s)"% (
+            self.name, self.is_connected, self.is_connecting)
+
+    def set_user(self, user):
+        assert type(user) == ProxyUser, \
+            "user must be of type ProxyUser"
+        self.user = user
 
     def connect(self):
         '''
@@ -95,28 +96,36 @@ class ProxyClient(object):
 
         LOGGER.debug("attempting connection to %s"%
             location.replace(self.user.psword, "********"))
+
+        self._is_connecting = True
         try:
             _server = xmlrpclib.ServerProxy(location)
-            #LOGGER.debug("server proxy created (this is good!)")
+            LOGGER.debug("server proxy created.. will attempt ping")
             _server.ping()
             LOGGER.debug("connected and pingable (this is very good!)")
             self._server = _server
         except xmlrpclib.ProtocolError:
+            self._is_connecting = False
             message = u"%s '%s'"% (_("connection refused for user"),
                 self.user.name)
             LOGGER.error(message)
             raise self.ConnectionError(message)
 
         except socket.error as e:
+            self._is_connecting = False
             raise self.ConnectionError(
             'Is the host %s running and accepting connections on port %d?'% (
             self.connection230_data.host, self.connection230_data.port))
+
+        self._is_connecting = False
 
     @property
     def server(self):
         '''
         a bridge to remote functions on the XMLRPC server
         '''
+        if self.is_connecting:
+            LOGGER.debug("awaiting connection")
         if self._server is None:
             try:
                 self.connect()
@@ -132,6 +141,14 @@ class ProxyClient(object):
         (to a proxy server)
         '''
         return self._server is not None
+
+    @property
+    def is_connecting(self):
+        '''
+        A boolean stating whether the connection is in progress
+        (happens in a thread)
+        '''
+        return self._is_connecting
 
     @property
     def brief_name(self):
@@ -163,7 +180,9 @@ class ProxyClient(object):
             except Exception:
                 return "unknown error in proxy_message"
         else:
-            message = "<h1>No connection</h1>%s"% self.connection230_data
+            message = '''<h1>No connection</h1>%s<br />
+            <a href='Retry_230_connection'>%s</a>'''% (
+            self.connection230_data, _("Try Again"))
         return message
 
 def _test():
@@ -178,7 +197,6 @@ def _test():
     conn_data.default_connection()
 
     pc = ProxyClient(conn_data)
-    pc.connect()
 
     if pc.server is not None:
         print pc.server.system.listMethods()
@@ -191,7 +209,7 @@ def _test():
         else:
             LOGGER.error(payload.error_message)
 
-    LOGGER.debug(pc.name)
+    LOGGER.debug('ProxyClient.name = "%s"'% pc.name)
     LOGGER.debug(pc.html)
 
 if __name__ == "__main__":
