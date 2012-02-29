@@ -85,10 +85,19 @@ class KnownServerWidget(QtGui.QFrame):
         if self.listWidget.currentItem() is None:
             self.listWidget.setCurrentRow(0)
 
+    def set_html(self, html):
+        '''
+        update the html on the embedded browser
+        '''
+        self.browser.setHtml(html)
+
     def _server_chosen(self, row):
+        '''
+        private function called by a gui interaction
+        '''
         try:
             pm = self._servers[row]
-            self.browser.setHtml(pm.html)
+            self.set_html(pm.html)
         except IndexError:
             self.browser.setHtml("<h1>No proxy server chosen</h1>")
         self.server_changed.emit(row)

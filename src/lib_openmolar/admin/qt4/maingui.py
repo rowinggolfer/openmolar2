@@ -72,7 +72,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             "OM %s"% _("Connect"), self)
         self.action_omconnect.setToolTip(
                                 _("Connect (to an openmolar server)"))
-
         icon = QtGui.QIcon.fromTheme("network-error")
         self.action_omdisconnect = QtGui.QAction(icon,
             "OM %s"% _("Disconnect"), self)
@@ -87,32 +86,27 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         insertpoint = self.action_connect
         self.main_toolbar.insertAction(insertpoint, self.action_omconnect)
         self.main_toolbar.insertAction(insertpoint, self.action_omdisconnect)
-        self.main_toolbar.insertSeparator(insertpoint)
 
         ## "Database Tools"
-
         self.menu_database = QtGui.QMenu(_("&Database Tools"), self)
         self.insertMenu_(self.menu_database)
 
         icon = QtGui.QIcon.fromTheme("contact-new")
         self.action_new_database = QtGui.QAction(icon,
             _("New Openmolar Database"), self)
-
+        icon = QtGui.QIcon(":icons/database.png")
         self.action_populate_demo = QtGui.QAction(icon,
             _("Populate database with demo data"), self)
 
         self.menu_database.addAction(self.action_new_database)
         self.menu_database.addAction(self.action_populate_demo)
 
-        tb_database = QtGui.QToolButton(self)
-        icon = QtGui.QIcon(":icons/database.png")
-        tb_database.setIcon(icon)
-        tb_database.setText(_("Database Tools"))
-        tb_database.setToolTip(_("A variety of database tools"))
-        tb_database.setPopupMode(tb_database.InstantPopup)
-        tb_database.setMenu(self.menu_database)
-
-        self.insertToolBarWidget(tb_database, True)
+        self.database_toolbar = QtGui.QToolBar(self)
+        self.database_toolbar.setObjectName("Database Toolbar")
+        self.database_toolbar.toggleViewAction().setText(_("Database Toolbar"))
+        self.database_toolbar.addAction(self.action_new_database)
+        self.database_toolbar.addAction(self.action_populate_demo)
+        self.insertToolBar(self.help_toolbar, self.database_toolbar)
 
         self.log_widget = LogWidget(LOGGER, self.parent())
         self.log_widget.welcome()
@@ -131,7 +125,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         ####       now load stored settings                                ####
         self.loadSettings()
-        tb_database.setToolButtonStyle(self.main_toolbar.toolButtonStyle())
 
         self.pg_sessions = []
 
@@ -433,11 +426,19 @@ _("Version"), AD_SETTINGS.VERSION,
             name = dl.name
             psword = dl.password
             self.advise("NOW WHAT", 2)
-            #AD_SETTINGS.proxy_user = ProxyUser(name, psword)
-            #force reload of server at next use
-            self._proxy_server = None
+            user = ProxyUser(name, psword)
+            server = self.selected_server
+            LOGGER.debug("switch user of %s to %s"% (server, user))
+            server.set_user(user)
             return True
         return False
+
+    def display_proxy_message(self):
+        '''
+        display the proxy message.
+        overwrites :doc:`ProxyManager` function
+        '''
+        self.known_server_widget.set_html(self.selected_client.html)
 
     def manage_shortcut(self, url):
         '''
@@ -459,6 +460,12 @@ _("Version"), AD_SETTINGS.VERSION,
             elif re.match("manage_.*", url):
                 dbname = re.match("manage_(.*)", url).groups()[0]
                 self.manage_db(dbname)
+            elif url == 'Retry_230_connection':
+                self.advise(_("retrying connection"))
+                try:
+                    self.selected_client.connect()
+                except ProxyClient.ConnectionError as ex:
+                    self.advise(ex.message, 2)
             else:
                 self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
         except ProxyManager.PermissionError as exc:

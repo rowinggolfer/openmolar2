@@ -86,7 +86,9 @@ class ProxyManager(object):
 
     def display_proxy_message(self):
         '''
-        display the proxy message
+        display the proxy message.
+        this function should be overwritten by subclasses of ProxyManager.
+        it is called whenever the client message should be refreshed.
         '''
         LOGGER.warning("display_proxy_message should be overwritten")
         pass
@@ -96,11 +98,22 @@ class ProxyManager(object):
         load the proxies.
         '''
         self.forget_proxies()
+        n_clients, n_active = 0,0
         for connection230_data in AD_SETTINGS.om_connections:
             LOGGER.debug("found connection data %s"% connection230_data)
             client = ProxyClient(connection230_data)
             LOGGER.debug("loading proxy_client %s"% client)
+            try:
+                client.connect()
+            except client.ConnectionError:
+                LOGGER.error("%s was unable to connect"% client)
             self._proxy_clients.append(client)
+            n_clients += 1
+            if client.is_connected:
+                n_active += 1
+
+        LOGGER.info("ProxyManager has %d clients (%d are connected)"% (
+            n_clients, n_active))
 
     def forget_proxies(self):
         self._proxy_clients = []
@@ -120,12 +133,19 @@ class ProxyManager(object):
         self.forget_proxies()
 
     @property
-    def proxy_server(self):
+    def selected_client(self):
         '''
-        return the currently selected proxy (by default this is item 0 of
-        _proxy_clients
+        return the currently selected :doc:ProxyClient
+        (by default this is item 0 of _proxy_clients)
         '''
-        return self._proxy_clients[self.selected_index].server
+        return self._proxy_clients[self.selected_index]
+
+    @property
+    def selected_server(self):
+        '''
+        return the currently selected proxy server
+        '''
+        return self.selected_client.server
 
     def set_proxy_index(self, index):
         '''
@@ -156,7 +176,7 @@ class ProxyManager(object):
         try:
             self.wait()
             self.advise("creating demo user")
-            payload = pickle.loads(self.proxy_server.create_demo_user())
+            payload = pickle.loads(self.selected_server.create_demo_user())
             self.wait(False)
             if not payload.permission:
                 raise self.PermissionError, payload.error_message
@@ -191,9 +211,9 @@ class ProxyManager(object):
         self.wait()
 
         if not demo:
-            payload = pickle.loads(self.proxy_server.create_db(dbname))
+            payload = pickle.loads(self.selected_server.create_db(dbname))
         else:
-            payload = pickle.loads(self.proxy_server.create_demodb())
+            payload = pickle.loads(self.selected_server.create_demodb())
         self.wait(False)
         if not payload.permission:
             raise self.PermissionError, payload.error_message
@@ -211,9 +231,9 @@ class ProxyManager(object):
         send a message to the openmolar server to drop this database
         '''
         if dbname == "openmolar_demo":
-            pickled_payload = self.proxy_server.drop_demodb()
+            pickled_payload = self.selected_server.drop_demodb()
         else:
-            pickled_payload = self.proxy_server.drop_db(str(dbname))
+            pickled_payload = self.selected_server.drop_db(str(dbname))
 
         payload = pickle.loads(pickled_payload)
         if not payload.permission:
@@ -239,10 +259,10 @@ def _test():
     pm = ProxyManager()
 
     #LOGGER is in the namespace due to lib_openmolar.admin import
-    #LOGGER.debug(pm.proxy_server)
-    #LOGGER.debug(pm.drop_db("openmolar_demo"))
-    #LOGGER.debug(pm.create_demo_database())
-    #LOGGER.debug(pm.proxy_clients)
+    LOGGER.debug("using %s"% pm.selected_server)
+    LOGGER.debug(pm.drop_db("openmolar_demo"))
+    LOGGER.debug(pm.create_demo_database())
+    #LOGGER.debug(pm.create_database("test"))
 
 if __name__ == "__main__":
     _test()
