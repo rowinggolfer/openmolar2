@@ -81,6 +81,7 @@ class ProxyClient(object):
         assert type(user) == ProxyUser, \
             "user must be of type ProxyUser"
         self.user = user
+        self._server = None
 
     def connect(self):
         '''
@@ -197,6 +198,8 @@ def _test():
     conn_data.default_connection()
 
     pc = ProxyClient(conn_data)
+    #admin_user = ProxyUser("admin", "dSqhZ0pt")
+    #pc.set_user(admin_user)
 
     if pc.server is not None:
         print pc.server.system.listMethods()
@@ -210,7 +213,7 @@ def _test():
             LOGGER.error(payload.error_message)
 
     LOGGER.debug('ProxyClient.name = "%s"'% pc.name)
-    LOGGER.debug(pc.html)
+    #LOGGER.debug(pc.html)
 
 if __name__ == "__main__":
     _test()

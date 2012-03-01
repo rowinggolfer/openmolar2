@@ -173,19 +173,11 @@ class DockableMenuBar(QtGui.QMenuBar):
         self.menu_view.addAction(action)
         self.refresh_mini_menu()
 
-    def known_toolbars(self):
-        '''
-        yield all toolbars of the parent application
-        '''
-        for child in self.parent().children():
-            if type(child) == QtGui.QToolBar:
-                yield child
-
     def update_toolbars(self):
         '''
         updates the view menu for all the parent application's toolbars
         '''
-        for toolbar in self.known_toolbars():
+        for toolbar in self.parent().toolbar_list:
             self.toolbar_menu.addAction(toolbar.toggleViewAction())
         self.refresh_mini_menu()
 

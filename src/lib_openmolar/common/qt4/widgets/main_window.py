@@ -53,7 +53,7 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
 
         #####          setup menu and headers                              ####
 
-        #: a pointer to the :doc:`DockAwareToolBar`
+        #: a pointer to the main toolbar
         self.main_toolbar = QtGui.QToolBar()
         self.main_toolbar.setObjectName("Main Toolbar")
         self.main_toolbar.toggleViewAction().setText(_("Toolbar"))
@@ -222,6 +222,15 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         if self.menuWidget():
             self.menuBar().update_toolbars()
 
+    @property
+    def toolbar_list(self):
+        '''
+        yield all toolbars of the application
+        '''
+        for child in self.children():
+            if type(child) == QtGui.QToolBar:
+                yield child
+
     def insertToolBar(self, *args):
         QtGui.QMainWindow.insertToolBar(self, *args)
         if self.menuWidget():
@@ -268,8 +277,12 @@ class BaseMainWindow(QtGui.QMainWindow, Advisor):
         font = settings.value("Font").toPyObject()
         if font:
             QtGui.QApplication.instance().setFont(font)
-        toolbar = settings.value("Toolbar", QtCore.Qt.ToolButtonTextUnderIcon)
-        self.main_toolbar.setToolButtonStyle(toolbar.toInt()[0])
+
+        toolbar_set = settings.value(
+            "Toolbar", QtCore.Qt.ToolButtonTextUnderIcon).toInt()[0]
+        for tb in self.toolbar_list:
+            tb.setToolButtonStyle(toolbar_set)
+
         tiny_menu = settings.value("TinyMenu").toBool()
         if tiny_menu:
             self.menuBar().toggle_visability(True)

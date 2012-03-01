@@ -39,7 +39,7 @@ from postgres_database import ConnectionError, PostgresDatabase
 from manage_databases_widget import ManageDatabasesWidget
 from postgres_session_widget import PostgresSessionWidget
 
-#from new_connection_dialog import NewUserPasswordDialog, UserPasswordDialog
+from lib_openmolar.common.qt4.dialogs import UserPasswordDialog
 
 class PostgresMainWindow(BaseMainWindow):
     '''
@@ -261,7 +261,7 @@ class PostgresMainWindow(BaseMainWindow):
 
     def get_user_pass(self, dbname):
         '''
-        return a tuple of result user, password
+        return a tuple of (result, user, password)
         '''
         LOGGER.debug("%s.get_user_pass %s"% (__file__, dbname))
         if dbname == "openmolar_demo":
