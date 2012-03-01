@@ -33,6 +33,7 @@ def user_perms(func):
         try:
             return func(*args, **kwargs)
         except ProxyClient.PermissionError:
+            LOGGER.info("permission error.. trying to elevate")
             proxy_manager_instance = args[0]
             if proxy_manager_instance.switch_server_user():
                 return func(*args, **kwargs)
@@ -219,7 +220,9 @@ class ProxyManager(object):
             raise self.PermissionError, payload.error_message
 
         if payload.payload:
-            self.advise(_("success!"), 1)
+            self.advise(u"%s '%s'<br />%s"%(
+            _("Successfully created database!"), dbname,
+            _("This database has no users yet")), 1)
             LOGGER.info("database %s created"% dbname)
 
         self.display_proxy_message()
@@ -253,6 +256,7 @@ def _test():
     import lib_openmolar.admin
     import gettext
     import logging
+    from lib_openmolar.common.connect import ProxyUser
 
     LOGGER.setLevel(logging.DEBUG)
     gettext.install("openmolar")
@@ -260,9 +264,12 @@ def _test():
 
     #LOGGER is in the namespace due to lib_openmolar.admin import
     LOGGER.debug("using %s"% pm.selected_server)
-    LOGGER.debug(pm.drop_db("openmolar_demo"))
-    LOGGER.debug(pm.create_demo_database())
-    #LOGGER.debug(pm.create_database("test"))
+    #LOGGER.debug(pm.drop_db("openmolar_demo"))
+    #LOGGER.debug(pm.create_demo_database())
+    admin_user = ProxyUser("admin", "dSqhZ0pt")
+    pm.selected_client.set_user(admin_user)
+
+    LOGGER.debug(pm.create_database("test"))
 
 if __name__ == "__main__":
     _test()

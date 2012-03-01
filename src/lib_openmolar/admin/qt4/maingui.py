@@ -25,7 +25,7 @@ import sys
 from xmlrpclib import Fault as ServerFault
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.connect import ProxyClient
+from lib_openmolar.common.connect import ProxyClient, ProxyUser
 
 from lib_openmolar.common.datatypes import ConnectionData
 from lib_openmolar.common.qt4.widgets import RestorableApplication
@@ -46,6 +46,19 @@ from lib_openmolar.admin.qt4.classes import (
 
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
+
+
+def require_session(func):
+    '''
+    a decorator function around methods that require a database session
+    '''
+    def sessionf(self):
+        if self.session_widgets == []:
+            self.advise("no session started",1)
+            return None
+        return func(self)
+
+    return sessionf
 
 
 class AdminMainWindow(PostgresMainWindow, ProxyManager):
@@ -94,18 +107,25 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         icon = QtGui.QIcon.fromTheme("contact-new")
         self.action_new_database = QtGui.QAction(icon,
             _("New Openmolar Database"), self)
+
         icon = QtGui.QIcon(":icons/database.png")
         self.action_populate_demo = QtGui.QAction(icon,
             _("Populate database with demo data"), self)
 
+        icon = QtGui.QIcon(":icons/database.png")
+        self.action_import_data = QtGui.QAction(icon,
+            _("Import data from other sources"), self)
+
         self.menu_database.addAction(self.action_new_database)
         self.menu_database.addAction(self.action_populate_demo)
+        self.menu_database.addAction(self.action_import_data)
 
         self.database_toolbar = QtGui.QToolBar(self)
         self.database_toolbar.setObjectName("Database Toolbar")
         self.database_toolbar.toggleViewAction().setText(_("Database Toolbar"))
         self.database_toolbar.addAction(self.action_new_database)
         self.database_toolbar.addAction(self.action_populate_demo)
+        self.database_toolbar.addAction(self.action_import_data)
         self.insertToolBar(self.help_toolbar, self.database_toolbar)
 
         self.log_widget = LogWidget(LOGGER, self.parent())
@@ -150,6 +170,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.action_new_database.triggered.connect(self.create_new_database)
         self.action_populate_demo.triggered.connect(self.populate_demo)
+        self.action_import_data.triggered.connect(self.import_data)
 
         self.connect(self.central_widget, QtCore.SIGNAL("end_pg_sessions"),
             self.end_pg_sessions)
@@ -178,6 +199,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         overwrite the property of the Base Class
         '''
         admin_session_widget = AdminSessionWidget(self)
+        admin_session_widget.query_error.connect(self.advise_dl)
+        admin_session_widget.query_sucess.connect(self.advise)
 
         return admin_session_widget
 
@@ -257,7 +280,10 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             self.display_proxy_message()
             return
         dbname = dl.database_name
-        ProxyManager.create_database(self, dbname)
+        try:
+            ProxyManager.create_database(self, dbname)
+        except ProxyClient.PermissionError as exc:
+            self.advise(exc.message, 2)
 
     def create_demo_database(self):
         '''
@@ -286,14 +312,11 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         if result:
             LOGGER.info(message)
 
+    @require_session
     def populate_demo(self):
         '''
         catches signal when user hits the demo action
         '''
-        if self.session_widgets == []:
-            self.advise("no session started",1)
-            return
-
         if len(self.session_widgets) == 1:
             i = 0
         else:
@@ -304,6 +327,13 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         dl = PopulateDemoDialog(conn, self)
         if not dl.exec_():
             self.advise("Demo data population was abandoned", 1)
+
+    @require_session
+    def import_data(self):
+        '''
+        raise a dialog to import into the current database
+        '''
+        self.advise("import data",1)
 
     def manage_db(self, dbname):
         '''
@@ -425,11 +455,10 @@ _("Version"), AD_SETTINGS.VERSION,
         if dl.exec_():
             name = dl.name
             psword = dl.password
-            self.advise("NOW WHAT", 2)
             user = ProxyUser(name, psword)
-            server = self.selected_server
-            LOGGER.debug("switch user of %s to %s"% (server, user))
-            server.set_user(user)
+            client = self.selected_client
+            LOGGER.debug("switch user of %s to %s"% (client, user))
+            client.set_user(user)
             return True
         return False
 

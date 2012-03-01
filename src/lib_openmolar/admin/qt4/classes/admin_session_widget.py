@@ -34,6 +34,12 @@ from lib_openmolar.admin.qt4.classes.database_table import (
 class AdminSessionWidget(PostgresSessionWidget):
     sql_tools = []
 
+    #:
+    query_error = QtCore.pyqtSignal(object)
+
+    #:
+    query_sucess = QtCore.pyqtSignal(object)
+
     def setup_ui(self):
         layout = QtGui.QVBoxLayout(self)
         layout.setMargin(3)
@@ -84,6 +90,16 @@ class AdminSessionWidget(PostgresSessionWidget):
     def _add_tool(self, tool):
         icon = QtGui.QIcon.fromTheme("text-x-generic")
         self.tab_widget.addTab(tool, icon, tool.name)
+        self.connect(tool, QtCore.SIGNAL("Query Success"), self.emit_sucess)
+        self.connect(tool, QtCore.SIGNAL("Query Error"), self.emit_error)
+
+    def emit_sucess(self, message=None):
+        LOGGER.debug("query_success %s"% message)
+        self.query_sucess.emit(message)
+
+    def emit_error(self, message=None):
+        LOGGER.debug("query_error %s"% message)
+        self.query_error.emit(message)
 
     def add_table(self):
         '''
@@ -113,19 +129,10 @@ class AdminSessionWidget(PostgresSessionWidget):
         PostgresSessionWidget.set_session(self, session)
         for tool in self.sql_tools:
             tool.set_connection(session)
-        #self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
-        #self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-
-        ## add a query table
-        #widg = SqlQueryTable(session)
-        #self.connect(widg, QtCore.SIGNAL("Query Success"), self.advise)
-        #self.connect(widg, QtCore.SIGNAL("Query Error"), self.advise_dl)
-        #self.tab_widget.addTab(widg, icon, _("Query Tool"))
 
         self.tab_widget.parent().setWindowTitle(session.description())
 
     def tab_selected(self, tab):
-        LOGGER.debug("tab selected %s"% tab)
         tab = self.tab_widget.currentWidget()
         if (tab and type(tab) == DatabaseTableViewer or
         type(tab) == RelationalDatabaseTableViewer) :
@@ -133,7 +140,7 @@ class AdminSessionWidget(PostgresSessionWidget):
 
 def _test():
     from lib_openmolar.admin.connect import DemoAdminConnection
-    
+
     app = QtGui.QApplication([])
     session = DemoAdminConnection()
     session.connect()
