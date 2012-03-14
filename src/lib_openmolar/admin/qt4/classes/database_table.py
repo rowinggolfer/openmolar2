@@ -215,16 +215,13 @@ class RelationalDatabaseTableViewer(DatabaseTableViewer):
 
 
 def _test():
-    from lib_openmolar.common.datatypes import ConnectionData
     from lib_openmolar.admin.connect import DemoAdminConnection
     def show_error(error):
         QtGui.QMessageBox.warning(mw, "error", error)
 
     app = QtGui.QApplication([])
-    conn_data = ConnectionData()
-    conn_data.demo_connection()
 
-    ac = AdminConnection(conn_data)
+    ac = DemoAdminConnection()
     ac.connect()
 
     mw = QtGui.QMainWindow()

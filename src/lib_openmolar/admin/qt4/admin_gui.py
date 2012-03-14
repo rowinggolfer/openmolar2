@@ -47,13 +47,15 @@ from lib_openmolar.admin.qt4.classes import (
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
+##TODO for windows version... this will need to be tweaked.
+CONF_DIR = "/etc/openmolar/admin/connections"
 
 def require_session(func):
     '''
     a decorator function around methods that require a database session
     '''
     def sessionf(self):
-        if self.session_widgets == []:
+        if not self.has_pg_connection:
             self.advise("no session started",1)
             return None
         return func(self)
@@ -208,11 +210,13 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         '''
         called at startup, and by the om_connect action
         '''
+        self.wait()
         ProxyManager._init_proxies(self)
         self.known_server_widget.clear()
         for client in self.proxy_clients:
             self.known_server_widget.add_proxy_client(client)
         self.known_server_widget.setEnabled(True)
+        self.wait(False)
 
     def om_disconnect(self):
         ProxyManager.om_disconnect(self)
@@ -312,28 +316,39 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         if result:
             LOGGER.info(message)
 
-    @require_session
-    def populate_demo(self):
-        '''
-        catches signal when user hits the demo action
-        '''
+    @property
+    def chosen_pg_session(self):
         if len(self.session_widgets) == 1:
             i = 0
         else:
             i = self.central_widget.currentIndex()-1
 
-        conn = self.session_widgets[i].pg_session
-        LOGGER.info("calling populate demo on session %s"% conn)
-        dl = PopulateDemoDialog(conn, self)
+        pg_session = self.session_widgets[i].pg_session
+        return pg_session
+
+    @require_session
+    def populate_demo(self):
+        '''
+        catches signal when user hits the demo action
+        '''
+        pg_session = self.chosen_pg_session
+        LOGGER.info("calling populate demo on session %s"% pg_session)
+        dl = PopulateDemoDialog(pg_session, self)
         if not dl.exec_():
-            self.advise("Demo data population was abandoned", 1)
+            self.advise(_("Demo data population was abandoned"), 1)
 
     @require_session
     def import_data(self):
         '''
         raise a dialog to import into the current database
         '''
-        self.advise("import data",1)
+        pg_session = self.chosen_pg_session
+        LOGGER.info("calling import data for session %s"% pg_session)
+
+        from lib_openmolar.admin.data_import import ImportDialog
+        dl = ImportDialog(pg_session, self)
+        if not dl.exec_():
+            self.advise(_("Import was abandoned"), 1)
 
     def manage_db(self, dbname):
         '''
@@ -346,6 +361,10 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             elif dl.drop_db:
                 self.advise(u"%s %s"%(_("dropping database"), dbname))
                 self.drop_db(dbname)
+            elif dl.truncate_db:
+                self.advise(u"%s %s"%(_("deleting all data from database"),
+                    dbname))
+                self.truncate_db(dbname)
 
     def closeEvent(self, event=None):
         '''
@@ -416,13 +435,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
     def loadSettings(self):
         PostgresMainWindow.loadSettings(self)
-        qsettings = QtCore.QSettings()
-
-        qsettings.setValue("connection_conf_dir",
-            "/etc/openmolar/admin/connections")
-
-    def saveSettings(self):
-        PostgresMainWindow.saveSettings(self)
+        QtCore.QSettings().setValue("connection_conf_dir", CONF_DIR)
 
     def show_about(self):
         '''
@@ -432,7 +445,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 This application provides tools to manage and configure your database server
 and can set up either a demo openmolar database, or a
 customised database for a specific dental practice situation.'''),
-_("Version"), AD_SETTINGS.VERSION,
+_("Version"), SETTINGS.VERSION,
 "<a href='http://www.openmolar.com'>www.openmolar.com</a>",
 'Neil Wallace - rowinggolfer@googlemail.com')
         self.advise(ABOUT_TEXT, 1)

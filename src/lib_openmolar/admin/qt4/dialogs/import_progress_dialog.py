@@ -25,29 +25,25 @@ from PyQt4 import QtCore, QtGui
 from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.qt4.widgets import ProgressWidget
 
-class DemoProgressDialog(BaseDialog):
+class ImportProgressDialog(BaseDialog):
     def __init__(self, connection, ommisions, parent=None):
         BaseDialog.__init__(self, parent)
 
         self.connection = connection
 
-        self.setWindowTitle(_("Progress"))
-        label = QtGui.QLabel(_("Populating Tables with demo data"))
+        self.setWindowTitle(_("Import"))
+        label = QtGui.QLabel(_("Importing Data"))
         self.insertWidget(label)
 
         frame = QtGui.QFrame()
         layout = QtGui.QVBoxLayout(frame)
 
-        self.module_dict = {}
-        for module in self.connection.admin_modules:
-            if module in ommisions:
-                continue
-            #instanstiate a class to get some information about the table
-            sg = module.SchemaGenerator()
+        self.progress_widgets = {}
+        for att in ("foo", "bar"):
             pw = ProgressWidget(self)
-            pw.setText(sg.tablename)
+            pw.setText(att)
             layout.addWidget(pw)
-            self.module_dict[module] = pw
+            self.progress_widgets[att] = pw
 
         self.scroll_area = QtGui.QScrollArea(self)
         self.scroll_area.setWidget(frame)
@@ -112,5 +108,5 @@ if __name__ == "__main__":
     sc = DemoAdminConnection()
     sc.connect()
 
-    dl = DemoProgressDialog(sc, [])
+    dl = ImportProgressDialog(sc, [])
     dl.exec_()

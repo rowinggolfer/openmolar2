@@ -26,6 +26,7 @@ import shutil
 import sys
 
 from lib_openmolar.common.datatypes import Connection230Data
+from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
 
 #CONFDIR = os.path.join(os.path.expanduser("~"),".openmolar")
 CONFDIR = "/etc/openmolar/admin/"
@@ -37,9 +38,9 @@ class SettingsError(Exception):
     '''
     pass
 
-class AdminSettings(object):
+class AdminSettings(PluginHandler):
     '''
-    A class installed into the global namespace as AD_SETTINGS.
+    A class installed into the global namespace as SETTINGS.
     '''
     connection230s = []
 
@@ -48,7 +49,12 @@ class AdminSettings(object):
     the user of the proxy server, should be None to use the
     default (unprivileged) user, or an instance of :doc:`ProxyUser`
     '''
-
+    PERSISTANT_SETTINGS = {}
+    '''
+    put persistant local settings in here..
+    they are pickled and stored in QtCore.QSettings for the application
+    meaning these survive a log out!
+    '''
     def __init__(self):
         self.VERSION
         self.load()
@@ -96,7 +102,7 @@ def install():
     >>>
     '''
     import __builtin__
-    __builtin__.__dict__["AD_SETTINGS"] = AdminSettings()
+    __builtin__.SETTINGS = AdminSettings()
 
 def _test():
     import logging
@@ -105,7 +111,7 @@ def _test():
     LOGGER.setLevel(logging.DEBUG)
     install()
     LOGGER.debug("testing %s"% __file__)
-    LOGGER.debug("proxy_servers = %s "% AD_SETTINGS.om_connections)
+    LOGGER.debug("proxy_servers = %s "% SETTINGS.om_connections)
 
 if __name__ == "__main__":
     _test()

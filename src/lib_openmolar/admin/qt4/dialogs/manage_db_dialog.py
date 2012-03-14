@@ -28,6 +28,7 @@ class ManageDatabaseDialog(ExtendableDialog):
 
     manage_users = False
     drop_db = False
+    truncate_db = False
 
     def __init__(self, dbname, parent=None):
         ExtendableDialog.__init__(self, parent)
@@ -40,10 +41,13 @@ class ManageDatabaseDialog(ExtendableDialog):
         label.setWordWrap(True)
 
         drop_but = QtGui.QPushButton(_("Drop (delete) this database"))
+        truncate_but = QtGui.QPushButton(
+            _("Remove all data from this database"))
         users_but = QtGui.QPushButton(_("Manage users for this database"))
 
         self.insertWidget(label)
         self.insertWidget(drop_but)
+        self.insertWidget(truncate_but)
         self.insertWidget(users_but)
 
         advanced_label = QtGui.QLabel("no advanced options as yet")
@@ -54,6 +58,7 @@ class ManageDatabaseDialog(ExtendableDialog):
         #self.enableApply()
 
         drop_but.clicked.connect(self.drop_but_clicked)
+        truncate_but.clicked.connect(self.truncate_but_clicked)
         users_but.clicked.connect(self.users_but_clicked)
 
     def sizeHint(self):
@@ -72,6 +77,10 @@ class ManageDatabaseDialog(ExtendableDialog):
 
     def users_but_clicked(self):
         self.manage_users = True
+        self.accept()
+
+    def truncate_but_clicked(self):
+        self.truncate_db = True
         self.accept()
 
 def _test():

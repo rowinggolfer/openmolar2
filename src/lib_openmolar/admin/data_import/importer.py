@@ -27,6 +27,8 @@ from xml.dom import minidom
 from PyQt4 import QtSql, QtCore
 from lib_openmolar.common import common_db_orm
 
+class _ImportWarning(Exception):
+    pass
 
 class Importer(object):
     '''
@@ -46,48 +48,41 @@ class Importer(object):
         self._import_directory = os.path.curdir
         self.USER_DICT = {}
 
-    def print_traceback(self):
-        '''
-        print any traceback in readableform
-        '''
-        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
-
-        readable_ex =   traceback.format_exception(
-            exceptionType, exceptionValue, exceptionTraceback)
-
-        for line in readable_ex:
-            print line
-
     @property
     def import_directory(self):
         '''
         returns the file path where XML data files can be found
         '''
-        assert os.path.isdir(self._import_directory)
         return self._import_directory
 
     def set_import_directory(self, directory):
         '''
         set the file path to the directory where XML data can be found
         '''
-        assert os.path.isdir(directory)
+        assert os.path.isdir(directory), "%s is not a directory"% directory
         self._import_directory = directory
 
     def import_practitioners(self):
-        TABLENAME = "practitioners"
-        print "importing %s"% TABLENAME
+        table_name = "practitioners"
+        LOGGER.info("importing %s"% table_name)
 
-        dom = minidom.parse(os.path.join(self.import_directory,
-            "%s.xml"% TABLENAME))
+        try:
+            filepath = os.path.abspath(
+                os.path.join(self.import_directory, "%s.xml"% table_name))
+            dom = minidom.parse(filepath)
+        except IOError as exc:
+            LOGGER.error(
+            "Unable to import practitioners - no such file %s"% filepath)
+            raise _ImportWarning
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, TABLENAME)
+        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
         record.include_ix = True
 
         record.remove(record.indexOf("time_stamp"))
         ps_query, values = record.insert_query
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
-        rows = dom.getElementsByTagName(TABLENAME.rstrip("s"))
+        rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
         for row in rows:
             psql_query.prepare(ps_query)
@@ -105,23 +100,29 @@ class Importer(object):
             psql_query.addBindValue("imported from xml")
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERROR IMPORTING %s - %s"% (
+                LOGGER.warning("ERROR IMPORTING %s - %s"% (
                     row.toxml(),
-                    psql_query.lastError().text())
+                    psql_query.lastError().text()))
 
     def import_avatars(self):
-        TABLENAME = "avatars"
-        print "importing %s"% TABLENAME
+        table_name = "avatars"
+        LOGGER.info("importing %s"% table_name)
 
-        dom = minidom.parse(os.path.join(self.import_directory,
-            "%s.xml"% TABLENAME))
+        try:
+            filepath = os.path.abspath(
+                os.path.join(self.import_directory, "%s.xml"% table_name))
+            dom = minidom.parse(filepath)
+        except IOError:
+            LOGGER.error(
+            "Unable to import avatars - no such file %s"% filepath)
+            raise _ImportWarning
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, TABLENAME)
+        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
 
         ps_query, values = record.insert_query
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
-        rows = dom.getElementsByTagName(TABLENAME.rstrip("s"))
+        rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
         for row in rows:
             psql_query.prepare(ps_query)
@@ -137,32 +138,39 @@ class Importer(object):
 
             psql_query.exec_()
             if psql_query.lastError().isValid():
-                print "ERROR IMPORTING - %s"% psql_query.lastError().text()
-
+                LOGGER.error(
+                "ERROR IMPORTING - %s"% psql_query.lastError().text())
 
     def import_patients(self):
-        print "importing patients"
+        table_name = "patients"
+        LOGGER.info("importing %s"% table_name)
 
     def import_static_charts(self):
-        print "importing static_charts"
+        table_name = "static charts"
+        LOGGER.info("importing %s"% table_name)
 
     def import_clerical_memos(self):
-        print "importing clerical memos"
+        table_name = "clerical memos"
+        LOGGER.info("importing %s"% table_name)
 
     def import_addresses(self):
-        print "importing addresses"
+        table_name = "addresses"
+        LOGGER.info("importing %s"% table_name)
 
     def import_clinical_memos(self):
-        print "importing clinical memos"
+        table_name = "clinical memos"
+        LOGGER.info("importing %s"% table_name)
 
     def import_appointments(self):
-        print "importing appointments from aslot"
+        table_name = "appointments from aslot"
+        LOGGER.info("importing %s"% table_name)
 
     def import_notes(self):
-        print "importing notes"
+        table_name = "notes"
+        LOGGER.info("importing %s"% table_name)
 
     def insert_null_user(self):
-        print "inserting null user to index 0"
+        LOGGER.info("inserting null user to index 0")
 
         ps_query = '''INSERT INTO users
         (ix, title, last_name, first_name, qualifications,
@@ -180,19 +188,26 @@ class Importer(object):
         psql_query.exec_()
 
     def import_users(self, ignore_errors=False):
-        TABLENAME = "users"
-        print "importing %s"% TABLENAME
+        table_name = "users"
+        LOGGER.info("importing %s"% table_name)
 
-        dom = minidom.parse(os.path.join(self.import_directory,
-            "%s.xml"% TABLENAME))
+        try:
+            filepath = os.path.abspath(
+                os.path.join(self.import_directory, "%s.xml"% table_name))
+            dom = minidom.parse(filepath)
+        except IOError:
+            LOGGER.error(
+            "Unable to import users - no such file %s"% filepath)
+            raise _ImportWarning
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, TABLENAME)
+
+        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
         record.include_ix = True
         record.remove(record.indexOf("time_stamp"))
         ps_query, values = record.insert_query
         psql_query = QtSql.QSqlQuery(self.om2_connection)
 
-        rows = dom.getElementsByTagName(TABLENAME.rstrip("s"))
+        rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
         for row in rows:
             psql_query.prepare(ps_query)
@@ -225,17 +240,24 @@ class Importer(object):
         print self.USER_DICT
 
     def import_bpe(self):
-        print "importing bpe"
+        table_name = "bpe"
+        LOGGER.info("importing %s"% table_name)
+
+    def import_perio(self):
+        table_name = "perio"
+        LOGGER.info("importing %s"% table_name)
 
     def import_contracted_practitioners(self):
-        print "importing contracted practitioners"
+        table_name = "contracted practitioners"
+        LOGGER.info("importing %s"% table_name)
 
     def import_telephones(self):
-        print "importing telephones"
+        table_name = "telephones"
+        LOGGER.info("importing %s"% table_name)
 
     def import_tx_completed(self):
-        print "importing tx_completed"
-
+        table_name = "tx_completed"
+        LOGGER.info("importing %s"% table_name)
 
     def import_all(self, *args):
         '''
@@ -243,9 +265,8 @@ class Importer(object):
 
         .. note::
             all arguments are ignored. arguments are for inherited classes only
-
         '''
-        print "importing all"
+        LOGGER.info ("running import_all function")
         tracebacks = []
         for func in (
             self.insert_null_user,
@@ -270,14 +291,27 @@ class Importer(object):
                 sys.stdout.flush()
                 func()
 
-            except Exception as e:
-                print "FATAL ERROR! in function %s"% func
-                tracebacks.append(func)
+            except _ImportWarning as exc:
+                tracebacks.append((func, exc))
+            except Exception as exc:
+                LOGGER.exception("UNHANDLED EXCEPTION in function %s"% func)
+                tracebacks.append((func, exc))
 
-        print "ALL DONE!"
+        LOGGER.info ("import_all function finished")
         if tracebacks:
-            print "The following functions gave exceptions"
-            print tracebacks
+            LOGGER.warning("The following functions had problems")
+            for func, exc in tracebacks:
+                if type(exc) == _ImportWarning:
+                    LOGGER.warning("Warning from %s"% func)
+                else:
+                    LOGGER.error("Unhandled exception from %s"% func)
+                    LOGGER.error("**** %s"% exc.message)
+
+    def run(self):
+        '''
+        calls import_all
+        '''
+        self.import_all()
 
 
 if __name__ == "__main__":
@@ -286,5 +320,5 @@ if __name__ == "__main__":
     sc.connect()
 
     im = Importer(sc)
-    im.set_import_directory("/home/neil/Desktop/adp_import")
+    #im.set_import_directory("/home/neil/Desktop/adp_import")
     im.import_all()

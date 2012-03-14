@@ -100,7 +100,7 @@ class ProxyManager(object):
         '''
         self.forget_proxies()
         n_clients, n_active = 0,0
-        for connection230_data in AD_SETTINGS.om_connections:
+        for connection230_data in SETTINGS.om_connections:
             LOGGER.debug("found connection data %s"% connection230_data)
             client = ProxyClient(connection230_data)
             LOGGER.debug("loading proxy_client %s"% client)
@@ -173,6 +173,12 @@ class ProxyManager(object):
         if not continue_:
             self.advise(_("failed"))
             return
+
+    @user_perms
+    def create_demo_user(self):
+        '''
+        create and grant privileges to om_demo
+        '''
         LOGGER.info("creating demo user")
         try:
             self.wait()
@@ -204,27 +210,29 @@ class ProxyManager(object):
         '''
         success = False
 
-        demo = dbname == "openmolar_demo"
         LOGGER.info("creating database %s"% dbname)
         self.advise("%s '%s' <br />%s"%(
             _("Creating a new database"), dbname,
             _("This may take some time")))
         self.wait()
 
-        if not demo:
-            payload = pickle.loads(self.selected_server.create_db(dbname))
-        else:
-            payload = pickle.loads(self.selected_server.create_demodb())
-        self.wait(False)
+        payload = pickle.loads(self.selected_server.create_db(dbname))
+
         if not payload.permission:
             raise self.PermissionError, payload.error_message
 
         if payload.payload:
-            self.advise(u"%s '%s'<br />%s"%(
-            _("Successfully created database!"), dbname,
-            _("This database has no users yet")), 1)
+            if dbname == "openmolar_demo":
+                self.advise("creating demo user and granting permissions")
+                self.create_demo_user()
+            else:
+                self.advise(u"%s '%s'<br />%s"%(
+                _("Successfully created database!"), dbname,
+                _("This database has no users yet")), 1)
+
             LOGGER.info("database %s created"% dbname)
 
+        self.wait(False)
         self.display_proxy_message()
         return payload.payload
 
@@ -251,6 +259,27 @@ class ProxyManager(object):
 
         self.display_proxy_message()
 
+    @user_perms
+    def truncate_db(self, dbname):
+        '''
+        send a message to the openmolar server to delete all data this database
+        this is for test purposes eg. demo database or import only
+        '''
+        pickled_payload = self.selected_server.truncate_all_tables(str(dbname))
+
+        payload = pickle.loads(pickled_payload)
+        if not payload.permission:
+            raise self.PermissionError, payload.error_message
+
+        if payload.payload:
+            self.advise(u"%s %s"%(
+                _("Sucessfully removed all data from"), dbname), 1)
+        else:
+            self.advise(u"%s<hr />%s"%(
+                _("Operation failed"), payload.error_message), 2)
+
+        self.display_proxy_message()
+
 
 def _test():
     import lib_openmolar.admin
@@ -265,7 +294,7 @@ def _test():
     #LOGGER is in the namespace due to lib_openmolar.admin import
     LOGGER.debug("using %s"% pm.selected_server)
     #LOGGER.debug(pm.drop_db("openmolar_demo"))
-    #LOGGER.debug(pm.create_demo_database())
+    LOGGER.debug(pm.create_demo_database())
     admin_user = ProxyUser("admin", "dSqhZ0pt")
     pm.selected_client.set_user(admin_user)
 

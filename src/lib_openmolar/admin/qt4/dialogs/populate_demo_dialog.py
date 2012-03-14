@@ -24,11 +24,11 @@ from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 
-from demo_progress_dialog import DemoProgressDialog, DialogThread
+from demo_progress_dialog import DemoProgressDialog
 
-class AdvancedPanel(QtGui.QWidget):
+class _AdvancedPanel(QtGui.QWidget):
     def __init__(self, modules, parent = None):
-        super(AdvancedPanel, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
         label = QtGui.QLabel(_("Only Populate the following Tables"))
         check_master = QtGui.QCheckBox(_('check / uncheck all'))
         check_master.setChecked(True)
@@ -83,7 +83,7 @@ class PopulateDemoDialog(ExtendableDialog):
         label.setAlignment(QtCore.Qt.AlignCenter)
         self.insertWidget(label)
 
-        self.adv_widg = AdvancedPanel(self.connection.admin_modules, self)
+        self.adv_widg = _AdvancedPanel(self.connection.admin_modules, self)
         self.add_advanced_widget(self.adv_widg)
 
         self.work_thread = QtCore.QThread(self)

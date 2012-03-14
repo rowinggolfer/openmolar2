@@ -46,7 +46,7 @@ class AdminMain(ProxyManager):
         if self.parser.has_section("user"):
             name = self.parser.get("user","name")
             psword = self.parser.get("user", "password")
-            AD_SETTINGS.proxy_user = ProxyUser(name, psword)
+            SETTINGS.proxy_user = ProxyUser(name, psword)
 
             #force reload of server at next use
             self._proxy_server = None
