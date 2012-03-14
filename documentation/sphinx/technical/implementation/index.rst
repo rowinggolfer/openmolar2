@@ -2,7 +2,7 @@
 Openmolar - Implementation
 **************************
 
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace (neil@openmolar.com)
 
  - *LANGUAGE* Written in `Python <http://python.org>`_ (requires 2.6), 
  

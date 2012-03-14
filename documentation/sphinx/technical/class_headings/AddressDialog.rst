@@ -1,4 +1,4 @@
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace (neil@openmolar.com)
 :Release: |release|
 :Date: |today|
    

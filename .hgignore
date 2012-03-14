@@ -22,3 +22,5 @@ src/version.py
 releases/*
 tmp/*
 setup.cfg
+plugins/
+plugins/*

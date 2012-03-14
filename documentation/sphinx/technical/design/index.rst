@@ -2,7 +2,7 @@
 Openmolar - Design
 ******************
 
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace (neil@openmolar.com)
 
 The Openmolar Suite consists of 3 distinct applications, 
 all of which interact with a postgresql database(s).

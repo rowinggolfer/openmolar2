@@ -86,8 +86,8 @@ def main():
         from lib_openmolar.admin import main_cli
         main_cli.main(options.script)
     else:
-        from lib_openmolar.admin.qt4 import maingui
-        maingui.main()
+        from lib_openmolar.admin.qt4 import admin_gui
+        admin_gui.main()
 
 
 if __name__ == "__main__":

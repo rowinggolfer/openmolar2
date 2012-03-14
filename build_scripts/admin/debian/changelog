@@ -1,3 +1,10 @@
+openmolar-admin (2.0.2+hg016~0) unstable; urgency=low
+
+  * new database creation now working, import Qaction added.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 01 Mar 2012 23:57:29 +0000
+
+
 openmolar-admin (2.0.2+hg015~0) unstable; urgency=low
 
   * as per hg log

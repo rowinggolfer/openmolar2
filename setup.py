@@ -125,7 +125,7 @@ def get_version(name):
     except ConfigParser.NoOptionError:
         print "no hg version"
     return major_version
-        
+
 if INSTALL_NAMESPACE:
     logging.info("running namespace setup")
     if os.path.isfile("MANIFEST"):
@@ -184,6 +184,7 @@ if INSTALL_COMMON:
                     'lib_openmolar.common.connect',
                     'lib_openmolar.common.datatypes',
                     'lib_openmolar.common.import_export',
+                    'lib_openmolar.common.plugin_tools',
                     'lib_openmolar.common.qt4',
                     'lib_openmolar.common.qt4.dialogs',
                     'lib_openmolar.common.qt4.postgres',
@@ -274,10 +275,10 @@ if INSTALL_CLIENT:
             'lib_openmolar.client.db_orm.diary',
             'lib_openmolar.client.db_orm.table_models',
             'lib_openmolar.client.qt4',
-            'lib_openmolar.client.qt4.client_widgets',
-            'lib_openmolar.client.qt4.client_widgets.chart_editor',
-            'lib_openmolar.client.qt4.client_widgets.chart_widgets',
-            'lib_openmolar.client.qt4.client_widgets.procedures',
+            'lib_openmolar.client.qt4.widgets',
+            'lib_openmolar.client.qt4.widgets.chart_editor',
+            'lib_openmolar.client.qt4.widgets.chart_widgets',
+            'lib_openmolar.client.qt4.widgets.procedures',
             'lib_openmolar.client.qt4.dialogs',
             'lib_openmolar.client.qt4.dialogs.address_dialogs',
             'lib_openmolar.client.qt4.dialogs.address_dialogs.components',
@@ -313,9 +314,9 @@ if INSTALL_SERVER:
         f.close()
 
         write_manifest_in([
-                "misc/server/*", 
-                "man/server/*", 
-                "src/server.py", 
+                "misc/server/*",
+                "man/server/*",
+                "src/server.py",
                 "src/shell_scripts/*"
                 ])
 

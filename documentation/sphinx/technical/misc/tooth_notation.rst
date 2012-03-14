@@ -1,7 +1,7 @@
 Tooth Notation
 ==============
 
-:Author: Neil Wallace (rowinggolfer AT googlemail.com)
+:Author: Neil Wallace (neil@openmolar.com)
    
 
 I have chosen to use the following numbering system a the core reference

@@ -32,8 +32,8 @@ def run():
     '''
     main function
     '''
-    from lib_openmolar.client.qt4 import maingui
-    sys.exit(maingui.main())
+    from lib_openmolar.client.qt4 import client_gui
+    sys.exit(client_gui.main())
 
 if __name__ == "__main__":
     def determine_path ():
