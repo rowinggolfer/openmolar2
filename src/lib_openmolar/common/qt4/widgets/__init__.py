@@ -9,3 +9,7 @@ from preference_manager import Preference, PreferencesDialog
 from completer_textedit import CompletionTextEdit
 from upper_case_lineedit import UpperCaseLineEdit
 from closeable_tab_widget import ClosableTabWidget
+from progress_widget import ProgressWidget
+from plugin_options_widget import PluginOptionsWidget
+from plugins_directory_widget import PluginsDirectoryWidget
+from pluggable_main_window import PluggableMainWindow

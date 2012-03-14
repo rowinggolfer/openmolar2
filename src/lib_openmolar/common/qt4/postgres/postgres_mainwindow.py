@@ -30,9 +30,9 @@ from lib_openmolar.common.datatypes import ConnectionData
 
 from lib_openmolar.common.qt4.widgets import (
     RestorableApplication,
-    BaseMainWindow,
-    Preference,
-    PreferencesDialog)
+    PluggableMainWindow,
+    Preference
+    )
 
 from connect_dialog import ConnectDialog
 from postgres_database import ConnectionError, PostgresDatabase
@@ -41,7 +41,7 @@ from postgres_session_widget import PostgresSessionWidget
 
 from lib_openmolar.common.qt4.dialogs import UserPasswordDialog
 
-class PostgresMainWindow(BaseMainWindow):
+class PostgresMainWindow(PluggableMainWindow):
     '''
     A main window with functions to connect to postgres
     '''
@@ -55,7 +55,7 @@ class PostgresMainWindow(BaseMainWindow):
     ALLOW_MULTIPLE_SESSIONS = True
 
     def __init__(self, parent=None):
-        BaseMainWindow.__init__(self, parent)
+        PluggableMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
 
         self.setWindowTitle(_("Postgres Application"))
@@ -279,7 +279,7 @@ class PostgresMainWindow(BaseMainWindow):
 
     def preferences_dialog(self):
         if self._preferences_dialog is None:
-            dl = self._preferences_dialog = PreferencesDialog(self)
+            dl = PluggableMainWindow.preferences_dialog(self)
 
             connections_pref = Preference(_("Database Connections"))
 
@@ -288,16 +288,20 @@ class PostgresMainWindow(BaseMainWindow):
             connections_pref.setWidget(m_d_widg)
             dl.insert_preference_dialog(0, connections_pref)
 
+            self._preferences_dialog = dl
+
         return self._preferences_dialog
 
-    def show_preferences_dialog(self):
-        '''
-        user wishes to launch the preferences dialog
-        '''
-        LOGGER.debug("launching preference dialog")
-        self.preferences_dialog().exec_()
-
 def _test():
+    import __builtin__
+    import gettext
+    import os
+    gettext.install("")
+
+    class MockSettings(object):
+        plugins = []
+        PLUGIN_DIRS = ["/home/neil/openmolar/hg_openmolar/plugins/client",]
+    __builtin__.SETTINGS = MockSettings()
 
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
@@ -312,6 +316,4 @@ if __name__ == "__main__":
     import logging
     LOGGER = logging.getLogger()
 
-    import gettext
-    gettext.install("openmolar")
     _test()
