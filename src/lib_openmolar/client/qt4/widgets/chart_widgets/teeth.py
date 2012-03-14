@@ -552,7 +552,7 @@ class ChartTooth(Tooth):
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
-    from lib_openmolar.client.qt4.client_widgets import chart_widgets
+    from lib_openmolar.client.qt4.widgets import chart_widgets
 
     def paintEvent(event):
         painter = QtGui.QPainter(widg)

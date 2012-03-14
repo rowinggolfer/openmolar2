@@ -21,7 +21,7 @@
 ###############################################################################
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.client.qt4.client_widgets.procedures.codes_tree_model \
+from lib_openmolar.client.qt4.widgets.procedures.codes_tree_model \
     import ProcCodeTreeModel
 
 class ProcCodeWidget(QtGui.QWidget):

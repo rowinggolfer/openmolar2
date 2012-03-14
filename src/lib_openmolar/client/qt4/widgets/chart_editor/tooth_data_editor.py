@@ -23,7 +23,7 @@
 import logging
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.client.qt4.client_widgets import chart_widgets
+from lib_openmolar.client.qt4.widgets import chart_widgets
 
 from tooth_data_list_widget import ToothDataListWidget
 from chart_line_edit import ChartLineEdit
@@ -31,7 +31,7 @@ from chart_editor_tooth import ToothEditor
 from navigate_frame import NavigateFrame
 from static_shortcuts_frame import StaticShortcutsFrame
 
-from lib_openmolar.client.qt4.client_widgets.procedures.crown_codes_model \
+from lib_openmolar.client.qt4.widgets.procedures.crown_codes_model \
     import CrownCodesModel
 
 class ToothDataEditor(QtGui.QWidget):
@@ -361,7 +361,7 @@ if __name__ == "__main__":
     def sig_catcher(*args):
         print args, dl.sender()
 
-    from lib_openmolar.client.qt4.client_widgets.chart_widgets import \
+    from lib_openmolar.client.qt4.widgets.chart_widgets import \
         teeth, chart_data_model
 
     model = chart_data_model.ChartDataModel()

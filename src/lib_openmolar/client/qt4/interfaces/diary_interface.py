@@ -20,11 +20,9 @@
 ##                                                                           ##
 ###############################################################################
 
-
 from PyQt4 import QtCore, QtGui
 
-
-from lib_openmolar.client.qt4 import client_widgets
+from lib_openmolar.client.qt4.widgets import DiaryControl, DiaryWidget
 
 from lib_openmolar.client.db_orm.diary import DiaryDataModel
 
@@ -35,8 +33,8 @@ class DiaryInterface(QtGui.QWidget):
     def __init__(self, parent = None):
         super(DiaryInterface, self).__init__(parent)
 
-        self.diary_control = client_widgets.DiaryControl()
-        self.diary_widget = client_widgets.DiaryWidget()
+        self.diary_control = DiaryControl()
+        self.diary_widget = DiaryWidget()
 
         self.model = DiaryDataModel()
 
@@ -86,8 +84,8 @@ if __name__ == "__main__":
     dl = QtGui.QDialog()
     dl.setMinimumSize(500,300)
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     di = DiaryInterface(dl)

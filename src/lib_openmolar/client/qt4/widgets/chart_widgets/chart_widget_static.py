@@ -249,9 +249,9 @@ class _TestDialog(QtGui.QDialog):
 
 
 if __name__ == "__main__":
-    from lib_openmolar.client.qt4 import client_widgets
+    from lib_openmolar.client.qt4.widgets import ChartDataModel
 
-    model = client_widgets.ChartDataModel()
+    model = ChartDataModel()
     app = QtGui.QApplication([])
     dl = _TestDialog(model)
     dl.exec_()

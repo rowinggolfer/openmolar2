@@ -20,36 +20,45 @@
 ##                                                                           ##
 ###############################################################################
 
+from __future__ import division
 
-from PyQt4 import QtGui, QtSql
+from PyQt4 import QtGui, QtCore
+from lib_openmolar.client.qt4.widgets.chart_widgets import ChartWidgetBase
 
-class PatientDiaryModel(QtSql.QSqlQueryModel):
-    def __init__(self):
-        QtSql.QSqlQueryModel.__init__(self)
+class ChartWidgetCompleted(ChartWidgetBase):
+    '''
+    ChartWidget as used on the summary page
+    '''
+    def __init__(self, model=None, parent=None):
+        super(ChartWidgetCompleted, self).__init__(model, parent)
 
-    def set_patient(self, patient_id):
-        query = '''select start, finish, clinician_type, clinician_spec,
-        reason1, reason2, length, parent, period, comment
-        from diary_patients join diary_appointments
-        on appt_ix = diary_appointments.ix where patient=?'''
-        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
-        q_query.prepare(query)
-        q_query.addBindValue(patient_id)
-        q_query.exec_()
-        self.setQuery(q_query)
+        self.add_key_press_function(
+            QtCore.Qt.Key_F5, self.complete_treatment)
+
+        self.treatment_addition_cat = "Completed"
+
+    def complete_treatment(self):
+        tooth = self.current_tooth
+        QtGui.QMessageBox.information(self, "info",
+        "edit completed treatment on %s?" %tooth.long_name)
+        return tooth.tooth_id
+
+    def draw_tooth(self, tooth, painter):
+        '''
+        overwrite this function so that no teeth are drawn by default,
+        only if they have some treatment....
+        '''
+
+        if tooth.has_properties:
+            tooth.draw_structure(painter)
+
 
 if __name__ == "__main__":
-    from PyQt4 import QtGui
-    from lib_openmolar.client.connect import DemoClientConnection
     app = QtGui.QApplication([])
+    dl = QtGui.QDialog()
+    object = ChartWidgetCompleted(None, dl)
 
-    cc = DemoClientConnection()
-    cc.connect()
-
-    model = PatientDiaryModel()
-    model.set_patient(1)
-
-    dl = QtGui.QTableView()
-    dl.setModel(model)
-    dl.show()
-    app.exec_()
+    layout = QtGui.QVBoxLayout(dl)
+    layout.addWidget(object)
+    dl.exec_()
+    app.closeAllWindows()

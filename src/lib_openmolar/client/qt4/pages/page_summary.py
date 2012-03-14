@@ -29,7 +29,7 @@ Clinical summary page which is added to the patient interface
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 
-from lib_openmolar.client.qt4.client_widgets import *
+from lib_openmolar.client.qt4.widgets import *
 
 from lib_openmolar.client.qt4.dialogs import (
     NewExamDialog, HygTreatmentDialog, XrayTreatmentDialog)
@@ -195,13 +195,13 @@ class SummaryPage(QtGui.QWidget):
 
 
 if __name__ == "__main__":
-    from lib_openmolar.client.qt4.client_widgets.chart_widgets import ChartDataModel
+    from lib_openmolar.client.qt4.widgets.chart_widgets import ChartDataModel
     model = ChartDataModel()
 
     app = QtGui.QApplication([])
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = QtGui.QDialog()

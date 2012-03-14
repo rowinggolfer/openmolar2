@@ -60,12 +60,9 @@ class ClientSessionWidget(QtGui.QStackedWidget, PostgresSessionWidget):
         self.update_status()
 
 def _test():
-    from lib_openmolar.common.datatypes import ConnectionData
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     app = QtGui.QApplication([])
-    conn_data = ConnectionData()
-    conn_data.demo_connection()
-    session = ClientConnection(conn_data)
+    session = DemoClientConnection()
     session.connect()
     csw = ClientSessionWidget()
     csw.set_session(session)

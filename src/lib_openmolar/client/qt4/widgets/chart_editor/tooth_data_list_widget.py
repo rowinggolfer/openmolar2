@@ -83,11 +83,11 @@ class ToothDataListWidget(QtGui.QListView):
 
 if __name__ == "__main__":
 
-    from lib_openmolar.client.qt4.client_widgets.chart_widgets.teeth \
+    from lib_openmolar.client.qt4.widgets.chart_widgets.teeth \
         import ChartTooth
-    from lib_openmolar.client.qt4.client_widgets.chart_widgets.tooth_data \
+    from lib_openmolar.client.qt4.widgets.chart_widgets.tooth_data \
         import ToothData
-    from lib_openmolar.client.qt4.client_widgets.chart_widgets.chart_data_model \
+    from lib_openmolar.client.qt4.widgets.chart_widgets.chart_data_model \
         import ChartDataModel
 
     app = QtGui.QApplication([])

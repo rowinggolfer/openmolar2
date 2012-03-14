@@ -30,9 +30,9 @@ from PyQt4 import QtCore, QtSql
 from lib_openmolar.common.datatypes import OMType
 from lib_openmolar.common import common_db_orm
 
-from lib_openmolar.client.qt4.client_widgets import ChartDataModel
-from lib_openmolar.client.qt4.client_widgets import ToothData
-from lib_openmolar.client.qt4.client_widgets import TreatmentTreeModel
+from lib_openmolar.client.qt4.widgets import ChartDataModel
+from lib_openmolar.client.qt4.widgets import ToothData
+from lib_openmolar.client.qt4.widgets import TreatmentTreeModel
 
 
 class TreatmentModel(object):
@@ -253,10 +253,10 @@ where patient_id = ?'''
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
 
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     from lib_openmolar.client.db_orm import PatientModel
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     pt = PatientModel(1)

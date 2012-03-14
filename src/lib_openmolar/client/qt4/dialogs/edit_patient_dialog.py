@@ -113,8 +113,8 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     from lib_openmolar.client.db_orm.client_patient import PatientDB

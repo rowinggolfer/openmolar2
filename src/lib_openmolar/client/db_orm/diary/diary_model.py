@@ -360,8 +360,8 @@ if __name__ == "__main__":
     import os, sys
     sys.path.insert(0, os.path.abspath("../../../../../"))
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     model = DiaryDataModel()

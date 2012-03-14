@@ -25,7 +25,7 @@ import os
 
 from lib_openmolar.common import settings
 
-from lib_openmolar.client.classes import PluginHandler
+from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
 from lib_openmolar.client.scripts import dent_key
 from lib_openmolar.client.qt4.colours import colours
 
@@ -108,7 +108,6 @@ class Settings(settings.CommonSettings, PluginHandler):
         #: locations of directories where plugins reside
         self.PLUGIN_DIRS = []
 
-        self._plugins = []
         self._fee_scales = []
         self._current_patient = None
         self._current_practitioner = None
@@ -298,7 +297,7 @@ def install():
     >>>
     '''
     import __builtin__
-    __builtin__.__dict__["SETTINGS"] = Settings()
+    __builtin__.SETTINGS = Settings()
 
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
@@ -309,4 +308,4 @@ if __name__ == "__main__":
     print SETTINGS.tooth_decoder.decode(23456)
 
     print SETTINGS.allowed_crown_types
-    SETTINGS.VERSION
+    print SETTINGS.VERSION

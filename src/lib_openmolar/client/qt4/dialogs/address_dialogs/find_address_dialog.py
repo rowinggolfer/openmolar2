@@ -140,8 +140,8 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = FindAddressDialog()

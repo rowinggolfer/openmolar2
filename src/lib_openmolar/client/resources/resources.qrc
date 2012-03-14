@@ -2,7 +2,6 @@
 <RCC version="1.0">
 <qresource>
 
-    <file>icons/plugins.png</file>
     <file>icons/applications-internet.png</file>
 
     <file>icons/add_user.png</file>

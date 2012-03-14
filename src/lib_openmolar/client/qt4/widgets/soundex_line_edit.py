@@ -20,45 +20,50 @@
 ##                                                                           ##
 ###############################################################################
 
-from __future__ import division
+'''
+provides a lineEdit with a sounds like checkbox
+'''
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.client.qt4.client_widgets.chart_widgets import ChartWidgetBase
+from lib_openmolar.client import qrc_resources
 
-class ChartWidgetCompleted(ChartWidgetBase):
-    '''
-    ChartWidget as used on the summary page
-    '''
-    def __init__(self, model=None, parent=None):
-        super(ChartWidgetCompleted, self).__init__(model, parent)
+class SoundexLineEdit(QtGui.QWidget):
+    def __init__(self, parent=None):
+        super(SoundexLineEdit, self).__init__(parent)
 
-        self.add_key_press_function(
-            QtCore.Qt.Key_F5, self.complete_treatment)
+        self.line_edit = QtGui.QLineEdit(self)
 
-        self.treatment_addition_cat = "Completed"
+        icon = QtGui.QIcon(':icons/soundex.svg')
+        self.cb = QtGui.QCheckBox(self)
+        self.cb.setIcon(icon)
 
-    def complete_treatment(self):
-        tooth = self.current_tooth
-        QtGui.QMessageBox.information(self, "info",
-        "edit completed treatment on %s?" %tooth.long_name)
-        return tooth.tooth_id
+        self.cb.setToolTip(_("check to search for a similar sounding name"))
 
-    def draw_tooth(self, tooth, painter):
-        '''
-        overwrite this function so that no teeth are drawn by default,
-        only if they have some treatment....
-        '''
+        layout = QtGui.QHBoxLayout(self)
+        layout.setMargin(0)
+        layout.addWidget(self.line_edit)
+        layout.addWidget(self.cb)
 
-        if tooth.has_properties:
-            tooth.draw_structure(painter)
+        ## give this class selected attributes from the enclosed widgets
 
+        self.cursorPositionChanged = self.line_edit.cursorPositionChanged
+        self.text = self.line_edit.text
+        self.setText = self.line_edit.setText
+        self.setFocus = self.line_edit.setFocus
+        self.editingFinished = self.line_edit.editingFinished
+        self.setCompleter = self.line_edit.setCompleter
+
+        self.isChecked = self.cb.isChecked
+        self.setChecked = self.cb.setChecked
+        self.cb.hide()
+
+    def show_soundex(self, visible):
+        self.cb.setVisible(visible)
 
 if __name__ == "__main__":
-    app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    object = ChartWidgetCompleted(None, dl)
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.addWidget(object)
-    dl.exec_()
-    app.closeAllWindows()
+    app = QtGui.QApplication([])
+    sw = SoundexLineEdit()
+    sw.show_soundex(True)
+    sw.show()
+    app.exec_()

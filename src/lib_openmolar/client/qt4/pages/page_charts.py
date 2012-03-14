@@ -24,8 +24,9 @@
 from PyQt4 import QtCore, QtGui, QtWebKit
 from lib_openmolar.client.messages import messages
 
-from lib_openmolar.client.qt4 import client_widgets
-
+from lib_openmolar.client.qt4.widgets import (
+    ChartWidgetStatic, ChartWidgetTreatment,
+    ChartWidgetCompleted, ToothDataEditor)
 
 class ChartsPage(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -34,21 +35,20 @@ class ChartsPage(QtGui.QWidget):
         self.patient = None
 
         #:
-        self.static = client_widgets.ChartWidgetStatic(None, self)
+        self.static = ChartWidgetStatic(None, self)
 
         #: a pointer to the :doc:`ChartDataModel` of the static chart
         self.static_chart_model = self.static.chart_data_model
 
         self.tx_pl_model = SETTINGS.treatment_model.plan_tx_chartmodel
         #:
-        self.treatment = client_widgets.ChartWidgetTreatment(
-            self.tx_pl_model, self)
+        self.treatment = ChartWidgetTreatment(self.tx_pl_model, self)
 
         tx_model = SETTINGS.treatment_model.cmp_tx_chartmodel
         #:
-        self.completed = client_widgets.ChartWidgetCompleted(tx_model, self)
+        self.completed = ChartWidgetCompleted(tx_model, self)
 
-        self.tooth_data_editor = client_widgets.ToothDataEditor(self)
+        self.tooth_data_editor = ToothDataEditor(self)
 
         right_widget = QtGui.QWidget(self)
         right_widget.setFixedWidth(150)

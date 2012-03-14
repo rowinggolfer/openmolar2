@@ -23,7 +23,7 @@
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from lib_openmolar.client.messages import messages
-from lib_openmolar.client.qt4.client_widgets import NotesWidget
+from lib_openmolar.client.qt4.widgets import NotesWidget
 
 from lib_openmolar.client.db_orm.table_models.patient_diary_model import \
     PatientDiaryModel
@@ -99,10 +99,10 @@ class ReceptionPage(QtGui.QWidget):
 
 if __name__ == "__main__":
 
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     app = QtGui.QApplication([])
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = QtGui.QDialog()

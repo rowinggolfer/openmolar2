@@ -24,7 +24,6 @@ else:
     LOGGER.info("no language environment found")
     gettext.install('openmolar', unicode=True)
 
-from classes import Plugin
 import settings
 settings.install()
 

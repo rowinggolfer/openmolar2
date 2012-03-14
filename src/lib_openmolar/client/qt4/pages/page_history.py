@@ -76,10 +76,10 @@ where patient_id=? order by tx_date, comment
 
 if __name__ == "__main__":
 
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     app = QtGui.QApplication([])
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
     hp = HistoryPage()
 

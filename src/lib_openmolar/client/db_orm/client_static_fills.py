@@ -141,8 +141,8 @@ if __name__ == "__main__":
         def __init__(self):
             pass
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     object = StaticFillsDB(1)

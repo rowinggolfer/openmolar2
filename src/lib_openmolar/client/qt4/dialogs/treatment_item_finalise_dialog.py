@@ -25,7 +25,7 @@ from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 
-from lib_openmolar.client.qt4 import client_widgets
+from lib_openmolar.client.qt4.widgets import ChartWidgetBase, ToothWidget
 
 class ChooseClinicianFrame(QtGui.QFrame):
         '''
@@ -63,7 +63,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
         ## chart
         self.chart_frame = QtGui.QFrame()
-        self.chart = client_widgets.ChartWidgetBase()
+        self.chart = ChartWidgetBase()
         #self.chart.setStyle(self.chart.CHART_STYLE_ROOTS)
         self.chart.setStyle(self.chart.CHART_STYLE_MIXED)
 
@@ -84,7 +84,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
         ## tooth for selecting chosen surfaces
 
         self.surfaces_frame = QtGui.QFrame()
-        self.tooth = client_widgets.ToothWidget()
+        self.tooth = ToothWidget()
         surfs_needed_label = QtGui.QLabel(_("Select surfaces"))
         self.chosen_surfaces_label = QtGui.QLabel("-")
         self.chosen_surfaces_label.setAlignment(QtCore.Qt.AlignCenter)
@@ -97,7 +97,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
         ## pontics chart
         self.pontics_frame = QtGui.QFrame()
-        self.pontics_chart = client_widgets.ChartWidgetBase()
+        self.pontics_chart = ChartWidgetBase()
         #self.chart.setStyle(self.chart.CHART_STYLE_ROOTS)
         self.pontics_chart.setStyle(self.pontics_chart.CHART_STYLE_MIXED)
 
@@ -347,11 +347,11 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 if __name__ == "__main__":
 
     from lib_openmolar.common.common_db_orm import TreatmentItem
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
 
     app = QtGui.QApplication([])
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = TreatmentItemFinaliseDialog()

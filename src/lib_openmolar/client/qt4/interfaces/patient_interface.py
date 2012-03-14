@@ -23,9 +23,9 @@
 import sys, traceback
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.client.qt4 import client_widgets
+from lib_openmolar.client.qt4.widgets import (ControlPanel, DetailsBrowser, NotesWidget, PatientInterfaceOptionsWidget)
 
-from lib_openmolar.client.qt4.client_widgets.procedures.proc_code_widget \
+from lib_openmolar.client.qt4.widgets.procedures.proc_code_widget \
     import ProcCodeDockWidget
 
 from lib_openmolar.client.qt4 import pages
@@ -44,10 +44,10 @@ class PatientInterface(QtGui.QWidget):
 
         self._proc_code_dock_widget = None #initialise if needed.
 
-        self.control_panel = client_widgets.ControlPanel(self)
+        self.control_panel = ControlPanel(self)
         '''a pointer to the :doc:`ControlPanel`'''
 
-        self.details_browser = client_widgets.DetailsBrowser(self)
+        self.details_browser = DetailsBrowser(self)
         '''a pointer to the :doc:`DetailsBrowser`'''
 
         self.reception_page = pages.ReceptionPage(self)
@@ -59,7 +59,7 @@ class PatientInterface(QtGui.QWidget):
         self.treatment_page = pages.TreatmentPage(self)
         '''a pointer to the :doc:`TreatmentPage`'''
 
-        self.notes_page = client_widgets.NotesWidget(self)
+        self.notes_page = NotesWidget(self)
         '''a pointer to the :doc:`NotesWidget`'''
 
         self.estimates_page = pages.EstimatesPage(self)
@@ -73,7 +73,7 @@ class PatientInterface(QtGui.QWidget):
         self.summary_page = pages.SummaryPage(model, self)
         '''a pointer to the :doc:`SummaryPage`'''
 
-        self.options_widget = client_widgets.PatientInterfaceOptionsWidget(self)
+        self.options_widget = PatientInterfaceOptionsWidget(self)
         '''a pointer to the :doc:`PatientInterfaceOptionsWidget`'''
 
         self.options_widget.tab_index_changed(0)
@@ -536,26 +536,22 @@ if __name__ == "__main__":
     from lib_openmolar.common.qt4.widgets import RestorableApplication
 
     app = RestorableApplication("openmolar-client")
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(500,300)
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(500,300)
 
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
 
     SETTINGS.PLUGIN_DIRS = QtCore.QSettings().value("plugin_dirs").toStringList()
-    SETTINGS.PERSISTANT_SETTINGS = {"compile_plugins":True}
     SETTINGS.load_plugins()
 
-    pi = PatientInterface(dl)
+    pi = PatientInterface(mw)
 
     cc.connect()
     pi.load_patient(1)
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.setMargin(0)
-    layout.addWidget(pi)
-
-    dl.connect(pi, QtCore.SIGNAL("Show Fee Widget"), _test_dock_widget)
-
-    dl.exec_()
+    mw.setCentralWidget(pi)
+    mw.connect(pi, QtCore.SIGNAL("Show Fee Widget"), _test_dock_widget)
+    mw.show()
+    app.exec_()

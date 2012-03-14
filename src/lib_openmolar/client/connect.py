@@ -26,6 +26,7 @@ ClientConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 
 from PyQt4 import QtGui, QtCore, QtSql
 
+from lib_openmolar.common.datatypes import ConnectionData
 from lib_openmolar.common.qt4.postgres.postgres_database import \
     PostgresDatabase
 
@@ -247,17 +248,23 @@ class ClientConnection(PostgresDatabase):
             QtGui.QApplication.instance().emit(
                 QtCore.SIGNAL("db error"), error.text())
 
+class DemoClientConnection(ClientConnection):
+    '''
+    A connection to the demo database (on localhost)
+    used for testing purposes.
+    '''
+    def __init__(self):
+        conn_data = ConnectionData()
+        conn_data.demo_connection()
+
+        ClientConnection.__init__(self, conn_data)
 
 if __name__ == "__main__":
     from lib_openmolar import client
-    from lib_openmolar.common.datatypes import ConnectionData
 
     app = QtGui.QApplication([])
 
-    conn_data = ConnectionData()
-    conn_data.demo_connection()
-
-    cc = ClientConnection(conn_data)
+    cc = DemoClientConnection()
     cc.connect()
 
     values = {"sname":"POTTA", "soundex_sname":True}

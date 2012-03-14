@@ -23,42 +23,7 @@
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import BaseDialog, ExtendableDialog
-
-
-
-
-class SoundexLineEdit(QtGui.QWidget):
-    def __init__(self, parent=None):
-        super(SoundexLineEdit, self).__init__(parent)
-
-        self.line_edit = QtGui.QLineEdit(self)
-
-        icon = QtGui.QIcon(':icons/soundex.svg')
-        self.cb = QtGui.QCheckBox(self)
-        self.cb.setIcon(icon)
-
-        self.cb.setToolTip(_("check to search for a similar sounding name"))
-
-        layout = QtGui.QHBoxLayout(self)
-        layout.setMargin(0)
-        layout.addWidget(self.line_edit)
-        layout.addWidget(self.cb)
-
-        ## give this class selected attributes from the enclosed widgets
-
-        self.cursorPositionChanged = self.line_edit.cursorPositionChanged
-        self.text = self.line_edit.text
-        self.setText = self.line_edit.setText
-        self.setFocus = self.line_edit.setFocus
-        self.editingFinished = self.line_edit.editingFinished
-        self.setCompleter = self.line_edit.setCompleter
-
-        self.isChecked = self.cb.isChecked
-        self.setChecked = self.cb.setChecked
-        self.cb.hide()
-
-    def show_soundex(self, visible):
-        self.cb.setVisible(visible)
+from lib_openmolar.client.qt4.widgets import SoundexLineEdit
 
 class FindPatientDialog(ExtendableDialog):
     def __init__(self, parent=None):
@@ -339,15 +304,13 @@ class FinalSelectionDialog(BaseDialog):
 
 if __name__ == "__main__":
 
-
-
     def sig_catcher(*args):
         print args
 
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = FindPatientDialog()

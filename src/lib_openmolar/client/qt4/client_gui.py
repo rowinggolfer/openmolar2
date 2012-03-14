@@ -35,11 +35,14 @@ from lib_openmolar.common.qt4.widgets import (
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
-from lib_openmolar.client.qt4 import client_widgets
+from lib_openmolar.client.qt4.widgets import StatusBarWidget
 
 from lib_openmolar.client.qt4.interfaces import ClientSessionWidget
 from lib_openmolar.client.qt4.interfaces import PatientInterface
 from lib_openmolar.client.qt4.interfaces import DiaryInterface
+
+##TODO for windows version... this will need to be tweaked.
+CONF_DIR = "/etc/openmolar/client/connections"
 
 class ClientMainWindow(PostgresMainWindow):
 
@@ -79,7 +82,8 @@ class ClientMainWindow(PostgresMainWindow):
         self.central_widget.add(self.patient_interface, "")
         self.central_widget.add(self.diary_interface, "")
 
-        self.status_widget = client_widgets.StatusBarWidget()
+        #:
+        self.status_widget = StatusBarWidget()
         self.statusbar.addPermanentWidget(self.status_widget)
 
         self.connect_signals()
@@ -150,33 +154,7 @@ class ClientMainWindow(PostgresMainWindow):
 
     def loadSettings(self):
         PostgresMainWindow.loadSettings(self)
-        qsettings = QtCore.QSettings()
-        qsettings.setValue("connection_conf_dir",
-            "/etc/openmolar/client/connections")
-
-        #python dict of settings
-        dict_ = str(qsettings.value("settings_dict").toString())
-        if dict_:
-            try:
-                SETTINGS.PERSISTANT_SETTINGS = pickle.loads(dict_)
-            except Exception as e:
-                print "exception caught loading python settings...", e
-
-        SETTINGS.PLUGIN_DIRS = qsettings.value(
-            "plugin_dirs").toStringList()
-
-    def saveSettings(self):
-        PostgresMainWindow.saveSettings(self)
-        qsettings = QtCore.QSettings()
-
-        #Qt settings
-
-        # SETTINGS is a python dict of non qt-specific settings.
-        # unfortunately.. QVariant.toPyObject can't recreate a dictionary
-        # so best to pickle this
-        pickled_dict = pickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
-        qsettings.setValue("settings_dict", pickled_dict)
-        qsettings.setValue("plugin_dirs", SETTINGS.PLUGIN_DIRS)
+        QtCore.QSettings().setValue("connection_conf_dir", CONF_DIR)
 
     def closeEvent(self, event=None):
         '''
@@ -218,21 +196,6 @@ class ClientMainWindow(PostgresMainWindow):
         if self._preferences_dialog is None:
             dl = self._preferences_dialog = \
                 PostgresMainWindow.preferences_dialog(self)
-
-            plugin_icon = QtGui.QIcon(":icons/plugins.png")
-
-            plugins_pref = Preference(_("Plugins"))
-            plugins_pref.setIcon(plugin_icon)
-            pl_widg = client_widgets.PluginOptionsWidget(self)
-            plugins_pref.setWidget(pl_widg)
-            dl.insert_preference_dialog(0, plugins_pref)
-
-            plugin_icon = QtGui.QIcon(":icons/plugins.png")
-            plugins_dir_pref = Preference(_("Plugin Directories"))
-            plugins_dir_pref.setIcon(plugin_icon)
-            pl_dir_widg = client_widgets.PluginsDirectoryWidget(self)
-            plugins_dir_pref.setWidget(pl_dir_widg)
-            dl.insert_preference_dialog(0, plugins_dir_pref)
 
         return self._preferences_dialog
 

@@ -100,8 +100,8 @@ class StaffMembers(list):
 
 if __name__ == "__main__":
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     staff_members = StaffMembers(cc)

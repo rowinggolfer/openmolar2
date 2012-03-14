@@ -25,7 +25,7 @@ import re
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 from lib_openmolar.client.messages import messages
-from lib_openmolar.client.qt4.client_widgets import AddNotesWidget
+from lib_openmolar.client.qt4.widgets import AddNotesWidget
 
 class NotesWidget(QtGui.QWidget):
     RECEPTION = 0
@@ -221,10 +221,10 @@ if __name__ == "__main__":
     from lib_openmolar.common.qt4.widgets import RestorableApplication
     app = RestorableApplication("openmolar-client")
 
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     from lib_openmolar.client.db_orm import PatientModel
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
 
     cc.connect()
     pt = PatientModel(1)

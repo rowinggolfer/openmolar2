@@ -781,8 +781,8 @@ if __name__ == "__main__":
     dl.setMinimumSize(500,300)
 
     from lib_openmolar.client.db_orm.diary import DiaryDataModel
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
     model = DiaryDataModel()
     model.load()

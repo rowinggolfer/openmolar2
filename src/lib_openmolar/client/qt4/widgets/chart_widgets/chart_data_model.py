@@ -20,8 +20,8 @@
 ##                                                                           ##
 ###############################################################################
 
-from lib_openmolar.client.qt4.client_widgets.chart_widgets import tooth_data
-from lib_openmolar.client.qt4.client_widgets.chart_widgets import perio_data
+from lib_openmolar.client.qt4.widgets.chart_widgets import tooth_data
+from lib_openmolar.client.qt4.widgets.chart_widgets import perio_data
 
 class ChartDataModel(object):
     '''

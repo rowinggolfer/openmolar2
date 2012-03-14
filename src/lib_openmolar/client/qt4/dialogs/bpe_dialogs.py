@@ -137,9 +137,9 @@ if __name__ == "__main__":
         pt = DuckPatient()
 
     app = QtGui.QApplication([])
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     parent = DuckParent()

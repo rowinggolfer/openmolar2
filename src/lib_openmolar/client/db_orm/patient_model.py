@@ -264,8 +264,8 @@ The behaviour of this object is very much like a dictionary.
 
 if __name__ == "__main__":
 
-    from lib_openmolar.client.connect import ClientConnection
-    cc = ClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     obj = PatientModel(1)

@@ -253,7 +253,7 @@ class _TestDialog(QtGui.QDialog):
             self.proc_code_dock_widget.setVisible(not state)
             return
 
-        from lib_openmolar.client.qt4.client_widgets.procedures.proc_code_widget \
+        from lib_openmolar.client.qt4.widgets.procedures.proc_code_widget \
             import ProcCodeDockWidget
 
         self.proc_code_dock_widget = ProcCodeDockWidget(self)
@@ -273,10 +273,10 @@ class _TestDialog(QtGui.QDialog):
 if __name__ == "__main__":
 
     app = QtGui.QApplication([])
-    from lib_openmolar.client.connect import ClientConnection
+    from lib_openmolar.client.connect import DemoClientConnection
     from lib_openmolar.client.db_orm import PatientModel
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     pt = PatientModel(1)
