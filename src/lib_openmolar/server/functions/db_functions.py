@@ -362,6 +362,31 @@ class DBFunctions(object):
             return True
         return False
 
+    def _tables(self, dbname):
+        '''
+        returns all the table names in schema dbname
+        '''
+        conn = psycopg2.connect(self.__conn_atts(dbname))
+        cursor = conn.cursor()
+        cursor.execute(
+        "SELECT tablename FROM pg_tables WHERE tableowner='public'")
+        for tablename in cursor.fetchall():
+            yield tablename[0]
+
+    @log_exception
+    def truncate_all_tables(self, dbname):
+        '''
+        truncates all tables except 'procedure codes'
+        resets the patient serialno index
+        '''
+        logging.warning("removing all data from %s"% dbname)
+        for tablename in self._tables(dbname):
+            if tablename != 'procedure_codes':
+                logging.info("... truncating '%s'"% tablename)
+                self._execute("TRUNCATE %s CASCADE"% tablename, dbname)
+        self._execute("select setval('patients_ix_seq', 1)")
+        return True
+
 def _test():
     '''
     test the DBFunctions class
@@ -374,13 +399,11 @@ def _test():
 
     dbname = "openmolar_demo"
     #log.debug(sf.newDB_sql(dbname))
-    #sf.drop_db(dbname)
-    #sf.drop_demo_user()
+    sf.drop_db(dbname)
+    sf.drop_demo_user()
     sf.create_db(dbname)
     sf.create_demo_user()
-    #sf.drop_db(dbname)
-    #sf.drop_demo_user()
-
+    sf.truncate_all_tables(dbname)
 
 if __name__ == "__main__":
     _test()
