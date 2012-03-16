@@ -1,3 +1,17 @@
+openmolar-common (2.0.3+hg018~0) unstable; urgency=low
+
+  * bugfix - was importing a non existent module
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 15 Mar 2012 15:44:58 +0000
+
+
+openmolar-common (2.0.3+hg017~0) unstable; urgency=low
+
+  * moved plugin widgets in to this package
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 15 Mar 2012 10:20:01 +0000
+
+
 openmolar-common (2.0.2+hg016~0) unstable; urgency=low
 
   * moved the functions which yield toolbars.

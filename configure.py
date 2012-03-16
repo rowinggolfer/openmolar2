@@ -66,6 +66,11 @@ class OMConfig(ConfigParser.RawConfigParser):
                 self.set(att, "version", version.VERSION)
                 self.set(att, "revision_number", version.revision_number)
                 self.set(att, "revision_id", version.revision_id)
+            else:
+                #use the common version number for namespace and lang
+                version = __import__("common.version", fromlist=["version"])
+                self.set(att, "version", version.VERSION)
+         
 
     def write(self, f):
         '''

@@ -121,10 +121,14 @@ def get_version(name):
         return "%s+hg%03d"% ( major_version,
             config.getint(name, "revision_number"))
     except ConfigParser.NoSectionError:
-        print "no hg version"
+        logging.warning("no hg version")
     except ConfigParser.NoOptionError:
-        print "no hg version"
+        logging.warning("no hg version")
     return major_version
+
+###############################################################################
+##                        "namespace" setup starts                              ##
+###############################################################################
 
 if INSTALL_NAMESPACE:
     logging.info("running namespace setup")
@@ -223,7 +227,6 @@ if INSTALL_ADMIN:
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.admin',
                     'lib_openmolar.admin.data_import',
-                    'lib_openmolar.admin.data_import.import_om1',
                     'lib_openmolar.admin.db_orm',
                     'lib_openmolar.admin.db_tools',
                     'lib_openmolar.admin.qt4',

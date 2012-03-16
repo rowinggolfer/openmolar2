@@ -1,3 +1,10 @@
+openmolar-server (2.0.3+hg009~0) unstable; urgency=low
+
+  * added functions to purge a database (necessary for import tests
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 15 Mar 2012 10:54:18 +0000
+
+
 openmolar-server (2.0.2+hg008~0) unstable; urgency=low
 
   * as per hg log

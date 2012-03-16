@@ -1,3 +1,10 @@
+openmolar-client (2.0.3+hg012~0) unstable; urgency=low
+
+  * moved the plugin handling to a new common class, altered some imports and renamed package client_widgets to simply widgets.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 15 Mar 2012 10:52:11 +0000
+
+
 openmolar-client (2.0.2+hg011~0) unstable; urgency=low
 
   * as per hg log

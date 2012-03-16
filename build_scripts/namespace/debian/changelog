@@ -1,3 +1,10 @@
+openmolar-namespace (2.0.3~0) unstable; urgency=low
+
+  * version numbering change
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 15 Mar 2012 11:09:34 +0000
+
+
 openmolar-namespace (2.0.1~0) unstable; urgency=low
 
   * new build process after switching using subrepos in the mercurial tree
