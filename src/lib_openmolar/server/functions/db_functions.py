@@ -369,7 +369,7 @@ class DBFunctions(object):
         conn = psycopg2.connect(self.__conn_atts(dbname))
         cursor = conn.cursor()
         cursor.execute(
-        "SELECT tablename FROM pg_tables WHERE tableowner='public'")
+        "SELECT tablename FROM pg_tables WHERE schemaname='public'")
         for tablename in cursor.fetchall():
             yield tablename[0]
 
