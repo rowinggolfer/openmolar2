@@ -373,6 +373,17 @@ class DBFunctions(object):
         for tablename in cursor.fetchall():
             yield tablename[0]
 
+    def _sequences(self, dbname):
+        '''
+        returns all the sequences in schema dbname
+        '''
+        conn = psycopg2.connect(self.__conn_atts(dbname))
+        cursor = conn.cursor()
+        cursor.execute(
+        "select sequence_name from information_schema.sequences")
+        for sequence_name in cursor.fetchall():
+            yield sequence_name[0]
+
     @log_exception
     def truncate_all_tables(self, dbname):
         '''
@@ -384,7 +395,11 @@ class DBFunctions(object):
             if tablename != 'procedure_codes':
                 logging.info("... truncating '%s'"% tablename)
                 self._execute("TRUNCATE %s CASCADE"% tablename, dbname)
-        self._execute("select setval('patients_ix_seq', 1)")
+        for sequence in self._sequences(dbname):
+            if not sequence.startswith('procedure_codes'):
+                logging.info("... reseting sequence '%s'"% sequence)
+                self._execute("select setval('%s', 1, false)"% sequence,
+                    dbname)
         return True
 
 def _test():
