@@ -386,13 +386,9 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         '''
         check that the user is prepared to lose any changes
         '''
-        result = QtGui.QMessageBox.question(self, _("confirm"),
-        "<p>%s<br />%s</p>"% (
+        return self.get_confirm(u"<p>%s<br />%s</p>"% (
         _("this action will overwrite any current data stored"),
-        _("proceed?")),
-        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Ok )
-        return result == QtGui.QMessageBox.Ok
+        _("proceed?")))
 
     def save_template(self):
         '''

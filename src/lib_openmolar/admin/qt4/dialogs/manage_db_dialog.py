@@ -65,13 +65,8 @@ class ManageDatabaseDialog(ExtendableDialog):
         return QtCore.QSize(400, 400)
 
     def drop_but_clicked(self):
-        if QtGui.QMessageBox.question(self, _("Confirm"),
-        u"%s '%s'?<br /><b>%s</b>"% (
-            _("Drop Database"),
-            self.dbname,
-        _   ("This operation cannot be undone!")),
-        QtGui.QMessageBox.Ok | QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
+        if self.get_confirm(u"%s '%s'?<br /><b>%s</b>"% (_("Drop Database"),
+        self.dbname, _("This operation cannot be undone!"))):
             self.drop_db = True
             self.accept()
 
@@ -80,8 +75,11 @@ class ManageDatabaseDialog(ExtendableDialog):
         self.accept()
 
     def truncate_but_clicked(self):
-        self.truncate_db = True
-        self.accept()
+        if self.get_confirm(u"%s '%s'?<br /><b>%s</b>"% (
+        _("Remove all data from"),
+        self.dbname, _("This operation cannot be undone!"))):
+            self.truncate_db = True
+            self.accept()
 
 def _test():
     app = QtGui.QApplication([])
