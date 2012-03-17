@@ -43,7 +43,7 @@ class BaseDialog(QtGui.QDialog):
         self.button_box.setCenterButtons(True)
 
         self.layout = QtGui.QVBoxLayout(self)
-        
+
         self.button_box.clicked.connect(self._clicked)
 
         self.check_before_reject_if_dirty = False
@@ -129,6 +129,28 @@ class BaseDialog(QtGui.QDialog):
         call this to enable the apply button (which is disabled by default)
         '''
         self.apply_but.setEnabled(enable)
+
+    def get_confirm(self, message,
+    accept="ok", reject="cancel", default="accept"):
+        '''
+        a convenience function to raise a dialog for confirmation of an action
+        '''
+        if accept == "ok":
+            accept_but = QtGui.QMessageBox.Ok
+        elif accept == "yes":
+            accept_but = QtGui.QMessageBox.Yes
+
+        if reject == "cancel":
+            reject_but = QtGui.QMessageBox.Cancel
+        elif reject == "no":
+            reject_but = QtGui.QMessageBox.No
+
+        buttons = accept_but|reject_but
+        default_but = accept_but if default == "accept" else reject_but
+
+        return QtGui.QMessageBox.question(self,_("Confirm"),
+        message, buttons, default_but) == accept_but
+
 
 if __name__ == "__main__":
     import gettext
