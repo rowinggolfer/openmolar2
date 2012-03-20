@@ -29,7 +29,6 @@ from PyQt4 import QtSql
 from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-
 SCHEMA = '''
 ix SERIAL,
 patient_id INTEGER NOT NULL REFERENCES patients(ix),

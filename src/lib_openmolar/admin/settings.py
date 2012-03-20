@@ -25,6 +25,7 @@ import os
 import shutil
 import sys
 
+from lib_openmolar.common.settings import CommonSettings
 from lib_openmolar.common.datatypes import Connection230Data
 from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
 
@@ -38,10 +39,11 @@ class SettingsError(Exception):
     '''
     pass
 
-class AdminSettings(PluginHandler):
+class AdminSettings(CommonSettings, PluginHandler):
     '''
     A class installed into the global namespace as SETTINGS.
     '''
+    
     connection230s = []
 
     proxy_user = None
@@ -49,13 +51,10 @@ class AdminSettings(PluginHandler):
     the user of the proxy server, should be None to use the
     default (unprivileged) user, or an instance of :doc:`ProxyUser`
     '''
-    PERSISTANT_SETTINGS = {}
-    '''
-    put persistant local settings in here..
-    they are pickled and stored in QtCore.QSettings for the application
-    meaning these survive a log out!
-    '''
+
     def __init__(self):
+        CommonSettings.__init__(self)
+
         self.VERSION
         self.load()
 
@@ -71,7 +70,7 @@ class AdminSettings(PluginHandler):
         except ImportError:
             VERSION = "Unknown"
             LOGGER.exception("unable to parse for admin versioning")
-        LOGGER.info("VERSION %s"% VERSION)
+        LOGGER.debug("VERSION %s"% VERSION)
         return VERSION
 
     def load(self):
