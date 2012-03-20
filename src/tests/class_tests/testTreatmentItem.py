@@ -26,7 +26,7 @@ lib_openmolar_path = os.path.abspath("../../")
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
-from lib_openmolar.common.common_db_orm.treatment_item import TreatmentItem
+from lib_openmolar.common.db_orm.treatment_item import TreatmentItem
 
 from lib_openmolar.client.connect import ClientConnection
 from lib_openmolar.client.db_orm.patient_model import PatientModel

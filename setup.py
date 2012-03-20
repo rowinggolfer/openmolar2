@@ -184,7 +184,7 @@ if INSTALL_COMMON:
         license = LICENSE,
         package_dir = {'lib_openmolar' : 'src/lib_openmolar'},
         packages = ['lib_openmolar.common',
-                    'lib_openmolar.common.common_db_orm',
+                    'lib_openmolar.common.db_orm',
                     'lib_openmolar.common.connect',
                     'lib_openmolar.common.datatypes',
                     'lib_openmolar.common.import_export',
