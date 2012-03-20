@@ -27,7 +27,7 @@ This module provides the Telephone Class
 from random import randint
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 SCHEMA = '''
 ix SERIAL NOT NULL,
@@ -53,7 +53,7 @@ class DemoGenerator(object):
     def __init__(self, database):
         self.length = 40
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
 
     def demo_queries(self):

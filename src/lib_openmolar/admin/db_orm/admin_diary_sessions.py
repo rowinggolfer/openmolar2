@@ -26,7 +26,7 @@ Provides a SchemaGenerator and DemoGenerator for the diary sessions
 from random import randint
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 
 SCHEMA = '''
@@ -64,7 +64,7 @@ class DemoGenerator(object):
 
         self.length = int(days * 5/7)
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

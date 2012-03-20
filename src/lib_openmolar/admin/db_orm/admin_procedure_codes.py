@@ -26,10 +26,10 @@ Provides a SchemaGenerator and DemoGenerator for procedure_codes table
 from PyQt4 import QtCore, QtSql
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 
-from lib_openmolar.common import SETTINGS
+
 from lib_openmolar.admin import qrc_resources
 
 

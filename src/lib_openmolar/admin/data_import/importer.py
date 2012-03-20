@@ -25,7 +25,7 @@ import sys
 import traceback
 from xml.dom import minidom
 from PyQt4 import QtSql, QtCore
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 class _ImportWarning(Exception):
     pass
@@ -75,7 +75,7 @@ class Importer(object):
             "Unable to import practitioners - no such file %s"% filepath)
             raise _ImportWarning
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_connection, table_name)
         record.include_ix = True
 
         record.remove(record.indexOf("time_stamp"))
@@ -117,7 +117,7 @@ class Importer(object):
             "Unable to import avatars - no such file %s"% filepath)
             raise _ImportWarning
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_connection, table_name)
 
         ps_query, values = record.insert_query
         psql_query = QtSql.QSqlQuery(self.om2_connection)
@@ -201,7 +201,7 @@ class Importer(object):
             raise _ImportWarning
 
 
-        record = common_db_orm.InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_connection, table_name)
         record.include_ix = True
         record.remove(record.indexOf("time_stamp"))
         ps_query, values = record.insert_query

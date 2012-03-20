@@ -28,7 +28,7 @@ from PyQt4 import QtCore, QtSql
 from random import randint
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 
 SCHEMA = '''
@@ -69,7 +69,7 @@ class DemoGenerator(object):
     def __init__(self, database):
         self.length = 61
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf("time_stamp"))
 
     def demo_queries(self):

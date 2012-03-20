@@ -157,6 +157,9 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
         QtCore.QTimer.singleShot(100, self._init_proxies)
 
+        SETTINGS.mainui = self
+        SETTINGS.load_plugins("admin")
+
     def connect_signals(self):
         '''
         set up signals/slots

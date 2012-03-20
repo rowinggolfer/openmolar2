@@ -26,7 +26,7 @@ This module inserts demo avatars into the database
 
 from lib_openmolar.admin import qrc_resources
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 from PyQt4 import QtCore
 
@@ -51,7 +51,7 @@ class DemoGenerator(object):
     def __init__(self, database=None):
         self.length = 6
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

@@ -26,7 +26,7 @@ This module provides the Demo User Queries
 
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 SCHEMA = '''
 ix SERIAL NOT NULL,
@@ -53,7 +53,7 @@ class DemoGenerator(object):
     def __init__(self, database=None):
         self.database = database
         self.length = 1
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

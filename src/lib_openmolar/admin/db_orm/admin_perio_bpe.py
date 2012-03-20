@@ -27,8 +27,8 @@ from random import randint
 from PyQt4 import QtSql
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
-from lib_openmolar.common import SETTINGS
+from lib_openmolar.common.db_orm import InsertableRecord
+
 
 
 TABLENAME = "perio_bpe"
@@ -63,7 +63,7 @@ class DemoGenerator(object):
         
         self.length = self.max_patient_id - self.min_patient_id      
         
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
 
     def demo_queries(self):

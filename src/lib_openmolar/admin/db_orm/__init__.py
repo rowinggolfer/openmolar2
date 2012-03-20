@@ -1,4 +1,4 @@
-from lib_openmolar.common.common_db_orm import om_views
+from lib_openmolar.common.db_orm import om_views
 
 from lib_openmolar.admin.db_orm import (
     admin_avatars,

@@ -25,7 +25,7 @@ This module provides Demo sql queries for the fees_raised table
 '''
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 
 SCHEMA = '''
@@ -48,7 +48,7 @@ class DemoGenerator(object):
     def __init__(self, database):
         self.length = 2
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

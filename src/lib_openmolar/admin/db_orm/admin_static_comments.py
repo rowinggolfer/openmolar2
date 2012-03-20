@@ -27,8 +27,7 @@ from random import randint
 from PyQt4 import QtSql
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
-from lib_openmolar.common import SETTINGS
+from lib_openmolar.common.db_orm import InsertableRecord
 
 SCHEMA = '''
 ix SERIAL,
@@ -65,7 +64,7 @@ class DemoGenerator(object):
         if self.length > 100:
             self.length = 100
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

@@ -27,7 +27,7 @@ Provides a SchemaGenerator and DemoGenerator for clincal_memos table
 from PyQt4 import QtSql
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "clinical_memos"
 
@@ -63,7 +63,7 @@ class DemoGenerator(object):
             self.length = 1
             self.patient_id = q_query.value(0).toInt()[0]
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
 
     def demo_queries(self):

@@ -27,7 +27,7 @@ Provides a SchemaGenerator and DemoGenerator for clincal_memos table
 from PyQt4 import QtSql, QtCore
 
 from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 
 SCHEMA = '''
@@ -50,7 +50,7 @@ class DemoGenerator(object):
     def __init__(self, database):
         self.length = 44
 
-        self.record = common_db_orm.InsertableRecord(database, TABLENAME)
+        self.record = InsertableRecord(database, TABLENAME)
 
     def demo_queries(self):
         '''

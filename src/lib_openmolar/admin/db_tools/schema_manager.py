@@ -22,11 +22,14 @@
 
 import os
 import hashlib
-from lib_openmolar.common import SETTINGS
+
 from lib_openmolar.admin.db_orm import *
+from lib_openmolar.common import settings
+
+C_SETTINGS = settings.CommonSettingsInstance()
 
 def proc_code_inserts():
-    for code in SETTINGS.PROCEDURE_CODES:
+    for code in C_SETTINGS.PROCEDURE_CODES:
         yield '''INSERT INTO procedure_codes (category, code, description)
         VALUES ('%s', '%s', '%s');\n'''% (
         code.cat_no, code.code, code.description)
@@ -48,7 +51,7 @@ class SchemaManager(object):
             queries = ""
 
             # gather up all types, tables, functions, views and rules
-            klasses = SETTINGS.OM_TYPES.values()
+            klasses = C_SETTINGS.OM_TYPES.values()
             for module in ADMIN_MODULES:
                 klasses.append(module.SchemaGenerator())
             klasses.append(admin_procedure_codes.SchemaGenerator())
