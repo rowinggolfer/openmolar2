@@ -91,7 +91,10 @@ class _TableView(QtGui.QTableView):
         QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
         QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
             for s_list in (SETTINGS.PLUGIN_DIRS, SETTINGS.NAKED_PLUGIN_DIRS):
-                s_list.removeAt(s_list.indexOf(dirname))
+                try:
+                    s_list.remove(dirname)
+                except ValueError:
+                    pass
         self.updated.emit()
 
     def toggle_naked(self, dirname):
@@ -107,8 +110,7 @@ class _TableView(QtGui.QTableView):
                 return
             SETTINGS.NAKED_PLUGIN_DIRS.append(dirname)
         else:
-            s_list = SETTINGS.NAKED_PLUGIN_DIRS
-            s_list.removeAt(s_list.indexOf(dirname))
+            SETTINGS.NAKED_PLUGIN_DIRS.remove(dirname)
         self.updated.emit()
 
 class PluginsDirectoryDialog(ExtendableDialog):
@@ -169,17 +171,8 @@ class PluginsDirectoryDialog(ExtendableDialog):
         self._update()
 
 def _test():
-    import __builtin__
-    import gettext
-    gettext.install("")
-
-    class MockSettings(object):
-        plugins = []
-        PLUGIN_DIRS = QtCore.QStringList(
-            ["/home/neil/openmolar/hg_openmolar/plugins/client",])
-        NAKED_PLUGIN_DIRS = QtCore.QStringList([])
-
-    __builtin__.SETTINGS = MockSettings()
+    from lib_openmolar import client
+    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
 
     app = QtGui.QApplication([])
     dl = PluginsDirectoryDialog()

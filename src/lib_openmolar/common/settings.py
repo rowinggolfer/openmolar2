@@ -226,18 +226,18 @@ class CommonSettingsInstance(CommonSettings):
 
 if __name__ == "__main__":
 
-    SETTINGS = CommonSettingsInstance()
-    print SETTINGS
+    C_SETTINGS = CommonSettingsInstance()
+    print C_SETTINGS
 
-    SETTINGS = CommonSettingsInstance()
-    print SETTINGS
+    C_SETTINGS = CommonSettingsInstance()
+    print C_SETTINGS
 
-    print SETTINGS.OM_TYPES
-    print SETTINGS.PY_DATE_FORMAT
-    print SETTINGS.QDATE_FORMAT
+    print C_SETTINGS.OM_TYPES
+    print C_SETTINGS.PY_DATE_FORMAT
+    print C_SETTINGS.QDATE_FORMAT
 
     for tooth in ("UR8", "UL1", "urd", "LL8"):
-        print SETTINGS.convert_tooth_shortname(tooth),
+        print C_SETTINGS.convert_tooth_shortname(tooth),
     print "should read 1,9,66,17"
 
-    print SETTINGS.PROCEDURE_CODES
+    print C_SETTINGS.PROCEDURE_CODES

@@ -67,6 +67,12 @@ Several key methods should be overwritten.
     #: can this be installed without app restart?
     is_hot_pluggable = True
 
+    #:
+    unique_id = None
+
+    #:
+    TARGET = "client"
+
     PluginError = _PluginError
 
     def __init__(self, plugin_type=SIMPLE):
@@ -84,6 +90,14 @@ Several key methods should be overwritten.
         by default, this does nothing, if overwritten, this is your chance
         to add to the gui.
         note - the gui can be accessed by SETTINGS.mainui
+        see also tear_down
+        '''
+        pass
+
+    def tear_down(self):
+        '''
+        deactive the plugin
+        this should reverse the setup_plugin function
         '''
         pass
 
@@ -123,7 +137,8 @@ Several key methods should be overwritten.
 
         NB - I have not coded a way to make these settings persistant yet.
         '''
-        message = _("no config found")
+        message = u"%s %s"% (
+            self.name, _("plugin has no configuration options"))
         QtGui.QMessageBox.information(parent,
             _("Configure") + " " + self.name, message)
 
@@ -154,7 +169,7 @@ Several key methods should be overwritten.
 
         a homepage for this plugin
         '''
-        return "None"
+        return "property website should be overwritten by subclasses"
 
     @property
     def TYPE(self):
@@ -188,6 +203,9 @@ Several key methods should be overwritten.
         "        authors '%s'\n"% self.authors +
         "        version '%s'\n"% self.version)
         return message
+
+    def set_unique_id(self, id):
+        self.unique_id = id
 
 if __name__ == "__main__":
     import gettext

@@ -44,6 +44,7 @@ class PluggableMainWindow(BaseMainWindow):
 
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
+        self.loadSettings()
 
     def loadSettings(self):
         '''
@@ -78,34 +79,42 @@ class PluggableMainWindow(BaseMainWindow):
             try:
                 SETTINGS.PERSISTANT_SETTINGS = pickle.loads(dict_)
             except Exception as e:
-                print "exception caught loading python settings...", e
+                logging.exception(
+                 "exception caught loading python settings...")
 
-        SETTINGS.PLUGIN_DIRS = qsettings.value(
-            "plugin_dirs").toStringList()
-        SETTINGS.NAKED_PLUGIN_DIRS = qsettings.value(
-            "naked_plugin_dirs").toStringList()
+        SETTINGS.PLUGIN_DIRS = list(qsettings.value(
+            "plugin_dirs").toStringList())
+        SETTINGS.NAKED_PLUGIN_DIRS = list(qsettings.value(
+            "naked_plugin_dirs").toStringList())
+        SETTINGS.ACTIVE_PLUGINS = set(qsettings.value(
+            "active_plugins").toStringList())
 
     def saveSettings(self):
         '''
         save settings from QtCore.QSettings
         '''
-        settings = QtCore.QSettings()
+        LOGGER.debug("saving settings")
+        qsettings = QtCore.QSettings()
         #Qt settings
-        settings.setValue("geometry", self.saveGeometry())
-        settings.setValue("windowState", self.saveState())
-        settings.setValue("statusbar_hidden", self.statusbar.isHidden())
-        settings.setValue("Font", self.font())
-        settings.setValue("Toolbar", self.main_toolbar.toolButtonStyle())
-        settings.setValue("TinyMenu", not self.menuBar().isVisible())
+        qsettings.setValue("geometry", self.saveGeometry())
+        qsettings.setValue("windowState", self.saveState())
+        qsettings.setValue("statusbar_hidden", self.statusbar.isHidden())
+        qsettings.setValue("Font", self.font())
+        qsettings.setValue("Toolbar", self.main_toolbar.toolButtonStyle())
+        qsettings.setValue("TinyMenu", not self.menuBar().isVisible())
 
-        # SETTINGS is a python dict of non qt-specific settings.
+        # SETTINGS.PERSISTANT_SETTINGS is a python dict of non qt-specific settings.
         # unfortunately.. QVariant.toPyObject can't recreate a dictionary
         # so best to pickle this
-        qsettings = QtCore.QSettings()
         pickled_dict = pickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
         qsettings.setValue("settings_dict", pickled_dict)
-        qsettings.setValue("plugin_dirs", SETTINGS.PLUGIN_DIRS)
-        qsettings.setValue("naked_plugin_dirs", SETTINGS.NAKED_PLUGIN_DIRS)
+
+        qsettings.setValue("plugin_dirs",
+            QtCore.QStringList(SETTINGS.PLUGIN_DIRS))
+        qsettings.setValue("naked_plugin_dirs",
+            QtCore.QStringList(SETTINGS.NAKED_PLUGIN_DIRS))
+        qsettings.setValue("active_plugins",
+            QtCore.QStringList(list(SETTINGS.ACTIVE_PLUGINS)))
 
     def preferences_dialog(self):
         if self._preferences_dialog is None:
@@ -125,24 +134,17 @@ class PluggableMainWindow(BaseMainWindow):
         '''
         launch the preference dialog
         '''
+        logging.debug("show_preferences_dialog")
         self.preferences_dialog().exec_()
 
-
 def _test():
-    import __builtin__
-    import gettext
-    import os
-    gettext.install("")
-
-    class MockSettings(object):
-        PERSISTANT_SETTINGS = {}
-        plugins = []
-        PLUGIN_DIRS = ["/home/neil/openmolar/hg_openmolar/plugins/client",]
-        NAKED_PLUGIN_DIRS = []
-    __builtin__.SETTINGS = MockSettings()
+    from lib_openmolar import client
+    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
 
     app = QtGui.QApplication([])
     mw = PluggableMainWindow()
+    SETTINGS.main_ui = mw
+    SETTINGS.load_plugins()
     mw.main_toolbar.addAction(QtGui.QAction("Placeholder", mw))
     mw.show()
     app.exec_()

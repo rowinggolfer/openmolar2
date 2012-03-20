@@ -29,7 +29,7 @@ import zipimport
 
 from lib_openmolar.common import Plugin
 
-from PyQt4.QtCore import QResource
+from PyQt4.QtCore import QResource, QString
 
 class PluginHandler(object):
     '''
@@ -41,10 +41,13 @@ class PluginHandler(object):
     #: locations of directories where naked plugins reside
     NAKED_PLUGIN_DIRS = []
 
+    #:
+    ACTIVE_PLUGINS = set([])
+
     _plugins = []
     _fee_scales = []
 
-    def get_pluggable_classes(self, module):
+    def get_pluggable_classes(self, module, target=None):
         '''
         Args:
             module (module object)
@@ -52,7 +55,6 @@ class PluginHandler(object):
         generates a list of all classes which are subclassed
         from lib_openmolar.client.Plugin in the module "module"
         '''
-
         for name in dir(module):
             obj = getattr(module, name)
             ## check is this object is a class.. and that it inherits
@@ -60,7 +62,11 @@ class PluginHandler(object):
             ## hence issubclass wouldn't work
             if inspect.isclass(obj) and Plugin in obj.mro()[1:]:
                 klass = obj()
-                yield klass
+                if target is None or klass.TARGET == target:
+                    yield klass
+                else:
+                    LOGGER.error("Plugin %s has target '%s' ignoring"% (
+                    klass.name, klass.TARGET))
 
     def get_modules(self, plugin_dir):
         '''
@@ -71,16 +77,18 @@ class PluginHandler(object):
             full_path = os.path.join(str(plugin_dir), file_)
 
             if file_.endswith(".py"):
-                LOGGER.info("NAKED PLUGIN FOUND '%s'"% full_path)
+                LOGGER.debug("found module '%s'"% full_path)
                 if plugin_dir in self.NAKED_PLUGIN_DIRS:
+                    LOGGER.info("NAKED PLUGIN FOUND '%s'"% full_path)
                     module = file_.replace('.py','')
                     mod = __import__(module)
                     yield mod
                 else:
                     LOGGER.info(
-                    'NOT COMPILING %s is not a known store for naked plugins'%
+            'IGNORING because %s is not a known store for naked plugins'%
                     plugin_dir)
             elif zipfile.is_zipfile(full_path):
+                LOGGER.info("POSSIBLE PLUGIN FOUND '%s'"% full_path)
                 module = file_.replace('.zip','')
                 try:
                     z = zipimport.zipimporter(full_path)
@@ -89,28 +97,32 @@ class PluginHandler(object):
                 except (zipimport.ZipImportError, zipfile.BadZipfile) as e:
                     LOGGER.exception ("incompatible plugin '%s'"% full_path)
 
-    def get_plugins(self, plugin_dir):
+    def get_plugins(self, plugin_dir, target=None):
         '''
         peruses a directory and finds all plugins
         '''
         i = 0
         for mod in self.get_modules(plugin_dir):
-            plugins = self.get_pluggable_classes(mod)
+            plugins = self.get_pluggable_classes(mod, target)
             for plugin in plugins:
+                plugin.set_unique_id(QString(
+                "%s:%s"% (mod.__name__, os.path.abspath(str(plugin_dir)))))
                 self.install_plugin(plugin)
                 i += 1
         return i
 
-    def load_plugins(self):
+    def load_plugins(self, target=None):
         '''
         this function is called by the client application to load plugins
         '''
         LOGGER.info ("loading plugins...")
         i = 0
         for plugin_dir in self.PLUGIN_DIRS:
+            LOGGER.info ("="*80)
             LOGGER.info ("looking for plugins in directory %s"% plugin_dir)
+            LOGGER.info ("="*80)
             try:
-                i += self.get_plugins(plugin_dir)
+                i += self.get_plugins(plugin_dir, target)
 
             except Exception as e:
                 LOGGER.exception ("Exception loading plugin")
@@ -121,17 +133,39 @@ class PluginHandler(object):
         '''
         installs a plugin (of type BasePlugin)
         '''
-        if plugin.TYPE == plugin.FEE_SCALE:
-            self.install_fee_scale(plugin)
+        if plugin.unique_id in self.ACTIVE_PLUGINS:
+            self.activate_plugin(plugin)
+        else:
+            LOGGER.info(".. %s in NOT ACTIVE"% plugin.unique_id)
+        self._plugins.append(plugin)
 
+    def activate_plugin(self, plugin):
+        LOGGER.info("..Activating %s '%s'"% (plugin.__module__, plugin.name))
         try:
+            if plugin.TYPE == plugin.FEE_SCALE:
+                self.install_fee_scale(plugin)
             LOGGER.debug("setting up plugin %s"% plugin)
             plugin.setup_plugin()
+            plugin.is_active = True
         except Exception, e:
             LOGGER.exception(
             "Exception during plugin.setup_plugin '%s'"% plugin.name)
 
-        self._plugins.append(plugin)
+        self.ACTIVE_PLUGINS.add(plugin.unique_id)
+
+    def deactivate_plugin(self, plugin):
+        LOGGER.info("..Deactivating %s '%s'"% (plugin.__module__, plugin.name))
+        if plugin.TYPE == plugin.FEE_SCALE:
+            self.remove_fee_scale(plugin)
+        try:
+            LOGGER.debug("calling teardoown plugin %s"% plugin)
+            plugin.tear_down()
+        except Exception, e:
+            LOGGER.exception(
+            "Exception during plugin.teardown '%s'"% plugin.name)
+
+        self.ACTIVE_PLUGINS.remove(plugin.unique_id)
+        plugin.is_active = False
 
     @property
     def plugins(self):
@@ -147,6 +181,13 @@ class PluginHandler(object):
         LOGGER.info ("installing fee_scale %s"% fee_scale)
         self._fee_scales.append(fee_scale)
 
+    def remove_fee_scale(self, fee_scale):
+        '''
+        removes a fee_scale (of type BasePlugin)
+        '''
+        LOGGER.info ("removing fee_scale %s"% fee_scale)
+        self._fee_scales.remove(fee_scale)
+
     @property
     def fee_scales(self):
         '''
@@ -155,7 +196,7 @@ class PluginHandler(object):
         return sorted(self._fee_scales)
 
 if __name__ == "__main__":
-    import lib_openmolar.admin
+    import lib_openmolar.client
     logging.basicConfig(level = logging.DEBUG)
     ph = PluginHandler()
     ph.PLUGIN_DIRS = [
@@ -164,4 +205,4 @@ if __name__ == "__main__":
     ph.NAKED_PLUGIN_DIRS = [
             "/home/neil/openmolar/hg_openmolar/plugins/src",
             ]
-    ph.load_plugins()
+    ph.load_plugins("client")

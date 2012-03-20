@@ -25,7 +25,6 @@ import os
 import sys
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common import SETTINGS
 from lib_openmolar.common.datatypes import ConnectionData
 
 from lib_openmolar.common.qt4.widgets import (
@@ -293,15 +292,9 @@ class PostgresMainWindow(PluggableMainWindow):
         return self._preferences_dialog
 
 def _test():
-    import __builtin__
-    import gettext
-    import os
-    gettext.install("")
-
-    class MockSettings(object):
-        plugins = []
-        PLUGIN_DIRS = ["/home/neil/openmolar/hg_openmolar/plugins/client",]
-    __builtin__.SETTINGS = MockSettings()
+    import logging
+    import lib_openmolar.client
+    LOGGER.setLevel(logging.DEBUG)
 
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
@@ -313,7 +306,4 @@ def _test():
     app.exec_()
 
 if __name__ == "__main__":
-    import logging
-    LOGGER = logging.getLogger()
-
     _test()

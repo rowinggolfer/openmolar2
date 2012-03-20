@@ -88,8 +88,15 @@ class PluginOptionsWidget(QtGui.QWidget):
 
         self.show_plugins()
 
-    def show_plugins(self):
+        self.about_button.clicked.connect(self.show_plugin_about)
+        self.config_button.clicked.connect(self.show_plugin_config)
 
+        self.listwidget.itemSelectionChanged.connect(
+            self._enable_plugin_buttons)
+
+        self.enable_checking()
+
+    def show_plugins(self):
         self.listwidget.clear()
         for plugin in SETTINGS.plugins:
             item = QtGui.QListWidgetItem(self.listwidget)
@@ -107,16 +114,59 @@ class PluginOptionsWidget(QtGui.QWidget):
         dl = PluginsDirectoryDialog(self)
         dl.exec_()
 
+    @property
+    def current_plugin(self):
+        return SETTINGS.plugins[self.listwidget.currentRow()]
+
+    def show_plugin_about(self):
+        self.current_plugin.about_dialog(self)
+
+    def show_plugin_config(self):
+        self.current_plugin.config_dialog(self)
+
+    def _enable_plugin_buttons(self, enable=True):
+        self.config_button.setEnabled(enable)
+        self.about_button.setEnabled(enable)
+
+    def _item_changed(self, item):
+        self.enable_checking(False)
+        val = item.checkState()
+        item.setCheckState(QtCore.Qt.PartiallyChecked)
+        if val == QtCore.Qt.Checked:
+            if QtGui.QMessageBox.question(self, _("confirm"),
+            u"%s %s"% (_("Enable Plugin"), self.current_plugin.name),
+            QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
+            QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
+                SETTINGS.activate_plugin(self.current_plugin)
+            else:
+                val = QtCore.Qt.Unchecked
+        else:
+            if QtGui.QMessageBox.question(self, _("confirm"),
+            u"%s %s"% (_("Disable Plugin"), self.current_plugin.name),
+            QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
+            QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
+                SETTINGS.deactivate_plugin(self.current_plugin)
+            else:
+                val = QtCore.Qt.Checked
+
+        item.setCheckState(val)
+        self.enable_checking(True)
+
+    def enable_checking(self, enable=True):
+        if enable:
+            self.listwidget.itemChanged.connect(self._item_changed)
+        else:
+            self.listwidget.itemChanged.disconnect(self._item_changed)
+
+
 def _test():
-    import __builtin__
-    import gettext
-    gettext.install("")
-
-    class MockSettings(object):
-        plugins = []
-        PLUGIN_DIRS = ["/home/neil/openmolar/hg_openmolar/plugins/client",]
-
-    __builtin__.SETTINGS = MockSettings()
+    import logging
+    from lib_openmolar import client
+    LOGGER.setLevel(logging.DEBUG)
+    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
+    SETTINGS.ACTIVE_PLUGINS = set([
+        'hello_world:/home/neil/openmolar/hg_openmolar/plugins/client',])
+    SETTINGS.load_plugins()
 
     app = QtGui.QApplication([])
     w = PluginOptionsWidget()

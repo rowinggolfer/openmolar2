@@ -22,7 +22,6 @@
 
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common import SETTINGS
 
 class DictionaryCompleter(QtGui.QCompleter):
     def __init__(self, parent=None):
@@ -127,6 +126,10 @@ class CompletionTextEdit(QtGui.QTextEdit):
         self.completer.complete(cr) ## popup it up!
 
 if __name__ == "__main__":
+    class MockSettings(object):
+        DICT_LOCATION = "/usr/share/dict/words"
+
+    SETTINGS = MockSettings()
 
     app = QtGui.QApplication([])
     te = CompletionTextEdit()
