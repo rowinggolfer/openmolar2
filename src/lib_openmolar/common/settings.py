@@ -229,9 +229,6 @@ if __name__ == "__main__":
     C_SETTINGS = CommonSettingsInstance()
     print C_SETTINGS
 
-    C_SETTINGS = CommonSettingsInstance()
-    print C_SETTINGS
-
     print C_SETTINGS.OM_TYPES
     print C_SETTINGS.PY_DATE_FORMAT
     print C_SETTINGS.QDATE_FORMAT
