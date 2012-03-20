@@ -1,3 +1,10 @@
+openmolar-common (2.0.3+hg021~0) unstable; urgency=low
+
+  * plugin system tweaked.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 20 Mar 2012 14:14:37 +0000
+
+
 openmolar-common (2.0.3+hg018~0) unstable; urgency=low
 
   * bugfix - was importing a non existent module
