@@ -27,13 +27,13 @@ This module provides the PatientDB Class
 
 from PyQt4 import QtCore, QtSql
 
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "teeth_present"
 
-class TeethPresentDB(common_db_orm.InsertableRecord):
+class TeethPresentDB(InsertableRecord):
     def __init__(self, patient_id):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn,
+        InsertableRecord.__init__(self, SETTINGS.psql_conn,
             TABLENAME)
 
         #:

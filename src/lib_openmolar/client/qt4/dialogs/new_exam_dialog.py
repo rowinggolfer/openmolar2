@@ -23,7 +23,7 @@
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import BaseDialog
-from lib_openmolar.common.common_db_orm import TreatmentItem
+from lib_openmolar.common.db_orm import TreatmentItem
 
 class NewExamDialog(BaseDialog):
     def __init__(self, parent=None):

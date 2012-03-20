@@ -25,13 +25,13 @@ Provides Perio_BpeDB class
 '''
 
 from PyQt4 import QtSql
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "perio_bpe"
 
-class NewPerioBPERecord(common_db_orm.InsertableRecord):
+class NewPerioBPERecord(InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(
+        InsertableRecord.__init__(
             self, SETTINGS.psql_conn, TABLENAME)
 
     @property

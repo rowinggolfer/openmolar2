@@ -25,14 +25,14 @@ Provides ContractedPractitionerDB class
 '''
 
 from PyQt4 import QtSql
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "contracted_practitioners"
 
 
-class NewContractedPractitionerRecord(common_db_orm.InsertableRecord):
+class NewContractedPractitionerRecord(InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self,
+        InsertableRecord.__init__(self,
             SETTINGS.psql_conn, TABLENAME)
 
     @property

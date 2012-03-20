@@ -346,7 +346,7 @@ class TreatmentItemFinaliseDialog(ExtendableDialog):
 
 if __name__ == "__main__":
 
-    from lib_openmolar.common.common_db_orm import TreatmentItem
+    from lib_openmolar.common.db_orm import TreatmentItem
     from lib_openmolar.client.connect import DemoClientConnection
 
     app = QtGui.QApplication([])

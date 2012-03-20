@@ -20,7 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
-from lib_openmolar.common import SETTINGS
+
 from PyQt4 import QtCore
 
 class TeethPresentDecoder(object):

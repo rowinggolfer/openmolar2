@@ -91,7 +91,7 @@ class ClientMainWindow(PostgresMainWindow):
         QtCore.QTimer.singleShot(100, self.new_pg_session)
 
         SETTINGS.mainui = self
-        SETTINGS.load_plugins()
+        SETTINGS.load_plugins("client")
 
     @property
     def central_widget(self):

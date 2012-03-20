@@ -25,13 +25,13 @@ Provides StaticFillsDB class
 '''
 
 from PyQt4 import QtSql
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "static_fills"
 
-class FillRecord(common_db_orm.InsertableRecord):
+class FillRecord(InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn, TABLENAME)
+        InsertableRecord.__init__(self, SETTINGS.psql_conn, TABLENAME)
 
     @property
     def tooth_id(self):

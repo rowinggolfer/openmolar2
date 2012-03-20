@@ -29,7 +29,7 @@ from PyQt4 import QtCore, QtSql
 
 from lib_openmolar.common.datatypes import EditableField
 
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "patients"
 
@@ -250,9 +250,9 @@ class PatientDB(QtSql.QSqlRecord):
         status_field
         ]
 
-class NewPatientDB(PatientDB, common_db_orm.InsertableRecord):
+class NewPatientDB(PatientDB, InsertableRecord):
     def __init__(self):
-        common_db_orm.InsertableRecord.__init__(self, SETTINGS.psql_conn,
+        InsertableRecord.__init__(self, SETTINGS.psql_conn,
             TABLENAME)
         self.patient_id = None
         self.orig = None

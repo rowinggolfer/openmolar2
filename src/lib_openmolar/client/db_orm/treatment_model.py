@@ -28,7 +28,8 @@ import logging
 from PyQt4 import QtCore, QtSql
 
 from lib_openmolar.common.datatypes import OMType
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
+from lib_openmolar.common.db_orm import TreatmentItem
 
 from lib_openmolar.client.qt4.widgets import ChartDataModel
 from lib_openmolar.client.qt4.widgets import ToothData
@@ -96,7 +97,7 @@ where patient_id = ?'''
         while q_query.next():
             record = q_query.record()
 
-            treatment_item = common_db_orm.TreatmentItem(record)
+            treatment_item = TreatmentItem(record)
             self.add_treatment_item(treatment_item)
 
     @property

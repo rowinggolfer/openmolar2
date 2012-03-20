@@ -186,7 +186,7 @@ class ChartDataModel(object):
         '''
         add root data from the database orm
         root_record is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_roots for details
+        see lib_openmolar.common.db_orm.static_roots for details
         '''
         root_id = root_record.tooth_id
         if root_id:
@@ -201,7 +201,7 @@ class ChartDataModel(object):
         '''
         add crown from the database orm
         crown is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_crowns for details
+        see lib_openmolar.common.db_orm.static_crowns for details
         '''
         tooth_id = crown_record.tooth_id
         if tooth_id:
@@ -217,7 +217,7 @@ class ChartDataModel(object):
         '''
         add fill from the database orm
         fill is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_fills for details
+        see lib_openmolar.common.db_orm.static_fills for details
         '''
         tooth_id = fill_record.tooth_id
         if tooth_id:
@@ -233,7 +233,7 @@ class ChartDataModel(object):
         '''
         add comment from the database orm
         fill is an instance of QtSqlQRecord, with some customisations
-        see lib_openmolar.common.common_db_orm.static_comments for details
+        see lib_openmolar.common.db_orm.static_comments for details
         '''
         tooth_id = record.tooth_id
         if tooth_id:

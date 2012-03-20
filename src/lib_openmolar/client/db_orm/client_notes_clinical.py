@@ -28,7 +28,7 @@ This module provides the ClinicalNotesDB Class
 TABLENAME = "notes_clinical"
 
 from PyQt4 import QtCore, QtSql
-from lib_openmolar.common.common_db_orm import InsertableRecord
+from lib_openmolar.common.db_orm import InsertableRecord
 
 class NotesClinicalDB(object):
     _new_note = None

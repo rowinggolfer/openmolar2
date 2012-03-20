@@ -23,9 +23,10 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.client.qt4.dialogs import TreatmentItemFinaliseDialog
+from lib_openmolar.common.db_orm import InsertableRecord
+from lib_openmolar.common.db_orm import TreatmentItem
 
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.client.qt4.dialogs import TreatmentItemFinaliseDialog
 
 class TreatmentPage(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -173,7 +174,7 @@ class TreatmentPage(QtGui.QWidget):
         convert to a :doc:`TreatmentItem`, validate and pass to
         :func:`add_treatment_item`
         '''
-        treatment_item = common_db_orm.TreatmentItem(proc_code)
+        treatment_item = TreatmentItem(proc_code)
 
         self.add_treatment_item(treatment_item)
 
@@ -190,7 +191,7 @@ class TreatmentPage(QtGui.QWidget):
         if proc_code == None:
             self.emit(QtCore.SIGNAL("garbage chart tx"))
             return
-        treatment_item = common_db_orm.TreatmentItem(proc_code)
+        treatment_item = TreatmentItem(proc_code)
         treatment_item.set_teeth([tooth_data.tooth_id])
         treatment_item.set_surfaces(tooth_data.surfaces)
         if plan_or_cmp == "Completed":

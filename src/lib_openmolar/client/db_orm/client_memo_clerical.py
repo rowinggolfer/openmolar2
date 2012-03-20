@@ -27,11 +27,11 @@ gets/sets a record in the clinical memo table
 from PyQt4 import QtCore, QtSql
 
 
-from lib_openmolar.common import common_db_orm
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "clerical_memos"
 
-class MemoClericalDB(common_db_orm.InsertableRecord):
+class MemoClericalDB(InsertableRecord):
     def __init__(self, patient_id):
         self.tablename = TABLENAME
         #:

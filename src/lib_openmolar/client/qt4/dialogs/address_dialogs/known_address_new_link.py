@@ -22,7 +22,6 @@
 
 from PyQt4 import QtGui, QtCore, QtSql
 from lib_openmolar.common.qt4.dialogs import BaseDialog
-from lib_openmolar.common import SETTINGS
 
 class KnownAddressNewLinkDialog(BaseDialog):
     '''
@@ -67,8 +66,8 @@ class KnownAddressNewLinkDialog(BaseDialog):
             return True
 
 if __name__ == "__main__":
-    
-    
+
+
 
     app = QtGui.QApplication([])
 

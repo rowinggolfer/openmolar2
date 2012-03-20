@@ -27,7 +27,7 @@ This module provides the AddressObjects Class, and AddressRecord Class
 
 from PyQt4 import QtSql, QtCore
 
-from lib_openmolar.common.common_db_orm import InsertableRecord
+from lib_openmolar.common.db_orm import InsertableRecord
 from lib_openmolar.common.datatypes import EditableField, OMType
 
 
