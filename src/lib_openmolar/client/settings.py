@@ -23,7 +23,7 @@
 import logging
 import os
 
-from lib_openmolar.common import settings
+from lib_openmolar.common.settings import CommonSettings
 
 from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
 from lib_openmolar.client.scripts import dent_key
@@ -46,7 +46,7 @@ class SettingsError(Exception):
         return repr(self.value)
 
 
-class Settings(settings.CommonSettings, PluginHandler):
+class Settings(CommonSettings, PluginHandler):
     #: an html image tag showing a pencil
     PENCIL = '<img class="pencil" alt ="edit" src="qrc:/icons/pencil.png" />'
 
@@ -55,7 +55,7 @@ class Settings(settings.CommonSettings, PluginHandler):
     _CSS = {}
 
     def __init__(self):
-        settings.CommonSettings.__init__(self)
+        CommonSettings.__init__(self)
 
         if not os.path.exists(self.LOCALFOLDER):
             os.mkdir(self.LOCALFOLDER)
