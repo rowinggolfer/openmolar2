@@ -27,7 +27,7 @@ import sys
 
 from lib_openmolar.common.settings import CommonSettings
 from lib_openmolar.common.datatypes import Connection230Data
-from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
+from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 
 #CONFDIR = os.path.join(os.path.expanduser("~"),".openmolar")
 CONFDIR = "/etc/openmolar/admin/"
