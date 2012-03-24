@@ -16,7 +16,8 @@ PACKAGE=openmolar-$(SUFFIX)
 VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
 
 clean_tmp:
-	rm -rf $(TMP_DIR)/!(README.txt)
+	mkdir -p $(TMP_DIR)
+	rm -rf $(TMP_DIR)/*
 
 test:
 	echo $(VERSION) 
