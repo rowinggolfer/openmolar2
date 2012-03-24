@@ -27,7 +27,7 @@ import sys
 import zipfile
 import zipimport
 
-from lib_openmolar.common import Plugin
+from lib_openmolar.common.qt4.plugin_tools import Plugin
 
 from PyQt4.QtCore import QResource, QString
 

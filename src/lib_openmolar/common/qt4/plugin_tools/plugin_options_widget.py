@@ -23,8 +23,10 @@
 
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.qt4.dialogs import PluginsDirectoryDialog
-
+from lib_openmolar.common.qt4.plugin_tools import PluginsDirectoryDialog
+from lib_openmolar.common.qt4.plugin_tools.plugin_download_window \
+     import PluginDownloadWindow
+                                                  
 class PluginOptionsWidget(QtGui.QWidget):
     '''
     a widget to display and manage plugins
@@ -96,6 +98,8 @@ class PluginOptionsWidget(QtGui.QWidget):
 
         self.enable_checking()
 
+        self.web_button.clicked.connect(self.open_browser)
+
     def show_plugins(self):
         self.listwidget.clear()
         for plugin in SETTINGS.plugins:
@@ -152,6 +156,10 @@ class PluginOptionsWidget(QtGui.QWidget):
         item.setCheckState(val)
         self.enable_checking(True)
 
+    def open_browser(self):
+        self.new_window = PluginDownloadWindow(self.parent())
+        self.new_window.show()
+        
     def enable_checking(self, enable=True):
         if enable:
             self.listwidget.itemChanged.connect(self._item_changed)

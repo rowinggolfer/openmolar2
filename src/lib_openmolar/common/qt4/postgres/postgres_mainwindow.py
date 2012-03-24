@@ -27,11 +27,10 @@ from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.datatypes import ConnectionData
 
-from lib_openmolar.common.qt4.widgets import (
-    RestorableApplication,
-    PluggableMainWindow,
-    Preference
-    )
+from lib_openmolar.common.qt4.widgets import RestorableApplication, Preference
+
+from lib_openmolar.common.qt4.plugin_tools import PlugableMainWindow
+    
 
 from connect_dialog import ConnectDialog
 from postgres_database import ConnectionError, PostgresDatabase
@@ -40,7 +39,7 @@ from postgres_session_widget import PostgresSessionWidget
 
 from lib_openmolar.common.qt4.dialogs import UserPasswordDialog
 
-class PostgresMainWindow(PluggableMainWindow):
+class PostgresMainWindow(PlugableMainWindow):
     '''
     A main window with functions to connect to postgres
     '''
@@ -54,7 +53,7 @@ class PostgresMainWindow(PluggableMainWindow):
     ALLOW_MULTIPLE_SESSIONS = True
 
     def __init__(self, parent=None):
-        PluggableMainWindow.__init__(self, parent)
+        PlugableMainWindow.__init__(self, parent)
         self.setMinimumSize(600, 400)
 
         self.setWindowTitle(_("Postgres Application"))
@@ -278,7 +277,7 @@ class PostgresMainWindow(PluggableMainWindow):
 
     def preferences_dialog(self):
         if self._preferences_dialog is None:
-            dl = PluggableMainWindow.preferences_dialog(self)
+            dl = PlugableMainWindow.preferences_dialog(self)
 
             connections_pref = Preference(_("Database Connections"))
 

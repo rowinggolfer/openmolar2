@@ -187,7 +187,7 @@ class DockableMenuBar(QtGui.QMenuBar):
         '''
         styleVariant = self.sender().data()
         style, result = styleVariant.toInt()
-        for toolbar in self.known_toolbars():
+        for toolbar in self.parent().toolbar_list:
             toolbar.setToolButtonStyle(style)
             for widg in toolbar.children():
                 if type(widg) == QtGui.QToolButton:
@@ -232,9 +232,6 @@ def _test():
             QtGui.QMainWindow.__init__(self, parent)
             self.setWindowIcon(QtGui.QIcon.fromTheme("application-exit"))
 
-            menu_bar = DockableMenuBar(self)
-            self.setMenuBar(menu_bar)
-
             ## initiate instances of our classes
 
             self.toolbar1 = QtGui.QToolBar(self)
@@ -246,6 +243,8 @@ def _test():
             self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar1)
             self.addToolBar(QtCore.Qt.TopToolBarArea, self.toolbar2)
 
+            menu_bar = DockableMenuBar(self)
+            self.setMenuBar(menu_bar)
             menu_bar.update_toolbars()
 
             ## some arbitrary stuff to make the app more realistic
@@ -285,6 +284,10 @@ def _test():
             te = QtGui.QTextEdit()
             self.setCentralWidget(te)
             te.setText(__doc__)
+
+        @property
+        def toolbar_list(self):
+            return [self.toolbar1, self.toolbar2]
 
         def sizeHint(self):
             return QtCore.QSize(400,400)

@@ -1,3 +1,3 @@
-from plugin_tools.plugin import Plugin
+from qt4.plugin_tools.plugin import Plugin
 
 __all__ = ["Plugin",]

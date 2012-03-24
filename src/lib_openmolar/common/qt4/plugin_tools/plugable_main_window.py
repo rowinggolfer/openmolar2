@@ -21,22 +21,22 @@
 ###############################################################################
 
 '''
-provides the PluggableMainWindow class
+provides the PlugableMainWindow class
 '''
 import logging
 import pickle
 import sys
 
 from PyQt4 import QtGui, QtCore
-from lib_openmolar.common.qt4.widgets import (
-    BaseMainWindow,
-    PluginOptionsWidget,
-    Preference,
-    PreferencesDialog)
 
-logging.basicConfig(level=logging.DEBUG)
+from lib_openmolar.common.qt4.widgets import BaseMainWindow
+from lib_openmolar.common.qt4.widgets import Preference
 
-class PluggableMainWindow(BaseMainWindow):
+from lib_openmolar.common.qt4.plugin_tools import PluginOptionsWidget
+
+from lib_openmolar.common.qt4.dialogs import PreferencesDialog
+
+class PlugableMainWindow(BaseMainWindow):
     '''
     adds a preference dialog with font and plugin options
     '''
@@ -134,15 +134,15 @@ class PluggableMainWindow(BaseMainWindow):
         '''
         launch the preference dialog
         '''
-        logging.debug("show_preferences_dialog")
+        LOGGER.debug("show_preferences_dialog")
         self.preferences_dialog().exec_()
 
 def _test():
     from lib_openmolar import client
-    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
+    SETTINGS.PLUGIN_DIRS = ["../../../../plugins/client"]
 
     app = QtGui.QApplication([])
-    mw = PluggableMainWindow()
+    mw = PlugableMainWindow()
     SETTINGS.main_ui = mw
     SETTINGS.load_plugins()
     mw.main_toolbar.addAction(QtGui.QAction("Placeholder", mw))
