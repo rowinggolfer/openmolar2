@@ -29,8 +29,9 @@ from lib_openmolar.client.connect import ClientConnection
 
 from lib_openmolar.common.qt4.widgets import (
     RestorableApplication,
-    Preference,
-    PreferencesDialog)
+    Preference)
+
+from lib_openmolar.common.qt4.dialogs import PreferencesDialog
 
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow

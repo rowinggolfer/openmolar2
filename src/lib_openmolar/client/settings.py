@@ -25,7 +25,7 @@ import os
 
 from lib_openmolar.common.settings import CommonSettings
 
-from lib_openmolar.common.plugin_tools.plugin_handler import PluginHandler
+from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 from lib_openmolar.client.scripts import dent_key
 from lib_openmolar.client.qt4.colours import colours
 
