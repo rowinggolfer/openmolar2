@@ -188,12 +188,12 @@ if INSTALL_COMMON:
                     'lib_openmolar.common.connect',
                     'lib_openmolar.common.datatypes',
                     'lib_openmolar.common.import_export',
-                    'lib_openmolar.common.plugin_tools',
                     'lib_openmolar.common.qt4',
                     'lib_openmolar.common.qt4.dialogs',
                     'lib_openmolar.common.qt4.postgres',
                     'lib_openmolar.common.qt4.printing',
                     'lib_openmolar.common.qt4.widgets',
+                    'lib_openmolar.common.qt4.plugin_tools',
                     ],
         )
 
