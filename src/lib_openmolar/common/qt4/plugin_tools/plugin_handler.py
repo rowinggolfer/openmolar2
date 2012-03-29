@@ -61,7 +61,13 @@ class PluginHandler(object):
             ## from Plugin.. (but is not the Plugin base class itself!)
             ## hence issubclass wouldn't work
             if inspect.isclass(obj) and Plugin in obj.mro()[1:]:
-                klass = obj()
+                try:
+                    LOGGER.debug("initiating plugin object %s"% obj)
+                    klass = obj()
+                except Exception: # shouldn't happen!!
+                    LOGGER.exception(
+                    "Unable to instantiate Plugin %s from %s"% (obj, module))
+                    continue
                 if target is None or klass.TARGET == target:
                     yield klass
                 else:
@@ -136,7 +142,7 @@ class PluginHandler(object):
         if plugin.unique_id in self.ACTIVE_PLUGINS:
             self.activate_plugin(plugin)
         else:
-            LOGGER.info(".. %s in NOT ACTIVE"% plugin.unique_id)
+            LOGGER.info(".. %s is set to NOT ACTIVE"% plugin.unique_id)
         self._plugins.append(plugin)
 
     def activate_plugin(self, plugin):
@@ -200,9 +206,10 @@ if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
     ph = PluginHandler()
     ph.PLUGIN_DIRS = [
-            "/home/neil/openmolar/hg_openmolar/plugins",
-            "/home/neil/openmolar/hg_openmolar/plugins/src"]
+            "/home/neil/openmolar/hg_openmolar/plugins/src/import_om1",
+            #"/home/neil/openmolar/hg_openmolar/plugins/src"
+            ]
     ph.NAKED_PLUGIN_DIRS = [
-            "/home/neil/openmolar/hg_openmolar/plugins/src",
+            "/home/neil/openmolar/hg_openmolar/plugins/src/import_om1",
             ]
     ph.load_plugins("client")
