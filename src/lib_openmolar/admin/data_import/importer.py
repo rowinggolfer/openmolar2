@@ -43,10 +43,13 @@ class Importer(object):
     sno_range = None
     sno_conditions = ""
 
-    def __init__(self, om2_connection):
-        self.om2_connection = om2_connection
+    def __init__(self):
+        self.om2_session = None
         self._import_directory = os.path.curdir
         self.USER_DICT = {}
+
+    def set_session(self, om2_session):
+        self.om2_session = om2_session
 
     @property
     def import_directory(self):
@@ -75,12 +78,12 @@ class Importer(object):
             "Unable to import practitioners - no such file %s"% filepath)
             raise _ImportWarning
 
-        record = InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_session, table_name)
         record.include_ix = True
 
         record.remove(record.indexOf("time_stamp"))
         ps_query, values = record.insert_query
-        psql_query = QtSql.QSqlQuery(self.om2_connection)
+        psql_query = QtSql.QSqlQuery(self.om2_session)
 
         rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
@@ -117,10 +120,10 @@ class Importer(object):
             "Unable to import avatars - no such file %s"% filepath)
             raise _ImportWarning
 
-        record = InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_session, table_name)
 
         ps_query, values = record.insert_query
-        psql_query = QtSql.QSqlQuery(self.om2_connection)
+        psql_query = QtSql.QSqlQuery(self.om2_session)
 
         rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
@@ -177,7 +180,7 @@ class Importer(object):
         abbrv_name, sex, dob, status, comments, modified_by)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
 
-        psql_query = QtSql.QSqlQuery(self.om2_connection)
+        psql_query = QtSql.QSqlQuery(self.om2_session)
 
         psql_query.prepare(ps_query)
 
@@ -201,11 +204,11 @@ class Importer(object):
             raise _ImportWarning
 
 
-        record = InsertableRecord(self.om2_connection, table_name)
+        record = InsertableRecord(self.om2_session, table_name)
         record.include_ix = True
         record.remove(record.indexOf("time_stamp"))
         ps_query, values = record.insert_query
-        psql_query = QtSql.QSqlQuery(self.om2_connection)
+        psql_query = QtSql.QSqlQuery(self.om2_session)
 
         rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
@@ -319,6 +322,7 @@ if __name__ == "__main__":
     sc = DemoAdminConnection()
     sc.connect()
 
-    im = Importer(sc)
-    #im.set_import_directory("/home/neil/Desktop/adp_import")
+    im = Importer()
+    im.set_session(sc)
+    im.set_import_directory("/home/neil/adp_import")
     im.import_all()
