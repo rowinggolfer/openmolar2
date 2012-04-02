@@ -44,7 +44,23 @@ class PlugableMainWindow(BaseMainWindow):
 
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
+        
+        icon = QtGui.QIcon(":icons/plugins.png")
+        plugin_action = QtGui.QAction(icon, _("Plugins"), self)
+
+        self.plugin_toolbar = QtGui.QToolBar()
+        '''
+        A toolbar which plugins can (should?) add a QAction to
+        '''
+        self.plugin_toolbar.setObjectName("plugins toolbar")
+        self.plugin_toolbar.toggleViewAction().setText(_("Plugins Toolbar"))
+        
+        self.plugin_toolbar.addAction(plugin_action)
+        
+        self.addToolBar(self.plugin_toolbar)
         self.loadSettings()
+        
+        plugin_action.triggered.connect(self.plugin_action_triggered)
 
     def loadSettings(self):
         '''
@@ -88,6 +104,8 @@ class PlugableMainWindow(BaseMainWindow):
             "naked_plugin_dirs").toStringList())
         SETTINGS.ACTIVE_PLUGINS = set(qsettings.value(
             "active_plugins").toStringList())
+
+        SETTINGS.main_ui = self
 
     def saveSettings(self):
         '''
@@ -136,6 +154,12 @@ class PlugableMainWindow(BaseMainWindow):
         '''
         LOGGER.debug("show_preferences_dialog")
         self.preferences_dialog().exec_()
+        
+    def plugin_action_triggered(self):
+        '''
+        dummy function. should probably be overwritten
+        '''
+        self.advise("plugin action clicked.. does nothing")
 
 def _test():
     from lib_openmolar import client
