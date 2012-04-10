@@ -114,20 +114,14 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.action_populate_demo = QtGui.QAction(icon,
             _("Populate database with demo data"), self)
 
-        icon = QtGui.QIcon(":icons/database.png")
-        self.action_import_data = QtGui.QAction(icon,
-            _("Import data from other sources"), self)
-
         self.menu_database.addAction(self.action_new_database)
         self.menu_database.addAction(self.action_populate_demo)
-        self.menu_database.addAction(self.action_import_data)
 
         self.database_toolbar = QtGui.QToolBar(self)
         self.database_toolbar.setObjectName("Database Toolbar")
         self.database_toolbar.toggleViewAction().setText(_("Database Toolbar"))
         self.database_toolbar.addAction(self.action_new_database)
         self.database_toolbar.addAction(self.action_populate_demo)
-        self.database_toolbar.addAction(self.action_import_data)
         self.insertToolBar(self.help_toolbar, self.database_toolbar)
 
         self.log_widget = LogWidget(LOGGER, self.parent())
@@ -157,7 +151,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
         QtCore.QTimer.singleShot(100, self._init_proxies)
 
-        SETTINGS.mainui = self
+        SETTINGS.main_ui = self
         SETTINGS.load_plugins("admin")
 
     def connect_signals(self):
@@ -175,8 +169,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.action_new_database.triggered.connect(self.create_new_database)
         self.action_populate_demo.triggered.connect(self.populate_demo)
-        self.action_import_data.triggered.connect(self.import_data)
-
+        
         self.connect(self.central_widget, QtCore.SIGNAL("end_pg_sessions"),
             self.end_pg_sessions)
 
@@ -339,19 +332,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         dl = PopulateDemoDialog(pg_session, self)
         if not dl.exec_():
             self.advise(_("Demo data population was abandoned"), 1)
-
-    @require_session
-    def import_data(self):
-        '''
-        raise a dialog to import into the current database
-        '''
-        pg_session = self.chosen_pg_session
-        LOGGER.info("calling import data for session %s"% pg_session)
-
-        from lib_openmolar.admin.data_import import ImportDialog
-        dl = ImportDialog(pg_session, self)
-        if not dl.exec_():
-            self.advise(_("Import was abandoned"), 1)
 
     def manage_db(self, dbname):
         '''

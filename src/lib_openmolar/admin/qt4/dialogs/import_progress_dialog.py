@@ -26,10 +26,10 @@ from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.qt4.widgets import ProgressWidget
 
 class ImportProgressDialog(BaseDialog):
-    def __init__(self, connection, ommisions, parent=None):
+    def __init__(self, importer, parent=None):
         BaseDialog.__init__(self, parent)
 
-        self.connection = connection
+        self.importer = importer
 
         self.setWindowTitle(_("Import"))
         label = QtGui.QLabel(_("Importing Data"))

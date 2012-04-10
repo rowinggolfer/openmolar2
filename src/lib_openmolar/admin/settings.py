@@ -98,11 +98,17 @@ class AdminSettings(CommonSettings, PluginHandler):
 def install():
     '''
     make an instance of this object acessible in the global namespace
-    >>>
     '''
-    import __builtin__
-    __builtin__.SETTINGS = AdminSettings()
-
+    try:
+        SETTINGS
+        LOGGER.warning(
+        "\n\tAbandoned a second attempt to install SETTINGS into globals\n"
+        "\tTHIS SHOULD NOT HAPPEN!!"
+        )
+    except NameError:    
+        import __builtin__
+        __builtin__.SETTINGS = AdminSettings()
+    
 def _test():
     import logging
     import admin_logger

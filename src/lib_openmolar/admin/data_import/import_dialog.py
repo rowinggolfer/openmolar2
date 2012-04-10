@@ -25,25 +25,20 @@ from PyQt4 import QtCore, QtGui
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 from lib_openmolar.admin.qt4.dialogs import ImportProgressDialog
 
+from lib_openmolar.admin.data_import.importer import Importer
+
+
 class ImportDialog(ExtendableDialog):
-    def __init__(self, pg_session, parent=None):
+    
+    importer = None
+    def __init__(self, parent=None):
         ExtendableDialog.__init__(self, parent)
         self.setWindowTitle(_("Import Data Wizard"))
 
-        self.pg_session = pg_session
-        SETTINGS.PLUGIN_DIRS = QtCore.QSettings().value("plugin_dirs").toStringList()
-        SETTINGS.load_plugins()
-
-        label = QtGui.QLabel(u"%s <b>'%s'</b> ?"% (
-            _('Import data into the current database'),
-            self.pg_session.databaseName()))
-        label.setWordWrap(True)
-        label.setAlignment(QtCore.Qt.AlignCenter)
-        self.insertWidget(label)
-
-        for dir_ in self.plugin_dirs:
-            cb = QtGui.QCheckBox(dir_)
-            self.insertWidget(cb)
+        self.label = QtGui.QLabel()
+        self.label.setWordWrap(True)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.insertWidget(self.label)
 
         self.work_thread = QtCore.QThread(self)
         self.work_thread.run = self.start_import
@@ -53,31 +48,45 @@ class ImportDialog(ExtendableDialog):
     def sizeHint(self):
         return QtCore.QSize(300, 100)
 
-    @property
-    def plugin_dirs(self):
-        settings = QtCore.QSettings()
-        dirs = settings.value("plugin_dirs").toStringList()
-        return dirs
+    def set_importer(self, importer):
+        '''
+        Set the importer (of type ..doc`Importer` )
+        '''
+        assert isinstance(importer, Importer)
+        self.importer = importer
+
+    def no_importer_message(self):
+        return QtGui.QMessageBox.warning(self.parent(), _("error"),
+        "No importer has been specified")
 
     def exec_(self):
+        if self.importer is None:
+            return self.no_importer_message()
+
+        message = u"%s <b>'%s'</b> ?"% (
+        _('Import data into the current database'),
+        self.importer.om2_session.databaseName())
+        self.label.setText(message)
+        
         if not ExtendableDialog.exec_(self):
             return False
         return self.start_()
-
+        
     def start_import(self):
         '''
         creates a thread for the database population
         enabling user to remain informed of progress
         '''
-        print "start importing now!!"
-
+        LOGGER.debug("start importing now!!")
+        self.importer.import_all()
+        
     def start_(self):
         '''
         TODO
         '''
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()
-        dl = ImportProgressDialog(self.pg_session, self.parent())
+        dl = ImportProgressDialog(self.importer, self.parent())
         if not dl.exec_():
             if self.work_thread.isRunning():
                 LOGGER.error("you quitted!")
@@ -88,17 +97,18 @@ class ImportDialog(ExtendableDialog):
 def _test():
     app = QtGui.QApplication([])
 
-    settings = QtCore.QSettings()
-    settings.setValue("plugin_dirs",
-        ["/etc/openmolar/plugins",
-        "/home/neil/openmolar/hg_openmolar/plugins/admin"])
-
     from lib_openmolar.admin.connect import DemoAdminConnection
+    from lib_openmolar.admin.data_import.importer import Importer
+    
     dc = DemoAdminConnection()
     dc.connect()
-
-    dl = ImportDialog(dc)
-
+    im = Importer()
+    im.set_session(dc)
+    im.set_import_directory("/home/neil/adp_import")
+    
+    dl = ImportDialog()
+    dl.set_importer(im)
+    
     print dl.exec_()
 
 if __name__ == "__main__":

@@ -21,31 +21,30 @@
 ###############################################################################
 
 import logging
-import logging.handlers
 
 def get_logger(level):
-    #formatter = logging.Formatter("%(levelname)s:%(message)s")
-
-    #handler = logging.StreamHandler()
-    #handler.setFormatter(formatter)
 
     logging.basicConfig(level=level,
                 format='%(asctime)s %(levelname)s %(message)s')
 
     LOGGER = logging.getLogger("openmolar-admin")
-    #LOGGER.setLevel(level)
-    #LOGGER.addHandler(handler)
 
     return LOGGER
 
 def install(level=logging.INFO):
     '''
     make an instance of this object acessible in the global namespace
-    >>>
     '''
-    import __builtin__
-    __builtin__.__dict__["LOGGER"] = get_logger(level)
-    LOGGER.debug("Installing an instance of LOGGER into globals")
+    try:
+        LOGGER
+        LOGGER.warning(
+        "\n\tAbandoned a second attempt to install LOGGER into globals\n"
+        "\tTHIS SHOULD NOT HAPPEN!!\n"
+        "\tperhaps code is being imported from both admin and client?"
+        )
+    except NameError:    
+        import __builtin__
+        __builtin__.LOGGER = get_logger(level)
 
 if __name__ == "__main__":
     install()

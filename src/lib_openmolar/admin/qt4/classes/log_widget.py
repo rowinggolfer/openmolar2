@@ -37,7 +37,7 @@ class LogWidget(QtGui.QFrame, Advisor):
 
         self.init_logger(logger)
 
-        self.text_browser = QtGui.QTextBrowser()
+        self.text_browser = QtGui.QPlainTextEdit()
         self.text_browser.setStyleSheet("background-color:black;color:white")
         self.text_browser.setFont(QtGui.QFont("courier", 10))
 
@@ -82,13 +82,16 @@ class LogWidget(QtGui.QFrame, Advisor):
         self.clear_button.clicked.connect(self.clear)
         save_button.clicked.connect(self.save)
         print_button.clicked.connect(self.print_)
+    
+        #use the signal/slot mechanism to ensure thread safety.
+        self.connect(self, QtCore.SIGNAL("LOG"), self._log)
 
         self.dirty = False
 
     def sizeHint(self):
         return QtCore.QSize(500, 150)
 
-    def log(self, record, dirty=True):
+    def log_handler(self, record, dirty=True):
         '''
         append message to the text in the browser
         record has the following attrs..
@@ -97,11 +100,17 @@ class LogWidget(QtGui.QFrame, Advisor):
         'msg', 'name', 'pathname', 'process', 'processName',
         'relativeCreated', 'thread', 'threadName'
         '''
-        self.text_browser.moveCursor(QtGui.QTextCursor.End)
-        message = "%s %s\n"% (record.levelname.ljust(8), record.getMessage())
-        self.text_browser.insertPlainText(message)
-        self.text_browser.moveCursor(QtGui.QTextCursor.End)
+        
+        if record.threadName != "MainThread":
+            message = "Thread : "
+        else:
+            message = ""
+        message += "%s %s"% (record.levelname.ljust(8), record.getMessage())
+        self.emit(QtCore.SIGNAL("LOG"), message)
         self.dirty = self.dirty or dirty
+
+    def _log(self, message):
+        self.text_browser.appendPlainText(message)
 
     def set_verbosity(self, level):
         '''
@@ -123,7 +132,7 @@ class LogWidget(QtGui.QFrame, Advisor):
             logger = logging.getLogger("test logger")
         self.logger = logger
         handler = logging.StreamHandler()
-        handler.emit = self.log
+        handler.emit = self.log_handler
         logger.addHandler(handler)
 
     def clear(self):

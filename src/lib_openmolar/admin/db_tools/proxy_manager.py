@@ -265,7 +265,11 @@ class ProxyManager(object):
         send a message to the openmolar server to delete all data this database
         this is for test purposes eg. demo database or import only
         '''
-        pickled_payload = self.selected_server.truncate_all_tables(str(dbname))
+        if dbname == "openmolar_demo":
+            pickled_payload = self.selected_server.truncate_demo()
+        else:
+            pickled_payload = self.selected_server.truncate_all_tables(
+                str(dbname))
 
         payload = pickle.loads(pickled_payload)
         if not payload.permission:
