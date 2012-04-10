@@ -6,10 +6,17 @@ import os
 logging.basicConfig(level = logging.INFO,
                 format='%(asctime)s %(levelname)s %(message)s')
 
-LOGGER = logging.getLogger("openmolar-client")
-__builtin__.__dict__["LOGGER"] = LOGGER
-
-LOGGER.debug("installing gettext and SETTINGS into __builtins__")
+try:
+    LOGGER
+    LOGGER.warning(
+    "\n\tAbandoned a second attempt to install LOGGER into globals\n"
+    "\tTHIS SHOULD NOT HAPPEN!!\n"
+    "\tperhaps code is being imported from both admin and client?"
+    )
+except NameError:    
+    LOGGER = logging.getLogger("openmolar-client")
+    import __builtin__
+    __builtin__.LOGGER = LOGGER
 
 lang = os.environ.get("LANG")
 if lang:

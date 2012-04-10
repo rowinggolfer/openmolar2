@@ -24,9 +24,9 @@ import logging
 import os
 
 from lib_openmolar.common.settings import CommonSettings
-
+from lib_openmolar.common.db_orm import TeethPresentDecoder
 from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
-from lib_openmolar.client.scripts import dent_key
+
 from lib_openmolar.client.qt4.colours import colours
 
 from lib_openmolar.client.db_orm import TreatmentModel
@@ -61,7 +61,7 @@ class Settings(CommonSettings, PluginHandler):
             os.mkdir(self.LOCALFOLDER)
 
         #: a reference to a :doc:`TeethPresentDecoder`
-        self.tooth_decoder = dent_key.TeethPresentDecoder()
+        self.tooth_decoder = TeethPresentDecoder()
 
         #: who is using the system
         self.user = "UNKNOWN"
@@ -294,15 +294,21 @@ class Settings(CommonSettings, PluginHandler):
 def install():
     '''
     make an instance of this object acessible in the global namespace
-    >>>
     '''
-    import __builtin__
-    __builtin__.SETTINGS = Settings()
-
+    try:
+        SETTINGS
+        LOGGER.warning(
+        "\n\tAbandoned a second attempt to install SETTINGS into globals\n"
+        "\tTHIS SHOULD NOT HAPPEN!!"
+        )
+    except NameError:    
+        import __builtin__
+        __builtin__.SETTINGS = Settings()
+    
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
 
-    install()
+    #install()
     print SETTINGS.PROCEDURE_CODES
     print SETTINGS.OM_TYPES
     print SETTINGS.tooth_decoder.decode(23456)
