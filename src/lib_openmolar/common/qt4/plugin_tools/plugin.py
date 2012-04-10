@@ -89,7 +89,7 @@ Several key methods should be overwritten.
         '''
         by default, this does nothing, if overwritten, this is your chance
         to add to the gui.
-        note - the gui can be accessed by SETTINGS.mainui
+        note - the gui can be accessed by SETTINGS.main_ui
         see also tear_down
         '''
         pass
