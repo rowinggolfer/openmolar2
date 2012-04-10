@@ -55,6 +55,7 @@ LOOSE_METHODS = (   'system.listMethods',
                     'no_databases_message',
                     'refresh_saved_schema',
                     #'save_schema'
+                    'truncate_demo',
                     )
 
 MANAGER_METHODS = ( 'create_db',

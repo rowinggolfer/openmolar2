@@ -384,6 +384,12 @@ class DBFunctions(object):
         for sequence_name in cursor.fetchall():
             yield sequence_name[0]
 
+    def truncate_demo(self):
+        '''
+        truncates the demo database
+        '''
+        return self.truncate_all_tables("openmolar_demo")
+
     @log_exception
     def truncate_all_tables(self, dbname):
         '''

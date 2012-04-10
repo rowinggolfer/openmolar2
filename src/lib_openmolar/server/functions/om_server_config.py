@@ -54,7 +54,7 @@ PASSWORD_HEADER = '''
 # If you do remove this file.. PLEASE KEEP A NOTE OF THE PASSWORD!!  #
 #                                                                    #
 ######################################################################
-'''
+PASSWORD = '''
 
 # alter this whenever changing the config file format
 CONFIG_VERSION = "1.0"
@@ -124,7 +124,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         plain, hash = pass_hash(8)
         f = open(PASSWORD_FILE, "w")
         f.write(PASSWORD_HEADER)
-        f.write(plain)
+        f.write(plain+"\n")
         f.close()
 
         self.add_section("managers-md5")
