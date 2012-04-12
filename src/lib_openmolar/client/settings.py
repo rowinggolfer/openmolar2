@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import __builtin__
 import logging
 import os
 
@@ -302,7 +303,6 @@ def install():
         "\tTHIS SHOULD NOT HAPPEN!!"
         )
     except NameError:    
-        import __builtin__
         __builtin__.SETTINGS = Settings()
     
 if __name__ == "__main__":

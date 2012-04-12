@@ -3,19 +3,18 @@ import gettext
 import logging
 import os
 
+import settings
+
 logging.basicConfig(level = logging.INFO,
                 format='%(asctime)s %(levelname)s %(message)s')
 
 try:
-    LOGGER
-    LOGGER.warning(
-    "\n\tAbandoned a second attempt to install LOGGER into globals\n"
-    "\tTHIS SHOULD NOT HAPPEN!!\n"
-    "\tperhaps code is being imported from both admin and client?"
-    )
+    LOGGER.warning('''
+        Abandoned a second attempt to install LOGGER into globals
+        THIS SHOULD NOT HAPPEN!!
+        perhaps code is being imported from both admin and client?''')
 except NameError:    
     LOGGER = logging.getLogger("openmolar-client")
-    import __builtin__
     __builtin__.LOGGER = LOGGER
 
 lang = os.environ.get("LANG")
@@ -31,7 +30,6 @@ else:
     LOGGER.info("no language environment found")
     gettext.install('openmolar', unicode=True)
 
-import settings
 settings.install()
 
 import qrc_resources
