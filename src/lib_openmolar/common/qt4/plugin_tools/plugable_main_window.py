@@ -163,11 +163,13 @@ class PlugableMainWindow(BaseMainWindow):
 
 def _test():
     from lib_openmolar import client
-    SETTINGS.PLUGIN_DIRS = ["../../../../plugins/client"]
+    SETTINGS.PLUGIN_DIRS = ["../../../../plugins/admin"]
 
     app = QtGui.QApplication([])
+    app.setOrganizationName("om_test")
+    app.setApplicationName("om_test")
+
     mw = PlugableMainWindow()
-    SETTINGS.main_ui = mw
     SETTINGS.load_plugins()
     mw.main_toolbar.addAction(QtGui.QAction("Placeholder", mw))
     mw.show()

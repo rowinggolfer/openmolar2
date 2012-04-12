@@ -107,44 +107,59 @@ class PluginHandler(object):
         '''
         peruses a directory and finds all plugins
         '''
-        i = 0
         for mod in self.get_modules(plugin_dir):
             plugins = self.get_pluggable_classes(mod, target)
             for plugin in plugins:
                 plugin.set_unique_id(QString(
                 "%s:%s"% (mod.__name__, os.path.abspath(str(plugin_dir)))))
-                self.install_plugin(plugin)
-                i += 1
-        return i
+                self._plugins.append(plugin)
 
     def load_plugins(self, target=None):
         '''
         this function is called by the client application to load plugins
         '''
         LOGGER.info ("loading plugins...")
-        i = 0
         for plugin_dir in self.PLUGIN_DIRS:
             LOGGER.info ("="*80)
             LOGGER.info ("looking for plugins in directory %s"% plugin_dir)
             LOGGER.info ("="*80)
             try:
-                i += self.get_plugins(plugin_dir, target)
-
+                self.get_plugins(plugin_dir, target)
             except Exception as e:
                 LOGGER.exception ("Exception loading plugin")
 
-        LOGGER.info("%d plugin(s) loaded"% i)
+        LOGGER.info("%d plugin(s) loaded"% len(self.plugins))
 
-    def install_plugin(self, plugin):
+    def activate_plugins(self):
         '''
-        installs a plugin (of type BasePlugin)
+        iterates over the loaded plugins and activates them.
         '''
-        if plugin.unique_id in self.ACTIVE_PLUGINS:
-            self.activate_plugin(plugin)
-        else:
-            LOGGER.info(".. %s is set to NOT ACTIVE"% plugin.unique_id)
-        self._plugins.append(plugin)
-
+        LOGGER.info ("="*80)
+        LOGGER.info("Activating plugins")
+        LOGGER.info ("="*80)
+        i = 0
+        for plugin in self.plugins:
+            if plugin.unique_id in self.ACTIVE_PLUGINS:
+                self.activate_plugin(plugin)
+                i += 1
+            else:
+                LOGGER.debug(".. NOT ACTIVATING %s"% plugin.unique_id)
+        LOGGER.info("%d plugin(s) activated"% i)
+    
+    def de_activate_plugins(self):
+        '''
+        iterates over the activated plugins and de-activates them.
+        '''
+        LOGGER.info ("="*80)
+        LOGGER.info("De-Activating plugins")
+        LOGGER.info ("="*80)
+        i = 0
+        for plugin in self.plugins:
+            if plugin.is_active:
+                self.deactivate_plugin(plugin)
+                i += 1
+        LOGGER.info("%d plugin(s) de-activated"% i)
+    
     def activate_plugin(self, plugin):
         LOGGER.info("..Activating %s '%s'"% (plugin.__module__, plugin.name))
         try:
@@ -212,4 +227,9 @@ if __name__ == "__main__":
     ph.NAKED_PLUGIN_DIRS = [
             "/home/neil/openmolar/hg_openmolar/plugins/src/import_om1",
             ]
-    ph.load_plugins("client")
+    ph.ACTIVE_PLUGINS = set([QString(
+    "import_om1_plugin:/home/neil/openmolar/hg_openmolar/plugins/src/import_om1"
+            )])
+    ph.load_plugins("admin")
+    ph.activate_plugins()
+    ph.de_activate_plugins()

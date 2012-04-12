@@ -188,7 +188,7 @@ def _test():
     obj.demo_connection()
 
     obj2 = ConnectionData()
-    obj2.from_conf_file("/etc/openmolar/client-connections/demo")
+    obj2.from_conf_file("/etc/openmolar/connections-available/demo.conf")
 
     print obj == obj2
     print obj.to_html()

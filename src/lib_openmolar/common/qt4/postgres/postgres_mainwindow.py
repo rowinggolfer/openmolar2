@@ -143,8 +143,8 @@ class PostgresMainWindow(PlugableMainWindow):
         if self._known_session_params is None:
             self._known_session_params = []
             try:
-                conf_dir = str(
-                    QtCore.QSettings().value("connection_conf_dir").toString())
+                conf_dir = str(QtCore.QSettings().value(
+                    "connection_conf_dir").toString())
 
                 LOGGER.debug(
                     "checking %s for connection config files"% conf_dir)
