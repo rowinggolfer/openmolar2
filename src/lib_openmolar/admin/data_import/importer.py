@@ -22,6 +22,7 @@
 
 import os
 import sys
+import time
 import traceback
 from xml.dom import minidom
 from PyQt4 import QtSql, QtCore
@@ -43,10 +44,33 @@ class Importer(object):
     sno_range = None
     sno_conditions = ""
 
+    #:
+    ImportWarning = _ImportWarning
+        
     def __init__(self):
         self.om2_session = None
         self._import_directory = os.path.curdir
         self.USER_DICT = {}
+
+        self.IMPORT_FUNCTIONS = (
+            self.insert_null_user,
+            self.import_avatars,
+            self.import_users,
+            self.import_practitioners,
+            self.import_patients,
+            self.import_tx_completed,
+            self.import_appointments,
+            self.import_clerical_memos,
+            self.import_clinical_memos,
+            self.import_addresses,
+            self.import_notes,
+            self.import_static_charts,
+            self.import_bpe,
+            self.import_perio,
+            self.import_contracted_practitioners,
+            self.import_telephones,
+            )
+
 
     def set_session(self, om2_session):
         self.om2_session = om2_session
@@ -106,6 +130,7 @@ class Importer(object):
                 LOGGER.warning("ERROR IMPORTING %s - %s"% (
                     row.toxml(),
                     psql_query.lastError().text()))
+        self.register_progress("import_practitioners", 100)
 
     def import_avatars(self):
         table_name = "avatars"
@@ -143,34 +168,49 @@ class Importer(object):
             if psql_query.lastError().isValid():
                 LOGGER.error(
                 "ERROR IMPORTING - %s"% psql_query.lastError().text())
+        self.register_progress("import_avatars", 100)
 
     def import_patients(self):
         table_name = "patients"
         LOGGER.info("importing %s"% table_name)
-
+        time.sleep(1)
+        self.register_progress("import_patients", 100)
+        
     def import_static_charts(self):
         table_name = "static charts"
         LOGGER.info("importing %s"% table_name)
-
+        time.sleep(1)
+        self.register_progress("import_static_charts", 100)
+        
     def import_clerical_memos(self):
         table_name = "clerical memos"
         LOGGER.info("importing %s"% table_name)
-
+        time.sleep(1)
+        self.register_progress("import_clerical_memos", 100)
+        
     def import_addresses(self):
         table_name = "addresses"
         LOGGER.info("importing %s"% table_name)
-
+        time.sleep(1)
+        self.register_progress("import_addresses", 100)
+        
     def import_clinical_memos(self):
         table_name = "clinical memos"
         LOGGER.info("importing %s"% table_name)
-
+        time.sleep(1)
+        self.register_progress("import_clinical_memos", 100)
+        
     def import_appointments(self):
         table_name = "appointments from aslot"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_appointments", 100)
 
     def import_notes(self):
         table_name = "notes"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_notes", 100)
 
     def insert_null_user(self):
         LOGGER.info("inserting null user to index 0")
@@ -185,10 +225,11 @@ class Importer(object):
         psql_query.prepare(ps_query)
 
         for val in (0, "?", "?", "?", "?", "-", "M",
-        QtCore.QDate(1900,1,1), "none", "",""):
+        QtCore.QDate(1900,1,1), "ZERO USER", "",""):
             psql_query.addBindValue(val)
 
         psql_query.exec_()
+        self.register_progress("insert_null_user", 100)
 
     def import_users(self, ignore_errors=False):
         table_name = "users"
@@ -201,8 +242,7 @@ class Importer(object):
         except IOError:
             LOGGER.error(
             "Unable to import users - no such file %s"% filepath)
-            raise _ImportWarning
-
+            raise self.ImportWarning
 
         record = InsertableRecord(self.om2_session, table_name)
         record.include_ix = True
@@ -212,11 +252,12 @@ class Importer(object):
 
         rows = dom.getElementsByTagName(table_name.rstrip("s"))
 
+        errors_encountered = False
         for row in rows:
             psql_query.prepare(ps_query)
             for node in ('ix', 'abbrv_name', 'role', 'title', 'last_name',
             'middle_name', 'first_name', 'qualifications', 'registration',
-            'correspondence_name', 'sex', 'dob', 'dbuser',
+            'correspondence_name', 'sex', 'dob',
             'status', 'comments', 'avatar_id', 'display_order'):
                 vals = row.getElementsByTagName(node)
                 try:
@@ -236,31 +277,45 @@ class Importer(object):
             psql_query.addBindValue("imported from xml")
             psql_query.exec_()
             if not ignore_errors and psql_query.lastError().isValid():
-                print "ERROR IMPORTING %s - %s"% (
-                    row.toxml(),
-                    psql_query.lastError().text())
-
-        print self.USER_DICT
+                LOGGER.warning("ERROR IMPORTING User \n\t%s\t%s"% (
+                    row.toprettyxml(),
+                    psql_query.lastError().text()))
+                errors_encountered = True
+        
+        LOGGER.debug(self.USER_DICT)
+        if errors_encountered:
+            raise self.ImportWarning
+        self.register_progress("import_users", 100)
 
     def import_bpe(self):
         table_name = "bpe"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_bpe", 100)
 
     def import_perio(self):
         table_name = "perio"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_perio", 100)
 
     def import_contracted_practitioners(self):
         table_name = "contracted practitioners"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_contracted_practitioners", 100)
 
     def import_telephones(self):
         table_name = "telephones"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_telephones", 100)
 
     def import_tx_completed(self):
         table_name = "tx_completed"
         LOGGER.info("importing %s"% table_name)
+        time.sleep(1)
+        self.register_progress("import_tx_completed", 100)
 
     def import_all(self, *args):
         '''
@@ -270,52 +325,74 @@ class Importer(object):
             all arguments are ignored. arguments are for inherited classes only
         '''
         LOGGER.info ("running import_all function")
-        tracebacks = []
-        for func in (
-            self.insert_null_user,
-            self.import_avatars,
-            self.import_users,
-            self.import_practitioners,
-            self.import_patients,
-            self.import_tx_completed,
-            self.import_appointments,
-            self.import_clerical_memos,
-            self.import_clinical_memos,
-            self.import_addresses,
-            self.import_notes,
-            self.import_static_charts,
-            self.import_bpe,
-            self.import_perio,
-            self.import_contracted_practitioners,
-            self.import_telephones,
-            ):
-
+        warnings, tracebacks = [], []
+        for func in self.IMPORT_FUNCTIONS:
             try:
                 sys.stdout.flush()
                 func()
 
-            except _ImportWarning as exc:
-                tracebacks.append((func, exc))
-            except Exception as exc:
-                LOGGER.exception("UNHANDLED EXCEPTION in function %s"% func)
-                tracebacks.append((func, exc))
+            except self.ImportWarning as exc:
+                warnings.append(func.__name__)
+        
+            except Exception as e:
+                LOGGER.exception(
+                    "UNHANDLED EXCEPTION! in function\n\t%s"% func)
+                tracebacks.append(func.__name__)
 
-        LOGGER.info ("import_all function finished")
+        LOGGER.info ("="*60)
+        LOGGER.info ("          import_all function finished")
+        LOGGER.info ("="*60)
+        self.log_errors(warnings, tracebacks)
+        
+    def log_errors(self, warnings, tracebacks):
+        '''
+        output any warnings captured during import all
+        '''    
+        if (warnings,tracebacks) == ([],[]):
+            LOGGER.info ("No warnings raised by the import process")
+            return
+    
+        if warnings:
+            LOGGER.warning("#"*60)
+            LOGGER.warning("# The following functions gave warnings:")
+            for warning in warnings:
+                LOGGER.warning("#    %s"% warning)
+            LOGGER.warning("#"*60)
+                    
         if tracebacks:
-            LOGGER.warning("The following functions had problems")
-            for func, exc in tracebacks:
-                if type(exc) == _ImportWarning:
-                    LOGGER.warning("Warning from %s"% func)
-                else:
-                    LOGGER.error("Unhandled exception from %s"% func)
-                    LOGGER.error("**** %s"% exc.message)
-
+            LOGGER.error("!"*60)
+            LOGGER.error("! The following functions gave exceptions:")
+            for tb in tracebacks:
+                LOGGER.error("#    %s"% tb)
+            LOGGER.error("!"*60)
+    
     def run(self):
         '''
         calls import_all
         '''
         self.import_all()
-
+    
+    def emit_finished_signal(self):
+        self.emit_(QtCore.SIGNAL("Import Finished"))
+    
+    def register_progress(self, func, percentage):
+        '''
+        feedback on how the import is going
+        '''
+        #LOGGER.debug("progress %s - %s"% (key, percentage))
+        self.emit_(QtCore.SIGNAL("import progress"), func, percentage)
+        
+    def emit_(self, *args):
+        '''
+        emit signals but be wary of case when there is no gui
+        (ie. when install demo is called from CLI)
+        '''
+        #LOGGER.debug("emitting signal")
+        if QtCore.QCoreApplication.instance() is None:
+            return
+        QtCore.QCoreApplication.instance().emit(*args)
+            
+    
 
 if __name__ == "__main__":
     from lib_openmolar.admin.connect import DemoAdminConnection

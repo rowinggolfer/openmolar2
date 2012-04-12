@@ -26,10 +26,8 @@ from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.qt4.widgets import ProgressWidget
 
 class ImportProgressDialog(BaseDialog):
-    def __init__(self, importer, parent=None):
+    def __init__(self, functions, parent=None):
         BaseDialog.__init__(self, parent)
-
-        self.importer = importer
 
         self.setWindowTitle(_("Import"))
         label = QtGui.QLabel(_("Importing Data"))
@@ -39,11 +37,11 @@ class ImportProgressDialog(BaseDialog):
         layout = QtGui.QVBoxLayout(frame)
 
         self.progress_widgets = {}
-        for att in ("foo", "bar"):
+        for att in functions:
             pw = ProgressWidget(self)
-            pw.setText(att)
+            pw.setText(att.__name__)
             layout.addWidget(pw)
-            self.progress_widgets[att] = pw
+            self.progress_widgets[att.__name__] = pw
 
         self.scroll_area = QtGui.QScrollArea(self)
         self.scroll_area.setWidget(frame)
@@ -51,10 +49,14 @@ class ImportProgressDialog(BaseDialog):
         self.insertWidget(self.scroll_area)
 
         self.apply_but.hide()
-        self.dirty = True
+        self.dirty = False
         self.set_check_on_cancel(True)
-
-        self.connect_signals()
+        
+        self.connect(QtCore.QCoreApplication.instance(), 
+            QtCore.SIGNAL("Import Finished"), self.finished)
+        
+        self.connect(QtGui.QApplication.instance(),
+            QtCore.SIGNAL("import progress"), self.progress)
 
     def sizeHint(self):
         return QtCore.QSize(350, 300)
@@ -63,50 +65,39 @@ class ImportProgressDialog(BaseDialog):
         if __name__ == "__main__":
             print args
         self.emit(QtCore.SIGNAL("Advise"), *args)
-
-    def connect_signals(self):
-        self.connect(QtGui.QApplication.instance(),
-            QtCore.SIGNAL("demo install complete"), self.finished)
-
-        self.connect(QtGui.QApplication.instance(),
-            QtCore.SIGNAL("demo progress"), self.progress)
-
+    
     def finished(self):
-        if self.successful_install:
+        if self.successful_import:
             QtGui.QMessageBox.information(self, _("Success"),
-                _("Demo Data Installed Sucessfully!"))
+                "Import finished")
+            self.accept()
         else:
             QtGui.QMessageBox.warning(self, _("Error"),
                 _("Some errors were encountered, please check the log"))
-
-        self.accept()
+    
+            self.apply_but.show()
+            self.apply_but.setText(_("Finish"))
+            self.enableApply()
+            self.cancel_but.hide()
 
     @property
-    def successful_install(self):
+    def successful_import(self):
         success = True
-        for progress_widget in self.module_dict.values():
+        for progress_widget in self.progress_widgets.values():
             success = success and progress_widget.value() == 100
         return success
-
-    def progress(self, module, percentage):
-        current_pb = self.module_dict[module]
+    
+    def progress(self, att, percentage):
+        current_pb = self.progress_widgets[att]
         current_pb.setValue(percentage)
         self.scroll_area.ensureWidgetVisible(current_pb)
 
+
 if __name__ == "__main__":
-    import time
     import gettext
     gettext.install("")
 
-    class DuckLog(object):
-        def log(self, *args):
-            print args
-
     app = QtGui.QApplication([])
 
-    from lib_openmolar.admin.connect import DemoAdminConnection
-    sc = DemoAdminConnection()
-    sc.connect()
-
-    dl = ImportProgressDialog(sc, [])
+    dl = ImportProgressDialog([ImportProgressDialog.progress])
     dl.exec_()

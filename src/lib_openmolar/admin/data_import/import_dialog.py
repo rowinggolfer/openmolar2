@@ -78,20 +78,28 @@ class ImportDialog(ExtendableDialog):
         enabling user to remain informed of progress
         '''
         LOGGER.debug("start importing now!!")
-        self.importer.import_all()
+        try:
+            self.importer.run()
+        except Exception:
+            LOGGER.exception("Unhandled error thrown by the importer")
+        
+        self.importer.emit_finished_signal()
         
     def start_(self):
         '''
-        TODO
+        raise a progress dialog, and start the thread.
         '''
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()
-        dl = ImportProgressDialog(self.importer, self.parent())
-        if not dl.exec_():
+        
+        FUNCS = self.importer.IMPORT_FUNCTIONS
+        prog_dl = ImportProgressDialog(FUNCS, self.parent())
+        if not prog_dl.exec_():
             if self.work_thread.isRunning():
                 LOGGER.error("you quitted!")
                 self.work_thread.terminate()
                 return False
+            
         return True
 
 def _test():
@@ -100,16 +108,19 @@ def _test():
     from lib_openmolar.admin.connect import DemoAdminConnection
     from lib_openmolar.admin.data_import.importer import Importer
     
+    mw = QtGui.QMainWindow()
+    mw.setWindowTitle("Mock Parent")
+    
     dc = DemoAdminConnection()
     dc.connect()
+
     im = Importer()
     im.set_session(dc)
-    im.set_import_directory("/home/neil/adp_import")
     
-    dl = ImportDialog()
+    dl = ImportDialog(mw)
     dl.set_importer(im)
-    
-    print dl.exec_()
+    dl.exec_()
+
 
 if __name__ == "__main__":
     _test()

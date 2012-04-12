@@ -20,7 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import ConfigParser
 import os
 import shutil
 import sys

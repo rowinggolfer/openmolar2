@@ -153,6 +153,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         SETTINGS.main_ui = self
         SETTINGS.load_plugins("admin")
+        SETTINGS.activate_plugins()
+        
 
     def connect_signals(self):
         '''
@@ -459,6 +461,7 @@ _("Version"), SETTINGS.VERSION,
         display the proxy message.
         overwrites :doc:`ProxyManager` function
         '''
+        LOGGER.info("Server Procedure completed")
         self.known_server_widget.set_html(self.selected_client.html)
 
     def manage_shortcut(self, url):

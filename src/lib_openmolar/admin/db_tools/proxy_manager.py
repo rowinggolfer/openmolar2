@@ -30,10 +30,13 @@ from lib_openmolar.admin.connect import AdminConnection
 
 def user_perms(func):
     def userf(*args, **kwargs):
+        LOGGER.debug("server function called %s"% func.__name__)
         try:
             return func(*args, **kwargs)
         except ProxyClient.PermissionError:
-            LOGGER.info("permission error.. trying to elevate")
+            LOGGER.warning("permission error for function %s"% func.__name__)
+            LOGGER.info(
+                "\t offering user chance to elevate his/her permissions")
             proxy_manager_instance = args[0]
             if proxy_manager_instance.switch_server_user():
                 return func(*args, **kwargs)
@@ -281,7 +284,7 @@ class ProxyManager(object):
         else:
             self.advise(u"%s<hr />%s"%(
                 _("Operation failed"), payload.error_message), 2)
-
+        
         self.display_proxy_message()
 
 

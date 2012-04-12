@@ -29,8 +29,6 @@ class DemoProgressDialog(BaseDialog):
     def __init__(self, connection, ommisions, parent=None):
         BaseDialog.__init__(self, parent)
 
-        self.connection = connection
-
         self.setWindowTitle(_("Progress"))
         label = QtGui.QLabel(_("Populating Tables with demo data"))
         self.insertWidget(label)
@@ -39,7 +37,7 @@ class DemoProgressDialog(BaseDialog):
         layout = QtGui.QVBoxLayout(frame)
 
         self.module_dict = {}
-        for module in self.connection.admin_modules:
+        for module in connection.admin_modules:
             if module in ommisions:
                 continue
             #instanstiate a class to get some information about the table
