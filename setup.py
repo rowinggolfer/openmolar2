@@ -287,7 +287,6 @@ if INSTALL_CLIENT:
             'lib_openmolar.client.qt4.dialogs.address_dialogs.components',
             'lib_openmolar.client.qt4.interfaces',
             'lib_openmolar.client.qt4.pages',
-            'lib_openmolar.client.scripts',
                     ],
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps',

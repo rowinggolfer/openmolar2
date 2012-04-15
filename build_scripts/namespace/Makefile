@@ -31,19 +31,21 @@ sources:
 	md5sum $(PACKAGE)-$(VERSION).tar.gz | sed "s/ .*//" > $(PACKAGE)-$(VERSION)_md5.txt 	
 		
 deb:
-	make clean_tmp
 	make sources
+	make clean_tmp
 	
 	$(BUILD_SCRIPTS_DIR)deb_maker.py -s$(RELEASES_DIR)sources -d$(DEB_DIR) -popenmolar-$(SUFFIX)
 	
 	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(TMP_DIR)
+	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(TMP_DIR)$(PACKAGE)-$(VERSION).orig.tar.gz
 	gunzip $(TMP_DIR)$(PACKAGE)-$(VERSION).tar.gz
 	cd $(TMP_DIR) ; tar -xvf $(TMP_DIR)$(PACKAGE)-$(VERSION).tar
 	cp -av $(DEB_DIR) $(TMP_DIR)$(PACKAGE)-$(VERSION)
 	
-	cd $(TMP_DIR)$(PACKAGE)-$(VERSION) ; dpkg-buildpackage -kF230408E
+	cd $(TMP_DIR)$(PACKAGE)-$(VERSION) ; \dpkg-buildpackage -S -kF230408E
+	#cd $(TMP_DIR)$ ; sudo pbuilder build $(PACKAGE)_$(VERSION)~6.dsc
 			
-	mv $(TMP_DIR)$\*.deb $(RELEASES_DIR)debs/
+	#mv $(TMP_DIR)$\*.deb $(RELEASES_DIR)debs/
 	
-	make clean_tmp
+	#make clean_tmp
 	

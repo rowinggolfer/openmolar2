@@ -1,3 +1,10 @@
+openmolar-namespace (2.0.4~6) unstable; urgency=low
+
+  * experimenting with pbuilder
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 15 Apr 2012 19:49:23 +0100
+
+
 openmolar-namespace (2.0.4~0) unstable; urgency=low
 
   * version numbering change
