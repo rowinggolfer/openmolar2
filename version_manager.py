@@ -34,6 +34,7 @@ https://bitbucket.org/dowski/mercurial-version-info-plugin
 '''
 
 import os
+import re
 import time
 
 from mercurial import util
@@ -48,6 +49,18 @@ VERSION_NUMBER = "2.0.5"
 ##                                                                           ##
 ###############################################################################
 
+f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"))
+data = f.read()
+f.close()
+
+new_data = re.sub("version = \d+.\\d+\.\d+", "version = %s"% VERSION_NUMBER, 
+    data)
+if data != new_data:
+    print ("Updated Major Version Numbering")
+
+f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"), "w")
+f.write(new_data)
+f.close()
 
 TEMPLATE = '''\
 VERSION = %(version)r

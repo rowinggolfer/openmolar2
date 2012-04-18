@@ -1,0 +1,21 @@
+Source: openmolar-server
+Section: misc
+Priority: extra
+Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
+Build-Depends: python, debhelper (>= 7)
+Homepage: http://www.openmolar.com
+Vcs-browser: http://code.google.com/p/openmolar/
+
+
+Package: openmolar-server
+Architecture: all
+Section: misc
+Priority: extra
+Depends: ${python:Depends}, postgresql, python-psycopg2, openmolar-namespace
+Description: Dental Practice Management Software - Server Component
+  the openmolar daemon running on port 230.
+ .
+ provides remote call functions and status messages to bridge between 
+ the openmolar-admin application (which may be on a remote machine) and
+ the postgres database server (which is a dependency of this package)
+ 

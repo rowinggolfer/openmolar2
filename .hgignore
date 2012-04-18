@@ -24,3 +24,7 @@ tmp/*
 setup.cfg
 plugins/
 plugins/*
+deb_srcs/
+tarballs/
+debs/
+

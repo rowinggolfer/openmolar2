@@ -1,0 +1,18 @@
+Source: openmolar-common
+Section: misc
+Priority: extra
+Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
+Build-Depends: python, debhelper (>= 7)
+Homepage: http://www.openmolar.com
+Vcs-browser: http://code.google.com/p/openmolar/
+
+
+Package: openmolar-common
+Architecture: all
+Section: misc
+Priority: extra
+Depends: ${python:Depends}, python-qt4, python-qt4-sql, libqt4-sql-psql, openmolar-namespace
+Description: Dental Practice Management Software - common library
+ .
+ provides code required by both the admin and client 
+ applications.

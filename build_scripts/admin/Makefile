@@ -1,49 +1,85 @@
-HEAD=$(HOME)/openmolar/hg_openmolar/
-BUILD_SCRIPTS_DIR=$(HEAD)/build_scripts/
-
 SUFFIX=admin
+PACKAGE=openmolar-$(SUFFIX)
 
-RELEASES_DIR=$(HEAD)releases/$(SUFFIX)/
+ifeq ($(DIST), )
+	DIST=unstable
+endif
+
+
+HEAD=$(HOME)/openmolar/hg_openmolar/
+BUILD_SCRIPTS_DIR = $(HEAD)/build_scripts/
+BUILDS_DIR=$(HEAD)builds/$(SUFFIX)/
+
+DIST_DIR=$(HEAD)dist/
+DEB_CONF_DIR=$(HEAD)build_scripts/$(SUFFIX)/metadata/$(DIST)/debian/
+
+VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
+
+TARBALL = $(PACKAGE)-$(VERSION).tar.gz
+TARBALL_DIR=$(HEAD)builds/$(SUFFIX)/tarballs/
 
 TMP_DIR=$(HEAD)tmp/
 
-DIST_DIR=$(HEAD)dist/
+DEB_SRCBUILDS_DIR=$(BUILDS_DIR)deb_srcs/$(DIST)/
+DEB_BUILDS_DIR=$(BUILDS_DIR)debs/$(DIST)/
 
-DEB_DIR=$(HEAD)/build_scripts/$(SUFFIX)/debian/
 
-PACKAGE=openmolar-$(SUFFIX)
-
-VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
+#this is where pbuilder puts stuff
+CACHE=/var/cache/pbuilder/$(DIST)-amd64/result/
 
 clean_tmp:
 	mkdir -p $(TMP_DIR)
 	rm -rf $(TMP_DIR)/*
 
-sources:
+tarball:
+	echo "making $(SUFFIX) tarball"
+	mkdir -p $(TARBALL_DIR)
 	cd $(HEAD) ;\
 		python configure.py --$(SUFFIX) ;\
 		python setup.py sdist ;\
+	cp -av $(DIST_DIR)$(TARBALL) $(TARBALL_DIR);
+	@echo "tarball is located $(TARBALL_DIR)$(TARBALL)"
+
+	@if [ -e "$(TARBALL_DIR)$(TARBALL)" ]; then echo "SUCCESS!"; fi
 	
-	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(RELEASES_DIR)sources/
+sign_tarball:
+	cd $(TARBALL_DIR) ;\
+	gpg --armor --sign --detach-sig -u rowinggolfer@googlemail.com $(TARBALL) ;\
+	md5sum $(TARBALL) | sed "s/ .*//" > $(PACKAGE)-$(VERSION)_md5.txt 	
 	
-	cd $(RELEASES_DIR)/sources ;\
-	gpg --armor --sign --detach-sig -u rowinggolfer@googlemail.com $(PACKAGE)-$(VERSION).tar.gz ;\
-	md5sum $(PACKAGE)-$(VERSION).tar.gz | sed "s/ .*//" > $(PACKAGE)-$(VERSION)_md5.txt 	
-		
-deb:
+	
+deb_src:
+	make tarball
 	make clean_tmp
-	make sources
+
+	@echo "target distro = $(DIST)"
 	
-	$(BUILD_SCRIPTS_DIR)deb_maker.py -s$(RELEASES_DIR)sources -d$(DEB_DIR) -popenmolar-$(SUFFIX)
+	# call my changelog gui	
+	$(BUILD_SCRIPTS_DIR)deb_maker.py -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) -popenmolar-$(SUFFIX)
 	
-	cp -av $(DIST_DIR)$(PACKAGE)-$(VERSION).tar.gz $(TMP_DIR)
-	gunzip $(TMP_DIR)$(PACKAGE)-$(VERSION).tar.gz
-	cd $(TMP_DIR) ; tar -xvf $(TMP_DIR)$(PACKAGE)-$(VERSION).tar
-	cp -av $(DEB_DIR) $(TMP_DIR)$(PACKAGE)-$(VERSION)
+	cp -av $(TARBALL_DIR)$(TARBALL) $(TMP_DIR)
 	
-	cd $(TMP_DIR)$(PACKAGE)-$(VERSION) ; dpkg-buildpackage -kF230408E
+	cd $(TMP_DIR) ;\
+	tar -zxvf $(TARBALL); \
+	mv $(TARBALL) `$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR)`.orig.tar.gz 
+	
+	cd $(TMP_DIR)$(PACKAGE)-$(VERSION) ; \
+	cp -av $(DEB_CONF_DIR) . ;\
+	dpkg-buildpackage -S -kF230408E
+	
+	mkdir -p $(DEB_SRCBUILDS_DIR)
+	mv $(TMP_DIR)`$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR)`* $(DEB_SRCBUILDS_DIR)
+	
+debs:
+	cd $(DEB_SRCBUILDS_DIR) ; \
+	sudo DIST=$(DIST) pbuilder build `$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR) full`.dsc -kF230408E
 			
-	mv $(TMP_DIR)$\*.deb $(RELEASES_DIR)debs/
+	mkdir -p $(DEB_BUILDS_DIR)
 	
-	make clean_tmp
-	
+	#pbuilder puts stuff in locations like this
+	#/var/cache/pbuilder/testing-amd64/result/openmolar-namespace_2.0.5~2_all.deb
+	sudo mv $(CACHE)`$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR) full`_all.deb $(DEB_BUILDS_DIR)
+		
+
+test:
+	@echo "targetting $(DIST)"
