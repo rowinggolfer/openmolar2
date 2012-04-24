@@ -24,9 +24,8 @@
 This module is used as a "hook" for mercurial so that revision updates occur
 whenever an update or commit is performed on the repo (or nested sub repo).
 
-Major Version numbers are also placed here (and ONLY here!)
-
-Openmolar uses standard major.minor.point versioning
+Openmolar uses standard major.minor.point versioning. 
+This is stored in version_number.py
 
 the majority of the code in this module is taken from 
 https://bitbucket.org/dowski/mercurial-version-info-plugin
@@ -35,32 +34,29 @@ https://bitbucket.org/dowski/mercurial-version-info-plugin
 
 import os
 import re
+import sys
 import time
 
 from mercurial import util
 
-###############################################################################
-##                                                                           ##
-##          ADJUST VERSION NUMBERS HERE.                                     ##
-##                                                                           ##
-VERSION_NUMBER = "2.0.62"
-##                                                                           ##
-##          ALL DONE!!                                                       ##
-##                                                                           ##
-###############################################################################
+cur_dir = os.path.dirname(__file__)
 
-f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"))
+sys.path.append(cur_dir)
+from version_number import VERSION_NUMBER
+
+f = open(os.path.join(cur_dir, "setup.cnf"))
 data = f.read()
 f.close()
 
-new_data = re.sub("version = \d+\.\d+\.\d+", "version = %s"% VERSION_NUMBER, 
+new_data = re.sub("version = \d+\.\d+\.\d+", 
+    "version = %s"% VERSION_NUMBER, 
     data)
+    
 if data != new_data:
     print ("Updated Major Version Numbering")
-
-f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"), "w")
-f.write(new_data)
-f.close()
+    f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"), "w")
+    f.write(new_data)
+    f.close()
 
 TEMPLATE = '''\
 VERSION = %(version)r

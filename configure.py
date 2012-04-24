@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import __builtin__
 import ConfigParser
 import logging
 import optparse
@@ -27,9 +28,12 @@ import os
 import StringIO
 import sys
 
+from version_number import VERSION_NUMBER
 sys.path.insert(0, os.path.abspath(os.path.join ("src", "lib_openmolar")))
 				
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
+__builtin__.LOGGER = logging.getLogger("openmolar config")
+
 				
 class OMConfig(ConfigParser.RawConfigParser):
     '''
@@ -61,21 +65,17 @@ class OMConfig(ConfigParser.RawConfigParser):
         for att in self.ATTS:
             self.add_section(att)
             self.set(att, "include", self.DICT[att])
+            self.set(att, "version", VERSION_NUMBER)
             try:
                 if att not in ("namespace", "lang"):
                     # this is the equiv of
                     # from admin import version 
                     version = __import__("%s.version"% att, fromlist=["version"])
-                    self.set(att, "version", version.VERSION)
                     self.set(att, "revision_number", version.revision_number)
                     self.set(att, "revision_id", version.revision_id)
-                else:
-                    #use the common version number for namespace and lang
-                    version = __import__("common.version", fromlist=["version"])
-                    self.set(att, "version", version.VERSION)
             except ImportError:
                 logging.error(
-                "IMPORT ERROR - version files not present for package %s"% att)
+                "IMPORT ERROR - hg generated version files not present for package %s"% att)
                 sys.exit("unable to continue")
 
     def write(self, f):
