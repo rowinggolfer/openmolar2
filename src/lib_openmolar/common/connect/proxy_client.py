@@ -190,7 +190,7 @@ def _test():
     import logging
     logging.basicConfig(level = logging.DEBUG)
     import __builtin__
-    __builtin__.__dict__["LOGGER"] = logging.getLogger()
+    __builtin__.LOGGER = logging.getLogger()
     import gettext
     gettext.install("openmolar")
 
