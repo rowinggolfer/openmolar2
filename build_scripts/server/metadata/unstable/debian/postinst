@@ -1,5 +1,0 @@
-#! /bin/sh
-
-update-rc.d openmolar defaults
-
-/etc/init.d/openmolar restart

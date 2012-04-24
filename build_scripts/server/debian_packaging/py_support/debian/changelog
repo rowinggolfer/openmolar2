@@ -1,0 +1,56 @@
+openmolar-server (2.0.62+hg012-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:24:46 +0100
+
+
+openmolar-server (2.0.61+hg012-3~__DIST__0) __DIST__; urgency=low
+
+  * new postinst script.
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 22 Apr 2012 00:17:49 +0100
+
+
+openmolar-server (2.0.61+hg012-2~__DIST__0) __DIST__; urgency=low
+
+  * new postinst script
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 23:42:02 +0100
+
+
+openmolar-server (2.0.61+hg012-1~__DIST__0) __DIST__; urgency=low
+
+  * new changelog
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 22:54:19 +0100
+
+
+openmolar-server (2.0.61+hg012-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release" (altered setup.py)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 17:52:08 +0100
+
+
+openmolar-server (2.0.6+hg012-0~__DIST__0) unstable; urgency=low
+
+  * postinst script no longer starts the daemon (experimental)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 20 Apr 2012 17:17:17 +0100
+
+
+openmolar-server (2.0.5-2+hg012~__DIST__0) __DIST__; urgency=low
+
+  * postinst script calls update-python-modules
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 20 Apr 2012 15:30:19 +0100
+
+
+openmolar-server (2.0.5-2~__DIST__0) __DIST__; urgency=low
+
+  * initial __DIST__ package using pysupport
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 18 Apr 2012 13:56:53 +0100
+
+

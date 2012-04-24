@@ -1,0 +1,21 @@
+openmolar-common (2.0.62+hg027-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:27:12 +0100
+
+
+openmolar-common (2.0.5+hg027-0~__DIST__0) __DIST__; urgency=low
+
+  * as per lib_openmolar hg revsion 27
+  * new debian/changelog
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 18 Apr 2012 00:48:00 +0100
+
+
+openmolar-common (2.0.5-0~__DIST__0) __DIST__; urgency=low
+
+  * new debian/changelog
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 17 Apr 2012 16:10:20 +0100
+

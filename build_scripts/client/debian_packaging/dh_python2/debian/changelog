@@ -1,0 +1,27 @@
+openmolar-client (2.0.62+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:27:48 +0100
+
+
+openmolar-client (2.0.61+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream setup.py and lib_openmolar.__init__.py
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 18:32:01 +0100
+
+
+openmolar-client (2.0.5+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * new debian/changelog
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 18 Apr 2012 01:10:51 +0100
+
+
+openmolar-client (2.0.4+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * build after admin plugin_work completed
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 12 Apr 2012 23:09:38 +0100
+

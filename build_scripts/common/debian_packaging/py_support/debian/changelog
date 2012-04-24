@@ -1,0 +1,29 @@
+openmolar-common (2.0.62+hg027-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:23:46 +0100
+
+
+openmolar-common (2.0.61+hg027-1~__DIST__0) __DIST__; urgency=low
+
+  * new changelog
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 22:52:46 +0100
+
+
+openmolar-common (2.0.61+hg027-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release" (altered setup.py)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 17:45:57 +0100
+
+
+openmolar-common (2.0.5+hg027-0~__DIST__0) __DIST__; urgency=low
+
+  * initial __DIST__ package using pysupport
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 18 Apr 2012 13:49:44 +0100
+
+
+

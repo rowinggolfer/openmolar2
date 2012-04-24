@@ -1,0 +1,21 @@
+openmolar-client (2.0.62+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:23:57 +0100
+
+
+openmolar-client (2.0.61+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release" (altered setup.py)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Apr 2012 17:48:52 +0100
+
+
+openmolar-client (2.0.5+hg017-0~__DIST__0) __DIST__; urgency=low
+
+  * initial __DIST__ package using pysupport
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 18 Apr 2012 13:05:00 +0100
+
+

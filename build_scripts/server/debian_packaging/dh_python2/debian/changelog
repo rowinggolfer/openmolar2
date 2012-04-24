@@ -1,0 +1,21 @@
+openmolar-server (2.0.62+hg012-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 13:28:10 +0100
+
+
+openmolar-server (2.0.5+hg012-1~__DIST__0) __DIST__; urgency=low
+
+  * new rules file
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 19 Apr 2012 14:44:00 +0100
+
+
+openmolar-server (2.0.5+hg012-0~__DIST__0) __DIST__; urgency=low
+
+  * build after admin plugin_work completed
+  * new debianisation
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 12 Apr 2012 23:10:38 +0100
+

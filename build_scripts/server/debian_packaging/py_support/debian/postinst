@@ -1,0 +1,6 @@
+#! /bin/sh
+
+update-python-modules  openmolar-server.public
+update-rc.d openmolar defaults
+
+service openmolar restart
