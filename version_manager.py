@@ -43,7 +43,7 @@ from mercurial import util
 ##                                                                           ##
 ##          ADJUST VERSION NUMBERS HERE.                                     ##
 ##                                                                           ##
-VERSION_NUMBER = "2.0.5"
+VERSION_NUMBER = "2.0.62"
 ##                                                                           ##
 ##          ALL DONE!!                                                       ##
 ##                                                                           ##
@@ -53,7 +53,7 @@ f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"))
 data = f.read()
 f.close()
 
-new_data = re.sub("version = \d+.\\d+\.\d+", "version = %s"% VERSION_NUMBER, 
+new_data = re.sub("version = \d+\.\d+\.\d+", "version = %s"% VERSION_NUMBER, 
     data)
 if data != new_data:
     print ("Updated Major Version Numbering")

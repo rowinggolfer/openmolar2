@@ -18,5 +18,6 @@ Platform specific instructions
     :maxdepth: 1
 
     debian
+    ubuntu
 
 

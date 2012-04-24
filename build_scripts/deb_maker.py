@@ -108,13 +108,13 @@ def raise_gui(changelog, sources):
     result = dl.exec_()
     return result, dl.changelog
 
-def new_changelog(package, version, author, package_no=0, dist="unstable", urgency="low"):
-    return '''%s (%s~%d) %s; urgency=%s
+def new_changelog(package, version, author, package_no=0, dist="__DIST__", urgency="low"):
+    return '''%s (%s-%d~%s0) %s; urgency=%s
 
   * {COMMENTS}
 
  -- %s  %s
-'''% (package, version, package_no, dist, urgency, author, commands.getoutput("date -R"))
+'''% (package, version, package_no, dist, dist, urgency, author, commands.getoutput("date -R"))
 
 def main():
     parser = Parser()
@@ -135,7 +135,7 @@ def main():
         "%s-(.*)\.tar\.gz$"% options.package, chosen).groups()[0]
 
     new_changes = new_changelog(options.package, version,
-        "Neil Wallace <rowinggolfer@googlemail.com>")
+        "Neil Wallace <rowinggolfer@googlemail.com>", 0)
 
     changelog = "%s\n\n%s"% (new_changes, changelog)
 

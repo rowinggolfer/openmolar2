@@ -9,18 +9,18 @@ the majority of time whilst developing openmolar2.
 Consequently, it should come as no surprise that installation on this platform
 is well supported (and hopefully painless!).
 
-In fact, the following should get be all you require to do.
+I have a repos for debian ::
+	deb http://openmolar.com/debian squeeze main
+	deb http://openmolar.com/debian testing main
+	deb http://openmolar.com/debian unstable main
+	
+add the flavour you require to your sources.list. (codename aliases should be supported eg. squeeze, wheezy etc..)
 
- 1. Add my repo and key. ::
- 
-    ~# echo "deb http://openmolar.com/repos/apt/debian squeeze main" >> /etc/apt/sources.list
-    ~# wget -O - http://www.openmolar.com/rowinggolfer.gpg.key| apt-key add -
+The repo is signed by my key, which is available ::
+	http://www.openmolar.com/rowinggolfer.gpg.key
+	
 
- 2. update. ::
- 
-    ~# apt-get update
-
- 3. Get whichever components you require. ::
+Once you have enabled the repo of your choice, get whichever components you require. ::
  
     ~# apt-get install openmolar-server openmolar-admin openmolar-client
  
