@@ -5,12 +5,13 @@ Maintainer: Neil Wallace <rowinggolfer@googlemail.com>
 Build-Depends: python, debhelper (>= 7)
 Homepage: http://www.openmolar.com
 Vcs-browser: http://code.google.com/p/openmolar/
+Standards-Version: 3.9.3
 
 Package: openmolar-admin
 Architecture: all
 Section: misc
 Priority: extra
-Depends: ${python:Depends}, openmolar-common, python-qscintilla2
+Depends: ${python:Depends}, ${misc:Depends}, openmolar-common, python-qscintilla2
 Description: Dental Practice Management Software - Admin Component
  .
  provides an assortment of command line and graphical tools for 

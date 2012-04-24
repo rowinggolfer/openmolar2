@@ -1,5 +1,7 @@
 #! /bin/sh
 
+#DEBHELPER#
+
 update-rc.d openmolar defaults
 
 /etc/init.d/openmolar restart

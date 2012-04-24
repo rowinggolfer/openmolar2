@@ -5,14 +5,14 @@ Priority: extra
 Build-Depends: python, debhelper (>= 7)
 Homepage: http://www.openmolar.com
 Vcs-browser: http://code.google.com/p/openmolar/
-Standards-Version: 2.0.5
+Standards-Version: 3.9.3
 X-Python-Version: >=2.6
 
 Package: openmolar-namespace
 Architecture: all
 Section: misc
 Priority: extra
-Depends: ${python:Depends}
+Depends: ${python:Depends}, ${misc:Depends}
 Description: Dental Practice Management Software - library namespace
  .
  installs lib_openmolar and the corresponding __init__.py into the correct 
