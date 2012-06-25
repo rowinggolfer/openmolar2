@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import inspect
 from PyQt4 import QtGui
 
 class _PluginError(Exception):
@@ -85,6 +86,10 @@ Several key methods should be overwritten.
 
         self._TYPE = plugin_type
 
+    @property
+    def file(self):
+        return inspect.getfile(self.__class__)
+
     def setup_plugin(self):
         '''
         by default, this does nothing, if overwritten, this is your chance
@@ -123,6 +128,7 @@ Several key methods should be overwritten.
         message += _("Description") + u"\t : %s<hr />"% self.description
 
         message += "%s<hr />"% self.long_description
+        message += _("Main File") + u"\t :<br />%s<hr />"% self.file
         message += _("Website") + u"\t : %s"% self.website
         QtGui.QMessageBox.information(parent,
             _("About") + " " + self.name, message)

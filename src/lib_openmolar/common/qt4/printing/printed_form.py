@@ -102,5 +102,9 @@ class PrintedForm(object):
 if __name__ == "__main__":
     app = QtGui.QApplication([])
     form = PrintedForm()
+    form.testing_mode = True
+    
+    form.rects = {"test":QtCore.QRect(600,1000,100,10)}
+    
     form.controlled_print()
     
