@@ -82,7 +82,8 @@ class ClientConnection(PostgresDatabase):
         search values is a dictionary)
         '''
 
-        query = '''SELECT  patients.ix, title, last_name, first_name,
+        query = '''SELECT DISTINCT ON (patients.ix) 
+        patients.ix, title, last_name, first_name,
         preferred_name, dob, addr1, addr2, postal_cd, number
         from (patients left outer join
         (addresses join address_link on addresses.ix = address_link.address_id)
