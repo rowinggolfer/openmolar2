@@ -1,3 +1,17 @@
+openmolar-namespace (2.0.63-1~__DIST__0) __DIST__; urgency=low
+
+  * new build environment
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 06 Jun 2012 22:50:41 +0100
+
+
+openmolar-namespace (2.0.63-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 24 Apr 2012 23:43:16 +0100
+
+
 openmolar-namespace (2.0.62-0~__DIST__0) __DIST__; urgency=low
 
   * new upstream release

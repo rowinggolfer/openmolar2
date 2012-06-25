@@ -114,7 +114,7 @@ def write_manifest_in(files=[]):
 
 def get_version(name):
     '''
-    returns a string with in the format X.Y.Z~hgN
+    returns a string with in the format X.Y.Z+hg03d
     '''
     major_version = config.get(name, "version")
     try:

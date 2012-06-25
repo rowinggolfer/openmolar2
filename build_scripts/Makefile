@@ -25,6 +25,7 @@ TARGETS
    all_tarballs
    all_deb_srcs
    all_deb_binaries
+   rpm (EXPERIMENTAL!)
    
 EXAMPLES are available.
 	make examples
@@ -81,8 +82,21 @@ ifeq ($(DEBHELPER), )
 	DEBHELPER=dh_python2
 endif
 
+#in case I forget!!
+ifeq ($(DIST), lucid)
+	DEBHELPER=py_support
+endif
+
 ifeq ($(NEW_CHANGELOG), )
 	NEW_CHANGELOG=true
+endif
+
+ifeq ($(SUFFIXES), )
+	SUFFIXES = namespace common client admin server
+endif
+
+ifeq ($(DEBDISTS), )
+	DEBDISTS = unstable testing stable precise lucid
 endif
 
 
@@ -93,7 +107,6 @@ BUILD_SCRIPTS_DIR = $(HEAD)/build_scripts/
 BUILDS_DIR=$(HEAD)builds/$(SUFFIX)/
 
 DIST_DIR=$(HEAD)dist/
-DEB_CONF_DIR=$(HEAD)build_scripts/$(SUFFIX)/debian_packaging/$(DEBHELPER)/debian/
 
 VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
 
@@ -102,12 +115,24 @@ TARBALL_DIR=$(HEAD)builds/$(SUFFIX)/tarballs/
 
 TMP_DIR=$(HEAD)tmp/
 
-DEB_SRCBUILDS_DIR=$(BUILDS_DIR)deb_srcs/$(DIST)/
+###################  Debian Packaging Stuff ####################################
+#                                                                              #
+DEB_CONF_DIR=$(HEAD)build_scripts/$(SUFFIX)/debian_packaging/$(DEBHELPER)/debian/
 DEB_BUILDS_DIR=$(BUILDS_DIR)debs/$(DIST)/
 
+DEBHELPERS= py_support dh_python2
+#                                                                              #
+##################  Debian packaging ends  #####################################
 
-#this is where pbuilder puts stuff
-CACHE=/var/cache/pbuilder/$(DIST)-amd64/result/
+
+##################  RPM packaging stuff    #####################################
+#                                                                              #
+SPEC_FILE=$(HEAD)build_scripts/$(SUFFIX)/rpm_packaging/$(PACKAGE).spec
+RPM_FACTORY=$(HOME)/rpmbuild/
+RPM_BUILDS_DIR=$(BUILDS_DIR)rpms/$(DIST)/
+#                                                                              #
+##################  RPM packaging ends     #####################################
+
 
 .phony:
 	make help
@@ -133,44 +158,34 @@ tarball:
 
 	@if [ -e "$(TARBALL_DIR)$(TARBALL)" ]; then echo "SUCCESS!"; fi
 	
-all_tarballs:
-	make SUFFIX=namespace tarball
-	make SUFFIX=common tarball
-	make SUFFIX=client tarball
-	make SUFFIX=admin tarball
-	make SUFFIX=server tarball
+tarballs:
+	$(foreach suffix,$(SUFFIXES), \
+		make SUFFIX=$(suffix) tarball \
+	;)
 	
-all_deb_srcs:
-	make SUFFIX=namespace deb_src
-	make SUFFIX=common deb_src
-	make SUFFIX=client deb_src
-	make SUFFIX=admin deb_src
-	make SUFFIX=server deb_src
-
-all_deb_binaries:
-	make SUFFIX=namespace deb_binary
-	make SUFFIX=common deb_binary
-	make SUFFIX=client deb_binary
-	make SUFFIX=admin deb_binary
-	make SUFFIX=server deb_binary
-		
 sign_tarball:
 	cd $(TARBALL_DIR) ;\
 	gpg --armor --sign --detach-sig -u rowinggolfer@googlemail.com $(TARBALL) ;\
 	md5sum $(TARBALL) | sed "s/ .*//" > $(PACKAGE)-$(VERSION)_md5.txt 	
-	
-deb_src:
+
+changelog:
+	# call my changelog gui
+	@echo $(BUILD_SCRIPTS_DIR)deb_maker.py -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) 
+	$(BUILD_SCRIPTS_DIR)deb_maker.py -p$(PACKAGE) -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) -popenmolar-$(SUFFIX)
+
+deb:
 	@if [ ! -e "$(TARBALL_DIR)$(TARBALL)" ]; then make tarball; fi
 	
 	make clean_tmp
 
-	@echo "target distro = $(DIST)"
+	@echo "Making debian packages target distro = $(DIST)"
 	
-	# call my changelog gui	
-	@if [ "$(NEW_CHANGELOG)" = 'true' ]; then \
-		$(BUILD_SCRIPTS_DIR)deb_maker.py -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) -popenmolar-$(SUFFIX); \
-	fi
+	# call my changelog gui if necessary
+	@if [ "$(NEW_CHANGELOG)" = 'true' ]; then make changelog; fi
+	
 	cp -av $(TARBALL_DIR)$(TARBALL) $(TMP_DIR)
+	
+	mkdir -p $(DEB_BUILDS_DIR)
 	
 	cd $(TMP_DIR) ;\
 	tar -zxvf $(TARBALL); \
@@ -180,39 +195,78 @@ deb_src:
 	cp -av $(DEB_CONF_DIR) . ;\
 	echo "modding changelog" ;\
 	sed -i s/__DIST__/$(DIST)/g debian/changelog ;\
-	dpkg-buildpackage -us -uc -S -kF230408E
+	sudo pdebuild --buildresult $(DEB_BUILDS_DIR) --pbuilderroot "sudo DIST=$(DIST)"
 	
-	mkdir -p $(DEB_SRCBUILDS_DIR)
-	mv $(TMP_DIR)`$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR)`* $(DEB_SRCBUILDS_DIR)
+	#mv $(TMP_DIR)`$(BUILD_SCRIPTS_DIR)version_name.py $(DEB_CONF_DIR)`* $(DEB_SRCBUILDS_DIR)
 	
-deb_binary:
-	#pbuilder puts stuff in locations like this
-	#/var/cache/pbuilder/testing-amd64/result/openmolar-namespace_2.0.5~2_all.deb
-	
-	cd $(DEB_SRCBUILDS_DIR) ; \
-	sudo DIST=$(DIST) pbuilder build "`ls -r| grep .dsc -m1`" -kF230408E ;\
-	mkdir -p $(DEB_BUILDS_DIR) ;\
-	sudo mv $(CACHE)"`ls -r $(CACHE) | grep _all.deb -m1`" $(DEB_BUILDS_DIR)
 
-everything:
-	make all_tarballs
-	make all_deb_srcs DIST=lucid DEBHELPER=py_support
-	make all_deb_srcs DIST=squeeze 
-	make all_deb_srcs DIST=wheezy NEW_CHANGELOG=false
-	make all_deb_srcs DIST=unstable NEW_CHANGELOG=false
-	make all_deb_srcs DIST=oneiric NEW_CHANGELOG=false 
-	make all_deb_srcs DIST=precise NEW_CHANGELOG=false
-	make all_deb_binaries DIST=lucid
-	make all_deb_binaries DIST=squeeze
-	make all_deb_binaries DIST=testing
-	make all_deb_binaries DIST=unstable
-	make all_deb_binaries DIST=oneiric
-	make all_deb_binaries DIST=precise
-		
+debs:
+	@echo "making all debian based packages.. first we need to update the changelogs for the 2 build systems"
+	
+	#make changelog DEBHELPER=<dh_python2|py_support>
+	$(foreach suffix,$(SUFFIXES), \
+		$(foreach var,$(DEBHELPERS), make changelog SUFFIX=$(suffix) DEBHELPER=$(var);) \
+	)
+	
+	#make deb DIST=<unstable|testing|stable|precise|lucid> ARCH=<i386|amd64> NEW_CHANGELOG=False 
+	$(foreach suffix,$(SUFFIXES), \
+		$(foreach dist,$(DEBDISTS), \
+			make deb SUFFIX=$(suffix) DIST=$(dist) NEW_CHANGELOG=False;) \
+	)
+	
+	make debsigns
+	
+debsign:
+	@echo "signing the debian packages"
+	cd $(DEB_BUILDS_DIR) ;\
+	debsign *.changes -kF230408E
+	
+debsigns:
+	#make debsign DIST=<unstable|testing|stable|precise|lucid> 
+	
+	$(foreach suffix,$(SUFFIXES), \
+		$(foreach dist,$(DEBDISTS), \
+			make debsign SUFFIX=$(suffix) DIST=$(dist) ;) \
+		) 
+
+pushdebs:
+	@echo "updating the local repo"
+	$(foreach suffix,$(SUFFIXES), \
+		$(foreach dist,$(DEBDISTS), \
+			cd ~/www/repos/apt/debian ;\
+			reprepro include $(dist) $(HEAD)builds/$(suffix)/debs/$(dist)/*.changes ; \
+		) \
+	 )
+	
+	#reprepro includedeb squeeze $(RELEASE_DIR)namespace/debs/*.deb ;\
+	#reprepro includedeb squeeze $(RELEASE_DIR)client/debs/*.deb ;\
+	#reprepro includedeb squeeze $(RELEASE_DIR)common/debs/*.deb ;\
+	#reprepro includedeb squeeze $(RELEASE_DIR)admin/debs/*.deb ;\
+	#reprepro includedeb squeeze $(RELEASE_DIR)server/debs/*.deb
+
+rpm:
+	@if [ ! -e "$(TARBALL_DIR)$(TARBALL)" ]; then make tarball; fi
+	
+	@echo "target distro = $(DIST)"
+	rpmdev-setuptree
+	
+	#cp -av $(SPEC_FILE) $(RPM_FACTORY)
+	cp -av $(TARBALL_DIR)$(TARBALL) $(RPM_FACTORY)SOURCES/
+	cp -av $(SPEC_FILE) $(RPM_FACTORY)SPECS/
+	# make the rpm here!
+	rpmbuild -ba $(SPEC_FILE)
+	
+	mkdir -p $(RPM_BUILDS_DIR)
+	touch $(RPM_BUILDS_DIR)rpm_result
+	
+	
+	
 test:
 	@echo "chosen package $(PACKAGE)"
 	@echo "targetting distro $(DIST)"
 	@if [ "$(NEW_CHANGELOG)" = 'true' ]; then \
-		echo "make changelog"; \
+		echo "will prompt for new changelog"; \
 	fi
+	@echo "debconfdir = $(DEB_CONF_DIR)"
+	@echo "Dist = $(DIST)"
 	

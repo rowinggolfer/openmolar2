@@ -1,5 +1,7 @@
 #! /bin/sh
 
+#DEBHELPER#
+
 update-python-modules  openmolar-server.public
 update-rc.d openmolar defaults
 

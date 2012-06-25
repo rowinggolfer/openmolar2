@@ -10,13 +10,20 @@ Consequently, it should come as no surprise that installation on this platform
 is well supported (and hopefully painless!).
 
 I have a repos for debian ::
-	deb http://openmolar.com/debian squeeze main
-	deb http://openmolar.com/debian testing main
-	deb http://openmolar.com/debian unstable main
+
+	deb http://openmolar.com/debian stable main
+	deb-src http://openmolar.com/debian stable main
 	
+	deb http://openmolar.com/debian testing main
+	deb-src http://openmolar.com/debian testing main
+	 
+	deb http://openmolar.com/debian unstable main
+	deb-src http://openmolar.com/debian unstable main
+	 
 add the flavour you require to your sources.list. (codename aliases should be supported eg. squeeze, wheezy etc..)
 
 The repo is signed by my key, which is available ::
+
 	http://www.openmolar.com/rowinggolfer.gpg.key
 	
 
