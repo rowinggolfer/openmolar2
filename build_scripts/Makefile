@@ -5,7 +5,7 @@ USAGE
    make [options] target
 
 OPTIONS
-   SUFFIX        (the second part of the package name client, admin etc...)    
+   OMSUFFIX        (the second part of the package name client, admin etc...)    
        default=namespace
        allowed values namespace, client, common, admin, server
    DIST          (the target distribution - eg. unstable, squeeze, lucid etc.) 
@@ -20,11 +20,10 @@ OPTIONS
 
 TARGETS
    tarball 
-   deb_src
-   deb_binary
-   all_tarballs
-   all_deb_srcs
-   all_deb_binaries
+   tarballs
+   deb   
+   debs
+   pushdebs
    rpm (EXPERIMENTAL!)
    
 EXAMPLES are available.
@@ -35,43 +34,32 @@ define EXAMPLES
 EXAMPLES
 make tarball
 	create a tarball for the default package (openmolar-namespace)   
-make tarball SUFFIX=client
+make tarball OMSUFFIX=client
 	create a tarball for openmolar-client   
 make all_tarballs
 	create tarballs for ALL suffixes
 
-make deb_src DIST=squeeze SUFFIX=client
-	create a debian source package for openmolar-client 
-make deb_src DIST=lucid SUFFIX=admin DEBHELPER=py_support
+make deb DIST=squeeze OMSUFFIX=client
+	create a debian package for openmolar-client 
+make deb DIST=lucid OMSUFFIX=admin DEBHELPER=py_support
 	create a debian source package for ubuntu lucid (10.04)
 	NOTE - lucid predates dh_python2, so debs MUST specify py_support instead.
-make deb_binary DIST=precise SUFFIX=server 
+make deb DIST=precise OMSUFFIX=server 
 	create a debian binary package for ubuntu precise (12.04).
-
+make debs
+	do everything
 
 and here's the whole shebang (as of April 24 2012) - should be a loop really
 
 make all_tarballs
-make all_deb_srcs DIST=lucid DEBHELPER=py_support
-make all_deb_srcs DIST=squeeze 
-make all_deb_srcs DIST=wheezy NEW_CHANGELOG=false
-make all_deb_srcs DIST=unstable NEW_CHANGELOG=false
-make all_deb_srcs DIST=oneiric NEW_CHANGELOG=false
-make all_deb_srcs DIST=precise NEW_CHANGELOG=false
-make all_deb_binaries DIST=lucid
-make all_deb_binaries DIST=squeeze
-make all_deb_binaries DIST=wheezy
-make all_deb_binaries DIST=unstable
-make all_deb_binaries DIST=oneiric
-make all_deb_binaries DIST=precise
-
+make debs
 endef
 	
 export USEAGE
 export EXAMPLES
 
-ifeq ($(SUFFIX), )
-	SUFFIX=namespace
+ifeq ($(OMSUFFIX), )
+	OMSUFFIX=namespace
 endif
 
 ifeq ($(DIST), )
@@ -91,8 +79,8 @@ ifeq ($(NEW_CHANGELOG), )
 	NEW_CHANGELOG=true
 endif
 
-ifeq ($(SUFFIXES), )
-	SUFFIXES = namespace common client admin server
+ifeq ($(OMSUFFIXES), )
+	OMSUFFIXES = namespace common client admin server
 endif
 
 ifeq ($(DEBDISTS), )
@@ -100,34 +88,36 @@ ifeq ($(DEBDISTS), )
 endif
 
 
-PACKAGE=openmolar-$(SUFFIX)
+PACKAGE=openmolar-$(OMSUFFIX)
 
 HEAD=$(HOME)/openmolar/hg_openmolar/
 BUILD_SCRIPTS_DIR = $(HEAD)/build_scripts/
-BUILDS_DIR=$(HEAD)builds/$(SUFFIX)/
+BUILDS_DIR=$(HEAD)builds/$(OMSUFFIX)/
 
 DIST_DIR=$(HEAD)dist/
 
-VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(SUFFIX)`
+VERSION=`$(BUILD_SCRIPTS_DIR)/get_version.py $(OMSUFFIX)`
 
 TARBALL = $(PACKAGE)-$(VERSION).tar.gz
-TARBALL_DIR=$(HEAD)builds/$(SUFFIX)/tarballs/
+TARBALL_DIR=$(HEAD)builds/$(OMSUFFIX)/tarballs/
 
 TMP_DIR=$(HEAD)tmp/
 
 ###################  Debian Packaging Stuff ####################################
 #                                                                              #
-DEB_CONF_DIR=$(HEAD)build_scripts/$(SUFFIX)/debian_packaging/$(DEBHELPER)/debian/
+DEB_CONF_DIR=$(HEAD)build_scripts/$(OMSUFFIX)/debian_packaging/$(DEBHELPER)/debian/
 DEB_BUILDS_DIR=$(BUILDS_DIR)debs/$(DIST)/
 
 DEBHELPERS= py_support dh_python2
+CHANGE_FILES=`ls -t $(DEB_BUILDS_DIR) | grep changes | head -n1`
+CHANGES_FILE = $(CHANGE_FILES)
 #                                                                              #
 ##################  Debian packaging ends  #####################################
 
 
 ##################  RPM packaging stuff    #####################################
 #                                                                              #
-SPEC_FILE=$(HEAD)build_scripts/$(SUFFIX)/rpm_packaging/$(PACKAGE).spec
+SPEC_FILE=$(HEAD)build_scripts/$(OMSUFFIX)/rpm_packaging/$(PACKAGE).spec
 RPM_FACTORY=$(HOME)/rpmbuild/
 RPM_BUILDS_DIR=$(BUILDS_DIR)rpms/$(DIST)/
 #                                                                              #
@@ -137,6 +127,9 @@ RPM_BUILDS_DIR=$(BUILDS_DIR)rpms/$(DIST)/
 .phony:
 	make help
 
+tes1t:
+	echo $(CHANGES_FILE)
+	
 help:
 	@echo "$$USEAGE"
 
@@ -148,10 +141,10 @@ clean_tmp:
 	rm -rf $(TMP_DIR)/*
 
 tarball:
-	echo "making $(SUFFIX) tarball"
+	echo "making $(OMSUFFIX) tarball"
 	mkdir -p $(TARBALL_DIR)
 	cd $(HEAD) ;\
-		python configure.py --$(SUFFIX) ;\
+		python configure.py --$(OMSUFFIX) ;\
 		python setup.py sdist ;\
 	cp -av $(DIST_DIR)$(TARBALL) $(TARBALL_DIR);
 	@echo "tarball is located $(TARBALL_DIR)$(TARBALL)"
@@ -159,9 +152,9 @@ tarball:
 	@if [ -e "$(TARBALL_DIR)$(TARBALL)" ]; then echo "SUCCESS!"; fi
 	
 tarballs:
-	$(foreach suffix,$(SUFFIXES), \
-		make SUFFIX=$(suffix) tarball \
-	;)
+	$(foreach suffix,$(OMSUFFIXES), \
+		make OMSUFFIX=$(suffix) tarball ;\
+	)
 	
 sign_tarball:
 	cd $(TARBALL_DIR) ;\
@@ -171,7 +164,7 @@ sign_tarball:
 changelog:
 	# call my changelog gui
 	@echo $(BUILD_SCRIPTS_DIR)deb_maker.py -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) 
-	$(BUILD_SCRIPTS_DIR)deb_maker.py -p$(PACKAGE) -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) -popenmolar-$(SUFFIX)
+	$(BUILD_SCRIPTS_DIR)deb_maker.py -p$(PACKAGE) -s$(TARBALL_DIR) -d$(DEB_CONF_DIR) -popenmolar-$(OMSUFFIX)
 
 deb:
 	@if [ ! -e "$(TARBALL_DIR)$(TARBALL)" ]; then make tarball; fi
@@ -204,14 +197,14 @@ debs:
 	@echo "making all debian based packages.. first we need to update the changelogs for the 2 build systems"
 	
 	#make changelog DEBHELPER=<dh_python2|py_support>
-	$(foreach suffix,$(SUFFIXES), \
-		$(foreach var,$(DEBHELPERS), make changelog SUFFIX=$(suffix) DEBHELPER=$(var);) \
+	$(foreach suffix,$(OMSUFFIXES), \
+		$(foreach var,$(DEBHELPERS), make changelog OMSUFFIX=$(suffix) DEBHELPER=$(var);) \
 	)
 	
 	#make deb DIST=<unstable|testing|stable|precise|lucid> ARCH=<i386|amd64> NEW_CHANGELOG=False 
-	$(foreach suffix,$(SUFFIXES), \
+	$(foreach suffix,$(OMSUFFIXES), \
 		$(foreach dist,$(DEBDISTS), \
-			make deb SUFFIX=$(suffix) DIST=$(dist) NEW_CHANGELOG=False;) \
+			make deb OMSUFFIX=$(suffix) DIST=$(dist) NEW_CHANGELOG=False;) \
 	)
 	
 	make debsigns
@@ -224,18 +217,22 @@ debsign:
 debsigns:
 	#make debsign DIST=<unstable|testing|stable|precise|lucid> 
 	
-	$(foreach suffix,$(SUFFIXES), \
+	$(foreach suffix,$(OMSUFFIXES), \
 		$(foreach dist,$(DEBDISTS), \
-			make debsign SUFFIX=$(suffix) DIST=$(dist) ;) \
+			make debsign OMSUFFIX=$(suffix) DIST=$(dist) ;) \
 		) 
+
+pushdeb:
+	cd ~/www/repos/apt/debian ;\
+	reprepro include $(DIST) $(HEAD)builds/$(OMSUFFIX)/debs/$(DIST)/$(CHANGES_FILE) ; \
+	
 
 pushdebs:
 	@echo "updating the local repo"
-	$(foreach suffix,$(SUFFIXES), \
+	$(foreach suffix,$(OMSUFFIXES), \
 		$(foreach dist,$(DEBDISTS), \
-			cd ~/www/repos/apt/debian ;\
-			reprepro include $(dist) $(HEAD)builds/$(suffix)/debs/$(dist)/*.changes ; \
-		) \
+			make OMSUFFIX=$(suffix) DIST=$(dist) pushdeb; \
+			) \
 	 )
 	
 	#reprepro includedeb squeeze $(RELEASE_DIR)namespace/debs/*.deb ;\

@@ -1,3 +1,17 @@
+openmolar-admin (2.0.64+hg025-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 02:11:51 +0100
+
+
+openmolar-admin (2.0.63+hg025-2~__DIST__0) __DIST__; urgency=low
+
+  * test build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 00:03:35 +0100
+
+
 openmolar-admin (2.0.63+hg025-1~__DIST__0) __DIST__; urgency=low
 
   * new pbuilder environments

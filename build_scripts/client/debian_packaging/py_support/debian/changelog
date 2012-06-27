@@ -1,3 +1,17 @@
+openmolar-client (2.0.64+hg018-0~__DIST__0) __DIST__; urgency=low
+
+ * new upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 02:11:32 +0100
+
+
+openmolar-client (2.0.63+hg018-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream code (hg 18)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 00:02:58 +0100
+
+
 openmolar-client (2.0.63+hg017-1~__DIST__0) __DIST__; urgency=low
 
   * new pbuilder environments

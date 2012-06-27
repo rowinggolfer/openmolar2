@@ -1,3 +1,16 @@
+openmolar-common (2.0.64+hg029-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream release
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 02:11:28 +0100
+
+
+openmolar-common (2.0.63+hg029-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream code (hg 29)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 26 Jun 2012 00:02:52 +0100
+
+
 openmolar-common (2.0.63+hg028-1~__DIST__0) __DIST__; urgency=low
 
   * new pbuilder environment
