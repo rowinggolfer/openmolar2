@@ -31,7 +31,7 @@ class DiaryInterface(QtGui.QWidget):
     A composite widget containing all elements for viewing a patient record
     '''
     def __init__(self, parent = None):
-        super(DiaryInterface, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
 
         self.diary_control = DiaryControl()
         self.diary_widget = DiaryWidget()
@@ -47,18 +47,12 @@ class DiaryInterface(QtGui.QWidget):
         layout.addWidget(self.diary_widget)
         self.connect_signals()
 
-
     def sizeHint(self):
         return QtCore.QSize(500, 400)
 
     def connect_signals(self):
-
-        control = self.diary_control
-        diary = self.diary_widget
-
-        self.connect(control, QtCore.SIGNAL("date changed"), diary.set_date)
-
-        control.combo_box.currentIndexChanged.connect(diary.setViewStyle)
+        self.diary_control.date_changed.connect(self.diary_widget.set_date)
+        self.diary_control.view_changed.connect(self.diary_widget.setViewStyle)
 
     def refresh(self):
         '''
@@ -77,22 +71,17 @@ class DiaryInterface(QtGui.QWidget):
 
 if __name__ == "__main__":
 
-
-
-
     app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(500,300)
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(500,300)
 
     from lib_openmolar.client.connect import DemoClientConnection
     cc = DemoClientConnection()
     cc.connect()
 
-    di = DiaryInterface(dl)
+    di = DiaryInterface(mw)
     di.refresh()
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.setMargin(0)
-    layout.addWidget(di)
-
-    dl.exec_()
+    mw.setCentralWidget(di)
+    mw.show()
+    app.exec_()

@@ -25,10 +25,24 @@ from PyQt4 import QtCore, QtGui
 
 class DiaryControl(QtGui.QWidget):
     '''
-    A composite widget containing all elements for viewing a patient record
+    A widget to allow user choice of parameters to show what information
+    is displayed on the diary (date, clinician etc...)
     '''
+
+    date_changed = QtCore.pyqtSignal(object)
+    '''
+    signal indicating that the date has changed.
+    supplies a QDate
+    '''
+
+    view_changed = QtCore.pyqtSignal(object)
+    '''
+    signal indicating that the user want to view a different style
+    eg day, week, fortnight etc...
+    '''
+
     def __init__(self, parent = None):
-        super(DiaryControl, self).__init__(parent)
+        QtGui.QWidget.__init__(self, parent)
 
         self.calendar = QtGui.QCalendarWidget()
         self.calendar.setFirstDayOfWeek(QtCore.Qt.Monday)
@@ -90,6 +104,7 @@ class DiaryControl(QtGui.QWidget):
         self.setMaximumWidth(self.calendar.width()+ padding*2)
 
         self.calendar.selectionChanged.connect(self.date_change)
+        self.combo_box.currentIndexChanged.connect(self.view_change)
 
     def set_limits(self, start, end):
         self.calendar.setMinimumDate(start)
@@ -136,11 +151,12 @@ class DiaryControl(QtGui.QWidget):
 
     def date_change(self):
         date = self.calendar.selectedDate()
-        self.emit(QtCore.SIGNAL("date changed"), date)
+        self.date_changed.emit(date)
+
+    def view_change(self, i):
+        self.view_changed.emit(i)
 
 if __name__ == "__main__":
-
-
 
     from lib_openmolar.client.connect import DemoClientConnection
     cc = DemoClientConnection()

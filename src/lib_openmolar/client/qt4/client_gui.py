@@ -107,6 +107,7 @@ class ClientMainWindow(PostgresMainWindow):
         '''
         self.session_widgets = [self.central_widget]
         self.central_widget.set_session(session)
+        self.diary_interface.refresh()
 
     @property
     def is_dirty(self):
