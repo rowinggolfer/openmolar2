@@ -24,8 +24,8 @@ import logging
 import subprocess
 import sys
 import psycopg2
-from lib_openmolar.server.functions.password_generator import new_password
 
+from lib_openmolar.server.functions.password_generator import new_password
 from lib_openmolar.server.functions.om_server_config import OMServerConfig
 
 def log_exception(func):
@@ -34,7 +34,7 @@ def log_exception(func):
             return func(*args, **kwargs)
         except Exception:
             log = logging.getLogger("openmolar-server")
-            log.debug("unhandled exception")
+            log.exception("unhandled exception")
             return ""
     return db_func
 
@@ -124,39 +124,6 @@ class DBFunctions(object):
             log.exception("Serious Error")
             return "NONE"
         return databases
-
-    @log_exception
-    def refresh_saved_schema(self):
-        '''
-        gets the schema from the admin app.
-        only works if the admin app is installed on the server machine.
-        note - this can also be done via the admin gui on a remote machine
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("polling admin application for latest schema")
-        try:
-            from lib_openmolar.admin.connect import DemoAdminConnection
-            sql =  AdminConnection().virgin_sql
-            self.save_schema(sql)
-        except ImportError as exc:
-            log.warning("admin app not installed on this machine")
-            return False
-        return True
-
-    @log_exception
-    def save_schema(self, sql):
-        '''
-        the admin app is responsible for the schema in use.
-        here, it has passed the schema in text form to the server, so that the
-        server can lay out new databases without the admin app.
-        '''
-        filename = "/usr/share/blank_schema.sql"
-        log = logging.getLogger("openmolar_server")
-        log.info("saving schema to %s"% filename)
-        f = open(filename, "w")
-        f.write(sql)
-        f.close()
-        return True
 
     @log_exception
     def install_fuzzymatch(self, dbname):
