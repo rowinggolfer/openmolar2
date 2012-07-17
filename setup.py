@@ -96,15 +96,6 @@ if ALL_PACKAGES_AVAILABLE:
         if include:
             logging.info ("package - %s"% name)
 
-    if INSTALL_SERVER:
-        from lib_openmolar.admin.db_tools.schema_manager import SchemaManager
-
-        schema_path = "misc/server/blank_schema.sql"
-        s_manager = SchemaManager()
-        if not s_manager.match(schema_path):
-            s_manager.write(schema_path)
-            cleanup_files.append(schema_path)
-
 def write_manifest_in(files=[]):
     f = open("MANIFEST.in", "w")
     f.write("include setup_part.cnf\n")
