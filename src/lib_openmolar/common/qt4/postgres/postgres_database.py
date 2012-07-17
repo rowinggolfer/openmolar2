@@ -68,24 +68,23 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         '''
         provides/removes a WaitCursor during connection and parsing functions
         '''
-        app_instance = QtGui.QApplication.instance()
-        if not app_instance: # could be the case if non-gui connection
+        try:
+            if waiting:
+                QtGui.QApplication.instance().setOverrideCursor(QtCore.Qt.WaitCursor)
+            else:
+                QtGui.QApplication.instance().restoreOverrideCursor()
+        except AttributeError: #no gui
             pass
-        elif waiting:
-            app_instance.setOverrideCursor(QtCore.Qt.WaitCursor)
-        else:
-            app_instance.restoreOverrideCursor()
 
     def connect(self, *args):
         '''
         open the connection, raising an error if fails or timeouts
         optional arguments of (user, password)
         '''
-        logging.debug("connecting")
+        logging.debug("PostgresDatabase connecting")
         self._wait_cursor()
         connection_in_progress = True
         def time_out():
-            logging.debug("time out")
             if connection_in_progress:
                 self._wait_cursor(False)
                 if not self.isOpen():
@@ -93,9 +92,9 @@ class PostgresDatabase(QtSql.QSqlDatabase):
                     self.close()
                     raise ConnectionError("Time out Error %s"% message)
 
-        logging.debug("setting timeout to 10 seconds")
-        QtCore.QTimer.singleShot(1000, time_out) ## 10 seconds.
-        logging.debug("timer set")
+        if QtCore.QCoreApplication.instance():
+            QtCore.QTimer.singleShot(1000, time_out) ## 10 seconds.
+            logging.info("timeout set to 10 seconds")
         if args:
             user = args[0]
             password = args[1]
@@ -105,7 +104,6 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         else:
             logging.debug("connecting with default params")
             connected = self.open()
-        logging.debug("connected??")
         connection_in_progress = False
         self._wait_cursor(False)
         if not connected:
@@ -122,7 +120,7 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         the query is simple
         NOTIFY new_appointment_made
         '''
-        logging.info("classes inheriting from PostgresDatabase should "
+        logging.warning("classes inheriting from PostgresDatabase should "
         "re-implement function subscribeToNotifications")
         #self.driver().subscribeToNotification("new_appointment_made")
 
