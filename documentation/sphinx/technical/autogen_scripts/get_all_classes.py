@@ -209,7 +209,7 @@ def main():
         for klass in get_class_names(mod):
             out_file = os.path.join(KLASS_SUBDIR, klass+".rst")
             if os.path.exists(out_file):
-                if not klass in ("DemoGenerator","SchemaGenerator"):
+                if not klass in ("DemoGenerator"):
                     warnings += 1
                     print "WARNING %s - file exists"% out_file
                 continue

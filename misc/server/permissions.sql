@@ -7,12 +7,10 @@ GRANT INSERT, UPDATE, SELECT ON avatars                   TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON clerical_memos            TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON clinical_memos            TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON contracted_practitioners  TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON diary_appointments        TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON diary_calendar            TO ADMIN_GROUP;
+GRANT INSERT, UPDATE, SELECT ON calendar                  TO ADMIN_GROUP;
+GRANT INSERT, UPDATE, SELECT ON diaries                   TO ADMIN_GROUP;
+GRANT INSERT, UPDATE, SELECT ON diary_entries             TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON diary_patients            TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON diary_sessions            TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON diary_settings            TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON diary_slots               TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON fees                      TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON invoice_status            TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON invoices                  TO ADMIN_GROUP;
@@ -46,18 +44,15 @@ GRANT INSERT, UPDATE, SELECT ON users                     TO ADMIN_GROUP;
 GRANT SELECT ON procedure_codes           TO ADMIN_GROUP;
 
 
-
-
 GRANT USAGE ON address_link_ix_seq             TO ADMIN_GROUP;
 GRANT USAGE ON addresses_ix_seq                TO ADMIN_GROUP;
 GRANT USAGE ON avatars_ix_seq                  TO ADMIN_GROUP;
 GRANT USAGE ON clerical_memos_ix_seq           TO ADMIN_GROUP;
 GRANT USAGE ON clinical_memos_ix_seq           TO ADMIN_GROUP;
 GRANT USAGE ON contracted_practitioners_ix_seq TO ADMIN_GROUP;
-GRANT USAGE ON diary_appointments_ix_seq       TO ADMIN_GROUP;
+GRANT USAGE ON diaries_ix_seq                  TO ADMIN_GROUP;
+GRANT USAGE ON diary_entries_ix_seq            TO ADMIN_GROUP;
 GRANT USAGE ON diary_patients_ix_seq           TO ADMIN_GROUP;
-GRANT USAGE ON diary_sessions_ix_seq           TO ADMIN_GROUP;
-GRANT USAGE ON diary_settings_ix_seq           TO ADMIN_GROUP;
 GRANT USAGE ON fees_ix_seq                     TO ADMIN_GROUP;
 GRANT USAGE ON invoice_status_ix_seq           TO ADMIN_GROUP;
 GRANT USAGE ON invoices_ix_seq                 TO ADMIN_GROUP;

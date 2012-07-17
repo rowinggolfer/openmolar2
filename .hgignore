@@ -16,7 +16,6 @@ build/
 MANIFEST.in
 setup.cnf
 setup_part.cnf
-blank_schema.sql
 src/version.py
 releases/*
 tmp/*
