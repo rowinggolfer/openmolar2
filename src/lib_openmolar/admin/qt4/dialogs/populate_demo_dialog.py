@@ -38,10 +38,7 @@ class _AdvancedPanel(QtGui.QWidget):
         f_layout = QtGui.QVBoxLayout(frame)
         self.module_dict = {}
         for module in modules:
-            #instanstiate a class to get some information about the table
-            sg = module.SchemaGenerator()
-            cb = QtGui.QCheckBox(sg.tablename)
-            cb.setToolTip(sg.comment)
+            cb = QtGui.QCheckBox(module.TABLENAME)
             cb.setChecked(True)
             f_layout.addWidget(cb)
             self.module_dict[module] = cb

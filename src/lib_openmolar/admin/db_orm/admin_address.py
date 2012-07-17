@@ -26,31 +26,9 @@ This module provides the Address Class
 
 from random import randint
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "addresses"
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-addr1 VARCHAR(60) NOT NULL,
-addr2 VARCHAR(60) DEFAULT NULL,
-addr3 VARCHAR(60) DEFAULT NULL,
-city VARCHAR(60) NOT NULL,
-county VARCHAR(30) DEFAULT NULL,
-country VARCHAR(30) DEFAULT NULL,
-postal_cd VARCHAR(30) NOT NULL,
-modified_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-CONSTRAINT pk_address PRIMARY KEY (ix),
-CONSTRAINT ck_addr1 CHECK (addr1 = upper(addr1)),
-CONSTRAINT ck_addr2 CHECK (addr2 = upper(addr2)),
-CONSTRAINT ck_addr3 CHECK (addr3 = upper(addr3)),
-CONSTRAINT ck_city CHECK (city = upper(city)),
-CONSTRAINT ck_county CHECK (county = upper(county)),
-CONSTRAINT ck_country CHECK (country = upper(country)),
-CONSTRAINT ck_postal_cd CHECK (postal_cd = upper(postal_cd))
-'''
 
 LINE1s = (u"18 Main Street", u"22 Union Street", u"38, The Hope", u"Asgard",
 u"The Gables", u"1058 Rue de la Soleil", u"23 Queen Street", u"The Cottage",
@@ -78,17 +56,6 @@ def random_addy():
         chr(randint(65, 90)), chr(randint(65, 90)))
 
     return (addr1.upper(), addr2.upper(), city.upper(), pcde.upper())
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, "addresses", SCHEMA)
-        self.comment = _(
-'''storage for ALL addresses in the database,
-for patients, clinicians, suppliers etc...''')
 
 
 class DemoGenerator(object):

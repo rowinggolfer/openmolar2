@@ -40,10 +40,8 @@ class DemoProgressDialog(BaseDialog):
         for module in connection.admin_modules:
             if module in ommisions:
                 continue
-            #instanstiate a class to get some information about the table
-            sg = module.SchemaGenerator()
             pw = ProgressWidget(self)
-            pw.setText(sg.tablename)
+            pw.setText(module.TABLENAME)
             layout.addWidget(pw)
             self.module_dict[module] = pw
 

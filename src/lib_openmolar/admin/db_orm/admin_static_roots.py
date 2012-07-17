@@ -21,36 +21,17 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for static_roots table
+Provides a DemoGenerator for static_roots table
 '''
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
-
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-tooth SMALLINT NOT NULL,
-description root_description_type,
-comment VARCHAR(80),
-checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_static_roots PRIMARY KEY (ix)
-'''
 
 TABLENAME = "static_roots"
 
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-
 class DemoGenerator(object):
-    def __init__(self, database=None):
+    def __init__(self, database):
         q_query= QtSql.QSqlQuery(
             "select min(ix), max(ix) from patients", database)
         if q_query.first():

@@ -24,28 +24,12 @@
 This module inserts demo avatars into the database
 '''
 
+from PyQt4 import QtCore
 from lib_openmolar.admin import qrc_resources
-from lib_openmolar.admin.table_schema import TableSchema
+
 from lib_openmolar.common.db_orm import InsertableRecord
 
-from PyQt4 import QtCore
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-description VARCHAR(50) NOT NULL,
-svg_data TEXT,
-CONSTRAINT pk_avatars PRIMARY KEY (ix)
-'''
-
 TABLENAME = "avatars"
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''avatars''')
 
 class DemoGenerator(object):
     def __init__(self, database=None):

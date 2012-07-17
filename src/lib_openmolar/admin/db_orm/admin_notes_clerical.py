@@ -21,39 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for the notes_clerical table
+Provides a DemoGenerator for the notes_clerical table
 '''
 from random import randint
-
-from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common.db_orm import InsertableRecord
-
 from PyQt4 import QtCore, QtSql
 
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-open_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-type notes_clerical_type NOT NULL DEFAULT 'observation',
-line TEXT DEFAULT NULL,
-author INTEGER REFERENCES users(ix),
-CONSTRAINT pk_notes_clerical PRIMARY KEY (ix)
-'''
+from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "notes_clerical"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for the patient table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _(
-'''storage for admin style notes payments, correspondence etc.''')
-
 
 class DemoGenerator(object):
     def __init__(self, database=None):

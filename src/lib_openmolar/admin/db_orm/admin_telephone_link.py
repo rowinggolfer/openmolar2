@@ -21,37 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for the telephone_link table'''
+Provides a DemoGenerator for the telephone_link table'''
 
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL NOT NULL,
-tel_cat telephone_type NOT NULL DEFAULT 'home',
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-tel_id INTEGER NOT NULL REFERENCES telephone(ix),
-comment VARCHAR(240),
-CONSTRAINT pk_telephone_link PRIMARY KEY (ix)
-'''
-
 TABLENAME = "telephone_link"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _(
-'''links the unique id of an telephone number to the unique id of a patient,
-along with some other information (home, work, mobile etc..)
-allowing a many-to-many relationship''')
-
 
 class DemoGenerator(object):
     def __init__(self, database=None):

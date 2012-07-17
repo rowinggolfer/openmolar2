@@ -26,28 +26,9 @@ This module provides the Telephone Class
 
 from random import randint
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL NOT NULL,
-number VARCHAR(30) NOT NULL,
-sms_capable Bool DEFAULT FALSE,
-checked_date DATE DEFAULT CURRENT_DATE,
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_telephone PRIMARY KEY (ix),
-CONSTRAINT telephone_nos_rule CHECK (number~'^[\d+ \+]*')
-'''
-
 TABLENAME = "telephone"
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''storage for telephone numbers''')
 
 class DemoGenerator(object):
     def __init__(self, database):

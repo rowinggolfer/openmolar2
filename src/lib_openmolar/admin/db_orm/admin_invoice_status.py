@@ -21,28 +21,12 @@
 ###############################################################################
 
 '''
-This module provides Demo sql queries for the fees_raised table
+This module provides Demo sql queries for the invoice_status table
 '''
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-status VARCHAR(80) NOT NULL /*open, paid, cancelled, disputed etc*/,
-CONSTRAINT pk_invoice_status PRIMARY KEY (ix)
-'''
-
 TABLENAME = "invoice_status"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database):

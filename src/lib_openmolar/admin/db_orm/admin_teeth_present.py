@@ -21,7 +21,7 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for teeth_present table
+Provides a DemoGenerator for teeth_present table
 provides schema and insert query for the teeth_present table
 data on which teeth are present in the patients mouth
 '''
@@ -29,26 +29,9 @@ data on which teeth are present in the patients mouth
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-dent_key BIGINT NOT NULL DEFAULT 281474976645120 /*adult teeth present*/,
-checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_teeth_present PRIMARY KEY (ix)
-'''
-
 TABLENAME = "teeth_present"
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database):

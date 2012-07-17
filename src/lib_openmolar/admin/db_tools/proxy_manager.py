@@ -45,7 +45,8 @@ def user_perms(func):
 
 class ProxyManager(object):
     '''
-    This class is the core application.
+    A ProxyManager manages the openmolar-servers running and provides an
+    interface for them to manage postgres.
     '''
 
     _proxy_clients = []
@@ -284,7 +285,7 @@ class ProxyManager(object):
         else:
             self.advise(u"%s<hr />%s"%(
                 _("Operation failed"), payload.error_message), 2)
-        
+
         self.display_proxy_message()
 
 

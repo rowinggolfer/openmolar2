@@ -21,30 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for clincal_memos table
+Provides a DemoGenerator for diary_calendar
 '''
 
 from PyQt4 import QtSql, QtCore
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-
-SCHEMA = '''
-date_id DATE,
-event VARCHAR(255) NOT NULL DEFAULT '',
-CONSTRAINT pk_diary_calendar PRIMARY KEY (date_id)
-'''
-
 TABLENAME = "diary_calendar"
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, "diary_calendar", SCHEMA)
-        self.comment = _('calendar information (public hols etc.)')
 
 class DemoGenerator(object):
     def __init__(self, database):

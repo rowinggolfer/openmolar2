@@ -21,35 +21,16 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for perio_bpe table
+Provides a DemoGenerator for perio_bpe table
 '''
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
+
 from lib_openmolar.common.db_orm import InsertableRecord
 
 
-
 TABLENAME = "perio_bpe"
-
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
-values CHAR(6),
-comment VARCHAR(80),
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_%s PRIMARY KEY (ix),
-CONSTRAINT bpe_values_rule CHECK (values~'^[01234\*\-]{6}$')
-'''% TABLENAME
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database=None):
@@ -60,9 +41,9 @@ class DemoGenerator(object):
             self.max_patient_id = q_query.value(1).toInt()[0]
         else:
             self.min_patient_id, self.max_patient_id = 0,0
-        
-        self.length = self.max_patient_id - self.min_patient_id      
-        
+
+        self.length = self.max_patient_id - self.min_patient_id
+
         self.record = InsertableRecord(database, TABLENAME)
         self.record.remove(self.record.indexOf('checked_date'))
 
@@ -85,8 +66,5 @@ if __name__ == "__main__":
     sc = DemoAdminConnection()
     sc.connect()
 
-    sg = SchemaGenerator()
-    print sg.removal_queries
-    print sg.creation_queries
     builder = DemoGenerator(sc)
     print builder.demo_queries().next()

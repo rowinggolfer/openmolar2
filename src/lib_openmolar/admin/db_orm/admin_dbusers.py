@@ -24,30 +24,9 @@
 This module provides the Demo User Queries
 '''
 
-
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL NOT NULL,
-username VARCHAR(30),
-password bytea,
-comments VARCHAR(512),
-CONSTRAINT pk_dbusers PRIMARY KEY (ix),
-CONSTRAINT unique_dbuser UNIQUE (username)
-'''
-
 TABLENAME = "dbusers"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''data on who is allowed to access the database.''')
-
 
 class DemoGenerator(object):
     def __init__(self, database=None):

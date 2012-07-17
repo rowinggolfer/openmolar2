@@ -21,37 +21,15 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for perio_pocketing table
+Provides a DemoGenerator for perio_pocketing table
 '''
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
-
-
 
 TABLENAME = "perio_pocketing"
 
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-tooth SMALLINT NOT NULL,
-checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
-values VARCHAR(6),
-comment VARCHAR(80),
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_%s PRIMARY KEY (ix),
-CONSTRAINT pocketing_patient_tooth_date UNIQUE (patient_id, tooth, checked_date),
-CONSTRAINT pocketing_values_rule CHECK (values~'^[ 0-9A-F]{6}$')
-'''% TABLENAME
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database=None):
@@ -97,6 +75,3 @@ if __name__ == "__main__":
 
     builder = DemoGenerator(sc)
     print builder.demo_queries().next()
-
-    sg = SchemaGenerator()
-    print sg.creation_queries

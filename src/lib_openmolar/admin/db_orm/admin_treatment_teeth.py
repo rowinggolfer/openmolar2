@@ -21,30 +21,14 @@
 ###############################################################################
 
 '''
-This module provides Demo sql queries for the treatment_fills table
+This module provides Demo sql queries for the treatment_teeth table
 '''
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix serial,
-treatment_id INTEGER REFERENCES treatments(ix),
-tooth SMALLINT NOT NULL,
-tx_type tooth_tx_type,
-CONSTRAINT pk_treatment_teeth PRIMARY KEY (ix)
-'''
 
 TABLENAME = "treatment_teeth"
 
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''extension table for treatments - teeth''')
 
 class DemoGenerator(object):
     def __init__(self, database=None):

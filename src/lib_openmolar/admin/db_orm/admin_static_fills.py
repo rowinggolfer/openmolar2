@@ -21,38 +21,15 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for static_fills table
+Provides a DemoGenerator for static_fills table
 '''
 from random import randint
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
+
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-tooth SMALLINT NOT NULL,
-surfaces VARCHAR(5) NOT NULL,
-material fill_material_type NOT NULL,
-comment VARCHAR(80),
-date_charted DATE NOT NULL DEFAULT CURRENT_DATE,
-CONSTRAINT pk_static_fills PRIMARY KEY (ix),
-CONSTRAINT static_fills_surface_rule CHECK (surfaces~'^[MODBL]*$')
-'''
-
 TABLENAME = "static_fills"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, "static_fills", SCHEMA)
-        self.comment = _(
-'''data for known fillings present in the patients mouth''')
-
 
 class DemoGenerator(object):
     def __init__(self, database=None):

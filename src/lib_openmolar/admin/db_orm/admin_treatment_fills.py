@@ -25,28 +25,10 @@
 This module provides Demo sql queries for the treatment_fills table
 '''
 from PyQt4 import QtSql
-from lib_openmolar.admin.table_schema import TableSchema
+
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix serial,
-tooth_tx_id INTEGER REFERENCES treatment_teeth(ix),
-surfaces VARCHAR(5) NOT NULL,
-material fill_material_type /* CAN BE NULL !!*/,
-CONSTRAINT treatment_fills_surface_rule CHECK (surfaces~'^[MODBL]*$'),
-CONSTRAINT pk_treatment_fills PRIMARY KEY (ix)
-'''
-
 TABLENAME = "treatment_fills"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''extension table for treatments - fillings''')
 
 class DemoGenerator(object):
     def __init__(self, database=None):

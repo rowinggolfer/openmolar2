@@ -24,37 +24,11 @@
 This module provides Demo sql queries for the treatments table
 '''
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
 
-SCHEMA = '''
-ix SERIAL NOT NULL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-/* parent_id INTEGER REFERENCES treatments(ix) ON DELETE CASCADE, */
-om_code VARCHAR(5) NOT NULL  /* REFERENCES PROCEDURE CODES????*/,
-completed BOOL NOT NULL DEFAULT FALSE,
-px_clinician INTEGER NOT NULL REFERENCES practitioners(ix),
-px_date DATE NOT NULL DEFAULT CURRENT_DATE,
-tx_clinician INTEGER REFERENCES practitioners(ix),
-tx_date DATE,
-added_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-comment VARCHAR(240),
-CONSTRAINT pk_treatments PRIMARY KEY (ix),
-CONSTRAINT completed_treatment_rule CHECK (NOT completed or tx_clinician is NOT NULL),
-CONSTRAINT completed_treatment_rule2 CHECK (NOT completed or tx_date is NOT NULL)
-'''
-
 TABLENAME = "treatments"
 
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''base table for treatments planned or completed''')
 
 class DemoGenerator(object):
     def __init__(self, database):

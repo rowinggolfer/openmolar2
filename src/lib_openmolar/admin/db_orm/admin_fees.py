@@ -24,29 +24,9 @@
 This module provides Demo sql queries for the fees table
 '''
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-fee DECIMAL(10,2) NOT NULL DEFAULT 0,
-type fee_type NOT NULL DEFAULT 'other',
-comment VARCHAR(240),
-time_stamp TIMESTAMP NOT NULL DEFAULT NOW(),
-CONSTRAINT pk_fees PRIMARY KEY (ix)
-'''
-
 TABLENAME = "fees"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
 
 class DemoGenerator(object):
     def __init__(self, database):

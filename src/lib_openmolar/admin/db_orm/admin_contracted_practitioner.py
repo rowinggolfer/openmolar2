@@ -21,36 +21,16 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for the
+Provides a DemoGenerator for the
 contracted practitioner table
 '''
+
 from random import randint, choice
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
 TABLENAME = "contracted_practitioners"
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-practitioner_id INTEGER NOT NULL REFERENCES practitioners(ix),
-contract_type VARCHAR(20),
-start_date DATE NOT NULL DEFAULT CURRENT_DATE,
-end_date DATE,
-comments VARCHAR(255),
-CONSTRAINT pk_contracted_practitioners PRIMARY KEY (ix)
-'''
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('links a patient to their regular practitioner')
 
 class DemoGenerator(object):
     def __init__(self, database=None):

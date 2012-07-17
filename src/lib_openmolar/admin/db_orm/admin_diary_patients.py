@@ -21,43 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for the patients diary
+Provides a DemoGenerator for the patients diary
 '''
-
-from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common.db_orm import InsertableRecord
 
 from PyQt4 import QtSql, QtCore
+from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL NOT NULL,
-patient INTEGER NOT NULL REFERENCES patients(ix),
-appt_ix INTEGER REFERENCES diary_appointments(ix),
-clinician_type clinician_type NOT NULL default 'dentist',
-clinician_spec INTEGER REFERENCES practitioners(ix),
-reason1 varchar(20),
-reason2 varchar(20),
-length INTEGER NOT NULL default 0,
-parent INTEGER,
-period INTERVAL,
-comment VARCHAR(240),
-time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-CONSTRAINT pk_diary_patients UNIQUE (ix),
-CONSTRAINT ck_diary_periods CHECK (
-    (parent IS NOT NULL AND period IS NOT NULL) OR
-    (period IS NULL AND parent IS NULL))
-'''
 
 TABLENAME = "diary_patients"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for the patient table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
-        self.comment = _('''storage for patients appointments''')
 
 class DemoGenerator(object):
     def __init__(self, database=None):

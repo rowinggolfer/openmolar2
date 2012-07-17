@@ -21,33 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for the diary sessions
+Provides a DemoGenerator for the diary sessions
 '''
 from random import randint
-
-from lib_openmolar.admin.table_schema import TableSchema
-from lib_openmolar.common.db_orm import InsertableRecord
-
-
-SCHEMA = '''
-ix SERIAL NOT NULL,
-practice_id INTEGER NOT NULL REFERENCES practices(ix),
-start TIMESTAMP (0) WITH TIME ZONE NOT NULL,
-finish TIMESTAMP WITH TIME ZONE NOT NULL,
-comments VARCHAR(240),
-CONSTRAINT pk_diary_sessions UNIQUE (ix)
-'''
-
-TABLENAME = "diary_sessions"
-
 from PyQt4 import QtSql, QtCore
 
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for the table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, TABLENAME, SCHEMA)
+from lib_openmolar.common.db_orm import InsertableRecord
+
+TABLENAME = "diary_sessions"
 
 class DemoGenerator(object):
     def __init__(self, database=None):

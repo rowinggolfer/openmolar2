@@ -21,36 +21,14 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator and DemoGenerator for clincal_memos table
+Provides a DemoGenerator for clincal_memos table
 '''
 
 from PyQt4 import QtSql
 
-from lib_openmolar.admin.table_schema import TableSchema
 from lib_openmolar.common.db_orm import InsertableRecord
 
-SCHEMA = '''
-ix SERIAL,
-patient_id INTEGER NOT NULL REFERENCES patients(ix),
-memo VARCHAR(255) NOT NULL DEFAULT '',
-checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
-checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
-CONSTRAINT pk_clerical_memos PRIMARY KEY (ix),
-CONSTRAINT unique_clerical_memos UNIQUE (patient_id)
-'''
-
 TABLENAME = "clerical_memos"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for this table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, "clerical_memos", SCHEMA)
-        self.comment = _(
-'''a 255 character field displayed prominently on the reception page''')
-
 
 class DemoGenerator(object):
     def __init__(self, database=None):

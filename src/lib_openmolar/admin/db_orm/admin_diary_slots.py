@@ -21,10 +21,8 @@
 ###############################################################################
 
 '''
-Provides a SchemaGenerator for diary_slots which is a dummy table
+Provides a DemoGenerator for diary_slots which is a dummy table
 '''
-
-from lib_openmolar.admin.table_schema import TableSchema
 
 from PyQt4 import QtSql, QtCore
 
@@ -34,21 +32,7 @@ note - this table has NO DATA!
 populated at runtime by the get_slots function
 '''
 
-SCHEMA = '''
-start TIMESTAMP (0) WITH TIME ZONE NOT NULL,
-length INTERVAL
-'''
 TABLENAME = "diary_slots"
-
-
-class SchemaGenerator(TableSchema):
-    '''
-    A custom object which lays out the schema for the patient table.
-    '''
-    def __init__(self):
-        TableSchema.__init__(self, "diary_slots", SCHEMA)
-        self.comment = _('''dummy table,
-        populated via a function working on the diary table proper''')
 
 class DemoGenerator(object):
     def __init__(self, database=None):
