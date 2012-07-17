@@ -22,65 +22,52 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.client.qt4.widgets import DiaryControl, DiaryWidget
-
-from lib_openmolar.client.db_orm.diary import DiaryDataModel
-
-class DiaryInterface(QtGui.QWidget):
+class DiaryPeriodControl(QtGui.QWidget):
     '''
-    A composite widget containing all elements for viewing a patient record
     '''
-    def __init__(self, parent = None):
+    index_changed = QtCore.pyqtSignal(object)
+
+    def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        self.diary_control = DiaryControl()
-        self.diary_widget = DiaryWidget()
+        icon = QtGui.QIcon()
+        day_button = QtGui.QPushButton(icon, "day")
+        day_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        day_button.setToolTip(_( u"Day View (24 hours)"))
 
-        self.model = DiaryDataModel()
+        work_day_button = QtGui.QPushButton(icon, "workday")
+        work_day_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        work_day_button.setToolTip(
+            _( u"Work Day View (determined by sessions)"))
 
-        self.diary_widget.setModel(self.model)
+        week_button = QtGui.QPushButton(icon, "week")
+        week_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        week_button.setToolTip(_( u"week View (24 hours)"))
+
+        work_week_button = QtGui.QPushButton(icon, "workweek")
+        work_week_button.setFocusPolicy(QtCore.Qt.NoFocus)
+        work_week_button.setToolTip(
+            _( u"Work week View (determined by sessions)"))
 
         layout = QtGui.QHBoxLayout(self)
         layout.setMargin(0)
-        layout.setSpacing(0)
-        layout.addWidget(self.diary_control)
-        layout.addWidget(self.diary_widget)
-        self.connect_signals()
+        layout.setSpacing(2)
+        layout.addWidget(day_button)
+        layout.addWidget(work_day_button)
+        layout.addWidget(week_button)
+        layout.addWidget(work_week_button)
 
     def sizeHint(self):
-        return QtCore.QSize(500, 400)
-
-    def connect_signals(self):
-        self.diary_control.date_changed.connect(self.diary_widget.set_date)
-        self.diary_control.view_changed.connect(self.diary_widget.setViewStyle)
-
-    def refresh(self):
-        '''
-        usually called when the database has connected/changed
-        '''
-        self.diary_control.refresh_practitioners(SETTINGS.practitioners)
-        self.diary_control.refresh_staff_members(SETTINGS.staff_members)
-        self.model.load()
-        self.diary_control.set_limits(self.model.start_date,
-            self.model.end_date)
-
-    def Advise(self, *args):
-        if __name__ == "__main__":
-            print args
-        self.emit(QtCore.SIGNAL("Advise"), *args)
+        return QtCore.QSize(200,60)
 
 if __name__ == "__main__":
 
+    def sig_catcher(*args):
+        print args, cp.sender()
+
+    from gettext import gettext as _
+
     app = QtGui.QApplication([])
-    mw = QtGui.QMainWindow()
-
-    from lib_openmolar.client.connect import DemoDiaryClientConnection
-    cc = DemoDiaryClientConnection()
-    cc.connect()
-
-    di = DiaryInterface(mw)
-    di.refresh()
-
-    mw.setCentralWidget(di)
-    mw.show()
+    cp = DiaryPeriodControl()
+    cp.show()
     app.exec_()

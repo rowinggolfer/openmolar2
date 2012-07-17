@@ -57,7 +57,10 @@ class DiaryControl(QtGui.QWidget):
 
         self.combo_box = QtGui.QComboBox(self)
         self.combo_box.addItems([_("Day"),_("Four Days"), _("Week"),
-            _("Fortnight"), _("Month"), _("Year"), _("Agenda"), ("Tasks")])
+            _("Fortnight"), _("Month"), _("Year"), _("List"), ("Tasks")])
+
+        self.period_combo_box = QtGui.QComboBox(self)
+        self.period_combo_box.addItems(["full", "session", "custom"])
 
         padding = 9
         ##DENTISTS
@@ -89,11 +92,11 @@ class DiaryControl(QtGui.QWidget):
         label.setAlignment(QtCore.Qt.AlignCenter)
         self.staff_layout.setMenuBar(label)
 
-
         layout = QtGui.QVBoxLayout(self)
         layout.setMargin(padding)
         layout.addWidget(self.calendar)
         layout.addWidget(self.combo_box)
+        layout.addWidget(self.period_combo_box)
         layout.addWidget(dentist_frame)
         layout.addWidget(hygienist_frame)
         layout.addWidget(staff_frame)

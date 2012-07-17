@@ -21,209 +21,30 @@
 ###############################################################################
 
 from PyQt4 import QtCore, QtSql
-
-class _DiarySettings(object):
-
-    DAY = 0
-    FOUR_DAY = 1
-    WEEK = 2
-    FORTNIGHT = 3
-    MONTH = 4
-    YEAR = 5
-    AGENDA = 6
-    TASKS = 7
-
-    DAY_VIEWS = (DAY, FOUR_DAY, WEEK, FORTNIGHT)
-
-    def __init__(self):
-        self._style = self.DAY
-
-    def set_style(self, style):
-        assert style>=self.DAY and style<=self.TASKS
-        self._style = style
-
-class Appointment(object):
-    def __init__(self, record): #date, hour, minute, length, name):
-        self.start = record.value("start").toDateTime()
-        self.finish =  record.value("finish").toDateTime()
-        self.type = record.value('type').toString()
-        self.comments = record.value('comments').toString()
-        self.rect = None
-
-    @property
-    def message(self):
-        return u"%s %s"% (self.type, self.comments)
-
-    @property
-    def full_details(self):
-        return u"%s %s %s"% (self.start.toString(), self.type, self.comments)
-
-    def __repr__(self):
-        return "appointment %s %s %s %s"% (
-            self.start, self.finish, self.type, self.comments)
-
-
-class DayData(object):
-    def __init__(self, practice_id=1):
-        self.sessions_loaded = False
-        self._appointments = None
-
-        self.practice_id = practice_id
-        self.date = None
-
-        self._diaries = {}
-        self._diary_list = None
-        self._public_hol_text = ""
-        self.in_bookable_range = False
-        self._session_start = None
-        self._session_finish = None
-
-    def __repr__(self):
-        return "Daydata %s %s with diaries=%s"% (
-            self.public_hol_text,
-            self.message,
-            self.diaries)
-
-    def clear(self):
-        self.sessions_loaded = False
-        self._diaries_loaded = False
-
-    @property
-    def appointments(self):
-        if self._appointments is None:
-            self.load_appointments()
-        return self._appointments
-
-    @property
-    def public_hol_text(self):
-        return self._public_hol_text
-
-    def set_public_hol_text(self, text):
-        self._public_hol_text = text
-
-    @property
-    def is_public_hol(self):
-        return self._public_hol_text != ""
-
-    @property
-    def has_session(self):
-        return self._session_start != None and self._session_finish != None
-
-    def set_session_start(self, start):
-        self._session_start = start
-
-    @property
-    def session_start(self):
-        return self._session_start
-
-    def set_session_finish(self, finish):
-        self._session_finish = finish
-
-    @property
-    def session_finish(self):
-        return self._session_finish
-
-    @property
-    def message(self):
-        try:
-            message =  u"%s <br />%s - %s"% (
-                _("session"),
-                self.session_start.toString(),
-                self.session_finish.toString())
-        except AttributeError:
-            message = _("no session")
-        return message
-
-    @property
-    def diaries(self):
-        if self._diary_list == None:
-            self._diary_list = sorted(self._diaries.keys())
-        return self._diary_list
-
-    def minutes_past_midnight(self, dtime):
-        '''
-        takes either a QDateTime, or a QTime, and returns the minutes past
-        midnight
-        '''
-        if type(dtime) == QtCore.QDateTime:
-            dtime = dtime.time()
-        return dtime.hour() * 60 + dtime.minute()
-
-    def load_sessions(self):
-        '''
-        loads all appointments of type "session" for this day
-        '''
-        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
-
-        query = '''select start, finish
-        from  diary_sessions where practice_id = ? and date(start) = ?'''
-        q_query.prepare(query)
-        q_query.addBindValue(self.practice_id)
-        q_query.addBindValue(self.date)
-
-        q_query.exec_()
-        if q_query.lastError().isValid():
-            print q_query.lastError().text()
-        while q_query.next():
-            record = q_query.record()
-
-            start = record.value("start").toDateTime()
-            finish =  record.value("finish").toDateTime()
-
-            self.set_session_start(start)
-            self.set_session_finish(finish)
-
-        q_query.finish()
-
-        self.sessions_loaded = True
-
-    def load_appointments(self):
-        '''
-        loads all appointments of type "session" for this day
-        '''
-
-        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
-
-        query = '''select diary_id, start, finish, type, comments
-        from diary_appointments where diary_id = ? and date(start) = ?
-        order by start'''
-
-        q_query.prepare(query)
-        q_query.addBindValue(4)  ## todo fix when ^ no of diaries
-        q_query.addBindValue(self.date)
-
-        self._appointments = []
-        q_query.exec_()
-        if q_query.lastError().isValid():
-            print q_query.lastError().text()
-        while q_query.next():
-            record = q_query.record()
-            appt = Appointment(record)
-
-            self._appointments.append(appt)
-
-        q_query.finish()
+from diary_settings import _DiarySettings
+from diary_day_data import DiaryDayData
 
 class DiaryDataModel(_DiarySettings):
     '''
     This is a custom model, which forms a bridge between the client
     and the database
     '''
-    def __init__(self, practice_id = 1):
+    def __init__(self):
         self._data = {}
-        self.practice_id = practice_id
+        self._active_diaries = None
         #default values in case db isn't open
         self.start_date = QtCore.QDate.currentDate().addYears(-2)
         self.end_date = QtCore.QDate.currentDate().addYears(2)
+
+        ##TODO this should be user settable.
         self.last_day = QtCore.QDate.currentDate().addMonths(6)
 
     def __repr__(self):
         data_repr = ""
         for key in self._data:
             data_repr += "%s:%s\n"% (key, self._data[key])
-        return "DiaryDataModel\ndb=%s\npractice=%s\nstart=%s\nend=%s\n%s"% (
+        return "DiaryDataModel\ndb=%s\nstart=%s\nend=%s\n%s"% (
             SETTINGS.psql_conn.databaseName(),
-            self.practice_id,
             self.start_date,
             self.end_date,
             data_repr)
@@ -237,19 +58,17 @@ class DiaryDataModel(_DiarySettings):
         '''
         poll the database for start, end and appointment limits
         '''
-        query = '''select book_start, book_end, last_day
-        from diary_settings where practice_id = ?'''
+        query = 'select min(book_start), max(book_end) from diaries'
         q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
-        q_query.addBindValue(self.practice_id)
+
         q_query.exec_()
         if q_query.last():
             record = q_query.record()
-            self.start_date = record.value("book_start").toDate()
-            self.end_date = record.value("book_end").toDate()
-            self.last_day = record.value("last_day").toDate()
+            self.start_date = record.value("min").toDate()
+            self.end_date = record.value("max").toDate()
         else:
-            print "WARNING - using default limits for diary"
+            LOGGER.warning("using default limits for diary")
 
     def init_data(self):
         '''
@@ -262,25 +81,44 @@ class DiaryDataModel(_DiarySettings):
         #due to database constraints, this list will be a
         #set of key value pairs.
         query = '''select dt, event
-        from (SELECT dt FROM generate_dates(?, ?, 1) dt)  as gen
-        left join diary_calendar on dt = date_id'''
+        from (SELECT dt FROM generate_dates(?, ?, 1) dt) as gen
+        left join calendar on dt = date_id'''
 
         q_query.prepare(query)
         q_query.addBindValue(self.start_date)
         q_query.addBindValue(self.end_date)
-
         q_query.exec_()
         while q_query.next():
             record = q_query.record()
-            day_data = DayData()
+            day_data = DiaryDayData(record.value("dt").toDate())
             day_data.set_public_hol_text(record.value("event").toString())
-            day_data.date = record.value("dt").toDate()
             if QtCore.QDate.currentDate() <= day_data.date <= self.last_day:
                 day_data.in_bookable_range = True
             ##QDate.__hash__ has a bug.. so have to convert here
+            ##this has been fixed in recent PyQt4..
+            ##there may be a perfomance benefit here
             self._data[day_data.date.toPyDate()] = day_data
 
         q_query.finish()
+
+    @property
+    def active_diaries(self):
+        '''
+        poll the database (one time only) and get active diary ids.
+        '''
+        if self._active_diaries is None:
+            active_diaries = []
+            q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
+
+            query = '''select ix from diaries where active'''
+
+            q_query.prepare(query)
+            q_query.exec_()
+            while q_query.next():
+                record = q_query.record()
+                active_diaries.append(record.value("ix").toInt()[0])
+            self._active_diaries = tuple(active_diaries)
+        return self._active_diaries
 
     def rowCount(self, style):
         if style in (self.DAY, self.WEEK, self.FOUR_DAY):
@@ -301,7 +139,7 @@ class DiaryDataModel(_DiarySettings):
                 start = start.addMonths(1)
             return i
 
-        return 200
+        return 100
 
     def row_from_date(self, date, style):
         '''
@@ -334,8 +172,7 @@ class DiaryDataModel(_DiarySettings):
             day_data = self._data[date.toPyDate()]
 
         except KeyError:
-            day_data = DayData()
-            day_data.date = date
+            day_data = DiaryDayData(date)
             self._data[date.toPyDate()] = day_data
 
         if view_style != self.TASKS:
@@ -343,6 +180,14 @@ class DiaryDataModel(_DiarySettings):
                 day_data.load_sessions()
 
         return day_data
+
+    def new_data(self, d1t, dt2, diary_ids, view_style=0):
+        '''
+        returns a 'DayData' objects for the date range requested
+        and specified diary ids
+        '''
+        return "NEW DATA"
+
 
     def header_data(self, row, style=0):
         if style == self.YEAR:
@@ -355,18 +200,18 @@ class DiaryDataModel(_DiarySettings):
 
 if __name__ == "__main__":
 
+    import logging
+    logging.basicConfig(level = logging.DEBUG)
+    LOGGER = logging.getLogger("test")
 
+    from PyQt4 import QtGui
+    app = QtGui.QApplication([])
 
-    import os, sys
-    sys.path.insert(0, os.path.abspath("../../../../../"))
-
-    from lib_openmolar.client.connect import DemoClientConnection
-    cc = DemoClientConnection()
+    from lib_openmolar.client.connect import DemoDiaryClientConnection
+    cc = DemoDiaryClientConnection()
     cc.connect()
 
     model = DiaryDataModel()
     model.load()
-    day_data = model.data(QtCore.QDate(2011,12,25))
-    print "public hol - ", day_data.is_public_hol, day_data.public_hol_text
 
     print model

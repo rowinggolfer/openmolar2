@@ -82,7 +82,7 @@ class ClientConnection(PostgresDatabase):
         search values is a dictionary)
         '''
 
-        query = '''SELECT DISTINCT ON (patients.ix) 
+        query = '''SELECT DISTINCT ON (patients.ix)
         patients.ix, title, last_name, first_name,
         preferred_name, dob, addr1, addr2, postal_cd, number
         from (patients left outer join
@@ -260,16 +260,30 @@ class DemoClientConnection(ClientConnection):
 
         ClientConnection.__init__(self, conn_data)
 
+class DemoDiaryClientConnection(ClientConnection):
+    '''
+    I created a different diary schema.. and this is a connection to it.
+    '''
+    def __init__(self):
+        conn_data = ConnectionData(db_name="testdiary")
+        ClientConnection.__init__(self, conn_data)
+
+def test_soundex(cc):
+    '''
+    this will fail if the soundex function (from postgres contrib)
+    has not be installed into the database
+    '''
+    values = {"sname":"POTTA", "soundex_sname":True}
+    #values = {"sname":"POTTER"}
+    print cc.get_matchlist(values)
+
 if __name__ == "__main__":
     from lib_openmolar import client
 
     app = QtGui.QApplication([])
 
-    cc = DemoClientConnection()
+    cc = DemoDiaryClientConnection()
     cc.connect()
 
-    values = {"sname":"POTTA", "soundex_sname":True}
-    #values = {"sname":"POTTER"}
-    print cc.get_matchlist(values)
-
+    #test_soundex(cc)
     print cc.blank_address_record

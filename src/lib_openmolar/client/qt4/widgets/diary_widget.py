@@ -30,9 +30,9 @@ from lib_openmolar.client.db_orm.diary import _DiarySettings, DiaryDataModel
 #            temporary globals                                                #
 ###############################################################################
 
-session_colour = QtGui.QColor("yellow")
-session_colour.setAlpha(100)
-appointment_colour = QtGui.QColor("blue")
+SESSION_COLOUR = QtGui.QColor("yellow")
+SESSION_COLOUR.setAlpha(100)
+APPOINTMENT_COLOUR = QtGui.QColor("blue")
 
 
 class DiaryWidget(QtGui.QWidget, _DiarySettings):
@@ -595,7 +595,7 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
 
             cell = self.day_cells[0]
 
-            appts = self.model.data(self.date).appointments
+            appts = self.model.data(self.date).entries
 
             y = self.mouse_pos.y()
 
@@ -702,19 +702,19 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
 
             painter.drawText(cell, d_str, self.text_align_option)
 
-            if data.has_session:
+            if data.has_sessions:
                 #painter.drawText(cell, "session", self.text_align_option)
                 #print "session found", data.session_start, data.session_finish
                 day_mins = 60*24
-                start = data.minutes_past_midnight(data.session_start)
-                finish = data.minutes_past_midnight(data.session_finish)
+                start = data.minutes_past_midnight(data.session_start(1))
+                finish = data.minutes_past_midnight(data.session_finish(1))
                 srect = QtCore.QRectF(
                     cell.x(),
                     cell.y()+start/day_mins * cell.height(),
                     cell.width(),
                     cell.height() * ((finish-start)/day_mins)
                     )
-                painter.fillRect(srect, session_colour)
+                painter.fillRect(srect, SESSION_COLOUR)
                 #painter.drawText(srect, "session", self.text_align_option)
 
             if not data.in_bookable_range:
@@ -724,10 +724,10 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
                 painter.restore()
 
         else: #DAY, FOUR_DAY or WEEK,
-            if data.has_session:
+            if data.has_sessions:
                 day_mins = 60*24
-                start = data.minutes_past_midnight(data.session_start)
-                finish = data.minutes_past_midnight(data.session_finish)
+                start = data.minutes_past_midnight(data.session_start(1))
+                finish = data.minutes_past_midnight(data.session_finish(1))
                 day_height = self.left_margin.total_height
                 srect = QtCore.QRectF(
                     cell.x(),
@@ -735,7 +735,7 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
                     cell.width(),
                     day_height * ((finish-start)/day_mins)
                     )
-                painter.fillRect(srect, session_colour)
+                painter.fillRect(srect, SESSION_COLOUR)
 
             self.draw_time_cells(cell, data, painter)
 
@@ -757,20 +757,20 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
             #painter.drawRect(time_cell)
             #painter.drawText(time_cell, "%s"% time_cell.mpm)
 
-        for appointment in data.appointments:
-            if self.is_resized or appointment.rect is None:
+        for entry in data.entries:
+            if self.is_resized or entry.rect is None:
                 day_mins = 60*24
-                start = data.minutes_past_midnight(appointment.start)
-                finish = data.minutes_past_midnight(appointment.finish)
+                start = data.minutes_past_midnight(entry.start)
+                finish = data.minutes_past_midnight(entry.finish)
                 day_height = self.left_margin.total_height
-                appointment.rect = QtCore.QRectF(
+                entry.rect = QtCore.QRectF(
                     cell.x(),
                     cell.y()+start/day_mins * day_height - self.top_margin.height,
                     cell.width(),
                     day_height * ((finish-start)/day_mins)
                     )
-            painter.fillRect(appointment.rect, appointment_colour)
-            painter.drawText(appointment.rect, appointment.message)
+            painter.fillRect(entry.rect, APPOINTMENT_COLOUR)
+            painter.drawText(entry.rect, entry.message)
 
 if __name__ == "__main__":
 
@@ -781,8 +781,8 @@ if __name__ == "__main__":
     dl.setMinimumSize(500,300)
 
     from lib_openmolar.client.db_orm.diary import DiaryDataModel
-    from lib_openmolar.client.connect import DemoClientConnection
-    cc = DemoClientConnection()
+    from lib_openmolar.client.connect import DemoDiaryClientConnection
+    cc = DemoDiaryClientConnection()
     cc.connect()
     model = DiaryDataModel()
     model.load()

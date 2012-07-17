@@ -124,20 +124,13 @@ class PatientInterface(QtGui.QWidget):
 
         app = QtGui.QApplication.instance()
 
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('New Patient'), self.new_patient)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Next Patient'), self.next_patient)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Last Patient'), self.last_patient)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Related Patients'), self.related_patient)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Find Patient'), self.find_patient)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Home'), self.go_home)
-        self.connect(self.control_panel,
-            QtCore.SIGNAL('Reload Patient'), self.reload_patient)
+        self.control_panel.refresh_clicked.connect(self.reload_patient)
+        self.control_panel.new_patient_clicked.connect(self.new_patient)
+        self.control_panel.next_patient_clicked.connect(self.next_patient)
+        self.control_panel.last_patient_clicked.connect(self.last_patient)
+        self.control_panel.related_patient_clicked.connect(self.related_patient)
+        self.control_panel.find_patient_clicked.connect(self.find_patient)
+        self.control_panel.home_clicked.connect(self.go_home)
 
         self.connect(self.find_dialog, QtCore.SIGNAL("Advise"), self.Advise)
         self.connect(self.find_dialog, QtCore.SIGNAL("Load Serial Number"),
