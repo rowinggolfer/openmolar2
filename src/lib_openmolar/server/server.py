@@ -25,6 +25,7 @@ This module provides the OpenMolar Server.
 '''
 
 import logging
+import os
 import socket
 import time
 import threading
@@ -70,6 +71,9 @@ class OMServer(Service):
         port = config.port
         key = config.private_key
         cert = config.pub_key
+        if not (os.path.isfile(key) and os.path.isfile(cert)):
+            raise IOError, "certificate '%s' and/or key '%s' not found"% (
+                                                                cert, key)
         try:
             self.server = VerifyingServerSSL((loc, port), key, cert)
         except socket.error:
