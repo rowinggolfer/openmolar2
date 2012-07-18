@@ -336,10 +336,12 @@ if INSTALL_SERVER:
                    'misc/server/openmolar-fuzzymatch',],
         data_files=[
                     ('/etc/init.d', ['misc/server/openmolar']),
+                    
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql',
                          'misc/server/permissions.sql']),
+                         
                     ('/etc/openmolar/',
                         ['misc/server/privatekey.pem',
                          'misc/server/cert.pem']),
