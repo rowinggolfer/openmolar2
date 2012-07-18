@@ -125,11 +125,12 @@ class MessageFunctions(object):
         %s
         <p>
         <b>%s</b>
-        <pre>ERROR</pre>
+        %s <i>/var/log/openmolar/server.log</i>
         </p>
         <br />
         %s'''%(HEADER, self.location_header,
         _("Cannot connect to the postgres server on this machine!"),
+        _("further information can be found in the log file"),
         get_footer())
 
 def _test():
