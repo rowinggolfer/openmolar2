@@ -184,8 +184,8 @@ if __name__ == "__main__":
     from PyQt4 import QtGui
     app = QtGui.QApplication([])
 
-    from lib_openmolar.client.connect import DemoDiaryClientConnection
-    cc = DemoDiaryClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     day_data = DiaryDayData(QtCore.QDate(2012,07,02))

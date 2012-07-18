@@ -74,8 +74,8 @@ if __name__ == "__main__":
     app = QtGui.QApplication([])
     mw = QtGui.QMainWindow()
 
-    from lib_openmolar.client.connect import DemoDiaryClientConnection
-    cc = DemoDiaryClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
 
     di = DiaryInterface(mw)

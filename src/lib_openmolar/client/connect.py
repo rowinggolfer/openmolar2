@@ -260,14 +260,6 @@ class DemoClientConnection(ClientConnection):
 
         ClientConnection.__init__(self, conn_data)
 
-class DemoDiaryClientConnection(ClientConnection):
-    '''
-    I created a different diary schema.. and this is a connection to it.
-    '''
-    def __init__(self):
-        conn_data = ConnectionData(db_name="testdiary")
-        ClientConnection.__init__(self, conn_data)
-
 def test_soundex(cc):
     '''
     this will fail if the soundex function (from postgres contrib)
@@ -282,7 +274,7 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication([])
 
-    cc = DemoDiaryClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     #test_soundex(cc)

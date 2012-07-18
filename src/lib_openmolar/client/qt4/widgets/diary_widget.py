@@ -774,15 +774,13 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
 
 if __name__ == "__main__":
 
-
-
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     dl.setMinimumSize(500,300)
 
     from lib_openmolar.client.db_orm.diary import DiaryDataModel
-    from lib_openmolar.client.connect import DemoDiaryClientConnection
-    cc = DemoDiaryClientConnection()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
     cc.connect()
     model = DiaryDataModel()
     model.load()
