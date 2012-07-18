@@ -40,12 +40,6 @@ class MultipleDatabaseWidget(QtGui.QWidget):
 
         self.details_browser = QtGui.QTextBrowser()
 
-        self.bottomlabel = QtGui.QLabel(
-            _('''To add, edit or delete connections,
-go to edit-> preferences -> database connections'''))
-        self.bottomlabel.setAlignment(QtCore.Qt.AlignCenter)
-        self.bottomlabel.setWordWrap(True)
-
         frame = QtGui.QFrame(self)
         self.grid_layout = QtGui.QGridLayout(frame)
         self.grid_layout.setMargin(0)
@@ -56,8 +50,7 @@ go to edit-> preferences -> database connections'''))
         self.layout = QtGui.QVBoxLayout(self)
         self.layout.addWidget(self.toplabel)
         self.layout.addWidget(frame)
-        self.layout.addWidget(self.bottomlabel)
-
+        
         self._load_connections()
         self._connect_signals()
 

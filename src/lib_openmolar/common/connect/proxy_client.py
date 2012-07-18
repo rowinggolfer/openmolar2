@@ -74,8 +74,7 @@ class ProxyClient(object):
         #socket.setdefaulttimeout(5.0)
 
     def __repr__(self):
-        return "%s (connected = %s) (connecting = %s)"% (
-            self.name, self.is_connected, self.is_connecting)
+        return "%s"% self.name
 
     def set_user(self, user):
         assert type(user) == ProxyUser, \
@@ -92,8 +91,12 @@ class ProxyClient(object):
             LOGGER.warning("ProxyUser has expired - using default ProxyUser")
             self.user = ProxyUser()
 
-        location = 'https://%s:%s@%s:%d'% (self.user.name, self.user.psword,
-        self.connection230_data.host, self.connection230_data.port)
+        location = 'https://%s:%s@%s:%d'% (
+                    self.user.name, 
+                    self.user.psword,
+                    self.connection230_data.host, 
+                    self.connection230_data.port
+                    )
 
         LOGGER.debug("attempting connection to %s"%
             location.replace(self.user.psword, "********"))
@@ -113,6 +116,7 @@ class ProxyClient(object):
             raise self.ConnectionError(message)
 
         except socket.error as e:
+            LOGGER.exception("unable to connect")
             self._is_connecting = False
             raise self.ConnectionError(
             'Is the host %s running and accepting connections on port %d?'% (
@@ -187,10 +191,6 @@ class ProxyClient(object):
         return message
 
 def _test():
-    import logging
-    logging.basicConfig(level = logging.DEBUG)
-    import __builtin__
-    __builtin__.LOGGER = logging.getLogger()
     import gettext
     gettext.install("openmolar")
 
@@ -198,9 +198,7 @@ def _test():
     conn_data.default_connection()
 
     pc = ProxyClient(conn_data)
-    #admin_user = ProxyUser("admin", "dSqhZ0pt")
-    #pc.set_user(admin_user)
-
+    
     if pc.server is not None:
         print pc.server.system.listMethods()
 
@@ -211,9 +209,16 @@ def _test():
             LOGGER.debug("last backup %s"% payload.payload)
         else:
             LOGGER.error(payload.error_message)
+            
+    else:
+        LOGGER.error("unable to connect")
 
-    LOGGER.debug('ProxyClient.name = "%s"'% pc.name)
-    #LOGGER.debug(pc.html)
+    LOGGER.debug(pc.html)
 
 if __name__ == "__main__":
+
+    import logging
+    logging.basicConfig(level = logging.DEBUG)
+    LOGGER = logging.getLogger("test")
+    
     _test()

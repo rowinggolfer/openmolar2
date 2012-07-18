@@ -41,7 +41,7 @@ class Connection230Data(object):
         returns params for a TCP_IP connection on localhost:5432 to
         openmolar_demo with the default user and password.
         '''
-        self.name = "defaulting to localhost"
+        self.name = "default"
         self.host = "localhost"
         self.port = 230
 
@@ -54,13 +54,12 @@ class Connection230Data(object):
         parser.readfp(f)
 
         self.name = os.path.basename(conf_file)
-        self.host = parser.get("CONNECTION", "host")
-        self.port = parser.getint("CONNECTION", "port")
+        self.host = parser.get("SERVER", "host")
+        self.port = parser.getint("SERVER", "port")
         f.close()
 
     def __repr__(self):
-        return "Connection230Data - '%s' %s %s"% (
-            self.name, self.host, self.port)
+        return "'%s' %s %s"% (self.name, self.host, self.port)
 
     def __cmp__(self, other):
         def str_atts(obj):
@@ -74,15 +73,15 @@ def _test():
 
     obj = Connection230Data()
     obj.default_connection()
-    print obj
+    print (obj)
 
     obj2 = Connection230Data()
-    obj2.from_conf_file("/etc/openmolar/admin/230connections/localhost")
+    obj2.from_conf_file("/etc/openmolar/connections230-available/localhost")
 
-    print obj2
+    print (obj2)
 
     #check cmp function
-    obj == obj2
+    print ("equal %s"% (obj == obj2))
 
 if __name__ == "__main__":
     _test()
