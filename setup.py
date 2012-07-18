@@ -186,6 +186,11 @@ if INSTALL_COMMON:
                     'lib_openmolar.common.qt4.widgets',
                     'lib_openmolar.common.qt4.plugin_tools',
                     ],
+        data_files=[
+                        ('/etc/openmolar/connections-available',
+                        ['src/config_files/demo.conf']),
+                        ('/etc/openmolar/connections230-available',[]),
+                   ],
         )
 
 ###############################################################################
@@ -227,9 +232,9 @@ if INSTALL_ADMIN:
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps',
                             ['misc/admin/openmolar-admin.svg']),
-
                         ('/usr/share/applications',
-                            ['misc/admin/openmolar2-admin.desktop'])
+                            ['misc/admin/openmolar2-admin.desktop']),
+                        ('/etc/openmolar/admin/connections',[]),
                      ],
         scripts = ['misc/admin/openmolar-admin'],
         )
@@ -282,9 +287,9 @@ if INSTALL_CLIENT:
         data_files = [
                         ('/usr/share/icons/hicolor/scalable/apps',
                             ['misc/client/openmolar2.svg']),
-
                         ('/usr/share/applications',
-                            ['misc/client/openmolar2.desktop'])
+                            ['misc/client/openmolar2.desktop']),
+                        ('/etc/openmolar/client/connections',[]),
                      ],
         scripts = ['misc/client/openmolar-client'],
         )
