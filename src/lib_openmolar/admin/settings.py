@@ -30,7 +30,7 @@ from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 
 #CONFDIR = os.path.join(os.path.expanduser("~"),".openmolar")
 CONFDIR = "/etc/openmolar/admin/"
-CONF230S = os.path.join(CONFDIR, "230connections")
+CONF230S = os.path.join(CONFDIR, "connections230")
 
 class SettingsError(Exception):
     '''

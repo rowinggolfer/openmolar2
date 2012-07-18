@@ -150,6 +150,8 @@ class ProxyManager(object):
         '''
         return the currently selected proxy server
         '''
+        if self.selected_client.server is None:
+            raise ProxyClient.ConnectionError
         return self.selected_client.server
 
     def set_proxy_index(self, index):
@@ -295,18 +297,15 @@ def _test():
     import logging
     from lib_openmolar.common.connect import ProxyUser
 
+    #LOGGER is in the namespace due to lib_openmolar.admin import
+    
     LOGGER.setLevel(logging.DEBUG)
     gettext.install("openmolar")
     pm = ProxyManager()
 
-    #LOGGER is in the namespace due to lib_openmolar.admin import
     LOGGER.debug("using %s"% pm.selected_server)
-    #LOGGER.debug(pm.drop_db("openmolar_demo"))
+    LOGGER.debug(pm.drop_db("openmolar_demo"))
     LOGGER.debug(pm.create_demo_database())
-    admin_user = ProxyUser("admin", "dSqhZ0pt")
-    pm.selected_client.set_user(admin_user)
-
-    LOGGER.debug(pm.create_database("test"))
 
 if __name__ == "__main__":
     _test()
