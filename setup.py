@@ -21,6 +21,7 @@
 ###############################################################################
 
 from distutils.core import setup
+from distutils.command.install_data import install_data
 
 import logging
 import os
@@ -189,13 +190,27 @@ if INSTALL_COMMON:
         data_files=[
                         ('/etc/openmolar/connections-available',
                         ['src/config_files/demo.conf']),
-                        ('/etc/openmolar/connections230-available',[]),
+                        ('/etc/openmolar/connections230-available',
+                        ['src/config_files/localhost.conf']),
                    ],
         )
 
 ###############################################################################
 ##                        "admin" setup starts                               ##
 ###############################################################################
+
+class InstallAdminSymlink(install_data):
+    '''
+    re-implement this so that symlinks are created
+    '''
+    def run(self):
+        install_data.run(self)
+        os.symlink("/etc/openmolar/connections230-available/localhost.conf",
+                   "/etc/openmolar/admin/connections230/localhost")
+        os.symlink("/etc/openmolar/connections-available/demo.conf",
+                   "/etc/openmolar/admin/connections/demo")
+        
+
 
 if INSTALL_ADMIN:
     logging.info("running admin setup")
@@ -236,6 +251,7 @@ if INSTALL_ADMIN:
                             ['misc/admin/openmolar2-admin.desktop']),
                         ('/etc/openmolar/admin/connections',[]),
                      ],
+        cmdclass = {'install_data': InstallAdminSymlinks},
         scripts = ['misc/admin/openmolar-admin'],
         )
 
@@ -243,6 +259,18 @@ if INSTALL_ADMIN:
 ###############################################################################
 ##                        "client" setup starts                              ##
 ###############################################################################
+
+class InstallClientSymlinks(install_data):
+    '''
+    re-implement this so that symlinks are created
+    '''
+    def run(self):
+        install_data.run(self)
+        os.symlink("/etc/openmolar/connections230-available/localhost.conf",
+                   "/etc/openmolar/client/connections230/localhost")
+        os.symlink("/etc/openmolar/connections-available/demo.conf",
+                   "/etc/openmolar/client/connections/demo")
+        
 
 if INSTALL_CLIENT:
     logging.info("running client setup")
@@ -291,6 +319,7 @@ if INSTALL_CLIENT:
                             ['misc/client/openmolar2.desktop']),
                         ('/etc/openmolar/client/connections',[]),
                      ],
+        cmdclass = {'install_data': InstallAdminSymlinks},
         scripts = ['misc/client/openmolar-client'],
         )
 
