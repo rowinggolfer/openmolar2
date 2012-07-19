@@ -199,7 +199,7 @@ if INSTALL_COMMON:
 ##                        "admin" setup starts                               ##
 ###############################################################################
 
-class InstallAdminSymlink(install_data):
+class InstallAdminSymlinks(install_data):
     '''
     re-implement this so that symlinks are created
     '''
@@ -319,7 +319,7 @@ if INSTALL_CLIENT:
                             ['misc/client/openmolar2.desktop']),
                         ('/etc/openmolar/client/connections',[]),
                      ],
-        cmdclass = {'install_data': InstallAdminSymlinks},
+        cmdclass = {'install_data': InstallClientSymlinks},
         scripts = ['misc/client/openmolar-client'],
         )
 
