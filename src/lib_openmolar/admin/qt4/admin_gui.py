@@ -491,9 +491,21 @@ _("Version"), SETTINGS.VERSION,
                 except ProxyClient.ConnectionError as ex:
                     self.advise(ex.message, 2)
             else:
-                self.advise("%s<hr />%s"% (_("Shortcut not found"), url), 2)
+                if not self.message_link(url):
+                    self.advise(
+                    "%s<hr />%s"% (_("Shortcut not found"), url), 2)
+
         except ProxyManager.PermissionError as exc:
             self.advise("%s<hr />%s" %(_("Permission denied"), exc), 2)
+
+    def message_link(self, url_text):
+        LOGGER.debug("message_link function with text %s"%url_text)
+        message = self.selected_client.message_link(url_text)
+        if not message:
+            return False
+        self.known_server_widget.set_html(message)
+        return True
+
 
 def main():
 

@@ -161,6 +161,7 @@ class ProxyManager(object):
         '''
         LOGGER.debug("setting proxy index to %s"% index)
         self.selected_index = index
+        self.display_proxy_message()
 
     def switch_server_user(self):
         '''
@@ -170,7 +171,6 @@ class ProxyManager(object):
         LOGGER.warning("ProxyManager.switch_server_user should be overwritten")
         return False
 
-    @user_perms
     def create_demo_database(self):
         '''
         initiates the demo database
@@ -180,7 +180,6 @@ class ProxyManager(object):
             self.advise(_("failed"))
             return
 
-    @user_perms
     def create_demo_user(self):
         '''
         create and grant privileges to om_demo
@@ -289,6 +288,7 @@ class ProxyManager(object):
                 _("Operation failed"), payload.error_message), 2)
 
         self.display_proxy_message()
+                
 
 
 def _test():

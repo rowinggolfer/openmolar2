@@ -46,17 +46,32 @@ class KnownServerWidget(QtGui.QFrame):
 
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
-
+                
         self.listWidget = QtGui.QListWidget()
         self.browser = Browser()
 
+        label = QtGui.QLabel(
+            _("The following OM Servers are configured for use."))
+        label.setWordWrap(True)
+        button = QtGui.QPushButton(_("Refresh Server Message"))
+
+        left_frame = QtGui.QFrame()
+        left_layout = QtGui.QVBoxLayout(left_frame)
+        left_layout.setMargin(0)
+        left_layout.addWidget(label)        
+        left_layout.addWidget(self.listWidget)
+        left_layout.addWidget(button)
+        
+
         splitter = QtGui.QSplitter(self)
-        splitter.addWidget(self.listWidget)
+        splitter.addWidget(left_frame)
         splitter.addWidget(self.browser)
         splitter.setSizes([100,300])
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(splitter)
+
+        button.clicked.connect(self.call_refresh)
 
         self.listWidget.currentRowChanged.connect(self._server_chosen)
 
@@ -100,6 +115,13 @@ class KnownServerWidget(QtGui.QFrame):
             self.set_html(pm.html)
         except IndexError:
             self.browser.setHtml("<h1>No proxy server chosen</h1>")
+        self.server_changed.emit(row)
+
+    def call_refresh(self):
+        '''
+        function called when the refresh button is clicked.
+        '''
+        row = self.listWidget.currentRow()
         self.server_changed.emit(row)
 
     @property
