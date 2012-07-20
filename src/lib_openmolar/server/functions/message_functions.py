@@ -21,6 +21,7 @@
 ###############################################################################
 
 import logging
+import re
 import socket
 
 CSS = '''
@@ -75,9 +76,27 @@ def get_footer():
         except ImportError:
             VERSION = "Unknown"
             logger.exception("unable to parse for server versioning")
-
-        FOOTER = '''\n<br /><br />
-        <i>server library version %s</i></body>\n</html>'''% VERSION
+    
+        try:
+            f = open("/etc/openmolar/manager_password.txt", "r")
+            PASSWORD='''
+                <em>Your admin password on this server is %s</em>
+                    '''% re.search("PASSWORD = (.*)", f.read()).groups()[0]
+            f.close()
+            
+        except IOError:
+            PASSWORD="admin password file unreadable. Good!"
+            
+        FOOTER = '''
+            <br /><br />
+            <i>server library version %s</i>
+            <ul>
+                <li><a href="show server log">Show Server Log</a></li>
+            </ul>
+            %s
+            </body>
+            </html>
+            '''% (VERSION, PASSWORD)
 
     return FOOTER
 
@@ -121,17 +140,35 @@ class MessageFunctions(object):
         get_footer())
 
     def postgres_error_message(self):
-        return '''%s
+        return u'''%s
         %s
         <p>
         <b>%s</b>
-        %s <i>/var/log/openmolar/server.log</i>
+        <br />
+        %s <a href="show server log">%s</a>
+        
         </p>
         <br />
         %s'''%(HEADER, self.location_header,
         _("Cannot connect to the postgres server on this machine!"),
-        _("further information can be found in the log file"),
+        _("further information may be found in the"),
+        _("Server Log File"),
         get_footer())
+
+    
+    def message_link(self, url):
+        '''
+        the "url" here will be text of a link that has been displayed as
+        part of the html from the server.
+        '''
+        
+        if url == "show server log":
+            f = open("/var/log/openmolar/server.log", "r")
+            data = f.read()
+            f.close()
+            return "<html><body><pre>%s</pre></body></html>"% data
+        
+        return None
 
 def _test():
     '''

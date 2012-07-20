@@ -36,7 +36,7 @@ LOOSE_METHODS = (   'system.listMethods',
                     'admin_welcome',
                     #'admin_welcome_template',
                     'available_databases',
-                    #'create_db',
+                    'create_db',
                     'create_demodb',
                     'create_demo_user',
                     #'create_user',
@@ -56,6 +56,7 @@ LOOSE_METHODS = (   'system.listMethods',
                     'refresh_saved_schema',
                     #'save_schema'
                     'truncate_demo',
+                    'message_link'
                     )
 
 MANAGER_METHODS = ( 'create_db',
@@ -189,9 +190,10 @@ def _test():
     '''
     logging.basicConfig(level=logging.DEBUG)
     sf = ServerFunctions()
-    sf.log.debug(sf.admin_welcome())
+    print (sf.admin_welcome())
 
     print (dir(sf))
-
+    print (sf.message_link("random_url_text"))
+    
 if __name__ == "__main__":
     _test()
