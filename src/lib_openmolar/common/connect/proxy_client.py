@@ -109,6 +109,7 @@ class ProxyClient(object):
             LOGGER.debug("connected and pingable (this is very good!)")
             self._server = _server
         except xmlrpclib.ProtocolError:
+            self._server = None
             self._is_connecting = False
             message = u"%s '%s'"% (_("connection refused for user"),
                 self.user.name)
@@ -189,6 +190,30 @@ class ProxyClient(object):
             <a href='Retry_230_connection'>%s</a>'''% (
             self.connection230_data, _("Try Again"))
         return message
+
+    def message_link(self, url_text):
+        '''
+        poll the openmolar xml_rpc server for messages
+        '''
+        if self._server is not None:
+            try:
+                payload = pickle.loads(self.server.message_link(url_text))
+                if not payload.permission:
+                    raise self.PermissionError
+                message = payload.payload
+            except xmlrpclib.Fault:
+                LOGGER.exception("error getting proxy message")
+                message = '''<h1>Unexpected server error!</h1>
+                please check the log and report a bug.'''
+            except Exception:
+                LOGGER.exception("unknown error in proxy_message")
+                return "unknown error in proxy_message"
+        else:
+            message = '''<h1>No connection</h1>%s<br />
+            <a href='Retry_230_connection'>%s</a>'''% (
+            self.connection230_data, _("Try Again"))
+        return message
+
 
 def _test():
     import gettext
