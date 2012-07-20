@@ -60,6 +60,8 @@ export EXAMPLES
 
 ifeq ($(OMSUFFIX), )
 	OMSUFFIX=namespace
+else
+	OMSUFFIXES=$(OMSUFFIX)
 endif
 
 ifeq ($(DIST), )
@@ -132,6 +134,8 @@ tes1t:
 	
 help:
 	@echo "$$USEAGE"
+	@echo $(OMSUFFIXES)
+	@echo $(OMSUFFIX)
 
 examples:
 	@echo "$$EXAMPLES"
@@ -234,12 +238,7 @@ pushdebs:
 			make OMSUFFIX=$(suffix) DIST=$(dist) pushdeb; \
 			) \
 	 )
-	
-	#reprepro includedeb squeeze $(RELEASE_DIR)namespace/debs/*.deb ;\
-	#reprepro includedeb squeeze $(RELEASE_DIR)client/debs/*.deb ;\
-	#reprepro includedeb squeeze $(RELEASE_DIR)common/debs/*.deb ;\
-	#reprepro includedeb squeeze $(RELEASE_DIR)admin/debs/*.deb ;\
-	#reprepro includedeb squeeze $(RELEASE_DIR)server/debs/*.deb
+
 
 rpm:
 	@if [ ! -e "$(TARBALL_DIR)$(TARBALL)" ]; then make tarball; fi
