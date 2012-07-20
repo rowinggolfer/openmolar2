@@ -1,4 +1,4 @@
-openmolar-client (2.0.66+hg021-1~__DIST__0) __DIST__; urgency=low
+openmolar-client (2.0.67+hg021-0~__DIST__0) __DIST__; urgency=low
 
   * added postinst script to create symlink in /etc/openmolar/client/connections* etc..
 

@@ -236,6 +236,7 @@ if INSTALL_ADMIN:
                         ('/usr/share/applications',
                             ['misc/admin/openmolar2-admin.desktop']),
                         ('/etc/openmolar/admin/connections',[]),
+                        ('/etc/openmolar/admin/connections230',[])
                      ],
         scripts = ['misc/admin/openmolar-admin'],
         )
@@ -292,6 +293,7 @@ if INSTALL_CLIENT:
                         ('/usr/share/applications',
                             ['misc/client/openmolar2.desktop']),
                         ('/etc/openmolar/client/connections',[]),
+                        ('/etc/openmolar/client/connections230',[]),
                      ],
         scripts = ['misc/client/openmolar-client'],
         )
