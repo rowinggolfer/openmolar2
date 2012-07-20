@@ -1,3 +1,10 @@
+openmolar-client (2.0.68+hg021-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release"
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 20 Jul 2012 18:37:50 +0100
+
+
 openmolar-client (2.0.67+hg021-0~__DIST__0) __DIST__; urgency=low
 
   * added postinst script to create symlink in /etc/openmolar/client/connections* etc..
