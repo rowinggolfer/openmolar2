@@ -88,7 +88,7 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
 
     @property
     def MASTER_PWORD(self):
-        return self.config.openmolar_pass
+        return self.config.postgres_pass
 
     def _init_permissions(self):
         '''
@@ -194,6 +194,13 @@ def _test():
 
     print (dir(sf))
     print (sf.message_link("random_url_text"))
+    
+    sf.backup("openmolar_demo")
+    sf.backup("openmolar_demo", schema_only=True)
+    
+    print sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
+                        "/home/neil/tmp/openmolar_demo/new.sql" )
+    
     
 if __name__ == "__main__":
     _test()

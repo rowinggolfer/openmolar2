@@ -21,12 +21,17 @@
 ###############################################################################
 
 import logging
+import os
 import subprocess
 import sys
 import psycopg2
 
 from lib_openmolar.server.functions.password_generator import new_password
 from lib_openmolar.server.functions.om_server_config import OMServerConfig
+
+BACKUP_DIR = "/etc/openmolar"
+BACKUP_DIR = "/home/neil/tmp"
+
 
 def log_exception(func):
     def db_func(*args, **kwargs):
@@ -268,7 +273,11 @@ class DBFunctions(object):
                 logging.info("role '%s' removed"% user_group)
             else:
                 return False
-
+            
+        if dbname == "openmolar_demo":
+            logging.warning("removing role (if exists) om_demo")
+            self._execute('drop user if exists om_demo')
+            
         return True
 
     @log_exception
@@ -283,8 +292,9 @@ class DBFunctions(object):
             password = new_password()
 
         try:
+            self._execute("create user %s"% username)
             self._execute(
-                "create user %s with login encrypted password '%s' "% (
+                "alter user %s with login encrypted password '%s' "% (
                     username, password))
             return True
         except Exception:
@@ -340,15 +350,19 @@ class DBFunctions(object):
         for tablename in cursor.fetchall():
             yield tablename[0]
 
-    def _sequences(self, dbname):
+    def _sequences(self, dbname, exceptions):
         '''
         returns all the sequences in schema dbname
+        exceptions is a list of tables whose sequences are to be ignored.
         '''
         conn = psycopg2.connect(self.__conn_atts(dbname))
         cursor = conn.cursor()
         cursor.execute(
         "select sequence_name from information_schema.sequences")
         for sequence_name in cursor.fetchall():
+            for exception in exceptions:
+                if sequence_name[0].startswith(exception):
+                    continue
             yield sequence_name[0]
 
     def truncate_demo(self):
@@ -364,17 +378,78 @@ class DBFunctions(object):
         resets the patient serialno index
         '''
         logging.warning("removing all data from %s"% dbname)
+        
+        exceptions = ("settings", "procedure_codes")
+        
         for tablename in self._tables(dbname):
-            if tablename != 'procedure_codes':
+            if tablename not in exceptions:
                 logging.info("... truncating '%s'"% tablename)
                 self._execute("TRUNCATE %s CASCADE"% tablename, dbname)
-        for sequence in self._sequences(dbname):
-            if not sequence.startswith('procedure_codes'):
-                logging.info("... reseting sequence '%s'"% sequence)
-                self._execute("select setval('%s', 1, false)"% sequence,
-                    dbname)
+        for sequence in self._sequences(dbname, exceptions):
+            logging.info("... reseting sequence '%s'"% sequence)
+            self._execute("select setval('%s', 1, false)"% sequence,
+                dbname)
         return True
+    
+    @log_exception
+    def backup(self, dbname, schema_only=False):
+        '''
+        calls a pg_dump (using db user openmolar)
+        if schema_only is True, then the -s option is passed into pg_dump.
+        '''
+        logging.info("backing up %s"% dbname)
 
+        opts = ["-s", dbname] if schema_only else [dbname]
+        
+        proc = subprocess.Popen(
+            ["pg_dump", "-h", "127.0.0.1", 
+            "-U", "openmolar", "-W"] + opts,
+            stdin = subprocess.PIPE,
+            stdout=subprocess.PIPE)
+        
+        proc.stdin.write(self.MASTER_PWORD)
+        proc.stdin.flush()
+            
+        stdout, stderr = proc.communicate()
+        
+        if stderr:
+            logging.warning("Errors were thrown %s"% stderr)
+        
+        backup_dir = os.path.join(BACKUP_DIR, dbname)
+        
+        if not os.path.isdir(backup_dir):
+            os.makedirs(backup_dir)
+
+        filepath = os.path.join(backup_dir, "backup.sql")
+        
+        f = open(filepath, "w")
+        f.write(stdout)
+        f.close()
+        
+        logging.info("backup saved to %s"% filepath)
+
+
+    @log_exception
+    def get_update_script(self, original, current):
+        '''
+        calls apgdiff to see if the schemas are the same
+        '''
+        logging.info("comparing schemas of %s and %s"% (original, current))
+
+        
+        proc = subprocess.Popen(
+            ["apgdiff", "--ignore-start-with", original, current],
+            stdout=subprocess.PIPE)
+        
+        stdout, stderr = proc.communicate()
+        
+        if stderr:
+            logging.warning("Errors were thrown %s"% stderr)
+        
+        if not stdout:
+            return ""
+        return stdout 
+            
 def _test():
     '''
     test the DBFunctions class
