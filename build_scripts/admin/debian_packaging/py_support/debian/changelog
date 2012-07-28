@@ -1,3 +1,17 @@
+openmolar-admin (2.0.69+hg028-1~__DIST__0) __DIST__; urgency=low
+
+  * changed postinst so that symlink is forced (if already present)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Jul 2012 08:50:00 +0100
+
+
+openmolar-admin (2.0.69+hg028-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release"
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Jul 2012 00:59:54 +0100
+
+
 openmolar-admin (2.0.68+hg027-0~__DIST__0) __DIST__; urgency=low
 
   * new upstream "release"

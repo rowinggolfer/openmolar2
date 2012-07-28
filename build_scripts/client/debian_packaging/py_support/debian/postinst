@@ -2,5 +2,5 @@
 
 #DEBHELPER#
 
-ln -s "/etc/openmolar/connections230-available/localhost.conf" "/etc/openmolar/client/connections230/localhost"
-ln -s "/etc/openmolar/connections-available/demo.conf" "/etc/openmolar/client/connections/demo"
+ln -sf "/etc/openmolar/connections230-available/localhost.conf" "/etc/openmolar/client/connections230/localhost"
+ln -sf "/etc/openmolar/connections-available/demo.conf" "/etc/openmolar/client/connections/demo"

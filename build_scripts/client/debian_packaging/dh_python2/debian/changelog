@@ -1,3 +1,17 @@
+openmolar-client (2.0.69+hg021-1~__DIST__0) __DIST__; urgency=low
+
+  * changed debian postinst script so that symlink is forced
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Jul 2012 08:27:14 +0100
+
+
+openmolar-client (2.0.69+hg021-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream "release"
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 21 Jul 2012 00:59:48 +0100
+
+
 openmolar-client (2.0.68+hg021-0~__DIST__0) __DIST__; urgency=low
 
   * new upstream "release"

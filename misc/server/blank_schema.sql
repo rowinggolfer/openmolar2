@@ -23,6 +23,8 @@
 
 ###############################################################################
 ##   This schema is a work in progress, and subject to change                ##
+##   A version number is put into table settings                             ##
+##   search this fle for 'schema_version'                                    ##
 ###############################################################################
 
 --*/
@@ -188,6 +190,19 @@ CREATE TYPE diary_entry_type as ENUM (
 
 
 /*-- TABLES --*/
+
+-- settings table is a simple key/value store 
+-- this should be useable by database owner only
+
+CREATE TABLE settings (
+
+	ix SERIAL,
+	key  VARCHAR(80),
+	data TEXT,
+	CONSTRAINT pk_settings PRIMARY KEY (ix)
+
+	);
+
 
 CREATE TABLE procedure_codes (
 
@@ -925,6 +940,9 @@ CREATE FUNCTION get_available_in_office_slots(t1 timestamp, t2 timestamp, id int
 
 
 /*-- DATA --*/
+
+INSERT INTO settings (key, data) VALUES ('created', 'today');
+INSERT INTO settings (key, data) VALUES ('schema_version', '0.1');
 
 INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A01', 'Exam (Routine)');
 INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A02', 'Exam (Extensive)');
