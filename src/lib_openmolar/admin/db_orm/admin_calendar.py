@@ -21,14 +21,14 @@
 ###############################################################################
 
 '''
-Provides a DemoGenerator for diary_calendar
+Provides a DemoGenerator for calendar
 '''
 
 from PyQt4 import QtSql, QtCore
 
 from lib_openmolar.common.db_orm import InsertableRecord
 
-TABLENAME = "diary_calendar"
+TABLENAME = "calendar"
 
 class DemoGenerator(object):
     def __init__(self, database):
