@@ -1,0 +1,22 @@
+### this file is neil's todo list for the application
+### it is by no means complete.
+
+
+server should be able to supply it's log file (on request) to the admin app.
+    DONE!
+
+use apgdiff.
+    when the server package is installed, database template should be updated and dumped to 
+    /var/lib/openmolar/schema_dump_VERSION.sql
+    apgdiff can then be called on ny schema to check if it conforms.
+
+More functionality for openmolar-server?
+    examples 
+
+    openmolar_server --create_demo
+    openmolar_server --create_user neil
+    openmolar_server -h 127.0.0.1 -p 230 -u admin -p password --check_schema openmolar_demo
+
+
+Fix FuzzyMatch Shell script
+    uses version 8.4 :(
