@@ -20,7 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 import os
 import sys
 import ConfigParser
@@ -68,13 +67,13 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         except IOError as exc:
             self.__good_read = False
             if exc.errno == 13:
-                logging.warning(
+                LOGGER.warning(
         "Insufficient Permission unable to parse config file. Are You Root?")
                 sys.exit("FATAL ERROR - Unable to read config file")
             elif exc.errno == 2:
-                logging.warning("no config file found")
+                LOGGER.warning("no config file found")
             else:
-                logging.exception(
+                LOGGER.exception(
                 "Unknown error in parsing config file.")
                 raise exc
 
@@ -86,8 +85,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         re-installs stuff.. which could be devastating!
         '''
         if os.path.isfile(PASSWORD_FILE):
-            log = logging.getLogger("openmolar_server")
-            log.warning("plain text password file exists")
+            LOGGER.warning("plain text password file exists")
 
         return self.__good_read
 
@@ -99,7 +97,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         try:
             return self.get("config", "version")
         except ConfigParser.NoSectionError as exc:
-            logging.info("no version found in server.conf")
+            LOGGER.info("no version found in server.conf")
             return None
 
     @property
@@ -139,7 +137,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         self.set("ssl", "key", os.path.join(ROOT_DIR, "privatekey.pem"))
 
     def write(self, f=None):
-        logging.warning("writing conf file '%s'"% CONF_FILE)
+        LOGGER.warning("writing conf file '%s'"% CONF_FILE)
         f = open(CONF_FILE, "w")
         f.write(HEADER)
         ConfigParser.SafeConfigParser.write(self, f)
@@ -233,17 +231,20 @@ def _test():
     conf = OMServerConfig()
     #conf.new_config()
     #conf.write()
-    logging.debug("config is current? %s"% conf.is_current)
+    LOGGER.debug("config is current? %s"% conf.is_current)
     conf.update()
-    logging.debug("installed = %s"% conf.is_installed)
-    logging.debug("managers - %s"% conf.managers)
-    logging.debug("postgres host %s"% conf.postgres_host)
-    logging.debug("postgres port %s"% conf.postgres_port)
-    logging.debug("postgres user %s"% conf.postgres_user)
-    logging.debug("postgres password %s"% ("*" * len(conf.postgres_pass)))
+    LOGGER.debug("installed = %s"% conf.is_installed)
+    LOGGER.debug("managers - %s"% conf.managers)
+    LOGGER.debug("postgres host %s"% conf.postgres_host)
+    LOGGER.debug("postgres port %s"% conf.postgres_port)
+    LOGGER.debug("postgres user %s"% conf.postgres_user)
+    LOGGER.debug("postgres password %s"% ("*" * len(conf.postgres_pass)))
 
 
 
 if __name__ == "__main__":
+    import logging
     logging.basicConfig(level = logging.DEBUG)
+    
+    LOGGER = logging.getLogger("test")
     _test()

@@ -20,8 +20,6 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
-
 class PayLoad(object):
     '''
     A wrapper for any server response.
@@ -63,13 +61,17 @@ def _test():
     '''
     def method():
         return "success"
-    logging.basicConfig(level=logging.DEBUG)
     pl = PayLoad(method)
-    logging.debug("payload = '%s'"% pl.payload)
+    LOGGER.debug("payload = '%s'"% pl.payload)
     pl.permission=True
     pl.set_payload(method())
-    logging.debug("payload = '%s'"% pl.payload)
+    LOGGER.debug("payload = '%s'"% pl.payload)
 
 if __name__ == "__main__":
     from gettext import gettext as _
+    import logging
+    logging.basicConfig(level = logging.DEBUG)
+    
+    LOGGER = logging.getLogger("test")
+    
     _test()

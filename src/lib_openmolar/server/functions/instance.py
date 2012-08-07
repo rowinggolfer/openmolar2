@@ -21,7 +21,6 @@
 ###############################################################################
 
 import hashlib
-import logging
 import random
 import pickle
 import string
@@ -59,8 +58,7 @@ LOOSE_METHODS = (   'system.listMethods',
                     'message_link'
                     )
 
-MANAGER_METHODS = ( 'create_db',
-                    'create_user',
+MANAGER_METHODS = ( 'create_user',
                     #'current_user',
                     'drop_db',
                     'drop_user',
@@ -71,14 +69,13 @@ MANAGER_METHODS = ( 'create_db',
                     #'newDB_sql',
                     )
 
-class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
+class ServerInstance(DBFunctions, ShellFunctions, MessageFunctions):
     '''
     A class whose functions will be inherited by the server.
     Inherits from many other classes as only one call of
     SimpleXMLServer.register_instance is allowed.
     '''
     _user = None
-    log = logging.getLogger("openmolar_server")
     PERMISSIONS = {}
 
     def __init__(self):
@@ -98,7 +95,7 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             self.PERMISSIONS[method] = ["admin", "default"]
         for method in MANAGER_METHODS:
             if self.PERMISSIONS.has_key(method):
-                self.log.debug(
+                LOGGER.debug(
                 "whoops... permissions has a duplicate entry for method '%s'"%
                 method)
             else:
@@ -114,10 +111,10 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         message = "permission for user '%s' for method '%s'"% (user, method)
 
         if (user == "root" or user in self.PERMISSIONS.get(method, [])):
-            self.log.debug("granted %s"% message)
+            LOGGER.debug("granted %s"% message)
             return True
         else :
-            self.log.debug("DENIED %s"% message)
+            LOGGER.debug("DENIED %s"% message)
             return False
 
     def _dispatch(self, method, params):
@@ -126,7 +123,7 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
         around all functions.
         returns a pickled object of type ..doc `Payload`
         '''
-        self.log.debug("_dispatch called for method %s"% method)
+        LOGGER.debug("_dispatch called for method %s"% method)
         pl = PayLoad(method)
         pl.permission = self._get_permission(method)
         if pl.permission:
@@ -136,9 +133,9 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
             except Exception as exc:
                 pl.set_payload("openmolar server error - check the server log")
                 pl.set_exception(exc)
-                self.log.exception("exception in method %s"% method)
+                LOGGER.exception("exception in method %s"% method)
 
-        self.log.debug("returning (pickled) %s"% pl)
+        LOGGER.debug("returning (pickled) %s"% pl)
         return pickle.dumps(pl)
 
     def admin_welcome(self):
@@ -186,10 +183,9 @@ class ServerFunctions(DBFunctions, ShellFunctions, MessageFunctions):
 
 def _test():
     '''
-    test the ShellFunctions class
+    test the ServerInstance class
     '''
-    logging.basicConfig(level=logging.DEBUG)
-    sf = ServerFunctions()
+    sf = ServerInstance()
     print (sf.admin_welcome())
 
     print (dir(sf))
@@ -198,9 +194,13 @@ def _test():
     sf.backup("openmolar_demo")
     sf.backup("openmolar_demo", schema_only=True)
     
-    print sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
-                        "/home/neil/tmp/openmolar_demo/new.sql" )
+    print (sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
+                        "/home/neil/tmp/openmolar_demo/new.sql" ))
     
     
 if __name__ == "__main__":
+    import __builtin__
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    __builtin__.LOGGER = logging.getLogger("openmolar_server")
     _test()

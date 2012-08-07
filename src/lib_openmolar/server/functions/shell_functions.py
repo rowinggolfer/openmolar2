@@ -24,21 +24,36 @@ import logging
 import subprocess
 import sys
 
+def log_exception(func):
+    def shell_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            LOGGER.exception("unhandled exception")
+            return ""
+    return shell_func
+
 class ShellFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
-    def install_fuzzymatch(self, name):
+    
+    @log_exception
+    def install_fuzzymatch(self, dbname):
         '''
         installs fuzzymatch functions into database with the name given
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("Installing fuzzymatch functions into database '%s'"% name)
+        LOGGER.info("Installing fuzzymatch functions into database '%s'"% dbname)
         try:
-            p = subprocess.Popen(["openmolar-install-fuzzymatch", name])
-            p.wait()
+            p = subprocess.Popen(["openmolar-fuzzymatch", dbname],
+                stdout = subprocess.PIPE)
+            while True:
+                line = p.stdout.readline()
+                if not line:
+                    break
+                LOGGER.info(line)
         except Exception as exc:
-            log.exception("unable to install fuzzymatch into '%s'"% name)
+            LOGGER.exception("unable to install fuzzymatch into '%s'"% dbname)
             return False
         return True
 
@@ -46,10 +61,12 @@ def _test():
     '''
     test the ShellFunctions class
     '''
-    logging.basicConfig(level=logging.DEBUG)
-    log = logging.getLogger("openmolar_server")
     sf = ShellFunctions()
-    #log.debug(sf.get_demo_user())
+    sf.install_fuzzymatch("openmolar_demo")
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    LOGGER = logging.getLogger("openmolar_server")
+    
     _test()

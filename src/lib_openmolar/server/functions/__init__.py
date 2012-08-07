@@ -1,3 +1,3 @@
-from instance import ServerFunctions
+from instance import ServerInstance
 
-__all__ = ["ServerFunctions"]
+__all__ = ["ServerInstance"]

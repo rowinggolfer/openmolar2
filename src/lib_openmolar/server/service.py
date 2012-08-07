@@ -25,7 +25,6 @@
 and the book python for sysadmins (which I own)
 '''
 
-import logging
 import os
 import sys
 
@@ -34,10 +33,7 @@ from signal import SIGTERM
 PIDFILE = "/var/run/openmolar/server.pid"
 
 class Service(object):
-    def __init__(self):
-        logging.basicConfig(level=logging.DEBUG)
-        self.log = logging.getLogger()
-
+    
     def write_pidfile(self):
         dirname = os.path.dirname(PIDFILE)
         try:
@@ -46,7 +42,7 @@ class Service(object):
             if exc.errno == 17:
                 pass
             else:
-                self.log.error('Unable to create %s - Are you root?'% dirname)
+                LOGGER.error('Unable to create %s - Are you root?'% dirname)
                 return False
 
         pid = os.getpid()
@@ -57,9 +53,9 @@ class Service(object):
 
         except IOError, exc:
             if exc.errno == 13:
-                self.log.error('Unable to create %s - Are you root?' % pid)
+                LOGGER.error('Unable to create %s - Are you root?' % pid)
             else:
-                self.log.exception('The service module had an IO error:')
+                LOGGER.exception('The service module had an IO error:')
             return False
 
         return True
@@ -70,11 +66,10 @@ class Service(object):
         daemonises the process,
         writes the new PIDfile
         '''
-        if os.path.isfile(PIDFILE):
-            self.log.warning("%s already exists"% PIDFILE)
-
+        if self.is_running:
+            LOGGER.warning("openmolar-server is already started")
+            
         self.daemonise(stdin, stdout, stderr)
-
         return self.write_pidfile()
 
     def daemonise(self, stdin, stdout, stderr):
@@ -92,7 +87,7 @@ class Service(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, exc:
-            self.log.exception("fork 1 failed")
+            LOGGER.exception("fork 1 failed")
             sys.exit("%s: fork #1 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
 
@@ -105,7 +100,7 @@ class Service(object):
             if pid > 0:
                 sys.exit(0)
         except OSError, exc:
-            self.log.exception("fork 2 failed")
+            LOGGER.exception("fork 2 failed")
             sys.exit("%s: fork #2 failed: (%d) %s\n" % (sys.argv[0],
             exc.errno, exc.strerror))
 
@@ -121,38 +116,46 @@ class Service(object):
         try:
             pidfile = open(PIDFILE, "r")
             pid = pidfile.readline()
-            self.log.info("Stopping the openmolar_server. " +
+            LOGGER.info("Stopping the openmolar_server. " +
                 "With pid number %s" % pid)
             os.kill(int(pid), SIGTERM)
             os.remove(PIDFILE)
 
         except OSError, e:
-            self.log.error("Could not kill process")
+            LOGGER.error("Could not kill process")
             if e.errno == 3: # catch a 'no such process'
                 os.remove(PIDFILE)
-                self.log.info("Removed defunct PID file.")
-                self.log.info("Try restarting openmolar-server now")
+                LOGGER.info("Removed defunct PID file.")
+                LOGGER.info("Try restarting openmolar-server now")
 
         except IOError:
-            self.log.warning("PID file not found when stopping server.")
-            self.log.warning("openmolar-server may not be running?")
+            LOGGER.warning("PID file not found when stopping server.")
+            LOGGER.warning("openmolar-server may not be running?")
 
     def status_(self):
         '''
         Check the status of the process (running | not running)
         '''
-        self.log.info('checking status of openmolar-server process')
+        LOGGER.info('checking status of openmolar-server process')
         try:
             pidfile = open(PIDFILE)
             pid = pidfile.readline()
             os.kill(int(pid), 0)
         except OSError:
-            self.log.warning('openmolar-server process not running')
+            LOGGER.warning('openmolar-server process not running')
         except IOError:
-            self.log.warning('openmolar-server process not running')
+            LOGGER.warning('openmolar-server process not running')
         else:
-            self.log.info(
+            LOGGER.info(
                 'openmolar-server process is running with PID: %s'% pid)
+
+    @property
+    def is_running(self):
+        '''
+        true is the process already exists.
+        '''
+        return os.path.isfile(PIDFILE)
+            
 
 def _test():
     sd = Service()
@@ -163,8 +166,12 @@ def _test():
     elif "status" in sys.argv:
         sd.status_()
     else:
-        print "nothing to do"
-        print "please pass 'start | stop | status' as arguments"
+        LOGGER.warning("nothing to do")
+        LOGGER.info("please pass 'start | stop | status' as arguments")
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    LOGGER = logging.getLogger("test")
+    
     _test()

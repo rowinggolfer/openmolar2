@@ -20,13 +20,10 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 import os
 import subprocess
 
 from lib_openmolar.server.functions.om_server_config import OMServerConfig
-
-LOGDIR = "/var/log/openmolar"
 
 class Installer(object):
     '''
@@ -71,8 +68,7 @@ class Installer(object):
         '''
         initialises the user "openmolar"
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("calling script openmolar-init-master-user")
+        LOGGER.info("calling script openmolar-init-master-user")
 
         p = subprocess.Popen(["openmolar-init-master-user"],
             stdout=subprocess.PIPE )
@@ -81,14 +77,13 @@ class Installer(object):
             line = p.stdout.readline()
             if not line:
                 break
-            log.info(line)
+            LOGGER.info(line)
 
     def init_master_db(self):
         '''
         initialises the openmolar_master database
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("calling script openmolar-init-master-db")
+        LOGGER.info("calling script openmolar-init-master-db")
 
         p = subprocess.Popen(["openmolar-init-master-db"],
             stdout=subprocess.PIPE )
@@ -97,7 +92,7 @@ class Installer(object):
             line = p.stdout.readline()
             if not line:
                 break
-            log.info(line)
+            LOGGER.info(line)
 
     def install(self):
         '''

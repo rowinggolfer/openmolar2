@@ -20,7 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
+
 import os
 import subprocess
 import sys
@@ -38,8 +38,7 @@ def log_exception(func):
         try:
             return func(*args, **kwargs)
         except Exception:
-            log = logging.getLogger("openmolar-server")
-            log.exception("unhandled exception")
+            LOGGER.exception("unhandled exception")
             return ""
     return db_func
 
@@ -72,29 +71,28 @@ class DBFunctions(object):
         '''
         execute an sql statement with default connection rights.
         '''
-        log = logging.getLogger("openmolar_server")
         try:
             conn = psycopg2.connect(self.__conn_atts(dbname))
             try:
                 # functions such as create and drop do not support transactions
                 conn.autocommit = True
             except AttributeError:
-                log.warning(
+                LOGGER.warning(
                     "no autocommit attribute in pyscopg2 - old version?")
                 conn.set_isolation_level(0)
 
             cursor = conn.cursor()
-            #log.debug(statement)
+            LOGGER.debug(statement)
             cursor.execute(statement)
             conn.close()
             return True
         except psycopg2.Warning as warn:
-            log.warning(warn)
+            LOGGER.warning(warn)
             conn.close()
             return True
         except psycopg2.Error as exc:
-            log.exception("error executing statement")
-            log.error(statement)
+            LOGGER.exception("error executing statement")
+            LOGGER.error(statement)
             raise exc
 
     @log_exception
@@ -112,8 +110,7 @@ class DBFunctions(object):
         to poll for this information.
 
         '''
-        log = logging.getLogger("openmolar_server")
-        log.debug("polling for available databases")
+        LOGGER.debug("polling for available databases")
         databases = []
         try:
             conn = psycopg2.connect(self.default_conn_atts)
@@ -126,29 +123,9 @@ class DBFunctions(object):
                 databases.append(result[0])
             conn.close()
         except Exception as exc:
-            log.exception("Serious Error")
+            LOGGER.exception("Serious Error")
             return "NONE"
         return databases
-
-    @log_exception
-    def install_fuzzymatch(self, dbname):
-        '''
-        installs fuzzymatch functions into database with the name given
-        '''
-        log = logging.getLogger("openmolar_server")
-        log.info("Installing fuzzymatch functions into database '%s'"% dbname)
-        try:
-            p = subprocess.Popen(["openmolar-install-fuzzymatch", dbname],
-                stdout = subprocess.PIPE)
-            while True:
-                line = p.stdout.readline()
-                if not line:
-                    break
-                log.info(line)
-        except Exception as exc:
-            log.exception("unable to install fuzzymatch into '%s'"% dbname)
-            return False
-        return True
 
     @log_exception
     def newDB_sql(self, dbname):
@@ -158,9 +135,8 @@ class DBFunctions(object):
         sql_file = "/usr/share/openmolar/blank_schema.sql"
         perms_file = "/usr/share/openmolar/permissions.sql"
 
-        log = logging.getLogger("openmolar_server")
-        log.info("reading sql from %s"% sql_file)
-        log.info("reading sql from %s"% perms_file)
+        LOGGER.info("reading sql from %s"% sql_file)
+        LOGGER.info("reading sql from %s"% perms_file)
 
         groups = {}
         perms, sql = "",""
@@ -182,7 +158,7 @@ class DBFunctions(object):
             perms = f.read()
             f.close()
         except IOError:
-            log.exception("error reading sql files.")
+            LOGGER.exception("error reading sql files.")
 
         permissions = perms.replace("ADMIN_GROUP", groups["admin"]).replace(
                             "CLIENT_GROUP", groups["client"])
@@ -201,14 +177,13 @@ class DBFunctions(object):
         '''
         creates a database with the name given
         '''
-        log = logging.getLogger("openmolar_server")
         try:
-            log.info("creating new database %s [with owner openmolar]"% dbname)
+            LOGGER.info("creating new database %s [with owner openmolar]"% dbname)
             self._execute("create database %s with owner openmolar"% dbname)
 
             return self._layout_schema(dbname)
         except:
-            log.exception("exeption in %(module)s")
+            LOGGER.exception("exeption in %(module)s")
         return False
 
     @log_exception
@@ -219,13 +194,12 @@ class DBFunctions(object):
         try:
             sql = self.newDB_sql(dbname)
 
-            log = logging.getLogger("openmolar_server")
-            log.info("laying out schema for database '%s'"% dbname)
+            LOGGER.info("laying out schema for database '%s'"% dbname)
 
             self._execute(sql, dbname)
             return True
         except:
-            log.exception("exeption in %(module)s")
+            LOGGER.exception("exeption in %(module)s")
         return False
 
     @log_exception
@@ -233,13 +207,12 @@ class DBFunctions(object):
         '''
         create our demo user
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("creating a demo user")
+        LOGGER.info("creating a demo user")
 
         if self.create_user("om_demo", "password"):
-            log.info("user om_demo created")
+            LOGGER.info("user om_demo created")
         else:
-            log.error("unable to create user om_demo. perhaps exists already?")
+            LOGGER.error("unable to create user om_demo. perhaps exists already?")
 
         return self.grant_user_permissions("om_demo", "openmolar_demo",
                 True, True)
@@ -258,24 +231,24 @@ class DBFunctions(object):
         also attempts to remove the standard user groups (this will fail if
         other roles in these groups haven't been removed first)
         '''
-        logging.warning("user '%s' is deleting database %s" %(
+        LOGGER.warning("user '%s' is deleting database %s" %(
             self._user, dbname))
-        logging.warning("removing database (if exists) %s"% dbname)
+        LOGGER.warning("removing database (if exists) %s"% dbname)
         if self._execute('drop database if exists %s;'% dbname):
-            logging.info("database '%s' removed"% dbname)
+            LOGGER.info("database '%s' removed"% dbname)
         else:
             return False
 
         for group in ("admin", "client"):
             user_group = 'om_%s_%s;'% (group, dbname)
-            logging.warning("removing role (if exists) '%s'"% user_group)
+            LOGGER.warning("removing role (if exists) '%s'"% user_group)
             if self._execute('drop user if exists %s'% user_group ):
-                logging.info("role '%s' removed"% user_group)
+                LOGGER.info("role '%s' removed"% user_group)
             else:
                 return False
             
         if dbname == "openmolar_demo":
-            logging.warning("removing role (if exists) om_demo")
+            LOGGER.warning("removing role (if exists) om_demo")
             self._execute('drop user if exists om_demo')
             
         return True
@@ -285,8 +258,7 @@ class DBFunctions(object):
         '''
         create a user (remote user)
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("add a login user with name '%s' and password"% username)
+        LOGGER.info("add a login user with name '%s' and password"% username)
 
         if password is None:
             password = new_password()
@@ -298,7 +270,7 @@ class DBFunctions(object):
                     username, password))
             return True
         except Exception:
-            log.exception("Serious Error")
+            LOGGER.exception("Serious Error")
         return False
 
     @log_exception
@@ -306,8 +278,7 @@ class DBFunctions(object):
         '''
         grant permissions for a user to database dbname
         '''
-        log = logging.getLogger("openmolar_server")
-        log.info("adding %s to priv groups on database %s"% (user, dbname))
+        LOGGER.info("adding %s to priv groups on database %s"% (user, dbname))
 
         SQL = ""
         if admin:
@@ -318,7 +289,7 @@ class DBFunctions(object):
             self._execute(SQL, dbname)
             return True
         except Exception:
-            log.exception("Serious Error")
+            LOGGER.exception("Serious Error")
         return False
 
     @log_exception
@@ -333,9 +304,9 @@ class DBFunctions(object):
         '''
         drops a user
         '''
-        logging.warning("removing user %s"% username)
+        LOGGER.warning("removing user %s"% username)
         if self._execute('drop user %s;'% username):
-            logging.info("user '%s' removed"% username)
+            LOGGER.info("user '%s' removed"% username)
             return True
         return False
 
@@ -377,16 +348,16 @@ class DBFunctions(object):
         truncates all tables except 'procedure codes'
         resets the patient serialno index
         '''
-        logging.warning("removing all data from %s"% dbname)
+        LOGGER.warning("removing all data from %s"% dbname)
         
         exceptions = ("settings", "procedure_codes")
         
         for tablename in self._tables(dbname):
             if tablename not in exceptions:
-                logging.info("... truncating '%s'"% tablename)
+                LOGGER.info("... truncating '%s'"% tablename)
                 self._execute("TRUNCATE %s CASCADE"% tablename, dbname)
         for sequence in self._sequences(dbname, exceptions):
-            logging.info("... reseting sequence '%s'"% sequence)
+            LOGGER.info("... reseting sequence '%s'"% sequence)
             self._execute("select setval('%s', 1, false)"% sequence,
                 dbname)
         return True
@@ -397,7 +368,7 @@ class DBFunctions(object):
         calls a pg_dump (using db user openmolar)
         if schema_only is True, then the -s option is passed into pg_dump.
         '''
-        logging.info("backing up %s"% dbname)
+        LOGGER.info("backing up %s"% dbname)
 
         opts = ["-s", dbname] if schema_only else [dbname]
         
@@ -413,30 +384,46 @@ class DBFunctions(object):
         stdout, stderr = proc.communicate()
         
         if stderr:
-            logging.warning("Errors were thrown %s"% stderr)
+            LOGGER.warning("Errors were thrown %s"% stderr)
         
         backup_dir = os.path.join(BACKUP_DIR, dbname)
         
         if not os.path.isdir(backup_dir):
             os.makedirs(backup_dir)
 
-        filepath = os.path.join(backup_dir, "backup.sql")
+        filename = "schema.sql" if schema_only else "backup.sql"
+        filepath = os.path.join(backup_dir, filename)
         
         f = open(filepath, "w")
         f.write(stdout)
         f.close()
         
-        logging.info("backup saved to %s"% filepath)
+        LOGGER.info("file saved as %s"% filepath)
 
+    @log_exception
+    def get_schema_version(self, dbname):
+        '''
+        issues a query to get the value of schema_version stored in settings.
+        '''
+        try:
+            conn = psycopg2.connect(self.__conn_atts(dbname))
+            cursor = conn.cursor()
+            cursor.execute(
+                "select max(data) from settings where key='schema_version'")
+            version = cursor.fetchone()
+            conn.close()
+            return version[0]
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
+            return "UNABLE TO get Version number."
 
     @log_exception
     def get_update_script(self, original, current):
         '''
         calls apgdiff to see if the schemas are the same
         '''
-        logging.info("comparing schemas of %s and %s"% (original, current))
+        LOGGER.info("comparing schemas of %s and %s"% (original, current))
 
-        
         proc = subprocess.Popen(
             ["apgdiff", "--ignore-start-with", original, current],
             stdout=subprocess.PIPE)
@@ -444,7 +431,7 @@ class DBFunctions(object):
         stdout, stderr = proc.communicate()
         
         if stderr:
-            logging.warning("Errors were thrown %s"% stderr)
+            LOGGER.warning("Errors were thrown %s"% stderr)
         
         if not stdout:
             return ""
@@ -454,19 +441,23 @@ def _test():
     '''
     test the DBFunctions class
     '''
-    logging.basicConfig(level=logging.DEBUG)
-    log = logging.getLogger("openmolar_server")
     sf = DBFunctions()
     sf._user = "test_user"
-    log.debug(sf.available_databases())
+    LOGGER.debug(sf.available_databases())
 
     dbname = "openmolar_demo"
-    #log.debug(sf.newDB_sql(dbname))
-    sf.drop_db(dbname)
-    sf.drop_demo_user()
-    sf.create_db(dbname)
-    sf.create_demo_user()
-    sf.truncate_all_tables(dbname)
+    #LOGGER.debug(sf.newDB_sql(dbname))
+    #sf.drop_db(dbname)
+    #sf.drop_demo_user()
+    #sf.create_db(dbname)
+    #sf.create_demo_user()
+    #sf.truncate_all_tables(dbname)
+
+    LOGGER.debug(
+        "%s has schema version %s"% (dbname, sf.get_schema_version(dbname)))
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig(level=logging.DEBUG)
+    LOGGER = logging.getLogger("openmolar_server")
     _test()

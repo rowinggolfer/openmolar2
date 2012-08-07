@@ -20,44 +20,17 @@
 ##                                                                           ##
 ###############################################################################
 
-import logging
 import re
 import socket
-
-CSS = '''
-body {
-    background-color:#ffffff;
-    }
-
-.database ul{
-    padding-left: 0px;
-    }
-.database li{
-    padding-left: 28px;
-    }
-
-.database li.header{
-    list-style-type: none;
-    padding-left: 12px;
-    }
-
-h1, h2, h3, h4 {color:#59212f;
-	padding-bottom:0px;}
-
-a {color:#2f2159;}
-'''
 
 HEADER = '''<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <title>Server Message</title>
-<style type="text/css">
-%s
-</style>
 </head>
 <body>
-'''% CSS
+'''
 
 FOOTER = None
 
@@ -65,17 +38,15 @@ def get_footer():
     global FOOTER
     if FOOTER is None:
 
-        logger = logging.getLogger("openmolar_server")
-
         try:
             from lib_openmolar.server import version
             VERSION = "%s~hg%s"% (version.VERSION, version.revision_number)
-            logger.info("SERVER VERSION %s"% VERSION)
-            logger.debug("VERSION DATE %s"% version.date)
-            logger.debug("REVISION ID %s"% version.revision_id)
+            LOGGER.info("SERVER VERSION %s"% VERSION)
+            LOGGER.debug("VERSION DATE %s"% version.date)
+            LOGGER.debug("REVISION ID %s"% version.revision_id)
         except ImportError:
             VERSION = "Unknown"
-            logger.exception("unable to parse for server versioning")
+            LOGGER.exception("unable to parse for server versioning")
     
         try:
             f = open("/etc/openmolar/manager_password.txt", "r")
@@ -88,12 +59,14 @@ def get_footer():
             PASSWORD="admin password file unreadable. Good!"
             
         FOOTER = '''
+            <div class = "footer">
             <br /><br />
             <i>server library version %s</i>
             <ul>
                 <li><a href="show server log">Show Server Log</a></li>
             </ul>
             %s
+            </div>
             </body>
             </html>
             '''% (VERSION, PASSWORD)
@@ -109,7 +82,8 @@ class MessageFunctions(object):
         '''
         an html header giving information about the server.
         '''
-        header = "<h3>%s %s '%s'</h3>"% (_("Connected to Openmolar-Server"),
+        header = "<div class='loc_header'><h3>%s %s '%s'</h3></div>"% (
+            _("Connected to Openmolar-Server"),
             _("on host"), socket.gethostname())
         return header
 
@@ -174,12 +148,16 @@ def _test():
     '''
     test the ShellFunctions class
     '''
-    logging.basicConfig(level=logging.DEBUG)
     sf = MessageFunctions()
-    logging.debug(sf.admin_welcome_template())
-    logging.debug(sf.no_databases_message())
-    logging.debug(sf.postgres_error_message())
+    LOGGER.debug(sf.admin_welcome_template())
+    LOGGER.debug(sf.no_databases_message())
+    LOGGER.debug(sf.postgres_error_message())
 
 if __name__ == "__main__":
     from gettext import gettext as _
+    import logging
+    logging.basicConfig(level = logging.DEBUG)
+    
+    LOGGER = logging.getLogger("test")
+    
     _test()

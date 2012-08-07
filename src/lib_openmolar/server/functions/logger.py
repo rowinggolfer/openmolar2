@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import __builtin__
 import logging
 import logging.handlers
 import os
@@ -51,17 +52,16 @@ def setup(level=logging.DEBUG):
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
+    __builtin__.LOGGER = logger
 
 def _test():
     try:
         setup()
-        print LOGNAME, LOCATION
-        my_logger = logging.getLogger(LOGNAME)
-        my_logger.debug("debug message")
-        my_logger.info("info message")
-        my_logger.warn("warn message")
-        my_logger.error("error message")
-        my_logger.critical("critical message")
+        LOGGER.debug("debug message")
+        LOGGER.info("info message")
+        LOGGER.warn("warn message")
+        LOGGER.error("error message")
+        LOGGER.critical("critical message")
     except IOError as exc:
         if exc.errno == 13:
             sys.stderr.write(

@@ -31,7 +31,7 @@ import time
 import threading
 
 from service import Service
-from lib_openmolar.server.functions.instance import ServerFunctions
+from lib_openmolar.server.functions.instance import ServerInstance
 from lib_openmolar.server.functions import logger
 from lib_openmolar.server.verifying_servers import VerifyingServerSSL
 from lib_openmolar.server.functions.om_server_config import OMServerConfig
@@ -51,21 +51,20 @@ class OMServer(Service):
     A pointer to the :doc:`VerifyingServerSSL`
     '''
     def __init__(self, verbose=False):
-        self.log = logging.getLogger("openmolar_server")
         if verbose:
-            self.log.setLevel(logging.DEBUG)
-            self.log.debug("logging in verbose mode")
+            LOGGER.setLevel(logging.DEBUG)
+            LOGGER.debug("logging in verbose mode")
             import lib_openmolar
-            self.log.debug(
+            LOGGER.debug(
                 "using module lib_openmolar from %s"% lib_openmolar.__file__)
         else:
-            self.log.setLevel(logging.INFO)
+            LOGGER.setLevel(logging.INFO)
 
     def start(self):
         '''
         start the server
         '''
-        self.log.info("starting OMServer Process")
+        LOGGER.info("starting OMServer Process")
         config = OMServerConfig()
         loc = config.location
         port = config.port
@@ -77,7 +76,7 @@ class OMServer(Service):
         try:
             self.server = VerifyingServerSSL((loc, port), key, cert)
         except socket.error:
-            self.log.error('Unable to start the server.' +
+            LOGGER.error('Unable to start the server.' +
                 (' Port %d is in use' % port ) +
                 ' (Perhaps openmolar server is already running?)')
             return
@@ -86,17 +85,17 @@ class OMServer(Service):
             readable_loc = "on all interfaces"
         else:
             readable_loc = loc
-        self.log.info(
+        LOGGER.info(
             "listening for ssl connections %s port %d"% (readable_loc, port))
-        self.log.debug("using cert %s"% cert)
-        self.log.debug("using key %s"% key)
+        LOGGER.debug("using cert %s"% cert)
+        LOGGER.debug("using key %s"% key)
 
         # daemonise the process and write to /var/run
         self.start_(stderr=logger.LOCATION)
 
         ## allow user to list methods?
         self.server.register_introspection_functions()
-        self.server.register_instance(ServerFunctions())
+        self.server.register_instance(ServerInstance())
 
         for manager, hash in config.managers:
             self.server.add_user(manager, hash)
@@ -108,7 +107,9 @@ class OMServer(Service):
         '''
         stop the server
         '''
-        self.log.info("Stopping server")
+        if not self.is_running:
+            return
+        LOGGER.info("Stopping server")
         try:
             self.server.shutdown()
         except AttributeError:
