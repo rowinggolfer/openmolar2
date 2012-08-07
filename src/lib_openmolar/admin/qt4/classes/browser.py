@@ -33,6 +33,8 @@ class Browser(QtWebKit.QWebView):
         QtWebKit.QWebView.__init__(self, parent)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.linkClicked.connect(self._link_clicked)
+        self.settings().setUserStyleSheetUrl(
+            QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS))
 
     def setHtml(self, html):
         QtWebKit.QWebView.setHtml(self, html)
@@ -54,7 +56,12 @@ if __name__ == "__main__":
     mw.setMinimumSize(400,200)
 
     browser = Browser()
-    browser.setHtml("hello<br /><a href='url'>click here</a>")
+    browser.setHtml(
+    '''<html><body>
+        <div class='loc_header'><h3>Test Header</h3>
+        </div>
+        <a href='url'>test link</a>
+        </body></html>''')
 
     browser.shortcut_clicked.connect(sig_catcher)
 
