@@ -109,12 +109,11 @@ a view aware editable model of data stored in various notes tables
         <head>
         <meta charset="utf-8" />
         <title>Clinical Notes</title>
-        <link rel="stylesheet" type="text/css" href="%s">
         </head>
         <body>
         <div class='center'><table>
         <tr><th>%s</th><th>%s</th><th>%s</th></tr>
-        '''% (SETTINGS.NOTES_CSS, _("Date"), _("Author"), _("notes"))
+        '''% (_("Date"), _("Author"), _("notes"))
 
         for record in self.clinical.records:
             author = record.value("author").toInt()[0]
@@ -208,15 +207,11 @@ a view aware editable model of data stored in various notes tables
         <head>
         <meta charset="utf-8" />
         <title>Reception Notes</title>
-        <link rel="stylesheet" type="text/css" href="%s">
         </head>
         <body>
         <div class='center'><table>
         <tr><th>%s</th><th>%s</th><th>%s</th><th>%s</th></tr>
-        '''% (
-            SETTINGS.NOTES_CSS,
-            _("Date"), _("Author"), _("Action"), _("Notes")
-            )
+        '''% (_("Date"), _("Author"), _("Action"), _("Notes"))
 
         for record in self.clerical.records:
             author = record.value("author").toInt()[0]
@@ -300,16 +295,12 @@ a view aware editable model of data stored in various notes tables
         <head>
         <meta charset="utf-8" />
         <title>Combined Notes</title>
-        <link rel="stylesheet" type="text/css" href="%s">
         </head>
         <body>
         <h1>%s</h1>
         <div class='center'><table>
         <tr><th>%s</th><th>%s</th><th>%s</th></tr>
-        '''% (
-            SETTINGS.NOTES_CSS,
-            _("Combined Notes"),
-            _("Date"), _("Author"), _("Notes"))
+        '''% (_("Combined Notes"),_("Date"), _("Author"), _("Notes"))
 
         for record in self.sorted_records:
             author = record.value("author").toInt()[0]

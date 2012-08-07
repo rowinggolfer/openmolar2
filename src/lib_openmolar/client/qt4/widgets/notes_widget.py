@@ -44,6 +44,9 @@ class NotesWidget(QtGui.QWidget):
         self.patient = None
 
         self.notes_browser = QtWebKit.QWebView(self)
+        self.notes_browser.settings().setUserStyleSheetUrl(
+            QtCore.QUrl.fromLocalFile(SETTINGS.NOTES_CSS))
+
         self.notes_browser.setHtml(messages.welcome_html(
             self.notes_browser.width()))
 

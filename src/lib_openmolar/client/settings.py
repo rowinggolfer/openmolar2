@@ -35,7 +35,7 @@ from lib_openmolar.client.db_orm.client_practitioner import Practitioners
 from lib_openmolar.client.db_orm.client_staff_members import StaffMembers
 from lib_openmolar.client.db_orm.client_users import Users
 
-from PyQt4.QtCore import QResource
+from PyQt4 import QtCore
 
 class SettingsError(Exception):
     '''
@@ -51,10 +51,9 @@ class Settings(CommonSettings, PluginHandler):
     #: an html image tag showing a pencil
     PENCIL = '<img class="pencil" alt ="edit" src="qrc:/icons/pencil.png" />'
 
-    LOCALFOLDER = os.path.join(os.environ.get("HOME", ""), ".openmolar2")
-
-    _CSS = {}
-
+    _notes_css, _details_css = None, None
+    
+    
     def __init__(self):
         CommonSettings.__init__(self)
 
@@ -118,29 +117,36 @@ class Settings(CommonSettings, PluginHandler):
         self._users = None
         self._last_known_address = None
 
-        self.init_css()
-
     def init_css(self):
         '''
-        look for the presence of custom css files
+        # ensure that css files are up to date.we have a css file.. 
+        # otherwise the layout will be awful!
         '''
-
+        CommonSettings.init_css(self)
         for css in ("notes", "details"):
-            custom_loc = os.path.join(self.LOCALFOLDER, "custom_%s.css"% css)
-
-            if os.path.exists(custom_loc):
-                print "WARNING: using a custom css file - %s"% custom_loc
-                self._CSS[css] = custom_loc
+            resource = QtCore.QResource(":css/%s.css"% css)
+            if resource.isCompressed():
+                data = QtCore.qUncompress(resource.data())
             else:
-                self._CSS[css] = os.path.join(self.LOCALFOLDER, "%s.css"% css)
+                data = resource.data()
 
-            #ensure that we have a css file.. otherwise the notes will be awful!
-            if not os.path.exists(self._CSS[css]):
-                print "initiating a new css file - %s"% self._CSS[css]
-                resource = QResource(":css/notes.css")
-                f = open(self._CSS[css], "w")
-                f.write(resource.data())
+            default_loc = os.path.join(self.LOCALFOLDER, "%s.css"% css)
+            
+            try:
+                f = open(default_loc, "r")
+                css_data = f.read()
                 f.close()
+                if css_data == data:
+                    LOGGER.debug("%s is current"% default_loc)
+                    continue
+            except IOError:
+                pass
+        
+            print "initiating a new css file - %s"% default_loc
+            f = open(default_loc, "w")
+            f.write(data)
+            f.close()
+        
 
     @property
     def VERSION(self):
@@ -167,8 +173,15 @@ class Settings(CommonSettings, PluginHandler):
             ~/.openmolar2/notes.css (which is generated if not present)
             or ~/.openmolar2/custom_notes.css (user edited file)
         '''
-        return "file://%s"% self._CSS.get("notes", "")
-
+        css_files = ("custom_notes.css", "notes.css")
+        for css_file in css_files:
+            fp = os.path.join(self.LOCALFOLDER, css_file)
+            if os.path.isfile(fp):
+                LOGGER.debug("using %s for notes_css"% fp)
+                return fp
+                
+        return ""
+   
     @property
     def DETAILS_CSS(self):
         '''
@@ -179,8 +192,15 @@ class Settings(CommonSettings, PluginHandler):
             ~/.openmolar2/details.css (which is generated if not present)
             or ~/.openmolar2/custom_details.css (user edited file)
         '''
-        return "file://%s"% self._CSS.get("details", "")
-
+        css_files = ("custom_details.css", "details.css")
+        for css_file in css_files:
+            fp = os.path.join(self.LOCALFOLDER, css_file)
+            if os.path.isfile(fp):
+                LOGGER.debug("using %s for details_css"% fp)
+                return fp
+    
+        return ""
+   
     @property
     def users(self):
         if self._users is None:

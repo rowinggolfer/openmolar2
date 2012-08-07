@@ -35,6 +35,9 @@ class DetailsBrowser(QtWebKit.QWebView):
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.setSizePolicy(QtGui.QSizePolicy.Preferred,
             QtGui.QSizePolicy.Expanding)
+        self.settings().setUserStyleSheetUrl(
+            QtCore.QUrl.fromLocalFile(SETTINGS.DETAILS_CSS))
+
         self.clear()
 
     def clear(self):
