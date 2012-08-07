@@ -1,0 +1,114 @@
+/*-- stylesheet for openmolar-server html output 
+written by Neil Wallace < rowinggolfer@gmail.com >
+
+################################################################################
+#                                                                              #
+#  THIS FILE IS UPDATED BY THE OPENMOLAR APPLICATION.                          #
+#                                                                              #
+#  ANY CHANGES YOU MAKE TO THIS FILE WILL NOT BE PRESERVED.                    #
+#                                                                              #
+#                                                                              #
+#  IF YOU WOULD LIKE TO USE A CUSTOM CSS FILE                                  #
+#  PLEASE PLACE IT IN THIS FOLDER AND NAME IT                                  #
+#  "custom_proxy.css"                                                          #
+#                                                                              #
+#  THE PRESENCE OF SUCH A FILE WILL MEAN THIS FILE IS IGNORED BY               #
+#  THE NOTES BROWSER.                                                          #
+#                                                                              #
+#                                                                              #
+################################################################################
+
+--*/
+body{
+    background: url(qrc:images/header_fade.png) repeat-x;
+}
+
+div.loc_header {
+    background: url('qrc:images/om_db.png') left no-repeat;
+    height:140px;
+    color:#ddffff;
+    text-align:center;
+    font-weight:bold;
+    position:relative;
+    top:0px;
+    left:10px;
+    width:100%;
+}
+
+h3.header {
+    color:white;
+    padding-bottom:0px;
+    }
+
+
+div.footer {
+    background: url(qrc:images/footer_fade.png) repeat-x;
+    height:120px;
+    padding-bottom:5px;
+    bottom:0px;
+    left:0px;
+    width:100%;
+    position:absolute;
+}
+
+div.footer_txt {
+    color:#eeeeee;
+    text-align:center;
+    top:40px;
+    position:relative;
+}
+
+a.footer_function {
+    color:red;
+    position:absolute;
+    right:50px
+}
+
+div.wrapper{
+    background: url('qrc:images/om_db.png');
+    background-color: #ffeeff;
+}
+
+div.database{
+    background: url('qrc:images/om_db.png') right no-repeat;
+    background-color: #ffeeff;
+    position:absolute;
+    padding-left:10%;
+    padding-top:10px;
+    padding-right:10%;
+    width:80%;
+    }
+
+h4.database {
+    color:#ed4567;
+    padding-bottom:0px;
+    }
+
+div.server_functions{
+    position:relative;
+    left:50px;
+}
+div.shortcuts{
+    padding-left: 200px;
+    position:relative;
+}
+
+li.header{
+list-style-type: none;
+padding-left: 12px;
+color: blue;
+}
+
+li {
+list-style-type: none;
+padding-left: 30px;
+}
+
+
+
+h1, h2, h3, h4 {color:#f5001d;
+padding-bottom:0px;}
+
+a {color:#2f2159;}
+
+

@@ -21,8 +21,9 @@
 ###############################################################################
 
 
-import socket
+import os
 import pickle
+import socket
 import xmlrpclib
 
 from lib_openmolar.common.datatypes import Connection230Data
@@ -105,7 +106,9 @@ class ProxyClient(object):
         try:
             _server = xmlrpclib.ServerProxy(location)
             LOGGER.debug("server proxy created.. will attempt ping")
+            socket.setdefaulttimeout(1) 
             _server.ping()
+            socket.setdefaulttimeout(None) 
             LOGGER.debug("connected and pingable (this is very good!)")
             self._server = _server
         except xmlrpclib.ProtocolError:
@@ -241,7 +244,7 @@ def _test():
     LOGGER.debug(pc.html)
 
 if __name__ == "__main__":
-
+    from lib_openmolar import admin
     import logging
     logging.basicConfig(level = logging.DEBUG)
     LOGGER = logging.getLogger("test")

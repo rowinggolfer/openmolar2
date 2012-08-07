@@ -25,13 +25,14 @@ this module provides a class CommonSettings, which is inherited by the Settings
 objects of admin and client applications
 '''
 
+import os
+import re
+
 import locale
 locale.setlocale(locale.LC_ALL, '')
 
 import gettext
 gettext.install("openmolar")
-
-import re
 
 from lib_openmolar.common.datatypes import *
 
@@ -46,6 +47,9 @@ def singleton(cls):
     return getinstance
 
 class CommonSettings(object):
+
+    #: where the users settings and stylesheets reside
+    LOCALFOLDER = os.path.join(os.environ.get("HOME", ""), ".openmolar2")
 
     #: the system dictionary
     DICT_LOCATION = "/usr/share/dict/words"
@@ -136,6 +140,37 @@ class CommonSettings(object):
         self._qdate_format = None
         self._rev_toothgrid_shortnames = {}
 
+        self.init_css()
+
+    def init_css(self):
+        '''
+        create css files if they don't exist
+        '''
+        default_loc = os.path.join(self.LOCALFOLDER, "proxy.css")
+
+        resource = QtCore.QResource(":css/proxy.css")
+        if resource.isCompressed():
+            data = QtCore.qUncompress(resource.data())
+        else:
+            data = resource.data()
+
+        default_loc = os.path.join(self.LOCALFOLDER, "proxy.css")
+        
+        try:
+            f = open(default_loc, "r")
+            css_data = f.read()
+            f.close()
+            if css_data == data:
+                LOGGER.debug("%s is current"% default_loc)
+                return
+        except IOError:
+            pass
+    
+        print "initiating a new css file - %s"% default_loc
+        f = open(default_loc, "w")
+        f.write(data)
+        f.close()
+
     @property
     def REV_TOOTHGRID_SHORTNAMES(self):
         if self._rev_toothgrid_shortnames != None:
@@ -216,6 +251,18 @@ class CommonSettings(object):
     @property
     def PROCEDURE_CATEGORIES(self):
         return self.PROCEDURE_CODES.CATEGORIES
+    
+    @property
+    def PROXY_CSS(self):
+        css_files = ("custom_proxy.css", "proxy.css")
+        for css_file in css_files:
+            fp = os.path.join(self.LOCALFOLDER, css_file)
+            if os.path.isfile(fp):
+                LOGGER.debug("using %s for proxy_css"% fp)
+                return fp
+    
+        return ""
+    
 
 @singleton
 class CommonSettingsInstance(CommonSettings):

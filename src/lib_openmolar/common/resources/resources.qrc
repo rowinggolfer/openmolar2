@@ -1,12 +1,20 @@
 <!DOCTYPE RCC>
    <RCC version="1.0">
       <qresource>
+      
          <file>icons/postgresql_elephant.svg</file> 
          <file>icons/no_postgresql_elephant.svg</file>
          <file>icons/plugins.png</file>
          <file>icons/eraser.png</file>
-         
+
+         <file>images/header_fade.png</file>
+         <file>images/footer_fade.png</file>
+         <file>images/om_db.png</file>
+
          <file>proc_codes/om2_codes.xml</file>
+
+          <file>css/proxy.css</file>
+
       </qresource>
    </RCC>
 
