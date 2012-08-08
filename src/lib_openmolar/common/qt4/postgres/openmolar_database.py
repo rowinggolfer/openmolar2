@@ -21,9 +21,10 @@
 ###############################################################################
 
 '''
-provides 2 classes.
+provides 3 classes.
 ConnectionError - a custom python exception, raised if connection times out
-PostgresDatabase - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
+SchemaError - a custom python exception, raised if connection times out
+OpenmolarDatabase - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 '''
 import logging
 
@@ -36,8 +37,9 @@ class ConnectionError(Exception):
     a custom Exception
     '''
     pass
+    
 
-class PostgresDatabase(QtSql.QSqlDatabase):
+class OpenmolarDatabase(QtSql.QSqlDatabase):
     '''
     inherits from PyQt4.QSql.QSqlDatabase
     adds a function "connect", which opens the connection whilst
@@ -45,8 +47,12 @@ class PostgresDatabase(QtSql.QSqlDatabase):
     Will Raise a Connection error if connection has not been established
     within 10 seconds
     '''
+    _schema_version = None
+    
+    class SchemaVersionError(Exception):
+        pass
+
     def __init__(self, connection_data):
-        #connect_timeout=10):
         assert type(connection_data) == ConnectionData, (
             "argument for database connection MUST be of type ConnectionData")
 
@@ -81,7 +87,9 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         open the connection, raising an error if fails or timeouts
         optional arguments of (user, password)
         '''
-        logging.debug("PostgresDatabase connecting")
+        self._schema_version = None
+
+        logging.debug("OpenmolarDatabase connecting")
         self._wait_cursor()
         connection_in_progress = True
         def time_out():
@@ -120,7 +128,7 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         the query is simple
         NOTIFY new_appointment_made
         '''
-        logging.warning("classes inheriting from PostgresDatabase should "
+        logging.warning("classes inheriting from OpenmolarDatabase should "
         "re-implement function subscribeToNotifications")
         #self.driver().subscribeToNotification("new_appointment_made")
 
@@ -140,13 +148,30 @@ class PostgresDatabase(QtSql.QSqlDatabase):
         if q_query.lastError().isValid():
             print "error", q_query.lastError().text()
 
+    @property
     def description(self):
         '''
         databasename, host and port
         '''
         return u"%s %s:%s"% (
             self.databaseName(), self.hostName(), self.port())
-
+            
+    
+    @property
+    def schema_version(self):
+        '''
+        poll the database to get the schema version from settings table
+        '''
+        if self._schema_version is None:
+            logging.debug("polling database for schema version")
+            query = "select max(data) from settings where key='schema_version'"
+            q_query = QtSql.QSqlQuery(query, self)
+            if not q_query.first():
+                self._schema_version = "???"
+            else:
+                self._schema_version = q_query.value(0).toString()
+        return self._schema_version
+    
 def _test():
     logging.basicConfig(level=logging.DEBUG)
 
@@ -154,12 +179,13 @@ def _test():
     parent = QtGui.QWidget()
     conn_data = ConnectionData()
     conn_data.demo_connection()
-    db = PostgresDatabase(conn_data)
+    db = OpenmolarDatabase(conn_data)
     logging.debug(db)
     message =  '<body>'
     try:
         db.connect()
         message += '<h4>connection Ok... </h4>'
+        message += 'Schema Version %s'% db.schema_version
         db.emit_notification("hello")
         db.close()
     except ConnectionError as e:

@@ -263,6 +263,13 @@ class CommonSettings(object):
     
         return ""
     
+    @property
+    def schema_versions(self):
+        '''
+        this is where I set the range of supported schema versions.
+        '''
+        return ("0.1",)
+        
 
 @singleton
 class CommonSettingsInstance(CommonSettings):

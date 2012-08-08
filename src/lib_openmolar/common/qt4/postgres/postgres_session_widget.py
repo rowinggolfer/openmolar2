@@ -23,7 +23,7 @@
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.datatypes import ConnectionData
-from postgres_database import ConnectionError, PostgresDatabase
+from openmolar_database import ConnectionError, OpenmolarDatabase
 
 class PostgresSessionWidget(QtGui.QWidget):
     #:
@@ -55,13 +55,15 @@ class PostgresSessionWidget(QtGui.QWidget):
         QtGui.QWidget.closeEvent(self, event)
 
     def set_session(self, session):
-        assert PostgresDatabase in session.__class__.__mro__
+        assert OpenmolarDatabase in session.__class__.__mro__
         self.pg_session = session
-
+        
     def get_session_status(self):
         '''
         returns a tuple, (brief, verbose)
         '''
+        if self.pg_session is None:
+            return "No session", "No session"
         name = self.pg_session.databaseName()
         host = self.pg_session.hostName()
         port = self.pg_session.port()
@@ -100,7 +102,7 @@ def _test():
     app = QtGui.QApplication([])
     conn_data = ConnectionData()
     conn_data.demo_connection()
-    session = PostgresDatabase(conn_data)
+    session = OpenmolarDatabase(conn_data)
     session.connect()
     psw = PostgresSessionWidget()
     psw.set_session(session)
@@ -111,6 +113,9 @@ def _test():
 if __name__ == "__main__":
     import logging
     LOGGER = logging.getLogger()
+
+    from lib_openmolar.common.settings import CommonSettingsInstance
+    SETTINGS = CommonSettingsInstance()
 
     import gettext
     gettext.install("openmolar")

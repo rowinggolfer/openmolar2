@@ -108,7 +108,6 @@ class ProxyClient(object):
             LOGGER.debug("server proxy created.. will attempt ping")
             socket.setdefaulttimeout(1) 
             _server.ping()
-            socket.setdefaulttimeout(None) 
             LOGGER.debug("connected and pingable (this is very good!)")
             self._server = _server
         except xmlrpclib.ProtocolError:
@@ -126,6 +125,9 @@ class ProxyClient(object):
             'Is the host %s running and accepting connections on port %d?'% (
             self.connection230_data.host, self.connection230_data.port))
 
+        finally:
+            socket.setdefaulttimeout(100) 
+            
         self._is_connecting = False
 
     @property

@@ -33,7 +33,7 @@ from lib_openmolar.common.qt4.plugin_tools import PlugableMainWindow
     
 
 from connect_dialog import ConnectDialog
-from postgres_database import ConnectionError, PostgresDatabase
+from openmolar_database import ConnectionError, OpenmolarDatabase
 from manage_databases_widget import ManageDatabasesWidget
 from postgres_session_widget import PostgresSessionWidget
 
@@ -47,7 +47,7 @@ class PostgresMainWindow(PlugableMainWindow):
     _preferences_dialog = None
     _connection_dialog = None
     _known_session_params = None
-    CONN_CLASS = PostgresDatabase
+    CONN_CLASS = OpenmolarDatabase
 
     #: True if more than one pg session is allowed (False for client)
     ALLOW_MULTIPLE_SESSIONS = True
@@ -131,7 +131,7 @@ class PostgresMainWindow(PlugableMainWindow):
         widg = self.new_session_widget
         widg.set_session(session)
         self.session_widgets.append(widg)
-        self.central_widget.add(widg, widg.pg_session.description())
+        self.central_widget.add(widg, widg.pg_session.description)
         return widg
 
     @property
@@ -199,15 +199,20 @@ class PostgresMainWindow(PlugableMainWindow):
                 conn_data = dl.chosen_connection
 
                 session = self.CONN_CLASS(conn_data)
-                if self._attempt_connection(session):
-                    self.add_session(session)
+                try:
+                    if self._attempt_connection(session):
+                        self.add_session(session)
+                except session.SchemaVersionError as error:
+                    self.advise(u"%s<hr /><pre>%s</pre>"% (
+                        _("Schema is out of date"), error), 2)
+                    LOGGER.exception("Schema Version Error") 
+                finally:
                     break
-
         self.update_session_status()
 
     def _attempt_connection(self, session):
         '''
-        attempt to open session (ie call :doc:`PostgresDatabase` .connect() )
+        attempt to open session (ie call :doc:`OpenmolarDatabase` .connect() )
         '''
         LOGGER.info(u"%s '%s'"% (_("Attempting connection using data"),
             session.connection_data))
@@ -221,6 +226,7 @@ class PostgresMainWindow(PlugableMainWindow):
             self.advise(u"%s<hr /><pre>%s</pre>"% (
                 _("Connection Error"), error), 2)
             LOGGER.exception("Connection Error")
+            
         return False
 
     def end_pg_sessions(self):

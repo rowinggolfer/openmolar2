@@ -19,19 +19,31 @@ written by Neil Wallace < rowinggolfer@gmail.com >
 ################################################################################
 
 --*/
-body{
+body {
+background-color:#ffffff}
+
+div.header{
     background: url(qrc:images/header_fade.png) repeat-x;
+    position:absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+}
+
+
+#logo{
+    background: url('qrc:images/om_db.png') no-repeat;
+    
 }
 
 div.loc_header {
-    background: url('qrc:images/om_db.png') left no-repeat;
     height:140px;
     color:#ddffff;
     text-align:center;
     font-weight:bold;
     position:relative;
     top:0px;
-    left:10px;
+    left:40px;
     width:100%;
 }
 
@@ -44,11 +56,11 @@ h3.header {
 div.footer {
     background: url(qrc:images/footer_fade.png) repeat-x;
     height:120px;
-    padding-bottom:5px;
+    padding-bottom:0px;
     bottom:0px;
     left:0px;
     width:100%;
-    position:absolute;
+    position:fixed;
 }
 
 div.footer_txt {
@@ -58,57 +70,27 @@ div.footer_txt {
     position:relative;
 }
 
-a.footer_function {
-    color:red;
-    position:absolute;
-    right:50px
-}
-
-div.wrapper{
-    background: url('qrc:images/om_db.png');
-    background-color: #ffeeff;
-}
-
-div.database{
-    background: url('qrc:images/om_db.png') right no-repeat;
-    background-color: #ffeeff;
-    position:absolute;
-    padding-left:10%;
+#show_log {
+    background: url(qrc:images/log.png) right no-repeat;
+    color:#ddffff;
+    padding-left:100px;
+    padding-right:50px;
     padding-top:10px;
-    padding-right:10%;
-    width:80%;
-    }
-
-h4.database {
-    color:#ed4567;
-    padding-bottom:0px;
-    }
-
-div.server_functions{
-    position:relative;
-    left:50px;
-}
-div.shortcuts{
-    padding-left: 200px;
-    position:relative;
+    padding-bottom:10px;
 }
 
-li.header{
-list-style-type: none;
-padding-left: 12px;
-color: blue;
+div.password{
+    text-align:center;
+    position:relative;
 }
 
 li {
-list-style-type: none;
 padding-left: 30px;
 }
 
-
-
-h1, h2, h3, h4 {color:#f5001d;
-padding-bottom:0px;}
-
 a {color:#2f2159;}
 
-
+a.management_link {
+    left:60px;
+    position:relative;
+}
