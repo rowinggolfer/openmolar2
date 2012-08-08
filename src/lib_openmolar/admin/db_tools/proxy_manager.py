@@ -127,14 +127,14 @@ class ProxyManager(object):
         '''
         connect to a 230 server
         '''
-        LOGGER.info("connecting to the openmolar_server....")
+        LOGGER.info("connecting to any configured openmolar_servers....")
         self._init_proxies()
 
     def om_disconnect(self):
         '''
         disconnect from the 230 server
         '''
-        LOGGER.info("disconnecting from the openmolar_server....")
+        LOGGER.info("disconnecting from all openmolar_servers....")
         self.forget_proxies()
 
     @property
@@ -143,8 +143,11 @@ class ProxyManager(object):
         return the currently selected :doc:ProxyClient
         (by default this is item 0 of _proxy_clients)
         '''
-        return self._proxy_clients[self.selected_index]
-
+        try:
+            return self._proxy_clients[self.selected_index]
+        except IndexError:
+            return None
+            
     @property
     def selected_server(self):
         '''

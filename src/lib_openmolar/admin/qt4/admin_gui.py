@@ -56,7 +56,7 @@ def require_session(func):
     '''
     def sessionf(self):
         if not self.has_pg_connection:
-            self.advise("no session started",1)
+            self.advise(_("Please start a session to perform this action"),1)
             return None
         return func(self)
 
@@ -251,7 +251,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         user has clicked on a link provided by a :doc:`ProxyClient`
         requesting a session on dbname
         '''
-        ## TODO this should use more information pulled from the proxy server
+        ## TODO deprecated - it's confusing to allow 2 ways to start a session.
 
         result, user, passwd = self.get_user_pass(db_name)
         if not result:
@@ -462,7 +462,8 @@ _("Version"), SETTINGS.VERSION,
         overwrites :doc:`ProxyManager` function
         '''
         LOGGER.info("Server Procedure completed")
-        self.known_server_widget.set_html(self.selected_client.html)
+        if self.selected_client:
+            self.known_server_widget.set_html(self.selected_client.html)
 
     def manage_shortcut(self, url):
         '''
