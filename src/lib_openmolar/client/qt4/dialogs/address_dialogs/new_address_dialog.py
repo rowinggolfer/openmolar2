@@ -235,7 +235,7 @@ def _test():
 
     app = QtGui.QApplication([])
 
-    cc = ClientConnection()
+    cc = DemoClientConnection()
     cc.connect()
 
     dl = NewAddressDialog()

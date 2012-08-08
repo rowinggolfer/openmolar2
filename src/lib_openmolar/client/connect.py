@@ -27,20 +27,27 @@ ClientConnection - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 from PyQt4 import QtGui, QtCore, QtSql
 
 from lib_openmolar.common.datatypes import ConnectionData
-from lib_openmolar.common.qt4.postgres.postgres_database import \
-    PostgresDatabase
+from lib_openmolar.common.qt4.postgres.openmolar_database import \
+    OpenmolarDatabase
 
 from lib_openmolar.client.db_orm.client_patient import DuckPatient
 
-class ClientConnection(PostgresDatabase):
+class ClientConnection(OpenmolarDatabase):
     '''
-    inherits from lib_openmolar.common.connect.PostgresDatabase,
+    inherits from lib_openmolar.common.connect.OpenmolarDatabase,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
     _blank_address_record = None
 
-    def __init__(self, *args):
-        PostgresDatabase.__init__(self, *args)
+    def connect(self):
+        SETTINGS.psql_conn = None
+        
+        OpenmolarDatabase.connect(self)
+        if self.schema_version not in SETTINGS.schema_versions:
+            raise self.SchemaVersionError, (
+        "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
+            self.schema_version, SETTINGS.schema_versions))
+        
         SETTINGS.psql_conn = self
 
     @property

@@ -71,7 +71,7 @@ def _test():
 
 if __name__ == "__main__":
     import logging
-    LOGGER = logging.getLogger()
+    LOGGER = logging.getLogger("test")
 
     import gettext
     gettext.install("openmolar")
