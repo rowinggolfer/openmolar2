@@ -144,29 +144,34 @@ class ServerInstance(DBFunctions, ShellFunctions, MessageFunctions):
         '''
         dbs = self.available_databases()
 
+
+        ## used to return this as part of the db list...############
+        #'''                <li class="connect">
+        #                    <a href='connect_%s'>%s</a>
+        #                </li>
+        #                <li class="manage">
+        #                    <a href='manage_%s'>%s</a>
+        #                </li>
+        #'''   % (db, _("start a session on this database"), db,
+        #        _("management options"))             
+        #############################################################
+        
         if dbs == "NONE":
             message = self.postgres_error_message()
         elif dbs == []:
             message = self.no_databases_message()
         else:
             message = self.admin_welcome_template()
-            db_list = ""
+            db_list = "<ul>"
             for db in dbs:
+                s_v = self.get_schema_version(db)
                 db_list += '''
-                <div class="database">
-                    <ul>
-                        <li class="header">%s</li>
-                        <li class="connect">
-                            <a href='connect_%s'>%s</a>
-                        </li>
-                        <li class="manage">
-                            <a href='manage_%s'>%s</a>
-                        </li>
-                    </ul>
-                </div>
+                    <li>
+                        <b>%s</b> (Schema Version %s) 
+                        <a class="management_link" href='manage_%s'>%s</a>
+                    </li>
                 '''% (
-                db, db, _("start a session on this database"), db,
-                _("management options"))
+                db, s_v, db, _("management options"))
             message = message.replace("{DATABASE LIST}", db_list)
         return message
 

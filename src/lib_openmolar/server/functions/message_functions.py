@@ -57,19 +57,21 @@ def get_footer():
             
         except IOError:
             PASSWORD="admin password file unreadable. Good!"
-            
+
+
         FOOTER = '''
             <div class = "footer">
-            <br /><br />
-            <i>server library version %s</i>
-            <ul>
-                <li><a href="show server log">Show Server Log</a></li>
-            </ul>
-            %s
+                <div class="password">
+                    %s
+                </div>
+                <div class = "footer_txt">
+                    <i>lib_openmolar.server version %s</i>
+                    <a id = "show_log" href="show server log">Show Server Log</a>
+                </div>
             </div>
             </body>
             </html>
-            '''% (VERSION, PASSWORD)
+            '''% (PASSWORD, VERSION)
 
     return FOOTER
 
@@ -82,9 +84,17 @@ class MessageFunctions(object):
         '''
         an html header giving information about the server.
         '''
-        header = "<div class='loc_header'><h3>%s %s '%s'</h3></div>"% (
+        header = '''
+        <div class="header">
+             <div id="logo" />
+            <div class='loc_header'><h3>%s %s '%s'</h3>
+            %s %s
+        </div>'''% (
             _("Connected to Openmolar-Server"),
-            _("on host"), socket.gethostname())
+            _("on host"), socket.gethostname(),
+            _("providing remote procedure calls for"), 
+            _("the admin and client applications."))
+
         return header
 
     def admin_welcome_template(self):
@@ -94,9 +104,11 @@ class MessageFunctions(object):
         html = u'''%s
         %s
         %s
+        %s
         {DATABASE LIST}
         %s'''% (HEADER, self.location_header,
-            _("The following openmolar schemas are at your disposal on this postgres server"),
+            _("The following openmolar schemas are at your disposal"),
+            _(" on this postgres server"),
             get_footer())
 
         return html
