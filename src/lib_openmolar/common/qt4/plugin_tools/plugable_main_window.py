@@ -159,8 +159,10 @@ class PlugableMainWindow(BaseMainWindow):
         '''
         dummy function. should probably be overwritten
         '''
-        self.advise("plugin action clicked.. does nothing")
-
+        LOGGER.debug("plugin action triggered")
+        self.preferences_dialog().select_preference(_("Plugins"))
+        self.preferences_dialog().exec_()
+        
 def _test():
     from lib_openmolar import client
     SETTINGS.PLUGIN_DIRS = ["../../../../plugins/admin"]

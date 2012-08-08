@@ -117,14 +117,20 @@ class ProxyClient(object):
                 self.user.name)
             LOGGER.error(message)
             raise self.ConnectionError(message)
-
-        except socket.error as e:
-            LOGGER.exception("unable to connect")
-            self._is_connecting = False
-            raise self.ConnectionError(
+        except socket.timeout:
+            message = ('OMServer Connection Timeout - ' +
             'Is the host %s running and accepting connections on port %d?'% (
-            self.connection230_data.host, self.connection230_data.port))
-
+            self.connection230_data.host, self.connection230_data.port))           
+            LOGGER.error(message)
+            self._is_connecting = False
+            raise self.ConnectionError(message)
+        except socket.error as e:
+            message = "Unknown socket error connecting to '%s':'%d'?"% (
+            self.connection230_data.host, self.connection230_data.port)    
+            LOGGER.exception(message)
+            self._is_connecting = False
+            raise self.ConnectionError(message)
+        
         finally:
             socket.setdefaulttimeout(100) 
             

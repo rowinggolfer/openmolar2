@@ -51,8 +51,7 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
         splitter.addWidget(left_frame)
         splitter.addWidget(self.stackedwidget)
 
-        self.connect(self.listwidget,
-            QtCore.SIGNAL("currentRowChanged (int)"),
+        self.listwidget.currentRowChanged.connect(
             self.stackedwidget.setCurrentIndex)
 
         self.add_font_option()
@@ -71,6 +70,25 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
         pref.setIcon(QtGui.QIcon.fromTheme("applications-fonts"))
         self.add_preference_dialog(pref)
 
+    def iter_items(self):
+        '''
+        a hack because I couldn't get QListWidget.items() to work!!
+        '''
+        for i in range(self.listwidget.count()):
+            yield self.listwidget.item(i)
+
+    def select_preference(self, preference):
+        '''
+        pass in a string, and if it exists in the list, it will be selected
+        typical usage would be PreferencesDialog.show_preference(_("Fonts"))
+        '''
+        for item in self.iter_items():
+            if item.text() == preference:
+                self.listwidget.setCurrentItem(item)
+                return
+        QtGui.QMessageBox.warning(self, "error", 
+            "couldn't find prefence %s"% preference)
+        
     def minimumSizeHint(self):
         return QtCore.QSize(400, 400)
 
@@ -109,6 +127,7 @@ def _test():
     app = QtGui.QApplication([])
     dl = PreferencesDialog()
     dl.show()
+    dl.select_preference(_("Fonts"))
     app.exec_()
 
 if __name__ == "__main__":
