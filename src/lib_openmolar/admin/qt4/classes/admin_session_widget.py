@@ -130,7 +130,7 @@ class AdminSessionWidget(PostgresSessionWidget):
         for tool in self.sql_tools:
             tool.set_connection(session)
 
-        self.tab_widget.parent().setWindowTitle(session.description())
+        self.tab_widget.parent().setWindowTitle(session.description)
 
     def tab_selected(self, tab):
         tab = self.tab_widget.currentWidget()

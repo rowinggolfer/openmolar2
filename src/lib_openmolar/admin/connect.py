@@ -21,8 +21,8 @@
 ###############################################################################
 
 '''
-AdminPostgresDatabase -
-a custom class inheriting from :doc:`PostgresDatabase`
+AdminConnection -
+a custom class inheriting from :doc:`OpenmolarDatabase`
 '''
 from __future__ import division
 
@@ -30,16 +30,23 @@ from PyQt4 import QtSql
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.datatypes import OMTypes, ConnectionData
-from lib_openmolar.common.qt4.postgres.postgres_database import \
-    PostgresDatabase
+from lib_openmolar.common.qt4.postgres.openmolar_database import \
+    OpenmolarDatabase
 
 from lib_openmolar.admin.db_orm import *
 
-class AdminConnection(PostgresDatabase):
+class AdminConnection(OpenmolarDatabase):
     '''
-    inherits from lib_openmolar.common.connect.PostgresDatabase,
+    inherits from lib_openmolar.common.connect.OpenmolarDatabase,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
+    def connect(self):
+        OpenmolarDatabase.connect(self)
+        if self.schema_version not in SETTINGS.schema_versions:
+            raise self.SchemaVersionError, (
+        "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
+            self.schema_version, SETTINGS.schema_versions))
+    
     @property
     def admin_modules(self):
         '''
