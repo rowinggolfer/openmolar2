@@ -30,7 +30,7 @@ class ManageDatabaseDialog(ExtendableDialog):
     drop_db = False
     truncate_db = False
 
-    def __init__(self, dbname, parent=None):
+    def __init__(self, dbname, management_functions, parent=None):
         ExtendableDialog.__init__(self, parent)
 
         self.dbname = dbname
@@ -50,7 +50,11 @@ class ManageDatabaseDialog(ExtendableDialog):
         self.insertWidget(truncate_but)
         self.insertWidget(users_but)
 
-        advanced_label = QtGui.QLabel("no advanced options as yet")
+        remote_functions = "<ul>"
+        for func, desc in management_functions:
+            remote_functions += "<li>%s</li>"% desc
+            
+        advanced_label = QtGui.QLabel("%s<ul>"% remote_functions )
 
         self.add_advanced_widget(advanced_label)
 
@@ -83,7 +87,8 @@ class ManageDatabaseDialog(ExtendableDialog):
 
 def _test():
     app = QtGui.QApplication([])
-    dl = ManageDatabaseDialog("foo")
+    dl = ManageDatabaseDialog("foo", [("db_func", "func1"),
+                    ("db_func", "func2")])
     dl.exec_()
 
 if __name__ == "__main__":

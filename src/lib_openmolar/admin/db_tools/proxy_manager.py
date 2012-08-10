@@ -293,6 +293,9 @@ class ProxyManager(object):
         self.display_proxy_message()
                 
 
+    def get_server_management_functions(self):
+        return self.selected_client.get_management_functions()
+
 
 def _test():
     import lib_openmolar.admin

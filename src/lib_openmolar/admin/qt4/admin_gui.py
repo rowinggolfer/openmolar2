@@ -339,7 +339,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         '''
         raise a dialog, and provide database management tools
         '''
-        dl = ManageDatabaseDialog(dbname, self)
+        server_functions = self.get_server_management_functions()
+        dl = ManageDatabaseDialog(dbname, server_functions, self)
         if dl.exec_():
             if dl.manage_users:
                 self.advise("manage users")
