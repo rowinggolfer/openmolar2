@@ -32,15 +32,15 @@ APPLICATION = "server"
 LOGNAME = "%s_%s"% (BASE, APPLICATION)
 LOCATION = "/var/log/%s/%s.log"% (BASE, APPLICATION)
 
+LOGDIR = os.path.dirname(LOCATION)
+    
 def setup(level=logging.DEBUG):
     """
     initiates the logger.
     allows caller to set the debug level and whether to echo the log to stdout
     """
-
-    dirname = os.path.dirname(LOCATION)
-    if not os.path.isdir(dirname):
-        os.makedirs(dirname)
+    if not os.path.isdir(LOGDIR):
+        os.makedirs(LOGDIR)
 
     logger = logging.getLogger(LOGNAME)
 

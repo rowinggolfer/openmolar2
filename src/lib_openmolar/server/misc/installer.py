@@ -24,6 +24,8 @@ import os
 import subprocess
 
 from lib_openmolar.server.misc.om_server_config import OMServerConfig
+from lib_openmolar.server.misc.logger import LOGDIR
+
 
 class Installer(object):
     '''
