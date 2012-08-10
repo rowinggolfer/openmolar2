@@ -23,7 +23,7 @@
 import os
 import subprocess
 
-from lib_openmolar.server.functions.om_server_config import OMServerConfig
+from lib_openmolar.server.misc.om_server_config import OMServerConfig
 
 class Installer(object):
     '''
