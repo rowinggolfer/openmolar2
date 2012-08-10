@@ -43,7 +43,7 @@ LOOSE_METHODS = (   'admin_welcome',
                     'refresh_saved_schema',
                     'truncate_demo',
                     'message_link',
-                    'management_functions'
+                    'management_functions',
                     )
 
 MANAGER_METHODS = ( 'create_user',

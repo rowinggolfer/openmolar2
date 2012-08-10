@@ -83,6 +83,7 @@ class VerifyingServer(SimpleXMLRPCServer):
         add a user to the userdict
         password should be MD5 hashed.
         '''
+        LOGGER.debug("adding user %s with hashed pass %s"% (user, hash))
         self.USERDICT[user] = hash
         LOGGER.debug("current user list is %s"% sorted(self.USERDICT.keys()))
         

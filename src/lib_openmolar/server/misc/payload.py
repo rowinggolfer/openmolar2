@@ -28,7 +28,7 @@ class PayLoad(object):
         self.method = method
         self.permission = False
         self._payload = None
-        self._exception_message = None
+        self._exception = None
 
     def __repr__(self):
         return "PAYLOAD - permission='%s', method='%s', payload_type=%s"% (
@@ -44,12 +44,22 @@ class PayLoad(object):
         self._payload = payload
 
     def set_exception(self, exc):
-        self._exception_message = str(exc)
-
+        self._exception = exc
+    
+    @property
+    def exception(self):
+        return self._exception
+    
+    @property
+    def exception_message(self):
+        if self.exception:
+            return str(self._exception)
+        return None
+    
     @property
     def error_message(self):
-        if self._exception_message is not None:
-            return self._exception_message
+        if self.exception_message is not None:
+            return self.exception_message
         if not self.permission:
             return "You do not have sufficient privileges to call %s"% (
                 self.method)
