@@ -72,8 +72,6 @@ class ProxyClient(object):
             user = ProxyUser()
         self.set_user(user)
 
-        #socket.setdefaulttimeout(5.0)
-
     def __repr__(self):
         return "%s"% self.name
 
@@ -178,6 +176,22 @@ class ProxyClient(object):
     @property
     def host(self):
         return self.connection230_data.host
+    
+    def get_management_functions(self):
+        '''
+        get a list of management functions from the server
+        these are passed to a dialog for user interaction.
+        '''
+        if self._server is not None:
+            try:
+                payload = pickle.loads(self.server.management_functions())
+                if not payload.permission:
+                    raise self.PermissionError
+                return payload.payload
+            except xmlrpclib.Fault:
+                LOGGER.exception("error getting proxy message")
+            
+        return []
 
     @property
     def html(self):
@@ -236,15 +250,18 @@ def _test():
     pc = ProxyClient(conn_data)
     
     if pc.server is not None:
-        print pc.server.system.listMethods()
-
+        
+        LOGGER.debug("Ping Function Test %s"% pc.server.ping())
+        
+        LOGGER.debug("methodSignature('last_backup') = %s"% 
+            pc.server.system.methodSignature("last_backup"))
+        
         LOGGER.debug("getting last backup")
         payload = pickle.loads(pc.server.last_backup())
-        LOGGER.debug("received payload %s"% payload)
-        if payload.payload:
-            LOGGER.debug("last backup %s"% payload.payload)
-        else:
+        if payload.error_message:
             LOGGER.error(payload.error_message)
+        else:
+            LOGGER.debug("last backup %s"% payload.payload)
             
     else:
         LOGGER.error("unable to connect")
