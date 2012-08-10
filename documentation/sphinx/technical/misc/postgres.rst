@@ -8,7 +8,7 @@ The Schema is **INCOMPLETE, EVOLVING AND SUBJECT TO CHANGE**
 .. note::
     to generate this output, use the following command
     
-    postgresql_autodoc -h 127.0.0.1 -u openmolar --password=initial_password -d openmolar_demo -t html
+    postgresql_autodoc -h 127.0.0.1 -u openmolar --password=PASSWORD -d openmolar_demo -t html
 
     replacing user and password fields as appropriate
 

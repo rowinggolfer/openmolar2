@@ -1,3 +1,17 @@
+openmolar-server (2.0.71+hg021-0~__DIST__0) __DIST__; urgency=low
+
+  * bugfix (broken import)
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 10 Aug 2012 06:45:51 +0100
+
+
+openmolar-server (2.0.71+hg020-0~__DIST__0) __DIST__; urgency=low
+
+  * new upstream
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Fri, 10 Aug 2012 01:02:04 +0100
+
+
 openmolar-server (2.0.70+hg019-0~__DIST__0) __DIST__; urgency=low
 
   * trial build
