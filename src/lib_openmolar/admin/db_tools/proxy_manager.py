@@ -22,7 +22,6 @@
 
 import re
 import sys
-import pickle
 
 from lib_openmolar.common.connect import ProxyClient
 
@@ -191,10 +190,8 @@ class ProxyManager(object):
         try:
             self.wait()
             self.advise("creating demo user")
-            payload = pickle.loads(self.selected_server.create_demo_user())
+            payload = self.selected_client.call("create_demo_user")
             self.wait(False)
-            if not payload.permission:
-                raise self.PermissionError, payload.error_message
             if payload.payload:
                 self.advise(_("successfully created demo user"))
                 LOGGER.info("successfully created demo user")
@@ -224,11 +221,7 @@ class ProxyManager(object):
             _("This may take some time")))
         self.wait()
 
-        payload = pickle.loads(self.selected_server.create_db(dbname))
-
-        if not payload.permission:
-            raise self.PermissionError, payload.error_message
-
+        payload = self.selected_client.call("create_db",dbname)
         if payload.payload:
             if dbname == "openmolar_demo":
                 self.advise("creating demo user and granting permissions")
@@ -250,13 +243,9 @@ class ProxyManager(object):
         send a message to the openmolar server to drop this database
         '''
         if dbname == "openmolar_demo":
-            pickled_payload = self.selected_server.drop_demodb()
+            payload = self.selected_client.call("drop_demodb")
         else:
-            pickled_payload = self.selected_server.drop_db(str(dbname))
-
-        payload = pickle.loads(pickled_payload)
-        if not payload.permission:
-            raise self.PermissionError, payload.error_message
+            payload = self.selected_client.call("drop_db", str(dbname))
 
         if payload.payload:
             self.advise(u"%s %s"%(
@@ -274,14 +263,10 @@ class ProxyManager(object):
         this is for test purposes eg. demo database or import only
         '''
         if dbname == "openmolar_demo":
-            pickled_payload = self.selected_server.truncate_demo()
+            payload = self.selected_client.call("truncate_demo")
         else:
-            pickled_payload = self.selected_server.truncate_all_tables(
+            payload = self.selected_client.call("truncate_all_tables",
                 str(dbname))
-
-        payload = pickle.loads(pickled_payload)
-        if not payload.permission:
-            raise self.PermissionError, payload.error_message
 
         if payload.payload:
             self.advise(u"%s %s"%(
@@ -292,9 +277,6 @@ class ProxyManager(object):
 
         self.display_proxy_message()
                 
-
-    def get_server_management_functions(self):
-        return self.selected_client.get_management_functions()
 
 
 def _test():

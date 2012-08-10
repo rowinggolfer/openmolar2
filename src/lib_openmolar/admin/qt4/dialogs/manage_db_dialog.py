@@ -23,50 +23,62 @@
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
+from lib_openmolar.common.connect.proxy_client import ProxyClient
 
 class ManageDatabaseDialog(ExtendableDialog):
 
-    manage_users = False
-    drop_db = False
-    truncate_db = False
-
-    def __init__(self, dbname, management_functions, parent=None):
+    def __init__(self, dbname, proxy_client, parent=None):
         ExtendableDialog.__init__(self, parent)
 
         self.dbname = dbname
-        self.setWindowTitle(u"%s %s"% (_("Manage Database"), dbname))
+        self.proxy_client = proxy_client
+        
+        header = u"%s %s"% (_("Manage Database"), dbname)
+        self.setWindowTitle(header)
 
-        label = QtGui.QLabel("<b>%s</b>"% (
-            _('The following options can be performed.')))
+        header_label = QtGui.QLabel("<b>%s</b>"% header)
+        label = QtGui.QLabel("%s<br /><em>%s</em>"% (
+            _('The following remote functions can be called.'),
+            _('''Please note - some of these functions 
+            may take a long time to execute and give little feedback''')
+            ))
         label.setWordWrap(True)
 
-        drop_but = QtGui.QPushButton(_("Drop (delete) this database"))
-        truncate_but = QtGui.QPushButton(
-            _("Remove all data from this database"))
-        users_but = QtGui.QPushButton(_("Manage users for this database"))
-
+        self.insertWidget(header_label)
         self.insertWidget(label)
-        self.insertWidget(drop_but)
-        self.insertWidget(truncate_but)
-        self.insertWidget(users_but)
+        
 
-        remote_functions = "<ul>"
-        for func, desc in management_functions:
-            remote_functions += "<li>%s</li>"% desc
+        for func, desc in self.proxy_client.get_management_functions():
+            but = QtGui.QPushButton(desc)
+            but.func_name = func
+            self.insertWidget(but)
+            but.clicked.connect(self.but_clicked)
             
-        advanced_label = QtGui.QLabel("%s<ul>"% remote_functions )
+        advanced_label = QtGui.QLabel("no advanced features available")
 
         self.add_advanced_widget(advanced_label)
 
+        self.cancel_but.setText(_("Close"))
         self.apply_but.hide()
-        #self.enableApply()
-
-        drop_but.clicked.connect(self.drop_but_clicked)
-        truncate_but.clicked.connect(self.truncate_but_clicked)
-        users_but.clicked.connect(self.users_but_clicked)
 
     def sizeHint(self):
         return QtCore.QSize(400, 400)
+
+    def but_clicked(self):
+        but = self.sender()
+        result = "Failed"
+        if not self.get_confirm( 
+            "You have selected '%s' this will perform function %s"% (
+            but.text(), but.func_name)):
+            return
+        attempting = True
+        while attempting:
+            try:
+                result = self.proxy_client.call(but.func_name, self.dbname)
+            except ProxyClient.PermissionError:
+                LOGGER.info("need to raise permissions")
+                attempting = not self.parent().switch_server_user()
+        LOGGER.debug(result)
 
     def drop_but_clicked(self):
         if self.get_confirm(u"%s '%s'?<br /><b>%s</b>"% (_("Drop Database"),
@@ -87,10 +99,17 @@ class ManageDatabaseDialog(ExtendableDialog):
 
 def _test():
     app = QtGui.QApplication([])
-    dl = ManageDatabaseDialog("foo", [("db_func", "func1"),
-                    ("db_func", "func2")])
-    dl.exec_()
-
+    from lib_openmolar.common.connect.proxy_client import _test_instance
+    proxy_client = _test_instance()
+    dl = ManageDatabaseDialog("openmolar_demo", proxy_client)
+    result = True
+    while result:
+        try:
+            result = dl.exec_()
+        except ProxyClient.PermissionError:
+            print "raise permissions"
+            
 if __name__ == "__main__":
+    import lib_openmolar.admin # set up LOGGER
     from gettext import gettext as _
     _test()

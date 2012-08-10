@@ -220,11 +220,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         ProxyManager.om_disconnect(self)
         self.known_server_widget.clear()
         self.known_server_widget.setEnabled(False)
-
-    def switch_server_user(self):
-        self.advise("we need to up your permissions for this",1)
-        return False
-
+    
     def show_log(self):
         '''
         toggle the state of the log dock window
@@ -245,34 +241,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             if self.central_widget.closeAll():
                 PostgresMainWindow.end_pg_sessions(self)
         self.update_session_status()
-
-    def use_proxy_database(self, db_name):
-        '''
-        user has clicked on a link provided by a :doc:`ProxyClient`
-        requesting a session on dbname
-        '''
-        ## TODO deprecated - it's confusing to allow 2 ways to start a session.
-
-        result, user, passwd = self.get_user_pass(db_name)
-        if not result:
-            return
-
-        client = self.known_server_widget.current_client
-        host = client.host
-        port = 5432
-        connection_data = ConnectionData(
-            connection_name = "%s_%s:%s"% (db_name, host, 5432),
-            host = host,
-            user = user,
-            password = passwd,
-            port = 5432,
-            db_name = db_name)
-
-        pg_session = AdminConnection(connection_data)
-        if self._attempt_connection(pg_session):
-            self.add_session(pg_session)
-        self.update_session_status()
-
+    
     def create_new_database(self):
         '''
         raise a dialog, then create a database with the chosen name
@@ -339,8 +308,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         '''
         raise a dialog, and provide database management tools
         '''
-        server_functions = self.get_server_management_functions()
-        dl = ManageDatabaseDialog(dbname, server_functions, self)
+        dl = ManageDatabaseDialog(dbname, self.selected_client , self)
         if dl.exec_():
             if dl.manage_users:
                 self.advise("manage users")
@@ -479,10 +447,6 @@ _("Version"), SETTINGS.VERSION,
             if url == "install_demo":
                 LOGGER.debug("Install demo called via shortcut")
                 self.create_demo_database()
-            elif re.match("connect_.*", url):
-                dbname = re.match("connect_(.*)", url).groups()[0]
-                self.advise("start session on database %s"% dbname)
-                self.use_proxy_database(dbname)
             elif re.match("manage_.*", url):
                 dbname = re.match("manage_(.*)", url).groups()[0]
                 self.manage_db(dbname)
