@@ -1,3 +1,17 @@
+openmolar-namespace (2.0.71-0~__DIST__0) __DIST__; urgency=low
+
+  * experimental build of broken server
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 09 Aug 2012 22:06:16 +0100
+
+
+openmolar-namespace (2.0.70-2~__DIST__0) __DIST__; urgency=low
+
+  * trial build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 08 Aug 2012 23:16:31 +0100
+
+
 openmolar-namespace (2.0.70-1~__DIST__0) __DIST__; urgency=low
 
   * new upstream "release"

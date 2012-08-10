@@ -211,7 +211,7 @@ debs:
 			make deb OMSUFFIX=$(suffix) DIST=$(dist) NEW_CHANGELOG=False;) \
 	)
 	
-	make debsigns
+	#make debsigns
 	
 debsign:
 	@echo "signing the debian packages"

@@ -20,3 +20,20 @@ More functionality for openmolar-server?
 
 Fix FuzzyMatch Shell script
     uses version 8.4 :(
+    
+
+New Design for ManageDatabaseDialog
+    this should get a list of functions from the server, 
+    and offer them to the user.
+    
+    1.  give the server a new function - "admin_options". this function
+        should return a set of objects which give the name of the function
+        to be called, warnings (eg.. this will remove all data etc..)
+        - on second thoughts.. perhaps just the function names, and then assume the server also has a doc_function?
+        - eg.. server.drop_database and server.drop_database_warnings ?
+    2.  make the dialog display these options and call them.
+    3.  existing functions (drop database, remove all data, manage users a good place to start)
+    4.  also.. how about "check schema version", and "update schema version".
+    
+    
+Run om_sphinx and postgresql_autodoc

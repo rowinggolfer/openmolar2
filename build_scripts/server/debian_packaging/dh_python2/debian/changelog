@@ -1,3 +1,17 @@
+openmolar-server (2.0.71+hg019-0~__DIST__0) __DIST__; urgency=low
+
+  * broken server
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 09 Aug 2012 22:24:06 +0100
+
+
+openmolar-server (2.0.70+hg019-0~__DIST__0) __DIST__; urgency=low
+
+  * trial build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 08 Aug 2012 23:17:24 +0100
+
+
 openmolar-server (2.0.70+hg019-0~__DIST__0) __DIST__; urgency=low
 
   * incremental release

@@ -25,8 +25,8 @@ from optparse import OptionParser
 import sys
 
 from lib_openmolar.server import server
-from lib_openmolar.server.functions import logger
-from lib_openmolar.server.functions.om_server_config import OMServerConfig
+from lib_openmolar.server.misc import logger
+from lib_openmolar.server.misc.om_server_config import OMServerConfig
 
 
 def first_run():
