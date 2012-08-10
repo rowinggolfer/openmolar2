@@ -76,7 +76,8 @@ def _test():
     print (obj)
 
     obj2 = Connection230Data()
-    obj2.from_conf_file("/etc/openmolar/connections230-available/localhost")
+    obj2.from_conf_file(
+        "/etc/openmolar/connections230-available/localhost.conf")
 
     print (obj2)
 
