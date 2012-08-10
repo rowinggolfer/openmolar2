@@ -30,11 +30,12 @@ import socket
 import time
 import threading
 
-from service import Service
-from lib_openmolar.server.functions.instance import ServerInstance
-from lib_openmolar.server.functions import logger
-from lib_openmolar.server.verifying_servers import VerifyingServerSSL
-from lib_openmolar.server.functions.om_server_config import OMServerConfig
+from lib_openmolar.server.daemon.service import Service
+from lib_openmolar.server.permission_dispatcher import PermissionDispatcher
+from lib_openmolar.server.misc import logger
+from lib_openmolar.server.servers.verifying_servers import VerifyingServerSSL
+from lib_openmolar.server.misc.om_server_config import OMServerConfig
+
 
 ##############################################################################
 ##  create a pair with openssl http://openssl.org/                          ##
@@ -89,14 +90,11 @@ class OMServer(Service):
             "listening for ssl connections %s port %d"% (readable_loc, port))
         LOGGER.debug("using cert %s"% cert)
         LOGGER.debug("using key %s"% key)
-
+        
         # daemonise the process and write to /var/run
         self.start_(stderr=logger.LOCATION)
 
-        ## allow user to list methods?
-        self.server.register_introspection_functions()
-        self.server.register_instance(ServerInstance())
-
+        self.server.register_instance(PermissionDispatcher())
         for manager, hash in config.managers:
             self.server.add_user(manager, hash)
 

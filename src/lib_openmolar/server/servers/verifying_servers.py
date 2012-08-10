@@ -31,10 +31,12 @@ from SimpleXMLRPCServer import (
     SimpleXMLRPCDispatcher,
     SimpleXMLRPCRequestHandler)
 
+
 def ping():
     '''
     A trivial function given to all servers for testing purposes
     '''
+    LOGGER.info("server has been pinged")
     return True
 
 class VerifyingServer(SimpleXMLRPCServer):
@@ -42,6 +44,8 @@ class VerifyingServer(SimpleXMLRPCServer):
     an extension of SimpleXMLPRCServer
     which enforces user authentication
     '''
+    
+    USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest()}
 
     registered_instance = None
     '''
@@ -51,21 +55,18 @@ class VerifyingServer(SimpleXMLRPCServer):
     _remember_user(user)
     '''
 
-    USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest()}
-
-    HAS_SMART_INSTANCE = False
-
     def __init__(self, addr):
         SimpleXMLRPCDispatcher.__init__(self)
         SimpleXMLRPCServer.__init__(self, addr, VerifyingRequestHandler)
         self.logRequests = False # the request handler logs enough detail
 
-        self.register_function(ping)
+        self.register_function(ping, "ping")
 
     def register_instance(self, klass):
         '''
         re-implement this function so that our set_user function makes sense!
         '''
+        LOGGER.debug("registering instance %s"% klass)
         self.registered_instance = klass
         try:
             klass._remember_user(None)
@@ -76,15 +77,7 @@ class VerifyingServer(SimpleXMLRPCServer):
     "the registered instance does not have special function _remember_user")
 
         SimpleXMLRPCServer.register_instance(self, klass)
-
-    def remember_user(self, user):
-        '''
-        remember the current user
-        '''
-        if not self.HAS_SMART_INSTANCE:
-            return
-        self.registered_instance._remember_user(user)
-
+        
     def add_user(self, user, hash):
         '''
         add a user to the userdict
@@ -92,12 +85,14 @@ class VerifyingServer(SimpleXMLRPCServer):
         '''
         self.USERDICT[user] = hash
         LOGGER.debug("current user list is %s"% sorted(self.USERDICT.keys()))
-
+        
+        
 class VerifyingServerSSL(VerifyingServer):
     '''
     an extension of SimpleXMLPRCServer
     which enforces ssl connection, and user authentication
     '''
+    
     def __init__(self, addr, KEYFILE, CERTFILE):
         SimpleXMLRPCDispatcher.__init__(self)
 
@@ -161,6 +156,7 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         see if this user has authenticated correctly
         return a simple True or False
         '''
+        LOGGER.debug("checking_user %s"% username)
         self.set_proxy_user()
         if username in self.server.USERDICT:
             if self.server.USERDICT[username] == md5(password).hexdigest():
@@ -175,8 +171,7 @@ class VerifyingRequestHandler(SimpleXMLRPCRequestHandler):
         when a user authenticates, make the username accessible to the
         registered functions
         '''
-        self.server.remember_user(user)
-
+        self.server.registered_instance._remember_user(user)
 
 def _test():
     s = VerifyingServer(("",1430))

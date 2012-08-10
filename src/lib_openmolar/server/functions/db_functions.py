@@ -26,8 +26,8 @@ import subprocess
 import sys
 import psycopg2
 
-from lib_openmolar.server.functions.password_generator import new_password
-from lib_openmolar.server.functions.om_server_config import OMServerConfig
+from lib_openmolar.server.misc.password_generator import new_password
+from lib_openmolar.server.misc.om_server_config import OMServerConfig
 
 BACKUP_DIR = "/etc/openmolar"
 BACKUP_DIR = "/home/neil/tmp"

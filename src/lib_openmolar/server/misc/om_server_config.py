@@ -24,7 +24,7 @@ import os
 import sys
 import ConfigParser
 
-from lib_openmolar.server.functions.password_generator import (
+from lib_openmolar.server.misc.password_generator import (
     new_password, pass_hash)
 
 ROOT_DIR = "/etc/openmolar/"
