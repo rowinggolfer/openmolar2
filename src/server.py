@@ -34,7 +34,7 @@ def first_run():
     conf = OMServerConfig()
     if not conf.is_installed:
         log.warning("First run of openmolar_server")
-        from lib_openmolar.misc.installer import Installer
+        from lib_openmolar.server.misc.installer import Installer
         installer = Installer()
         installer.install()
     else:
