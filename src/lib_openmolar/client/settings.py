@@ -53,12 +53,8 @@ class Settings(CommonSettings, PluginHandler):
 
     _notes_css, _details_css = None, None
     
-    
     def __init__(self):
         CommonSettings.__init__(self)
-
-        if not os.path.exists(self.LOCALFOLDER):
-            os.mkdir(self.LOCALFOLDER)
 
         #: a reference to a :doc:`TeethPresentDecoder`
         self.tooth_decoder = TeethPresentDecoder()
