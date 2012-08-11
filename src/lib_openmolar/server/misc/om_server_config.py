@@ -31,6 +31,8 @@ ROOT_DIR = "/etc/openmolar/"
 CONF_FILE = os.path.join(ROOT_DIR, "server.conf")
 PASSWORD_FILE = os.path.join(ROOT_DIR, "manager_password.txt")
 
+KEY_DIR = "/usr/share/openmolar/"
+
 HEADER = '''
 ######################################################################
 #                                                                    #
@@ -133,8 +135,8 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         self.set("230server", "port", "230")
 
         self.add_section("ssl")
-        self.set("ssl", "cert", os.path.join(ROOT_DIR, "cert.pem"))
-        self.set("ssl", "key", os.path.join(ROOT_DIR, "privatekey.pem"))
+        self.set("ssl", "cert", os.path.join(KEY_DIR, "cert.pem"))
+        self.set("ssl", "key", os.path.join(KEY_DIR, "privatekey.pem"))
 
     def write(self, f=None):
         LOGGER.warning("writing conf file '%s'"% CONF_FILE)
