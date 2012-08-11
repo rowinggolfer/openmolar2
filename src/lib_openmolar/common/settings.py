@@ -139,6 +139,9 @@ class CommonSettings(object):
         self._pydate_format = None
         self._qdate_format = None
         self._rev_toothgrid_shortnames = {}
+        
+        if not os.path.exists(self.LOCALFOLDER):
+            os.makedirs(self.LOCALFOLDER)
 
         self.init_css()
 
