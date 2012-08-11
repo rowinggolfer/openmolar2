@@ -1,4 +1,4 @@
-openmolar-server (2.0.73+hg023-0~__DIST__0) __DIST__; urgency=low
+openmolar-server (2.0.73+hg024-0~__DIST__0) __DIST__; urgency=low
 
   * bugfix of server installer import
 

@@ -89,10 +89,10 @@ if ALL_PACKAGES_AVAILABLE:
     for include, name in (
         (INSTALL_NAMESPACE, "namespace"),
         (INSTALL_COMMON, "common modules"),
-        (INSTALL_COMMON, "client application"),
-        (INSTALL_COMMON, "admin application"),
-        (INSTALL_COMMON, "server daemon"),
-        (INSTALL_COMMON, "language pack")):
+        (INSTALL_CLIENT, "client application"),
+        (INSTALL_ADMIN, "admin application"),
+        (INSTALL_SERVER, "server daemon"),
+        (INSTALL_LANG, "language pack")):
         if include:
             logging.info ("package - %s"% name)
 
@@ -152,6 +152,11 @@ if INSTALL_NAMESPACE:
 ###############################################################################
 
 if INSTALL_COMMON:
+    try:
+        import lib_openmolar
+    except ImportError:
+        sys.exit("please install openmolar-namespace before this package")
+    
     logging.info("running common setup")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -200,7 +205,11 @@ if INSTALL_COMMON:
 
 if INSTALL_ADMIN:
     logging.info("running admin setup")
-
+    try:
+        import lib_openmolar
+    except ImportError:
+        sys.exit("please install openmolar-namespace before this package")
+    
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -249,6 +258,11 @@ if INSTALL_ADMIN:
 
 if INSTALL_CLIENT:
     logging.info("running client setup")
+    try:
+        import lib_openmolar
+    except ImportError:
+        sys.exit("please install openmolar-namespace before this package")
+    
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -305,6 +319,10 @@ if INSTALL_CLIENT:
 
 if INSTALL_SERVER:
     logging.info("running server setup")
+    try:
+        import lib_openmolar
+    except ImportError:
+        sys.exit("please install openmolar-namespace before this package")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -347,10 +365,8 @@ if INSTALL_SERVER:
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql',
-                         'misc/server/permissions.sql']),
-                         
-                    ('/etc/openmolar/',
-                        ['misc/server/privatekey.pem',
+                         'misc/server/permissions.sql',
+                         'misc/server/privatekey.pem',
                          'misc/server/cert.pem']),
                    ],
         )
@@ -376,6 +392,7 @@ if INSTALL_LANG:
 ###############################################################################
 # and finally.. if we've got this far.. remove any unwanted cruft             #
 ###############################################################################
+
 
 logging.info("cleaning up any temporary files")
 if ALL_PACKAGES_AVAILABLE:
