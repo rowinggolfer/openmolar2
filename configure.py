@@ -29,11 +29,14 @@ import StringIO
 import sys
 
 from version_number import VERSION_NUMBER
+import version_manager
+
+version_manager.main()
+
 sys.path.insert(0, os.path.abspath("src"))
-				
+
 logging.basicConfig(level=logging.ERROR)
 
-				
 class OMConfig(ConfigParser.RawConfigParser):
     '''
     subclass RawConfigParser with default values and an overwrite of the write
@@ -81,9 +84,7 @@ class OMConfig(ConfigParser.RawConfigParser):
             except ImportError:
                 logging.exception(
                 "IMPORT ERROR - hg generated version files not present for package %s"% att)
-                    self.set(att, "revision_number", "unavailable")
-                    self.set(att, "revision_id", "unavailable")
-                
+                sys.exit("version files not present. Unable to proceed")
                 
     def write(self, f):
         '''
