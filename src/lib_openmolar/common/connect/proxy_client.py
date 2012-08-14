@@ -199,7 +199,11 @@ class ProxyClient(object):
         '''
         payload = self.call("management_functions")
         return payload.payload
-        
+    
+    def pre_execution_warning(self, func_name):
+        payload = self.call("pre_execution_warning", func_name)
+        return payload.payload        
+    
     def call(self, func, *args):
         '''
         a wrapper to call server functions.
