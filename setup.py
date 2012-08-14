@@ -155,7 +155,7 @@ if INSTALL_COMMON:
     try:
         import lib_openmolar
     except ImportError:
-        sys.exit("please install openmolar-namespace before this package")
+        logging.warning("please install openmolar-namespace before this package")
     
     logging.info("running common setup")
     if os.path.isfile("MANIFEST"):
@@ -208,7 +208,7 @@ if INSTALL_ADMIN:
     try:
         import lib_openmolar
     except ImportError:
-        sys.exit("please install openmolar-namespace before this package")
+        logging.warning("please install openmolar-namespace before this package")
     
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -261,7 +261,7 @@ if INSTALL_CLIENT:
     try:
         import lib_openmolar
     except ImportError:
-        sys.exit("please install openmolar-namespace before this package")
+        logging.warning("please install openmolar-namespace before this package")
     
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -322,7 +322,8 @@ if INSTALL_SERVER:
     try:
         import lib_openmolar
     except ImportError:
-        sys.exit("please install openmolar-namespace before this package")
+        logging.warning("please install openmolar-namespace before this package")
+        
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
