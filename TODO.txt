@@ -2,8 +2,7 @@
 ### it is by no means complete.
 
 
-server should be able to supply it's log file (on request) to the admin app.
-    DONE!
+NEW ISSUES
 
 use apgdiff.
     when the server package is installed, database template should be updated and dumped to 
@@ -21,11 +20,22 @@ More functionality for openmolar-server?
 Fix FuzzyMatch Shell script
     uses version 8.4 :(
     
+Icons.
+    om_admin uses a lot of icons fromTheme... see it running under e17 to
+    understand the problem. Ideally I need to provide a backup theme.
 
+FIXED ISSUES
+
+server should be able to supply it's log file (on request) to the admin app.
+    DONE 2012_08_08
+
+Run om_sphinx and postgresql_autodoc
+    DONE! 2012_08_14
+    
 New Design for ManageDatabaseDialog
     this should get a list of functions from the server, 
     and offer them to the user.
-    
+
     1.  give the server a new function - "admin_options". this function
         should return a set of objects which give the name of the function
         to be called, warnings (eg.. this will remove all data etc..)
@@ -34,6 +44,6 @@ New Design for ManageDatabaseDialog
     2.  make the dialog display these options and call them.
     3.  existing functions (drop database, remove all data, manage users a good place to start)
     4.  also.. how about "check schema version", and "update schema version".
-    
-    
-Run om_sphinx and postgresql_autodoc
+
+
+    DONE! 2012_08_14
