@@ -28,8 +28,11 @@ from lib_openmolar.server.misc.password_generator import (
     new_password, pass_hash)
 
 ROOT_DIR = "/etc/openmolar/"
-CONF_FILE = os.path.join(ROOT_DIR, "server.conf")
 PASSWORD_FILE = os.path.join(ROOT_DIR, "manager_password.txt")
+
+SERVER_DIR = os.path.join(ROOT_DIR, "server")
+CONF_FILE = os.path.join(SERVER_DIR, "server.conf")
+BACKUP_FILE = os.path.join(SERVER_DIR, "backup.conf")
 
 KEY_DIR = "/usr/share/openmolar/"
 
@@ -175,8 +178,8 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
         return self.get("postgresql", "password")
 
     @property
-    def etc_dir(self):
-        return os.path.dirname(CONF_FILE)
+    def conf_dir(self):
+        return SERVER_DIR
 
     @property
     def pub_key(self):

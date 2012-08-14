@@ -49,7 +49,7 @@ class Installer(object):
             self.config.update()
 
     def make_dirs(self):
-        for dir in (self.config.etc_dir, LOGDIR):
+        for dir in (self.config.conf_dir, LOGDIR):
             try:
                 print "making directory", dir
                 os.makedirs(dir)

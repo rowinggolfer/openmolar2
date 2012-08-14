@@ -20,7 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
-
+from datetime import datetime
 import os
 import subprocess
 import sys
@@ -28,10 +28,7 @@ import psycopg2
 
 from lib_openmolar.server.misc.password_generator import new_password
 from lib_openmolar.server.misc.om_server_config import OMServerConfig
-
-BACKUP_DIR = "/etc/openmolar"
-BACKUP_DIR = "/home/neil/tmp"
-
+from lib_openmolar.server.misc.backup_config import BackupConfig
 
 def log_exception(func):
     def db_func(*args, **kwargs):
@@ -363,7 +360,7 @@ class DBFunctions(object):
         return True
     
     @log_exception
-    def backup(self, dbname, schema_only=False):
+    def backup_db(self, dbname, schema_only=False):
         '''
         calls a pg_dump (using db user openmolar)
         if schema_only is True, then the -s option is passed into pg_dump.
@@ -386,12 +383,20 @@ class DBFunctions(object):
         if stderr:
             LOGGER.warning("Errors were thrown %s"% stderr)
         
+        try:
+            BACKUP_DIR = BackupConfig().backup_dir
+        except IOError:
+            BACKUP_DIR = "/usr/share/openmolar/backups/"
+        
         backup_dir = os.path.join(BACKUP_DIR, dbname)
         
         if not os.path.isdir(backup_dir):
             os.makedirs(backup_dir)
-
-        filename = "schema.sql" if schema_only else "backup.sql"
+        
+        filename = "schema"% now if schema_only else "backup"
+        
+        filename += datetime.now().strftime("%Y%m%d_%H%M%S") + ".sql"
+            
         filepath = os.path.join(backup_dir, filename)
         
         f = open(filepath, "w")

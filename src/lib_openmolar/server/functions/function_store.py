@@ -90,8 +90,8 @@ def _test():
     print (dir(sf))
     print (sf.message_link("random_url_text"))
     
-    sf.backup("openmolar_demo")
-    sf.backup("openmolar_demo", schema_only=True)
+    sf.backup_db("openmolar_demo")
+    sf.backup_db("openmolar_demo", schema_only=True)
     
     print (sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
                         "/home/neil/tmp/openmolar_demo/new.sql" ))

@@ -48,6 +48,8 @@ LOOSE_METHODS = (   'admin_welcome',
                     'truncate_demo',
                     'message_link',
                     'management_functions',
+                    'pre_execution_warning',
+                    'backup_db'
                     )
 
 MANAGER_METHODS = ( 'create_user',
@@ -141,7 +143,24 @@ class PermissionDispatcher(FunctionStore):
         return (
             ("drop_db", _("Drop this database")),
             ("truncate_all_tables", _("Remove All Data from this database")),
+            ("backup_db", _("Backup this database")),
             )
+        
+    def pre_execution_warning(self, func_name):
+        '''
+        see if any warning needs to be confirmed before execution
+        returns None if hasn't been specified here.
+        '''
+        warnings = {
+        "drop_db" : u"%s<br /><b>%s</b>"% (
+                    _("Are you sure you want to drop this database?"),
+                    _("This action cannot be undone")),
+        "truncate_all_tables" : u"%s<br /><b>%s</b>"% (
+            _("Are you sure you want to remove All Data from this database?"),
+            _("This action cannot be undone"))
+                    }
+                    
+        return warnings.get(func_name, None)
         
 def _test():
     '''
