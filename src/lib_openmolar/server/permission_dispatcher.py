@@ -29,6 +29,10 @@ from lib_openmolar.server.functions import FunctionStore
 from lib_openmolar.server.misc.payload import PayLoad
 
 
+## if you want a method to be displayed by the admin application's
+## ManageDatabaseDialog.. include the method in 
+## PermissionDispatcher.management_functions (below)
+
 LOOSE_METHODS = (   'admin_welcome',
                     'available_databases',
                     'create_db',
@@ -52,6 +56,8 @@ MANAGER_METHODS = ( 'create_user',
                     'grant_user_permissions',
                     'truncate_all_tables',
                     )
+
+
 
 class PermissionDispatcher(FunctionStore):
     '''
@@ -127,7 +133,16 @@ class PermissionDispatcher(FunctionStore):
         '''
         self._user = user
 
-    
+    def management_functions(self):
+        '''
+        A list of tuples (func, description).
+        Ultimately these are displayed to the user in a dialog.
+        '''
+        return (
+            ("drop_db", _("Drop this database")),
+            ("truncate_all_tables", _("Remove All Data from this database")),
+            )
+        
 def _test():
     '''
     test the DispatchServer class

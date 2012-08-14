@@ -91,16 +91,6 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
         import datetime
         return datetime.datetime.now().isoformat()
 
-    def management_functions(self):
-        '''
-        A list of tuples (func, description).
-        Ultimately these are displayed to the user in a dialog.
-        '''
-        return (
-            ("dropdb", _("Drop this database")),
-            ("truncate_db", _("Remove All Data from this database")),
-            ("manage_users", _("Manage Users"))
-            )
     
 def _test():
     '''
