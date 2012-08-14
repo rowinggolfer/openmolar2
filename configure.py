@@ -81,9 +81,10 @@ class OMConfig(ConfigParser.RawConfigParser):
             except ImportError:
                 logging.exception(
                 "IMPORT ERROR - hg generated version files not present for package %s"% att)
-                print sys.path
-                sys.exit("unable to continue")
-
+                    self.set(att, "revision_number", "unavailable")
+                    self.set(att, "revision_id", "unavailable")
+                
+                
     def write(self, f):
         '''
         re-implement write so that our header is included

@@ -68,6 +68,7 @@ date = %(date)r
 '''
 
 def hook(ui, repo, node=None, **params):
+    print ("executing mercurial hook %s"% __file__)
     conf = _load_config(ui)
     changeset = repo[node]
     if not changeset.node():
@@ -79,7 +80,7 @@ def hook(ui, repo, node=None, **params):
 
 def _write_version_info(changeset, versionfile):
     template_vars = {
-    	'version':VERSION_NUMBER,
+        'version':VERSION_NUMBER,
         'revision_id':changeset.node().encode('hex'),
         'revision_number':changeset.rev(),
         'branch':changeset.branch(),
