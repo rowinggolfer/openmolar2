@@ -67,20 +67,25 @@ class ProxyClient(object):
         "ProxyClient must be initiated with a Connection230Data object"
 
         self.connection230_data = connection230_data
-
         if user is None:
-            user = ProxyUser()
-        self.set_user(user)
-
+            self.use_default_user()
+        else:
+            self.set_user(user)
+            
     def __repr__(self):
         return "%s"% self.name
 
     def set_user(self, user):
         assert type(user) == ProxyUser, \
             "user must be of type ProxyUser"
-        LOGGER.debug("setting proxyclient user to %s"% user)
+        #LOGGER.debug("setting proxyclient user to %s"% user)
         self.user = user
         self._server = None
+        self._is_connecting = False
+        
+    def use_default_user(self):
+        user = ProxyUser()
+        self.set_user(user)
 
     def connect(self):
         '''
@@ -89,25 +94,28 @@ class ProxyClient(object):
         '''
         if self.user.has_expired:
             LOGGER.warning("ProxyUser has expired - using default ProxyUser")
-            self.user = ProxyUser()
+            self.use_default_user()
 
-        location = 'https://%s:%s@%s:%d'% (
+        location = 'https://%s:{PASSWORD}@%s:%d'% (
                     self.user.name, 
-                    self.user.psword,
                     self.connection230_data.host, 
                     self.connection230_data.port
                     )
-
+                    
+        if not self.user.psword:
+            location = location.replace(":{PASSWORD}", "")
+        
         LOGGER.debug("attempting connection to %s"%
-            location.replace(self.user.psword, "********"))
+            location.replace("{PASSWORD}", "*"*len(self.user.psword)))
+        
+        location = location.replace("{PASSWORD}", self.user.psword)
 
         self._is_connecting = True
         try:
             _server = xmlrpclib.ServerProxy(location)
-            LOGGER.debug("server proxy created.. will attempt ping")
             socket.setdefaulttimeout(1) 
             _server.ping()
-            LOGGER.debug("connected and pingable (this is very good!)")
+            LOGGER.debug("connected to OMServer as user '%s'"% self.user.name)
             self._server = _server
         except xmlrpclib.ProtocolError:
             self._server = None
@@ -199,9 +207,9 @@ class ProxyClient(object):
             LOGGER.exception("xmlrpc error")
         except Exception as exc:
             LOGGER.exception("unknown error from server function %s"% func)
-
+        
         return self._unpickle(pickled_payload)
-
+        
     def _unpickle(self, pickled_payload):
         '''
         XMLRPC can not pass python objects, so they are pickled by the server

@@ -33,7 +33,7 @@ class Connection230Data(object):
     to the 230server.
     '''
     name = ""
-    host = ""
+    host = "localhost"
     port = 230
 
     def default_connection(self):
