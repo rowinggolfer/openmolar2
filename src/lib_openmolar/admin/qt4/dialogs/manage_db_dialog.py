@@ -71,9 +71,9 @@ class ManageDatabaseDialog(ExtendableDialog):
 
     def but_clicked(self):
         but = self.sender()
-        if not self.get_confirm( 
-            "You have selected '%s' this will perform function %s"% (
-            but.text(), but.func_name)):
+        
+        warning = self.proxy_client.pre_execution_warning(but.func_name)
+        if warning and not self.get_confirm(warning):
             return
         attempting = True
         while attempting:
