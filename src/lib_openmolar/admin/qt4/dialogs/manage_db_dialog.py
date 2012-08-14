@@ -23,9 +23,14 @@
 from PyQt4 import QtCore, QtGui
 
 from lib_openmolar.common.qt4.dialogs import ExtendableDialog
+from lib_openmolar.common.qt4.dialogs import UserPasswordDialog
 from lib_openmolar.common.connect.proxy_client import ProxyClient
+from lib_openmolar.common.connect.proxy_user import ProxyUser
 
 class ManageDatabaseDialog(ExtendableDialog):
+
+    waiting = QtCore.pyqtSignal(object)
+    function_completed = QtCore.pyqtSignal()    
 
     def __init__(self, dbname, proxy_client, parent=None):
         ExtendableDialog.__init__(self, parent)
@@ -66,7 +71,6 @@ class ManageDatabaseDialog(ExtendableDialog):
 
     def but_clicked(self):
         but = self.sender()
-        result = "Failed"
         if not self.get_confirm( 
             "You have selected '%s' this will perform function %s"% (
             but.text(), but.func_name)):
@@ -74,28 +78,44 @@ class ManageDatabaseDialog(ExtendableDialog):
         attempting = True
         while attempting:
             try:
+                result = "No permission to perform %s"% but.func_name
+                self.waiting.emit(True)
                 result = self.proxy_client.call(but.func_name, self.dbname)
+                attempting = False
             except ProxyClient.PermissionError:
-                LOGGER.info("need to raise permissions")
-                attempting = not self.parent().switch_server_user()
+                LOGGER.info("user '%s' can not perform function '%s'"% (
+                    self.proxy_client.user.name, but.func_name))
+                self.waiting.emit(False)
+                attempting = self.switch_to_admin_user()
+            finally:
+                self.waiting.emit(False)
         LOGGER.debug(result)
-
-    def drop_but_clicked(self):
-        if self.get_confirm(u"%s '%s'?<br /><b>%s</b>"% (_("Drop Database"),
-        self.dbname, _("This operation cannot be undone!"))):
-            self.drop_db = True
-            self.accept()
-
-    def users_but_clicked(self):
-        self.manage_users = True
+        QtGui.QMessageBox.information(self, "result", "%s"% result.payload)
         self.accept()
+        self.function_completed.emit()
 
-    def truncate_but_clicked(self):
-        if self.get_confirm(u"%s '%s'?<br /><b>%s</b>"% (
-        _("Remove all data from"),
-        self.dbname, _("This operation cannot be undone!"))):
-            self.truncate_db = True
-            self.accept()
+    def switch_to_admin_user(self):
+        '''
+        try and elevate to admin user of the proxy-server
+        '''
+        LOGGER.debug("switch_to_admin_user called")
+        QtGui.QMessageBox.information(self, "info", 
+            "you need to be admin user to do this function")
+        dl = UserPasswordDialog(self)
+        dl.set_name("admin")
+        if not dl.exec_():
+            return False
+        
+        name = dl.name
+        psword = dl.password
+        user = ProxyUser(name, psword)
+        self.proxy_client.set_user(user)
+        if self.proxy_client.server is None:
+            QtGui.QMessageBox.warning(self, "error", 
+            "no connection established for user '%s'" % name)
+            self.proxy_client.use_default_user()
+            return False
+        return True
 
 def _test():
     app = QtGui.QApplication([])
@@ -104,10 +124,7 @@ def _test():
     dl = ManageDatabaseDialog("openmolar_demo", proxy_client)
     result = True
     while result:
-        try:
-            result = dl.exec_()
-        except ProxyClient.PermissionError:
-            print "raise permissions"
+        result = dl.exec_()
             
 if __name__ == "__main__":
     import lib_openmolar.admin # set up LOGGER

@@ -309,17 +309,10 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         raise a dialog, and provide database management tools
         '''
         dl = ManageDatabaseDialog(dbname, self.selected_client , self)
-        if dl.exec_():
-            if dl.manage_users:
-                self.advise("manage users")
-            elif dl.drop_db:
-                self.advise(u"%s %s"%(_("dropping database"), dbname))
-                self.drop_db(dbname)
-            elif dl.truncate_db:
-                self.advise(u"%s %s"%(_("deleting all data from database"),
-                    dbname))
-                self.truncate_db(dbname)
-
+        dl.waiting.connect(self.wait)
+        dl.function_completed.connect(self.display_proxy_message)
+        dl.exec_()
+            
     def closeEvent(self, event=None):
         '''
         re-implement the close event of QtGui.QMainWindow, and check the user
@@ -443,26 +436,22 @@ _("Version"), SETTINGS.VERSION,
         unrecognised signals are send to the user via the notification.
         '''
         LOGGER.debug("manage_shortcut %s"% url)
-        try:
-            if url == "install_demo":
-                LOGGER.debug("Install demo called via shortcut")
-                self.create_demo_database()
-            elif re.match("manage_.*", url):
-                dbname = re.match("manage_(.*)", url).groups()[0]
-                self.manage_db(dbname)
-            elif url == 'Retry_230_connection':
-                self.advise(_("retrying connection"))
-                try:
-                    self.selected_client.connect()
-                except ProxyClient.ConnectionError as ex:
-                    self.advise(ex.message, 2)
-            else:
-                if not self.message_link(url):
-                    self.advise(
-                    "%s<hr />%s"% (_("Shortcut not found"), url), 2)
-
-        except ProxyManager.PermissionError as exc:
-            self.advise("%s<hr />%s" %(_("Permission denied"), exc), 2)
+        if url == "install_demo":
+            LOGGER.debug("Install demo called via shortcut")
+            self.create_demo_database()
+        elif re.match("manage_.*", url):
+            dbname = re.match("manage_(.*)", url).groups()[0]
+            self.manage_db(dbname)
+        elif url == 'Retry_230_connection':
+            self.advise(_("retrying connection"))
+            try:
+                self.selected_client.connect()
+            except ProxyClient.ConnectionError as ex:
+                self.advise(ex.message, 2)
+        else:
+            if not self.message_link(url):
+                self.advise(
+                "%s<hr />%s"% (_("Shortcut not found"), url), 2)
 
     def message_link(self, url_text):
         LOGGER.debug("message_link function with text %s"%url_text)
