@@ -32,9 +32,13 @@ class Connection230Data(object):
     A custom data type to store information on how applications can connect
     to the 230server.
     '''
-    name = ""
+    name = "default"
     host = "localhost"
     port = 230
+
+    @property
+    def is_valid(self):
+        return self.port != 0
 
     def default_connection(self):
         '''
@@ -49,10 +53,15 @@ class Connection230Data(object):
         '''
         parse a conf_filefor connection params
         '''
-        f = open(conf_file)
-        parser = ConfigParser.SafeConfigParser()
-        parser.readfp(f)
-
+        try:
+            f = open(conf_file)
+            parser = ConfigParser.SafeConfigParser()
+            parser.readfp(f)
+        except IOError:
+            LOGGER.exception("unable to parse conf_file")
+            self.name = "BAD CONF FILE!"
+            self.port=0 #will render the connection invalid
+            return
         self.name = os.path.basename(conf_file)
         self.host = parser.get("SERVER", "host")
         self.port = parser.getint("SERVER", "port")

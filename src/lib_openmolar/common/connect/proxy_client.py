@@ -65,7 +65,7 @@ class ProxyClient(object):
 
         assert type(connection230_data) == Connection230Data, \
         "ProxyClient must be initiated with a Connection230Data object"
-
+        
         self.connection230_data = connection230_data
         if user is None:
             self.use_default_user()
@@ -92,6 +92,10 @@ class ProxyClient(object):
         attempt to connect to xmlrpc_server, and return this object
         raise a ConnectionError if no success.
         '''
+        if not self.connection230_data.is_valid:
+            raise self.ConnectionError(
+            "connection data is invalid - check your conf files")
+
         if self.user.has_expired:
             LOGGER.warning("ProxyUser has expired - using default ProxyUser")
             self.use_default_user()
