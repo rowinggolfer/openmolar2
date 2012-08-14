@@ -112,8 +112,8 @@ class PermissionDispatcher(FunctionStore):
         pl = PayLoad(method)
         pl.permission = self._get_permission(method)
         if pl.permission:
-            #this line execute the method!
             try:
+                #this line executes the method!
                 pl.set_payload(getattr(self, method)(*params))
             except Exception as exc:
                 pl.set_payload("openmolar server error - check the server log")

@@ -51,18 +51,6 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
         the html shown on startup to the admin application
         '''
         dbs = self.available_databases()
-
-
-        ## used to return this as part of the db list...############
-        #'''                <li class="connect">
-        #                    <a href='connect_%s'>%s</a>
-        #                </li>
-        #                <li class="manage">
-        #                    <a href='manage_%s'>%s</a>
-        #                </li>
-        #'''   % (db, _("start a session on this database"), db,
-        #        _("management options"))             
-        #############################################################
         
         if dbs == "NONE":
             message = self.postgres_error_message()
@@ -107,8 +95,7 @@ def _test():
     
     print (sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
                         "/home/neil/tmp/openmolar_demo/new.sql" ))
-    
-    
+        
 if __name__ == "__main__":
     import __builtin__
     import logging
