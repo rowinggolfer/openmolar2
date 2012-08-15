@@ -59,9 +59,12 @@ class BackupConfig(ConfigParser.SafeConfigParser):
         '''
         parse the conf file for the main postgresql password
         '''
-        return self.get("backup", "location")
-
-
+        try:
+            return self.get("backup", "location")
+        except ConfigParser.NoSectionError as exc:
+            LOGGER.info("no backup location found in backup.conf")
+            raise IOError("misconfigured or missing backup file")
+        
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level = logging.DEBUG)
