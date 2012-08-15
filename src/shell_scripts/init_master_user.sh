@@ -5,7 +5,7 @@
 # This user will be the owner of ALL openmolar's databases,
 # and as such be of use for backups etc..
 
-PWORD_LOCATION='/etc/openmolar/server.conf'
+PWORD_LOCATION='/etc/openmolar/server/server.conf'
 
 if [ ! -f $PWORD_LOCATION ]
 then

@@ -58,6 +58,17 @@ class DebMakerGui(QtGui.QDialog):
         layout.addWidget(label2, 1,0)
         layout.addWidget(self.text_edit, 1,1)
 
+        nightly_but = QtGui.QPushButton("nightly build")
+        nightly_but.clicked.connect(self.insert_text)
+        
+        upstream_but = QtGui.QPushButton("upstream release")
+        upstream_but.clicked.connect(self.insert_text)
+
+        comment_frame = QtGui.QFrame()
+        layout = QtGui.QHBoxLayout(comment_frame)
+        layout.addWidget(nightly_but)
+        layout.addWidget(upstream_but)
+
         butbox = QtGui.QDialogButtonBox(self)
         butbox.setStandardButtons(butbox.Ok|butbox.Cancel)
 
@@ -66,6 +77,7 @@ class DebMakerGui(QtGui.QDialog):
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(frame)
+        layout.addWidget(comment_frame)
         layout.addWidget(butbox)
 
     def sizeHint(self):
@@ -74,6 +86,11 @@ class DebMakerGui(QtGui.QDialog):
     @property
     def changelog(self):
         return self.text_edit.toPlainText()
+
+    def insert_text(self):
+        but = self.sender()
+        text = self.text_edit.toPlainText()
+        self.text_edit.setText(text.replace("{COMMENTS}", but.text()))
 
 class Parser(optparse.OptionParser):
     def __init__(self):
@@ -149,7 +166,7 @@ def main():
     f = open(os.path.join(options.deb_dir, "changelog"), "w")
     f.write(changelog)
     f.close()
-	
+
     logging.info("succesfully written new changelog")
 
 if __name__ == "__main__":

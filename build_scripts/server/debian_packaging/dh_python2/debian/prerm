@@ -1,0 +1,9 @@
+#! /bin/sh
+
+
+# stop the server
+/etc/init.d/openmolar stop
+
+# next line gets replace automagically by debhelper scripts.
+#DEBHELPER#
+

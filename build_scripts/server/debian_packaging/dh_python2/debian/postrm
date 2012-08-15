@@ -1,0 +1,13 @@
+#! /bin/sh
+
+update-rc.d openmolar defaults
+
+# I have to force removal of these files as they are not
+# installed with the deb packaging, but on first run.
+
+if [ "$1" = "purge" ]; then
+    rm -rf "/etc/openmolar/serve*" || true
+fi
+
+#DEBHELPER#
+
