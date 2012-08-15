@@ -1,8 +1,8 @@
-openmolar-server (2.0.78+hg028-1~__DIST__0) __DIST__; urgency=low
+openmolar-server (2.0.79+hg029-2~__DIST__0) __DIST__; urgency=low
 
   * new postrm script
 
- -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 15 Aug 2012 14:43:22 +0100
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 15 Aug 2012 16:14:45 +0100
 
 
 openmolar-server (2.0.78+hg028-0~__DIST__0) __DIST__; urgency=low
