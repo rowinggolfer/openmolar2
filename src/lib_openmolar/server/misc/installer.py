@@ -70,16 +70,22 @@ class Installer(object):
         '''
         initialises the user "openmolar"
         '''
-        LOGGER.info("calling script openmolar-init-master-user")
 
-        p = subprocess.Popen(["openmolar-init-master-user"],
-            stdout=subprocess.PIPE )
+        for script in (
+        "openmolar-init-master-user",
+        "openmolar-alter-master-user"
+        ):
+        
+            LOGGER.info("calling script %s"% script)
 
-        while True:
-            line = p.stdout.readline()
-            if not line:
-                break
-            LOGGER.info(line)
+            p = subprocess.Popen([script],
+                stdout=subprocess.PIPE )
+
+            while True:
+                line = p.stdout.readline()
+                if not line:
+                    break
+                LOGGER.info(line)
 
     def init_master_db(self):
         '''
@@ -94,7 +100,7 @@ class Installer(object):
             line = p.stdout.readline()
             if not line:
                 break
-            LOGGER.info(line)
+            LOGGER.debug(line)
 
     def install(self):
         '''
