@@ -8,8 +8,8 @@
 # oh, and /etc/openmolar/server.conf is an obsolete location
 
 if [ "$1" = "purge" ]; then
-   rm -rf "/etc/openmolar/server.conf" || true
+   rm -f "/etc/openmolar/server.conf" || true
    rm -rf "/etc/openmolar/server"  || true
-   rm -rf "/etc/openmolar/manager_password.txt"  || true
+   rm -f "/etc/openmolar/manager_password.txt"  || true
 fi
 
