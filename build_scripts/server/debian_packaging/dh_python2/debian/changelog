@@ -1,3 +1,10 @@
+openmolar-server (2.0.80+hg029-0~__DIST__0) __DIST__; urgency=low
+
+  * nightly build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Wed, 15 Aug 2012 16:54:27 +0100
+
+
 openmolar-server (2.0.79+hg029-2~__DIST__0) __DIST__; urgency=low
 
   * new postrm script

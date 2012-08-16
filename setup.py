@@ -359,6 +359,7 @@ if INSTALL_SERVER:
         scripts = ['misc/server/openmolar-server',
                    'misc/server/openmolar-init-master-db',
                    'misc/server/openmolar-init-master-user',
+                   'misc/server/openmolar-alter-master-user',
                    'misc/server/openmolar-fuzzymatch',],
         data_files=[
                     ('/etc/init.d', ['misc/server/openmolar']),

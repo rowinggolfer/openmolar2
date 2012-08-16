@@ -2,6 +2,7 @@
 
 #DEBHELPER#
 
+openmolar-alter-master-user
 update-rc.d openmolar defaults
 
 /etc/init.d/openmolar restart
