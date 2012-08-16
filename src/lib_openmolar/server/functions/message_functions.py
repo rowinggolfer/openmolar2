@@ -66,12 +66,12 @@ def get_footer():
                 </div>
                 <div class = "footer_txt">
                     <i>lib_openmolar.server version %s</i>
-                    <a id = "show_log" href="show server log">Show Server Log</a>
+                    <a id = "show_log" href="show server log">%s</a>
                 </div>
             </div>
             </body>
             </html>
-            '''% (PASSWORD, VERSION)
+            '''% (PASSWORD, VERSION, _("Show Server Log"))
 
     return FOOTER
 
@@ -101,12 +101,17 @@ class MessageFunctions(object):
         '''
         return the html shown at admin_startup
         '''
-        html = u'''%s
+        html = u'''
         %s
         %s
-        %s
-        {DATABASE LIST}
-        %s'''% (HEADER, self.location_header,
+        <div class="main">
+            <b>%s
+            %s</b>
+            {DATABASE TABLE}
+        </div>
+        %s'''% (
+            HEADER, 
+            self.location_header,
             _("The following openmolar schemas are at your disposal"),
             _(" on this postgres server"),
             get_footer())

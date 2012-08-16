@@ -58,18 +58,41 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
             message = self.no_databases_message()
         else:
             message = self.admin_welcome_template()
-            db_list = "<ul>"
-            for db in dbs:
+            db_table = '''
+            <table id="database_table">
+            <tr>
+                <th>%s</th>
+                <th>%s</th>
+                <th>%s</th>
+                <th>%s</th>                
+            </tr>
+            '''% (  
+                _("Database Name"), 
+                _("Schema Version"), 
+                _("Server Side Functions"),
+                _("Local Functions")
+                )
+
+            for i, db in enumerate(dbs):
                 s_v = self.get_schema_version(db)
-                db_list += '''
-                    <li>
-                        <b>%s</b> (Schema Version %s) 
-                        <a class="management_link" href='manage_%s'>%s</a>
-                    </li>
+                if i % 2 == 0:
+                    db_table += '<tr class="even">'
+                else:
+                    db_table += '<tr class="odd">'
+                db_table += '''
+                        <td><b>%s</b></td>
+                        <td>%s</td> 
+                        <td>
+                            <a class="management_link" href='manage_%s'>%s</a>
+                        </td>
+                        <td>
+                            <a class="config_link" href='configure_%s'>%s</a>
+                        </td>
+                    </tr>
                 '''% (
-                db, s_v, db, _("management options"))
-            message = message.replace("{DATABASE LIST}", db_list)
-        return message
+                db, s_v, db, _("Manage"), db, _("Configure"))
+            message = message.replace("{DATABASE TABLE}", db_table+"</table>")
+        return message 
 
     def last_backup(self):
         '''
