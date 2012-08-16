@@ -4,6 +4,8 @@
 
 update-python-modules  openmolar-server.public
 
+openmolar-alter-master-user
+
 update-rc.d openmolar defaults
 
 service openmolar restart
