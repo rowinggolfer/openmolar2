@@ -47,19 +47,21 @@ class KnownServerWidget(QtGui.QFrame):
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
                 
-        self.listWidget = QtGui.QListWidget()
+        self.list_widget = QtGui.QListWidget()
         self.browser = Browser()
 
         label = QtGui.QLabel(
             _("The following OM Servers are configured for use."))
         label.setWordWrap(True)
-        button = QtGui.QPushButton(_("Refresh Server Message"))
+        button = QtGui.QPushButton(_("Refresh"))
+        button.setToolTip(
+            _("Poll all configured OMServers for status and refresh the page"))
 
         left_frame = QtGui.QFrame()
         left_layout = QtGui.QVBoxLayout(left_frame)
         left_layout.setMargin(0)
         left_layout.addWidget(label)        
-        left_layout.addWidget(self.listWidget)
+        left_layout.addWidget(self.list_widget)
         left_layout.addWidget(button)
         
 
@@ -73,7 +75,7 @@ class KnownServerWidget(QtGui.QFrame):
 
         button.clicked.connect(self.call_refresh)
 
-        self.listWidget.currentRowChanged.connect(self._server_chosen)
+        self.list_widget.currentRowChanged.connect(self._server_chosen)
 
         self.browser.shortcut_clicked.connect(self.browser_shortcut_clicked)
 
@@ -82,24 +84,39 @@ class KnownServerWidget(QtGui.QFrame):
 
     def clear(self):
         self._servers = []
-        self.listWidget.clear()
+        self.list_widget.clear()
+        
+    def refresh(self):
+        '''
+        update the status of all the clients
+        '''
+        for i in range(self.list_widget.count()):
+            proxy_client = self._servers[i]
+            item = self.list_widget.item(i)
+            item_text = proxy_client.brief_name
+            if proxy_client.is_connected:
+                icon = QtGui.QIcon(":icons/openmolar-server.png")
+            else:
+                icon = QtGui.QIcon(":icons/database.png")
+                item_text += u" (%s)"% _("NOT CONNECTED")
 
+            item.setIcon(icon)
+            item.setText(item_text)
+            item.setToolTip(proxy_client.name)
+        
     def add_proxy_client(self, proxy_client):
         '''
         add a :doc:`ProxyClient`
         '''
         self._servers.append(proxy_client)
-        if proxy_client.is_connected:
-            icon = QtGui.QIcon(":icons/openmolar-server.png")
-        else:
-            icon = QtGui.QIcon(":icons/database.png")
+        
+        item_text = proxy_client.brief_name
 
-        item = QtGui.QListWidgetItem(icon, proxy_client.brief_name,
-            self.listWidget)
-        item.setToolTip(proxy_client.name)
-        if self.listWidget.currentItem() is None:
-            self.listWidget.setCurrentRow(0)
-
+        item = QtGui.QListWidgetItem(item_text, self.list_widget)
+        if self.list_widget.currentItem() is None:
+            self.list_widget.setCurrentRow(0)
+        self.refresh()
+        
     def set_html(self, html):
         '''
         update the html on the embedded browser
@@ -110,6 +127,8 @@ class KnownServerWidget(QtGui.QFrame):
         '''
         private function called by a gui interaction
         '''
+        self.refresh()
+        self.set_html("please wait....")
         try:
             pm = self._servers[row]
             self.set_html(pm.html)
@@ -121,7 +140,8 @@ class KnownServerWidget(QtGui.QFrame):
         '''
         function called when the refresh button is clicked.
         '''
-        row = self.listWidget.currentRow()
+        self.refresh()
+        row = self.list_widget.currentRow()
         self.server_changed.emit(row)
 
     @property
@@ -129,13 +149,14 @@ class KnownServerWidget(QtGui.QFrame):
         '''
         the active :doc:`ProxyClient`
         '''
-        return self._servers[self.listWidget.currentRow()]
+        return self._servers[self.list_widget.currentRow()]
 
     def browser_shortcut_clicked(self, shortcut):
         '''
         pass on the signal from the browser, adding information
         '''
         self.shortcut_clicked.emit(shortcut)
+        self.refresh()
 
 def _test():
     class duck_client(object):

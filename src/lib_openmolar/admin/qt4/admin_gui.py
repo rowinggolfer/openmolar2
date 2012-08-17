@@ -446,6 +446,7 @@ _("Version"), SETTINGS.VERSION,
             self.advise(_("retrying connection"))
             try:
                 self.selected_client.connect()
+                self.display_proxy_message()
             except ProxyClient.ConnectionError as ex:
                 self.advise(ex.message, 2)
         else:
