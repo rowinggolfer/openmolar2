@@ -1,3 +1,10 @@
+openmolar-server (2.0.83+hg031-0~__DIST__0) __DIST__; urgency=low
+
+  * nightly build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Thu, 16 Aug 2012 23:43:43 +0100
+
+
 openmolar-server (2.0.82+hg030-0~__DIST__0) __DIST__; urgency=low
 
   * new installer calling openmolar-alter-master-user
