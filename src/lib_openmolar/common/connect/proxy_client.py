@@ -42,6 +42,14 @@ class _PermissionError(Exception):
     '''
     pass
 
+class DuckPayload(object):
+    '''
+    a mock type of lib_openmolar.server.misc.payload.Payload
+    '''
+    permission = True
+    exception = None
+    payload = None
+    error_message = "No connection"
 
 class ProxyClient(object):
     '''
@@ -92,6 +100,7 @@ class ProxyClient(object):
         attempt to connect to xmlrpc_server, and return this object
         raise a ConnectionError if no success.
         '''
+        self._server = None
         if not self.connection230_data.is_valid:
             raise self.ConnectionError(
             "connection data is invalid - check your conf files")
@@ -122,8 +131,6 @@ class ProxyClient(object):
             LOGGER.debug("connected to OMServer as user '%s'"% self.user.name)
             self._server = _server
         except xmlrpclib.ProtocolError:
-            self._server = None
-            self._is_connecting = False
             message = u"%s '%s'"% (_("connection refused for user"),
                 self.user.name)
             LOGGER.error(message)
@@ -133,19 +140,16 @@ class ProxyClient(object):
             'Is the host %s running and accepting connections on port %d?'% (
             self.connection230_data.host, self.connection230_data.port))           
             LOGGER.error(message)
-            self._is_connecting = False
             raise self.ConnectionError(message)
         except socket.error as e:
-            message = "Unknown socket error connecting to '%s':'%d'?"% (
+            message = "Unable to connect to '%s':'%d'?"% (
             self.connection230_data.host, self.connection230_data.port)    
             LOGGER.exception(message)
-            self._is_connecting = False
             raise self.ConnectionError(message)
         
         finally:
             socket.setdefaulttimeout(100) 
-            
-        self._is_connecting = False
+            self._is_connecting = False
 
     @property
     def server(self):
@@ -155,11 +159,7 @@ class ProxyClient(object):
         if self.is_connecting:
             LOGGER.debug("awaiting connection")
         if self._server is None:
-            try:
-                self.connect()
-            except self.ConnectionError:
-                LOGGER.exception
-                self._server = None
+            self.connect()
         return self._server
 
     @property
@@ -168,8 +168,11 @@ class ProxyClient(object):
         A boolean value stating whether the client is connected
         (to a proxy server)
         '''
-        return self._server is not None
-
+        try:
+            return (self._server is not None and self.server.ping())
+        except Exception:
+            self._server = None
+            return False
     @property
     def is_connecting(self):
         '''
@@ -208,15 +211,25 @@ class ProxyClient(object):
         '''
         a wrapper to call server functions.
         this is useful as it automatically unpickles the payloads
+        
+        this is the equivalent of self.server.func(*args)
+        returns an object of type lib_openmolar.server.misc.payload.PayLoad
+        (or a DuckType thereof)
         '''
+        if not self.is_connected:
+            duck_payload = DuckPayload()
+            duck_payload.error_message = "%s '%s':'%d'?"% (
+                _("Unable to connect to"),
+                self.connection230_data.host,  
+                self.connection230_data.port) 
+            return duck_payload
+        
         try:
             pickled_payload = getattr(self.server, func).__call__(*args)
+            return self._unpickle(pickled_payload)
         except xmlrpclib.Fault:
             LOGGER.exception("xmlrpc error")
-        except Exception as exc:
-            LOGGER.exception("unknown error from server function %s"% func)
-        
-        return self._unpickle(pickled_payload)
+            return DuckPayload()
         
     def _unpickle(self, pickled_payload):
         '''
@@ -236,10 +249,10 @@ class ProxyClient(object):
         '''
         poll the openmolar xml_rpc server for messages
         '''
-        if self._server is not None:
-            payload = self.call("admin_welcome")
-            message = payload.payload
-        else:
+        payload = self.call("admin_welcome")
+        message = payload.payload
+        if message is None:
+            LOGGER.error("unable to get ProxyClient.html")
             message = '''<h1>No connection</h1>%s<br />
             <a href='Retry_230_connection'>%s</a>'''% (
             self.connection230_data, _("Try Again"))
