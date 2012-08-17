@@ -29,7 +29,7 @@ class PayLoad(object):
         self.permission = False
         self._payload = None
         self._exception = None
-
+        
     def __repr__(self):
         return "PAYLOAD - permission='%s', method='%s', payload_type=%s"% (
             self.permission, self.method, type(self.payload))
@@ -45,7 +45,7 @@ class PayLoad(object):
 
     def set_exception(self, exc):
         self._exception = exc
-    
+
     @property
     def exception(self):
         return self._exception
