@@ -20,7 +20,8 @@ written by Neil Wallace < rowinggolfer@gmail.com >
 
 --*/
 body {
-background-color:#ffffff}
+    background-color:#ffffff
+}
 
 div.header{
     background: url(qrc:images/header_fade.png) repeat-x;
@@ -44,7 +45,7 @@ div.loc_header {
     position:relative;
     top:0px;
     left:40px;
-    width:100%;
+    width:90%;
 }
 
 h3.header {
@@ -64,7 +65,7 @@ div.footer {
     bottom:0px;
     left:0px;
     width:100%;
-    position:fixed;
+    #position:fixed;
 }
 
 div.footer_txt {
@@ -77,10 +78,11 @@ div.footer_txt {
 #show_log {
     background: url(qrc:images/log.png) right no-repeat;
     color:#ddffff;
-    padding-left:100px;
+    padding-left:50px;
     padding-right:50px;
     padding-top:10px;
     padding-bottom:10px;
+    position:relative;
 }
 
 div.password{
@@ -100,9 +102,16 @@ a.management_link {
 }
 --*/
 
-table {
+#postgres_table {
+    width:60%;
+    margin-left:20%; 
+    margin-right:20%;
+}
+
+#database_table {
     width:100%;
 }
+
 table, td, th {
     text-align:center;
     border:4px solid #888888;
@@ -119,5 +128,10 @@ background-color:#dddddd;
 }
 tr.even{
 background-color:#eeeeee;
+}
+
+h3, h4, h5, h6 {
+padding-top:0px;
+padding-bottom:0px;
 }
 
