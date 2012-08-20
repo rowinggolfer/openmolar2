@@ -93,38 +93,6 @@ class DBFunctions(object):
             raise exc
 
     @log_exception
-    def available_databases(self):
-        '''
-        get a list of databases (owned by "openmolar")
-
-        the query I use for this is based on the following.
-
-        SELECT datname, usename, datdba
-        FROM pg_database JOIN pg_user
-        ON pg_database.datdba = pg_user.usesysid and usename='openmolar';
-
-        pg_database and pg_user are tables which do not require a superuser
-        to poll for this information.
-
-        '''
-        LOGGER.debug("polling for available databases")
-        databases = []
-        try:
-            conn = psycopg2.connect(self.default_conn_atts)
-            cursor = conn.cursor()
-            cursor.execute('''SELECT datname FROM pg_database JOIN pg_user
-            ON pg_database.datdba = pg_user.usesysid
-            where usename='openmolar' and datname != 'openmolar_master'
-            order by datname''')
-            for result in cursor.fetchall():
-                databases.append(result[0])
-            conn.close()
-        except Exception as exc:
-            LOGGER.exception("Serious Error")
-            return "NONE"
-        return databases
-
-    @log_exception
     def newDB_sql(self, dbname):
         '''
         returns the sql to layout the users and tables in a database.
@@ -406,23 +374,6 @@ class DBFunctions(object):
         LOGGER.info("file saved as %s"% filepath)
 
     @log_exception
-    def get_schema_version(self, dbname):
-        '''
-        issues a query to get the value of schema_version stored in settings.
-        '''
-        try:
-            conn = psycopg2.connect(self.__conn_atts(dbname))
-            cursor = conn.cursor()
-            cursor.execute(
-                "select max(data) from settings where key='schema_version'")
-            version = cursor.fetchone()
-            conn.close()
-            return version[0]
-        except Exception as exc:
-            LOGGER.exception("Serious Error")
-            return "UNABLE TO get Version number."
-
-    @log_exception
     def get_update_script(self, original, current):
         '''
         calls apgdiff to see if the schemas are the same
@@ -441,7 +392,7 @@ class DBFunctions(object):
         if not stdout:
             return ""
         return stdout 
-            
+        
 def _test():
     '''
     test the DBFunctions class
@@ -457,7 +408,7 @@ def _test():
     #sf.create_db(dbname)
     #sf.create_demo_user()
     #sf.truncate_all_tables(dbname)
-
+    
     LOGGER.debug(
         "%s has schema version %s"% (dbname, sf.get_schema_version(dbname)))
 

@@ -46,54 +46,7 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
     def MASTER_PWORD(self):
         return self.config.postgres_pass
 
-    def admin_welcome(self):
-        '''
-        the html shown on startup to the admin application
-        '''
-        dbs = self.available_databases()
-        
-        if dbs == "NONE":
-            message = self.postgres_error_message()
-        elif dbs == []:
-            message = self.no_databases_message()
-        else:
-            message = self.admin_welcome_template()
-            db_table = '''
-            <table id="database_table">
-            <tr>
-                <th>%s</th>
-                <th>%s</th>
-                <th>%s</th>
-                <th>%s</th>                
-            </tr>
-            '''% (  
-                _("Database Name"), 
-                _("Schema Version"), 
-                _("Server Side Functions"),
-                _("Local Functions")
-                )
-
-            for i, db in enumerate(dbs):
-                s_v = self.get_schema_version(db)
-                if i % 2 == 0:
-                    db_table += '<tr class="even">'
-                else:
-                    db_table += '<tr class="odd">'
-                db_table += '''
-                        <td><b>%s</b></td>
-                        <td>%s</td> 
-                        <td>
-                            <a class="management_link" href='manage_%s'>%s</a>
-                        </td>
-                        <td>
-                            <a class="config_link" href='configure_%s'>%s</a>
-                        </td>
-                    </tr>
-                '''% (
-                db, s_v, db, _("Manage"), db, _("Configure"))
-            message = message.replace("{DATABASE TABLE}", db_table+"</table>")
-        return message 
-
+    
     def last_backup(self):
         '''
         returns a iso formatted datetime string showing when the

@@ -20,8 +20,12 @@
 ##                                                                           ##
 ###############################################################################
 
+import psycopg2
 import re
 import socket
+
+from lib_openmolar.server.misc.om_server_config import OMServerConfig
+
 
 HEADER = '''<!DOCTYPE html>
 <html lang="en">
@@ -60,10 +64,12 @@ def get_footer():
 
 
         FOOTER = '''
-            <div class = "footer">
+            <h4>Openmolar Server</h4>
                 <div class="password">
                     %s
                 </div>
+            </div>
+            <div class = "footer">
                 <div class = "footer_txt">
                     <i>lib_openmolar.server version %s</i>
                     <a id = "show_log" href="show server log">%s</a>
@@ -75,10 +81,36 @@ def get_footer():
 
     return FOOTER
 
+def log_exception(func):
+    def mess_func(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            LOGGER.exception("unhandled exception in message function")
+            return ""
+    return mess_func
+
+
 class MessageFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
+    def __init__(self):
+        self.config = OMServerConfig()
+
+    def __conn_atts(self, dbname="openmolar_master"):
+        '''
+        has to be a private function because of the password!
+        a well set up server will restrict user "openmolar"
+        to a unix socket connection (ie local machine only)
+        or at the very least a TCP/IP connection to only localhost.
+        (function doesn't get picked up by register_instance)
+        '''
+        return "host='%s' user='%s' port='%s' password='%s' dbname='%s'"% (
+            self.config.postgres_host, self.config.postgres_user,
+            self.config.postgres_port,
+            self.config.postgres_pass, dbname)
+
     @property
     def location_header(self):
         '''
@@ -96,6 +128,55 @@ class MessageFunctions(object):
             _("the admin and client applications."))
 
         return header
+    
+    @log_exception
+    def get_schema_version(self, dbname):
+        '''
+        issues a query to get the value of schema_version stored in settings.
+        '''
+        try:
+            conn = psycopg2.connect(self.__conn_atts(dbname))
+            cursor = conn.cursor()
+            cursor.execute(
+                "select max(data) from settings where key='schema_version'")
+            version = cursor.fetchone()
+            conn.close()
+            return version[0]
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
+            return "UNABLE TO get Version number."
+
+    @log_exception
+    def available_databases(self):
+        '''
+        get a list of databases (owned by "openmolar")
+
+        the query I use for this is based on the following.
+
+        SELECT datname, usename, datdba
+        FROM pg_database JOIN pg_user
+        ON pg_database.datdba = pg_user.usesysid and usename='openmolar';
+
+        pg_database and pg_user are tables which do not require a superuser
+        to poll for this information.
+
+        '''
+        LOGGER.debug("polling for available databases")
+        databases = []
+        try:
+            conn = psycopg2.connect(self.__conn_atts())
+            cursor = conn.cursor()
+            cursor.execute('''SELECT datname FROM pg_database JOIN pg_user
+            ON pg_database.datdba = pg_user.usesysid
+            where usename='openmolar' and datname != 'openmolar_master'
+            order by datname''')
+            for result in cursor.fetchall():
+                databases.append(result[0])
+            conn.close()
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
+            return "NONE"
+        return databases
 
     def admin_welcome_template(self):
         '''
@@ -105,18 +186,97 @@ class MessageFunctions(object):
         %s
         %s
         <div class="main">
-            <b>%s
-            %s</b>
+            <h4>Postgresql Server</h4>
+            
+            <table id="postgres_table">
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>            
+                <tr class="even">
+                    <td>version</td>
+                    <td>9.1.4</td>
+                </tr>
+                <tr class="odd">
+                    <td>listening addresses</td>
+                    <td>localhost</td>
+                </tr>
+                <tr class="even">
+                <td>port</td>
+                <td>5432</td>
+                </tr>
+             </table>
+
+            <h4>%s</h4>
+            {USERS}
+            
+            <h4>%s</h4>
             {DATABASE TABLE}
-        </div>
-        %s'''% (
+        %s
+        '''% (
             HEADER, 
             self.location_header,
-            _("The following openmolar schemas are at your disposal"),
-            _(" on this postgres server"),
+            _("Users who can login to postgres"),
+            _("Openmolar Databases"),
             get_footer())
 
         return html
+    
+    def admin_welcome(self):
+        '''
+        the html shown on startup to the admin application
+        '''
+        dbs = self.available_databases()
+        
+        if dbs == "NONE":
+            message = self.postgres_error_message()
+        elif dbs == []:
+            message = self.no_databases_message()
+        else:
+            message = self.admin_welcome_template()
+            db_table = '''
+            <table id="database_table">
+            <tr>
+                <th>%s</th>
+                <th>%s</th>
+                <th>%s</th>
+                <th>%s</th>                
+            </tr>
+            '''% (  
+                _("Database Name"), 
+                _("Schema Version"), 
+                _("Server Side Functions"),
+                _("Local Functions")
+                )
+
+            for i, db in enumerate(dbs):
+                s_v = self.get_schema_version(db)
+                if i % 2 == 0:
+                    db_table += '<tr class="even">'
+                else:
+                    db_table += '<tr class="odd">'
+                db_table += '''
+                        <td><b>%s</b></td>
+                        <td>%s</td> 
+                        <td>
+                            <a class="management_link" href='manage_%s'>%s</a>
+                        </td>
+                        <td>
+                            <a class="config_link" href='configure_%s'>%s</a>
+                        </td>
+                    </tr>
+                '''% (
+                db, s_v, db, _("Manage"), db, _("Configure"))
+
+            user_html = "<ul>"
+            for user in self.login_roles():
+                user_html += "<li>%s</li>"% user
+            user_html += "</ul>"
+
+            message = message.replace("{USERS}", user_html)
+            
+            message = message.replace("{DATABASE TABLE}", db_table+"</table>")
+        return message 
 
     def no_databases_message(self):
         return '''%s
@@ -160,15 +320,63 @@ class MessageFunctions(object):
             return "<html><body><pre>%s</pre></body></html>"% data
         
         return None
+    
+    @log_exception
+    def login_roles(self):
+        '''
+        get a list of roles allowed to login to postgres.
+        '''
+        try:
+            conn = psycopg2.connect(self.__conn_atts())
+            cursor = conn.cursor()
+            cursor.execute(
+                '''select usename from pg_catalog.pg_user 
+                where usename not similar to 'om_[ac][dl][mi][ie]nt?_group%'
+                ''')
+            users = cursor.fetchall()
+            conn.close()
+            for user in users:
+                yield user
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
+    
+    @log_exception
+    def list_sessions(self, db_name):
+        '''
+        list active connections
+        '''
+        try:
+            conn = psycopg2.connect(self.__conn_atts())
+            cursor = conn.cursor()
+            cursor.execute(
+                '''select usename, client_addr, application_name 
+                from pg_catalog.pg_stat_activity where datname = '%s'
+                '''% db_name)
+            sessions = cursor.fetchall()
+            conn.close()
+            for user, address, application in sessions:
+                yield (user, address, application)
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
+    
 
 def _test():
     '''
     test the ShellFunctions class
     '''
     sf = MessageFunctions()
-    LOGGER.debug(sf.admin_welcome_template())
+    LOGGER.debug(sf.admin_welcome())
     LOGGER.debug(sf.no_databases_message())
     LOGGER.debug(sf.postgres_error_message())
+    
+    dbname = "openmolar_demo"
+    for user, address, application in sf.list_sessions(dbname):
+        print (
+        "'%s:%s' is using database '%s' with application '%s'"% (
+        user, address, dbname, application))
+
+    for user in sf.login_roles():
+        print (user)
 
 if __name__ == "__main__":
     from gettext import gettext as _
