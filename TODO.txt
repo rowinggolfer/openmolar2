@@ -4,6 +4,16 @@
 
 NEW ISSUES
 
+======================================================================
+20.8.2012
+add a save html button to the admin browser
+    (this will speed development of css etc)
+
+admin welcome html should show more information about the postgres server
+    (eg. version number, users etc...)
+
+======================================================================
+
 use apgdiff.
     when the server package is installed, database template should be updated and dumped to 
     /var/lib/openmolar/schema_dump_VERSION.sql

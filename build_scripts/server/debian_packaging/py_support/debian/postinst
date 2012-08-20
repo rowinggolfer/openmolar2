@@ -2,7 +2,7 @@
 
 #DEBHELPER#
 
-update-python-modules  openmolar-server.public
+update-python-modules openmolar-server.public
 
 openmolar-alter-master-user
 
