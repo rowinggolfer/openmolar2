@@ -23,6 +23,7 @@
 
 from PyQt4 import QtCore, QtGui
 
+from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.admin.qt4.classes.browser import Browser
 
 class KnownServerWidget(QtGui.QFrame):
@@ -53,16 +54,21 @@ class KnownServerWidget(QtGui.QFrame):
         label = QtGui.QLabel(
             _("The following OM Servers are configured for use."))
         label.setWordWrap(True)
-        button = QtGui.QPushButton(_("Refresh"))
-        button.setToolTip(
+        
+        r_button = QtGui.QPushButton(_("Refresh"))
+        r_button.setToolTip(
             _("Poll all configured OMServers for status and refresh the page"))
+
+        h_button = QtGui.QPushButton(_("View Source"))
+        h_button.setToolTip(_("view the html of shown page"))
 
         left_frame = QtGui.QFrame()
         left_layout = QtGui.QVBoxLayout(left_frame)
         left_layout.setMargin(0)
         left_layout.addWidget(label)        
         left_layout.addWidget(self.list_widget)
-        left_layout.addWidget(button)
+        left_layout.addWidget(r_button)
+        left_layout.addWidget(h_button)
         
 
         splitter = QtGui.QSplitter(self)
@@ -73,8 +79,9 @@ class KnownServerWidget(QtGui.QFrame):
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(splitter)
 
-        button.clicked.connect(self.call_refresh)
-
+        r_button.clicked.connect(self.call_refresh)
+        h_button.clicked.connect(self.view_html)
+        
         self.list_widget.currentRowChanged.connect(self._server_chosen)
 
         self.browser.shortcut_clicked.connect(self.browser_shortcut_clicked)
@@ -123,6 +130,25 @@ class KnownServerWidget(QtGui.QFrame):
         '''
         self.browser.setHtml(html)
 
+    def view_html(self):
+        '''
+        view the displayed html in plain text
+        '''
+        html = self.browser.page().currentFrame().toHtml()
+        text_browser = QtGui.QTextEdit()
+        text_browser.setReadOnly(True)
+        text_browser.setFont(QtGui.QFont("courier", 10))
+        text_browser.setLineWrapMode(QtGui.QTextEdit.NoWrap)
+        text_browser.setPlainText(html)
+        dl = BaseDialog(self, remove_stretch=True)
+        dl.setWindowTitle("html source view")
+        dl.insertWidget(text_browser)
+        dl.setMinimumWidth(600)
+        dl.cancel_but.hide()
+        dl.set_accept_button_text(_("Ok"))
+        dl.enableApply()
+        dl.exec_()
+            
     def _server_chosen(self, row):
         '''
         private function called by a gui interaction

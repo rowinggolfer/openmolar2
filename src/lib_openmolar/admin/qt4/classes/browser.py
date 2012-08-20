@@ -38,7 +38,8 @@ class Browser(QtWebKit.QWebView):
 
     def setHtml(self, html):
         QtWebKit.QWebView.setHtml(self, html)
-        self.page().setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
+        self.page().setLinkDelegationPolicy(
+            QtWebKit.QWebPage.DelegateAllLinks)
 
     def _link_clicked(self, url):
         url_string = unicode(url.toString())
