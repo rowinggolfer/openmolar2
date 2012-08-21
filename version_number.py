@@ -24,5 +24,5 @@ Major Version numbering for openmolar should be placed here (and ONLY here!)
 
 '''
 
-VERSION_NUMBER = "2.0.84"
+VERSION_NUMBER = "2.0.86"
 
