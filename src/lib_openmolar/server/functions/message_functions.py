@@ -186,37 +186,17 @@ class MessageFunctions(object):
         %s
         %s
         <div class="main">
-            <h4>Postgresql Server</h4>
             
-            <table id="postgres_table">
-                <tr>
-                    <th>Parameter</th>
-                    <th>Value</th>
-                </tr>            
-                <tr class="even">
-                    <td>version</td>
-                    <td>9.1.4</td>
-                </tr>
-                <tr class="odd">
-                    <td>listening addresses</td>
-                    <td>localhost</td>
-                </tr>
-                <tr class="even">
-                <td>port</td>
-                <td>5432</td>
-                </tr>
-             </table>
+            <h4>%s</h4>            
+            {SERVER_INFO}
 
-            <h4>%s</h4>
-            {USERS}
-            
             <h4>%s</h4>
             {DATABASE TABLE}
         %s
         '''% (
             HEADER, 
             self.location_header,
-            _("Users who can login to postgres"),
+            _("Postgresql Server Information"),
             _("Openmolar Databases"),
             get_footer())
 
@@ -234,48 +214,12 @@ class MessageFunctions(object):
             message = self.no_databases_message()
         else:
             message = self.admin_welcome_template()
-            db_table = '''
-            <table id="database_table">
-            <tr>
-                <th>%s</th>
-                <th>%s</th>
-                <th>%s</th>
-                <th>%s</th>                
-            </tr>
-            '''% (  
-                _("Database Name"), 
-                _("Schema Version"), 
-                _("Server Side Functions"),
-                _("Local Functions")
-                )
-
-            for i, db in enumerate(dbs):
-                s_v = self.get_schema_version(db)
-                if i % 2 == 0:
-                    db_table += '<tr class="even">'
-                else:
-                    db_table += '<tr class="odd">'
-                db_table += '''
-                        <td><b>%s</b></td>
-                        <td>%s</td> 
-                        <td>
-                            <a class="management_link" href='manage_%s'>%s</a>
-                        </td>
-                        <td>
-                            <a class="config_link" href='configure_%s'>%s</a>
-                        </td>
-                    </tr>
-                '''% (
-                db, s_v, db, _("Manage"), db, _("Configure"))
-
-            user_html = "<ul>"
-            for user in self.login_roles():
-                user_html += "<li>%s</li>"% user
-            user_html += "</ul>"
-
-            message = message.replace("{USERS}", user_html)
             
-            message = message.replace("{DATABASE TABLE}", db_table+"</table>")
+            message = message.replace("{SERVER_INFO}", self.pg_server_table)
+
+            message = message.replace("{USERS}", self.user_html)
+            
+            message = message.replace("{DATABASE TABLE}", self.db_table(dbs))
         return message 
 
     def no_databases_message(self):
@@ -325,13 +269,15 @@ class MessageFunctions(object):
     def login_roles(self):
         '''
         get a list of roles allowed to login to postgres.
+        query uses regex to ignore om_client_group roles
+        and om_admin_group roles.
         '''
         try:
             conn = psycopg2.connect(self.__conn_atts())
             cursor = conn.cursor()
             cursor.execute(
                 '''select usename from pg_catalog.pg_user 
-                where usename not similar to 'om_[ac][dl][mi][ie]nt?_group%'
+                where usename !~ 'om_[ac][dl][mi][ie]nt?_group'
                 ''')
             users = cursor.fetchall()
             conn.close()
@@ -358,8 +304,139 @@ class MessageFunctions(object):
                 yield (user, address, application)
         except Exception as exc:
             LOGGER.exception("Serious Error")
+        
+    @log_exception
+    def pg_server_info(self):
+        '''
+        returns (postgres_version, listen_addresses, port)
+        '''
+        query = '''select current_setting('server_version') as version, 
+        current_setting('listen_addresses') as addresses, 
+        current_setting('port') as port'''
+        try:
+            conn = psycopg2.connect(self.__conn_atts())
+            cursor = conn.cursor()
+            cursor.execute(query)
+            values = cursor.fetchall()
+            conn.close()
+            for value in values:
+                yield value 
+        except Exception as exc:
+            LOGGER.exception("Serious Error")
     
+    @property
+    def pg_server_table(self):
+        '''
+        returns formatted server information
+        '''
+        try:
+            values = self.pg_server_info()
+            html = '''
+            <table id="postgres_table">
+                <tr>
+                    <th>%s</th>
+                    <th>%s</th>
+                    <th>%s</th>
+                    <th>%s</th>
+                </tr>            
+                '''% (
+                    _("Version"), 
+                    _("Listen Addresses"), 
+                    _("Port"), 
+                    _("allowed users"))
+            for value in values:
+                html +='''
+                    <tr class="even">
+                        <td>%s</td>
+                        <td>%s</td>
+                        <td>%s</td>
+                        <td class="list">{USERS}</td>
+                    </tr>
+                '''% value
+            return html + "</table>"
+        except Exception:
+            LOGGER.exception("error in MessageFunctions.pg_server_table")
+            return "Unable to get server info, check the log"
+    
+    def db_table(self, dbs):
+        '''
+        gets html showing available databases
+        includes links for management and configuration.
+        '''
+        try:
+            html = '''
+                <table id="database_table">
+                <tr>
+                    <th>%s</th>
+                    <th>%s</th>
+                    <th>%s</th>
+                    <th>%s</th>
+                    <th>%s</th>                
+                </tr>
+                '''% (  
+                    _("Database Name"), 
+                    _("Active Sessions"),
+                    _("Schema Version"), 
+                    _("Server Side Functions"),
+                    _("Local Functions")
+                    )
 
+            for i, db in enumerate(dbs):
+                s_v = self.get_schema_version(db)
+                if i % 2 == 0:
+                    html += '<tr class="even">'
+                else:
+                    html += '<tr class="odd">'
+                html += '''
+                        <td><b>%s</b></td>
+                        <td class="list">{SESSIONS}</td> 
+                        <td>%s</td>
+                        <td>
+                            <a class="management_link" href='manage_%s'>%s</a>
+                        </td>
+                        <td>
+                            <a class="config_link" href='configure_%s'>%s</a>
+                        </td>
+                    </tr>
+                '''% (db, s_v, db, _("Manage"), db, _("Configure"))
+            
+                ses_html = '                <table class="sessions">'
+                for session in self.list_sessions(db):
+                    ses_html += '''
+                        <tr>
+                            <td>%s</td>
+                            <td>%s</td>
+                            <td>%s</td>
+                        </tr>'''% session
+                ses_html += "</table>"
+                
+                if not "<td>" in ses_html:
+                    ses_html = _("No Sessions")
+
+                html = html.replace("{SESSIONS}", ses_html)
+                
+            return  html + "</table>"
+            
+        except Exception:
+            LOGGER.exception("unable to format db_table")
+            return "unable to create db_table information, check the log"
+
+    @property
+    def user_html(self):
+        '''
+        returns html showing login roles
+        '''
+        try:
+            html = "<ul>"
+            for user in self.login_roles():
+                html += "<li>%s</li>"% user
+            html += "</ul>"
+            
+            return html
+        except Exception:
+            LOGGER.exception("unable to create user_html")
+            return "unable to create user_html, check the log"
+            
 def _test():
     '''
     test the ShellFunctions class
@@ -378,6 +455,11 @@ def _test():
     for user in sf.login_roles():
         print (user)
 
+    for val in sf.pg_server_info():
+        print (val)
+    
+    print sf.pg_server_table
+    
 if __name__ == "__main__":
     from gettext import gettext as _
     import logging
