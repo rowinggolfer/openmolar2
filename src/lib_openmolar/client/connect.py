@@ -41,12 +41,14 @@ class ClientConnection(OpenmolarDatabase):
 
     def connect(self):
         SETTINGS.psql_conn = None
-        
+        self.setConnectOptions("%sapplication_name=openmolar-client;"%
+            self.connectOptions())
         OpenmolarDatabase.connect(self)
         if self.schema_version not in SETTINGS.schema_versions:
             raise self.SchemaVersionError, (
         "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
             self.schema_version, SETTINGS.schema_versions))
+        
         
         SETTINGS.psql_conn = self
 
