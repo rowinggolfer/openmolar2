@@ -33,8 +33,13 @@ class Browser(QtWebKit.QWebView):
         QtWebKit.QWebView.__init__(self, parent)
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.linkClicked.connect(self._link_clicked)
-        self.settings().setUserStyleSheetUrl(
-            QtCore.QUrl.fromLocalFile("file://" + SETTINGS.PROXY_CSS))
+        try:
+            QtCore.QUrl.isLocalFile
+            css_url = QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS)            
+        except AttributeError:
+            #QUrl was handled differently in older pyqts (lucid)
+            css_url = QtCore.QUrl("file://" + SETTINGS.PROXY_CSS)
+        self.settings().setUserStyleSheetUrl(css_url)
 
     def setHtml(self, html):
         QtWebKit.QWebView.setHtml(self, html)
