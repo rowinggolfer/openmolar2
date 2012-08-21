@@ -34,7 +34,7 @@ class Browser(QtWebKit.QWebView):
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.linkClicked.connect(self._link_clicked)
         self.settings().setUserStyleSheetUrl(
-            QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS))
+            QtCore.QUrl.fromLocalFile("file://" + SETTINGS.PROXY_CSS))
 
     def setHtml(self, html):
         QtWebKit.QWebView.setHtml(self, html)

@@ -41,12 +41,15 @@ class AdminConnection(OpenmolarDatabase):
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
     def connect(self):
+        self.setConnectOptions("%sapplication_name=openmolar-admin;"%
+            self.connectOptions())
         OpenmolarDatabase.connect(self)
         if self.schema_version not in SETTINGS.schema_versions:
             raise self.SchemaVersionError, (
         "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
             self.schema_version, SETTINGS.schema_versions))
-    
+
+        
     @property
     def admin_modules(self):
         '''
