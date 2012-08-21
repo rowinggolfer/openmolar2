@@ -62,12 +62,13 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
 
         self.setHostName(connection_data.host)
         self.setPort(connection_data.port)
-        if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
-            self.setConnectOptions("requiressl=1")
         self.setUserName(connection_data.user)
         self.setPassword(connection_data.password)
         self.setDatabaseName(connection_data.db_name)
-
+        
+        if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
+            self.setConnectOptions("requiressl=1;")
+        
         self.driver().notification.connect(self.notification_received)
 
     def _wait_cursor(self, waiting=False):
@@ -90,6 +91,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         self._schema_version = None
 
         logging.debug("OpenmolarDatabase connecting")
+        
         self._wait_cursor()
         connection_in_progress = True
         def time_out():
@@ -188,13 +190,14 @@ def _test():
         message += 'Schema Version %s'% db.schema_version
         db.emit_notification("hello")
         db.close()
+    
     except ConnectionError as e:
         message = u"connection error<hr />%s"% e
         app.restoreOverrideCursor()
     message += "</body>"
 
     QtGui.QMessageBox.information(parent, "result", message)
-
+    
     app.closeAllWindows()
 
 if __name__ == "__main__":
