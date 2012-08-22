@@ -1,25 +1,29 @@
 ### this file is neil's todo list for the application
 ### it is by no means complete.
 
-
+======================================================================
 NEW ISSUES
-
-======================================================================
-20.8.2012
-add a save html button to the admin browser
-    (this will speed development of css etc)
-
-admin welcome html should show more information about the postgres server
-    (eg. version number, users etc...)
-
 ======================================================================
 
-use apgdiff.
+2012_08_22 - server log is doubling up
+    fix it!
+
+2012_08_22 - get configuration link working for admin app
+    suggest that at the very least this shows the text which needs to be
+    saved as a config file, and suggests a name etc.
+    
+2012_08_22 - add server function "user permissions" to the management dialog
+    this should show the users and their current groups, and allow removal and addition to those groups.
+    
+2012_08_22 - admin app should allow addition of postgres users.
+    add a login user to postgres, and control where they can login from ?
+
+2012_08_01 - use apgdiff.
     when the server package is installed, database template should be updated and dumped to 
     /var/lib/openmolar/schema_dump_VERSION.sql
     apgdiff can then be called on ny schema to check if it conforms.
 
-More functionality for openmolar-server?
+2012_08_01 - More functionality for openmolar-server?
     examples 
 
     openmolar_server --create_demo
@@ -27,22 +31,31 @@ More functionality for openmolar-server?
     openmolar_server -h 127.0.0.1 -p 230 -u admin -p password --check_schema openmolar_demo
 
 
-Fix FuzzyMatch Shell script
+2012_08_01 - Fix FuzzyMatch Shell script
     uses version 8.4 :(
     
-Icons.
+2012_08_01 - Icons.
     om_admin uses a lot of icons fromTheme... see it running under e17 to
     understand the problem. Ideally I need to provide a backup theme.
 
+======================================================================
 FIXED ISSUES
+======================================================================
+2012_08_12 - add a save html button to the admin browser
+    (this will speed development of css etc)
+    DONE 2012_08_21
 
-server should be able to supply it's log file (on request) to the admin app.
+2012_08_12 - admin welcome html should show more information about the postgres server
+    (eg. version number, users etc...)
+    DONE 2012_08_21
+
+2012_08_01 - server should be able to supply it's log file (on request) to the admin app.
     DONE 2012_08_08
 
-Run om_sphinx and postgresql_autodoc
+2012_08_01 - Run om_sphinx and postgresql_autodoc
     DONE! 2012_08_14
     
-New Design for ManageDatabaseDialog
+2012_08_01 - New Design for ManageDatabaseDialog
     this should get a list of functions from the server, 
     and offer them to the user.
 
