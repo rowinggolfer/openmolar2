@@ -5,7 +5,7 @@ The Server
 
 
 The Openmolar Server is a set of scripts accessible anywhere on your network 
-(or local machine) via an XMLRPC service running, by default, on port 230.
+(or local machine) via an XMLRPC service running, by default, on port 1430.
 
 Configuration of this service is performed by editing the file located at ::
 
