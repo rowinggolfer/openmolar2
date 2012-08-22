@@ -135,7 +135,7 @@ class OMServerConfig(ConfigParser.SafeConfigParser):
 
         self.add_section("230server")
         self.set("230server", "listen", "")
-        self.set("230server", "port", "230")
+        self.set("230server", "port", "1430")
 
         self.add_section("ssl")
         self.set("ssl", "cert", os.path.join(KEY_DIR, "cert.pem"))
