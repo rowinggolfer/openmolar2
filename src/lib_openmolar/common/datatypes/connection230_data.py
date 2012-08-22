@@ -34,7 +34,7 @@ class Connection230Data(object):
     '''
     name = "default"
     host = "localhost"
-    port = 230
+    port = 1430
 
     @property
     def is_valid(self):
@@ -47,7 +47,7 @@ class Connection230Data(object):
         '''
         self.name = "default"
         self.host = "localhost"
-        self.port = 230
+        self.port = 1430
 
     def from_conf_file(self, conf_file):
         '''
