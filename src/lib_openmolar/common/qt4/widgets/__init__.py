@@ -11,5 +11,3 @@ from completer_textedit import CompletionTextEdit
 from upper_case_lineedit import UpperCaseLineEdit
 from closeable_tab_widget import ClosableTabWidget
 from progress_widget import ProgressWidget
-
-

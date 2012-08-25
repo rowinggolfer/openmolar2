@@ -32,6 +32,10 @@ class UserPasswordDialog(BaseDialog):
         self.setWindowTitle(_("Input Required"))
         frame = QtGui.QFrame()
         form = QtGui.QFormLayout(frame)
+        
+        self.label = QtGui.QLabel(_("Please enter a username and Password"))
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        
         self.name_lineEdit = QtGui.QLineEdit()
         self.pass_lineEdit = QtGui.QLineEdit()
 
@@ -43,12 +47,19 @@ class UserPasswordDialog(BaseDialog):
         form.addRow(_("Name"),self.name_lineEdit)
         form.addRow(_("Password"),self.pass_lineEdit)
 
+        self.insertWidget(self.label)
         self.insertWidget(frame)
 
         self.name_lineEdit.cursorPositionChanged.connect(self._check)
 
     def sizeHint(self):
         return QtCore.QSize(300,150)
+
+    def set_label_text(self, text):
+        '''
+        change the label text.
+        '''
+        self.label.setText(text)
 
     def _check(self):
         self.enableApply(self.name_lineEdit.text() != "")

@@ -193,6 +193,30 @@ class ProxyClient(object):
     def host(self):
         return self.connection230_data.host
     
+    def get_pg_user_list(self):
+        '''
+        get a list of users know to the pg server
+        '''
+        payload = self.call("login_roles")
+        return payload.payload
+    
+    def get_pg_user_perms(self, user, dbname):
+        '''
+        get a list of users know to the pg server
+        '''
+        payload = self.call("get_user_permissions", user, dbname)
+        return payload.payload
+    
+    def grant_pg_user_perms(
+    self, user, dbname, admin=False, client=False):
+        '''
+        add user to group
+        '''
+        payload = self.call("grant_user_permissions", user, dbname, 
+        admin, client)
+
+        return payload.payload
+        
     def get_management_functions(self):
         '''
         get a list of management functions from the omserver 
@@ -296,7 +320,9 @@ def _test():
         
     LOGGER.debug(pc.html)
     LOGGER.debug(pc.get_management_functions())
-    LOGGER.debug(pc.call("dropdb", "openmolar_demo"))
+    #LOGGER.debug(pc.call("dropdb", "openmolar_demo"))
+
+    LOGGER.debug(pc.get_pg_user_perms("om_demo", "openmolar_demo"))
 
 
 if __name__ == "__main__":

@@ -96,17 +96,10 @@ padding-left: 30px;
 
 a {color:#2f2159;}
 
-/*--
-a.management_link {
-    background: url(qrc:images/log.png) left no-repeat;
-}
---*/
-
 #postgres_table {
-    width:80%;
-    margin-left:10%; 
-    margin-right:10%;
+    width:100%;
 }
+
 
 #database_table {
     width:100%;
