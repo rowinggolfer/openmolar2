@@ -33,32 +33,11 @@ from lib_openmolar.server.misc.payload import PayLoad
 ## ManageDatabaseDialog.. include the method in 
 ## PermissionDispatcher.management_functions (below)
 
-LOOSE_METHODS = (   'admin_welcome',
-                    'available_databases',
-                    'create_db',
-                    'create_demodb',
-                    'create_demo_user',
-                    'default_conn_atts',
-                    'drop_demo_user',
-                    'drop_demodb',
-                    'last_backup',
-                    'last_error',
-                    'no_databases_message',
-                    'refresh_saved_schema',
-                    'truncate_demo',
-                    'message_link',
-                    'management_functions',
-                    'pre_execution_warning',
-                    'backup_db'
-                    )
-
-MANAGER_METHODS = ( 'create_user',
-                    'drop_db',
+MANAGER_METHODS = ( 'drop_db',
                     'drop_user',
                     'grant_user_permissions',
                     'truncate_all_tables',
                     )
-
 
 
 class PermissionDispatcher(FunctionStore):
@@ -77,15 +56,8 @@ class PermissionDispatcher(FunctionStore):
         '''
         parse the tuples above into a dictionary of lists
         '''
-        for method in LOOSE_METHODS:
-            self.PERMISSIONS[method] = ["admin", "default"]
         for method in MANAGER_METHODS:
-            if self.PERMISSIONS.has_key(method):
-                LOGGER.debug(
-                "whoops... permissions has a duplicate entry for method '%s'"%
-                method)
-            else:
-                self.PERMISSIONS[method] = ["admin"]
+            self.PERMISSIONS[method] = ["admin"]
 
     def _get_permission(self, method):
         '''
@@ -93,16 +65,16 @@ class PermissionDispatcher(FunctionStore):
         "root" can do anything it likes!
         other users depend on the list above.
         '''
-        user = self.user
-        message = "permission for user '%s' for method '%s'"% (user, method)
-
-        if (user == "root" or user in self.PERMISSIONS.get(method, [])):
-            LOGGER.debug("granted %s"% message)
-            return True
-        else :
-            LOGGER.debug("DENIED %s"% message)
-            return False
-
+        try:
+            permission = self.user in self.PERMISSIONS[method]
+        except KeyError:
+            permission = True
+        message = "permission for user '%s' for method '%s' - %s "% (
+            self.user, method, "Granted" if permission else "Unauthorised")
+        
+        LOGGER.debug(message)
+        return permission
+        
     def _dispatch(self, method, params):
         '''
         overwrite the special _dispatch function which is a wrapper

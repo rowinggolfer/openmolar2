@@ -22,6 +22,7 @@
 
 from datetime import datetime
 import os
+import re
 import subprocess
 import sys
 import psycopg2
@@ -109,8 +110,8 @@ class DBFunctions(object):
         for group in ('admin', 'client'):
             groupname = "om_%s_group_%s"% (group, dbname)
 
-            sql += "drop user if exists %s;\n"% groupname
-            sql += "create user %s;\n"% groupname
+            sql += "drop role if exists %s;\n"% groupname
+            sql += "create role %s;\n"% groupname
 
             groups[group] = groupname
 
@@ -215,8 +216,14 @@ class DBFunctions(object):
         if dbname == "openmolar_demo":
             LOGGER.warning("removing role (if exists) om_demo")
             self._execute('drop user if exists om_demo')
+        
+        #clean up the permission groups.
+        for group in ('admin', 'client'):
+            groupname = "om_%s_group_%s"% (group, dbname)
+            LOGGER.warning("attempting to remove role '%s'"% groupname)
+            self._execute("drop role if exists %s;\n"% groupname)
             
-        return True
+        return "Dropped Database %s"% dbname
 
     @log_exception
     def create_user(self, username, password=None):
@@ -239,23 +246,54 @@ class DBFunctions(object):
         return False
 
     @log_exception
-    def grant_user_permissions(self, user, dbname, admin=True, client=True):
+    def grant_user_permissions(self, user, dbname, admin=True, 
+    client=True):
         '''
-        grant permissions for a user to database dbname
+        grant/revoke permissions for a user to database dbname
         '''
         LOGGER.info("adding %s to priv groups on database %s"% (user, dbname))
 
         SQL = ""
         if admin:
             SQL += "GRANT om_admin_group_%s to %s;\n"% (dbname, user)
+        else:
+            SQL += "REVOKE om_admin_group_%s from %s;\n"% (dbname, user)
         if client:
             SQL += "GRANT om_client_group_%s to %s;\n"% (dbname, user)
+        else:
+            SQL += "REVOKE om_client_group_%s from %s;\n"% (dbname, user)
+            
         try:
             self._execute(SQL, dbname)
             return True
         except Exception:
             LOGGER.exception("Serious Error")
         return False
+
+    @log_exception
+    def get_user_permissions(self, user, dbname):
+        '''
+        get permissions for a user to database dbname
+        returns a dict.
+        {"admin":True,"client":True}
+        '''
+        LOGGER.debug(
+            "getting priv groups for user '%s' on dbase '%s'"% (user, dbname))
+        conn = psycopg2.connect(self.__conn_atts(dbname))
+        cursor = conn.cursor()
+        cursor.execute('''
+        select rolname from pg_user 
+        join pg_auth_members on (pg_user.usesysid=pg_auth_members.member) 
+        join pg_roles on (pg_roles.oid=pg_auth_members.roleid) 
+        where pg_user.usename=%s'''
+        , (user,))
+        perms = {}
+        
+        for rolname in cursor.fetchall():
+            for group in ["admin","client"]:
+                if re.match("om_%s_group_%s"% (group, dbname), rolname[0]):
+                    perms[group] = True
+        return perms
 
     @log_exception
     def drop_demo_user(self):
@@ -399,8 +437,7 @@ def _test():
     '''
     sf = DBFunctions()
     sf._user = "test_user"
-    LOGGER.debug(sf.available_databases())
-
+    
     dbname = "openmolar_demo"
     #LOGGER.debug(sf.newDB_sql(dbname))
     #sf.drop_db(dbname)
@@ -409,11 +446,12 @@ def _test():
     #sf.create_demo_user()
     #sf.truncate_all_tables(dbname)
     
-    LOGGER.debug(
-        "%s has schema version %s"% (dbname, sf.get_schema_version(dbname)))
-
+    print sf.get_user_permissions("om_demo", dbname)
+    
 if __name__ == "__main__":
+    import __builtin__
     import logging
+
     logging.basicConfig(level=logging.DEBUG)
-    LOGGER = logging.getLogger("openmolar_server")
+    __builtin__.LOGGER = logging.getLogger("openmolar_server")
     _test()

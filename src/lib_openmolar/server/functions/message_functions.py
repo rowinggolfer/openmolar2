@@ -175,7 +175,7 @@ class MessageFunctions(object):
             conn.close()
         except Exception as exc:
             LOGGER.exception("Serious Error")
-            return "NONE"
+            return "EXCEPTION CAUGHT"
         return databases
 
     def admin_welcome_template(self):
@@ -208,10 +208,18 @@ class MessageFunctions(object):
         '''
         dbs = self.available_databases()
         
-        if dbs == "NONE":
+        if dbs == "EXCEPTION CAUGHT":
             message = self.postgres_error_message()
         elif dbs == []:
-            message = self.no_databases_message()
+            message = self.admin_welcome_template()
+            
+            message = message.replace("{SERVER_INFO}", self.pg_server_table)
+
+            message = message.replace("{USERS}", self.user_html)
+
+            message = message.replace("{DATABASE TABLE}",
+                self.no_databases_message)
+            
         else:
             message = self.admin_welcome_template()
             
@@ -222,17 +230,18 @@ class MessageFunctions(object):
             message = message.replace("{DATABASE TABLE}", self.db_table(dbs))
         return message 
 
+    @property
     def no_databases_message(self):
-        return '''%s
-        %s
-        <p>%s<br />
+        return '''
+        <p>
+        %s<br />
         %s <a href="install_demo">%s</a>.
         </p>
-        <br />
-        %s'''%(HEADER, self.location_header,
+        '''% (
         _("You do not appear to have any openmolar databases installed."),
-        _("To install a demo database now"), _("Click Here"),
-        get_footer())
+        _("To install a demo database now"), 
+        _("Click Here")
+        )
 
     def postgres_error_message(self):
         return u'''%s
@@ -269,23 +278,25 @@ class MessageFunctions(object):
     def login_roles(self):
         '''
         get a list of roles allowed to login to postgres.
-        query uses regex to ignore om_client_group roles
-        and om_admin_group roles.
+        
+        note - om_client_group and om_admin_group roles are non-login roles
         '''
+        roles = []
         try:
             conn = psycopg2.connect(self.__conn_atts())
             cursor = conn.cursor()
             cursor.execute(
-                '''select usename from pg_catalog.pg_user 
-                where usename !~ 'om_[ac][dl][mi][ie]nt?_group'
-                ''')
+                'select usename from pg_catalog.pg_user')
             users = cursor.fetchall()
             conn.close()
             for user in users:
-                yield user
+                roles.append(user[0])
+        
         except Exception as exc:
             LOGGER.exception("Serious Error")
-    
+        
+        return sorted(roles)
+        
     @log_exception
     def list_sessions(self, db_name):
         '''
@@ -317,10 +328,9 @@ class MessageFunctions(object):
             conn = psycopg2.connect(self.__conn_atts())
             cursor = conn.cursor()
             cursor.execute(query)
-            values = cursor.fetchall()
+            values = cursor.fetchone()
             conn.close()
-            for value in values:
-                yield value 
+            return values
         except Exception as exc:
             LOGGER.exception("Serious Error")
     
@@ -338,22 +348,40 @@ class MessageFunctions(object):
                     <th>%s</th>
                     <th>%s</th>
                     <th>%s</th>
+                    <th>%s</th>
                 </tr>            
                 '''% (
                     _("Version"), 
                     _("Listen Addresses"), 
                     _("Port"), 
-                    _("allowed users"))
-            for value in values:
-                html +='''
+                    _("Users"),
+                    _("Manage")
+                    )
+            
+            html +='''
                     <tr class="even">
                         <td>%s</td>
                         <td>%s</td>
                         <td>%s</td>
                         <td class="list">{USERS}</td>
+                        <td>
+        <form action="add_pg_user" method="get">
+            <button id="add_pg_user" type="submit">
+                %s
+            </button>
+            <button id="remove_pg_user_button" 
+            formaction="drop_pg_user" type="submit">
+                %s
+            </button>
+        </form>
+                        </td>
                     </tr>
-                '''% value
-            return html + "</table>"
+            </table>
+                '''% (values +
+                 (_("Add a Postgres User"), _("Remove a Postgres User") )
+                )
+            return html
+         
         except Exception:
             LOGGER.exception("error in MessageFunctions.pg_server_table")
             return "Unable to get server info, check the log"
@@ -392,13 +420,29 @@ class MessageFunctions(object):
                         <td class="list">{SESSIONS}</td> 
                         <td>%s</td>
                         <td>
-                            <a class="management_link" href='manage_%s'>%s</a>
+                            <form action="manage_%s" method="get">
+                                <button class="manageDBbut" type="submit">
+                                    %s
+                                </button>
+                                <button class="manageDBbut" 
+                                formaction="user_manage_%s" type="submit">
+                                    %s
+                                </button>
+                            </form>
                         </td>
                         <td>
-                            <a class="config_link" href='configure_%s'>%s</a>
+                            <form action="configure_%s" method="get">
+                                <button class="configDBbut" type="submit">
+                                    %s
+                                </button>
+                            </form>
                         </td>
                     </tr>
-                '''% (db, s_v, db, _("Manage"), db, _("Configure"))
+                '''% (  db, s_v, 
+                        db, _("Database"), 
+                        db, _("User Permissions"), 
+                        db, _("Configure Sessions")
+                    )
             
                 ses_html = '                <table class="sessions">'
                 for session in self.list_sessions(db):
