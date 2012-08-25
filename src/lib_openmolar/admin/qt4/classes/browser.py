@@ -23,28 +23,54 @@
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 
+class _WebPage(QtWebKit.QWebPage):
+    '''
+    subclass Webpage so that links and forms are handled.
+    '''
+    def __init__(self, parent=None):
+        QtWebKit.QWebPage.__init__(self, parent)
+        self.setLinkDelegationPolicy(QtWebKit.QWebPage.DelegateAllLinks)
+
+    def acceptNavigationRequest(self, frame, request, type_):
+        if type_==self.NavigationTypeFormSubmitted:
+            self.linkClicked.emit(request.url())
+        return QtWebKit.QWebPage.acceptNavigationRequest(
+            self, frame, request, type_)
+
 class Browser(QtWebKit.QWebView):
     '''
     A browser which is aware of some of the shortcuts offered by the server.
     '''
     shortcut_clicked = QtCore.pyqtSignal(object)
+    
+    css_link = False
 
     def __init__(self, parent=None):
         QtWebKit.QWebView.__init__(self, parent)
+        
+        self._page = _WebPage()
+        self.setPage(self._page)
+       
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.linkClicked.connect(self._link_clicked)
         try:
             QtCore.QUrl.isLocalFile
             css_url = QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS)            
+            self.settings().setUserStyleSheetUrl(css_url)
         except AttributeError:
             #QUrl was handled differently in older pyqts (lucid)
             css_url = QtCore.QUrl("file://" + SETTINGS.PROXY_CSS)
-        self.settings().setUserStyleSheetUrl(css_url)
-
+            self.css_link = True
+        
     def setHtml(self, html):
+        # a hack so that lucid qt works...
+        if self.css_link:
+            html = html.replace("</head>",
+            '''<link rel="stylesheet" type="text/css" 
+            href="file://%s" rel="text/css" /> 
+            </head>'''% SETTINGS.PROXY_CSS)
+
         QtWebKit.QWebView.setHtml(self, html)
-        self.page().setLinkDelegationPolicy(
-            QtWebKit.QWebPage.DelegateAllLinks)
 
     def _link_clicked(self, url):
         url_string = unicode(url.toString())
@@ -66,7 +92,10 @@ if __name__ == "__main__":
     '''<html><body>
         <div class='loc_header'><h3>Test Header</h3>
         </div>
-        <a href='url'>test link</a>
+        <a href='url.html'>test link</a>
+        <form action="button_clicked.html" method="get">
+            <button type="submit">test_button</button>
+         </form>
         </body></html>''')
 
     browser.shortcut_clicked.connect(sig_catcher)

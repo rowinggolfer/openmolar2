@@ -277,7 +277,23 @@ class ProxyManager(object):
 
         self.display_proxy_message()
                 
+    @user_perms
+    def add_postgres_user(self, username, password):
+        '''
+        send a message to the openmolar server to delete all data this database
+        this is for test purposes eg. demo database or import only
+        '''
+        payload = self.selected_client.call("create_user", username, password)
+        
+        if payload.payload:
+            self.advise(u"%s %s"% (
+                _("Sucessfully added postgres user"), username), 1)
+        else:
+            self.advise(u"%s<hr />%s"%(
+                _("Operation failed"), payload.error_message), 2)
 
+        self.display_proxy_message()
+    
 
 def _test():
     import lib_openmolar.admin

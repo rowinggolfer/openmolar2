@@ -119,7 +119,8 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.database_toolbar = QtGui.QToolBar(self)
         self.database_toolbar.setObjectName("Database Toolbar")
-        self.database_toolbar.toggleViewAction().setText(_("Database Toolbar"))
+        self.database_toolbar.toggleViewAction().setText(
+            _("Database Toolbar"))
         self.database_toolbar.addAction(self.action_new_database)
         self.database_toolbar.addAction(self.action_populate_demo)
         self.insertToolBar(self.help_toolbar, self.database_toolbar)
@@ -149,13 +150,12 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.show()
 
         QtCore.QTimer.singleShot(100, self.setBriefMessageLocation)
-        QtCore.QTimer.singleShot(100, self._init_proxies)
+        QtCore.QTimer.singleShot(1000, self._init_proxies)
 
         SETTINGS.main_ui = self
         SETTINGS.load_plugins("admin")
         SETTINGS.activate_plugins()
         
-
     def connect_signals(self):
         '''
         set up signals/slots
@@ -209,13 +209,16 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         called at startup, and by the om_connect action
         '''
         self.wait()
+        self.advise(_("Initiating OMServer connections"))
+        self.advise(u"%s....."% _("Please wait"))
         ProxyManager._init_proxies(self)
         self.known_server_widget.clear()
         for client in self.proxy_clients:
             self.known_server_widget.add_proxy_client(client)
         self.known_server_widget.setEnabled(True)
         self.wait(False)
-
+        self.advise(u"....%s"% _("Done!"))
+        
     def om_disconnect(self):
         ProxyManager.om_disconnect(self)
         self.known_server_widget.clear()
@@ -313,6 +316,15 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         dl.function_completed.connect(self.display_proxy_message)
         dl.exec_()
             
+    def manage_pg_users(self, dbname):
+        '''
+        raise a dialog, and provide database management tools
+        '''
+        dl = ManagePGUsersDialog(dbname, self.selected_client , self)
+        dl.waiting.connect(self.wait)
+        dl.function_completed.connect(self.display_proxy_message)
+        dl.exec_()
+                    
     def closeEvent(self, event=None):
         '''
         re-implement the close event of QtGui.QMainWindow, and check the user
@@ -436,24 +448,53 @@ _("Version"), SETTINGS.VERSION,
         unrecognised signals are send to the user via the notification.
         '''
         LOGGER.debug("manage_shortcut %s"% url)
-        if url == "install_demo":
+        if url == 'Retry_230_connection':
+            self.advise(_("retrying connection"))
+            try:
+                self.selected_client.connect()
+            except ProxyClient.ConnectionError as ex:
+                self.advise(ex.message, 2)
+            self.display_proxy_message()
+        elif url == "install_demo":
             LOGGER.debug("Install demo called via shortcut")
             self.create_demo_database()
         elif re.match("manage_.*", url):
             dbname = re.match("manage_(.*)", url).groups()[0]
             self.manage_db(dbname)
-        elif url == 'Retry_230_connection':
-            self.advise(_("retrying connection"))
-            try:
-                self.selected_client.connect()
-                self.display_proxy_message()
-            except ProxyClient.ConnectionError as ex:
-                self.advise(ex.message, 2)
+        elif re.match("user_manage_.*", url):
+            dbname = re.match("user_manage_(.*)", url).groups()[0]
+            self.manage_pg_users(dbname)
+        elif url == 'add_pg_user':
+            self.add_pg_user()
+        elif url == 'drop_pg_user':
+            self.remove_pg_user()            
         else:
             if not self.message_link(url):
                 self.advise(
                 "%s<hr />%s"% (_("Shortcut not found"), url), 2)
-
+    
+    def add_pg_user(self):
+        '''
+        raise a dialog and get a username and password to add as a postgres 
+        user
+        '''
+        dl = UserPasswordDialog(self)
+        dl.set_label_text(
+          _("Please enter a username and password for the new postgres user")
+            )
+       
+        if dl.exec_():
+            self.add_postgres_user(dl.name, dl.password)
+    
+    def remove_pg_user(self):
+        '''
+        ask for confirmation, then remove the user
+        '''
+        dl = DropPGUserDialog(self.selected_client , self)
+        
+        if dl.exec_():
+            self.display_proxy_message()
+    
     def message_link(self, url_text):
         LOGGER.debug("message_link function with text %s"%url_text)
         message = self.selected_client.message_link(url_text)

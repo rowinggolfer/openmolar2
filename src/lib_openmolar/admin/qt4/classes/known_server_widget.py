@@ -74,7 +74,8 @@ class KnownServerWidget(QtGui.QFrame):
         splitter = QtGui.QSplitter(self)
         splitter.addWidget(left_frame)
         splitter.addWidget(self.browser)
-        splitter.setSizes([100,300])
+        splitter.setSizes([80,320])
+        splitter.setObjectName("KnownServerWidgetSplitter")
 
         layout = QtGui.QVBoxLayout(self)
         layout.addWidget(splitter)
