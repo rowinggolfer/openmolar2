@@ -27,6 +27,7 @@ A custom datatype, capable of parsing conf files in the following format
 
 import ConfigParser
 import getpass
+import inspect
 import types
 
 class ConnectionData(object):
@@ -77,6 +78,16 @@ class ConnectionData(object):
         self.port = 5432
         self.db_name = "openmolar_demo"
 
+    def reset(self):
+        '''
+        perhaps the user got the password wrong?
+        calling this puts it back to state  
+        '''
+        if self.conf_file is None:
+            LOGGER.error(
+            "Cannot reset connection data which has no associated conf file")
+        self.from_conf_file(self.conf_file)
+
     def from_conf_file(self, conf_file):
         '''
         parse a conf_filefor connection params
@@ -101,26 +112,33 @@ class ConnectionData(object):
         self.host = parser.get("CONNECTION", "host")
         self.port = parser.getint("CONNECTION", "port")
         self.db_name = parser.get("CONNECTION", "db_name")
-        if parser.get("CONNECTION", "auth") == "plain_password":
+        if parser.get("CONNECTION", "auth") == "supplied_password":
             self._password = parser.get("CONNECTION", "password")
         else:
-            self._password = (self.get_password,
-                    "Please enter a password for the connection %s"%(
-                    self.connection_name))
+            self._password = self.get_password
 
     @property
     def password(self):
-        if type(self._password) == types.TupleType:
-            self._password = self._password[0].__call__(self._password[1])
-
+        if type(self._password) in types.StringTypes:
+            return self._password
+        if (inspect.ismethod(self._password) or 
+        inspect.isfunction(self._password)):
+            try:
+                ps_word = self._password.__call__(self)
+                self._password = ps_word
+            except:
+                LOGGER.exception("unable to call get password function")
+                return ""
         return self._password
 
-    def get_password(self, prompt_):
+    def get_password(self, conn_data):
         '''
         prompt the user for a password.
-        (should be overwritten if subclassing)
+        (should be overwritten if subclassing by a gui)
         '''
-        return getpass.getpass(prompt=prompt_)
+        prompt = "Please enter a password for the connection %s"%(
+                    self.connection_name)
+        return getpass.getpass(prompt=prompt)
 
     @property
     def brief_name(self):
@@ -160,7 +178,7 @@ class ConnectionData(object):
             self.host,
             self.port,
             self.user,
-            ("*" * len(self.password))[:4],
+            "************",
             self.db_name)
         return html
 
@@ -188,7 +206,7 @@ def _test():
     obj.demo_connection()
 
     obj2 = ConnectionData()
-    obj2.from_conf_file("/etc/openmolar/connections-available/demo.conf")
+    obj2.from_conf_file("/home/neil/.openmolar2/connections-available/demo.conf")
 
     print obj == obj2
     print obj.to_html()

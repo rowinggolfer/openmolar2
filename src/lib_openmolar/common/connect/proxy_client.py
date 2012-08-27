@@ -141,10 +141,12 @@ class ProxyClient(object):
             self.connection230_data.host, self.connection230_data.port))           
             LOGGER.error(message)
             raise self.ConnectionError(message)
-        except socket.error as e:
-            message = "Unable to connect to '%s':'%d'?"% (
-            self.connection230_data.host, self.connection230_data.port)    
-            LOGGER.exception(message)
+        except socket.error as exc:
+            message = "Unable to connect to '%s':'%d'? %s"% (
+                self.connection230_data.host, 
+                self.connection230_data.port,
+                exc)    
+            LOGGER.error(message)            
             raise self.ConnectionError(message)
         
         finally:

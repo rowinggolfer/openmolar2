@@ -20,18 +20,21 @@
 ##                                                                           ##
 ###############################################################################
 
-import re
+'''
+provides a class PostgresMainWindow for common functionality between 
+the admin and client applications
+'''
+
 import os
-import sys
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.datatypes import ConnectionData
 
-from lib_openmolar.common.qt4.widgets import RestorableApplication, Preference
+from lib_openmolar.common.qt4.widgets import RestorableApplication
+from lib_openmolar.common.qt4.widgets import Preference
 
 from lib_openmolar.common.qt4.plugin_tools import PlugableMainWindow
     
-
 from connect_dialog import ConnectDialog
 from openmolar_database import ConnectionError, OpenmolarDatabase
 from manage_databases_widget import ManageDatabasesWidget
@@ -48,7 +51,8 @@ class PostgresMainWindow(PlugableMainWindow):
     _connection_dialog = None
     _known_session_params = None
     CONN_CLASS = OpenmolarDatabase
-
+    CONNECTION_CONF_DIRS = []
+    
     #: True if more than one pg session is allowed (False for client)
     ALLOW_MULTIPLE_SESSIONS = True
 
@@ -67,12 +71,13 @@ class PostgresMainWindow(PlugableMainWindow):
         self.action_connect.setToolTip(_("Start a PostgreSQL session"))
 
         icon = QtGui.QIcon(":icons/no_postgresql_elephant.svg")
-        self.action_disconnect = QtGui.QAction(icon, _("End Session(s)"), self)
+        self.action_disconnect = QtGui.QAction(
+            icon, _("End Session(s)"), self)
         self.action_disconnect.setToolTip(_("End all PostgreSQL sessions"))
 
         insertpoint = self.action_quit
         self.menu_file.insertAction(insertpoint, self.action_connect)
-        self.menu_file.insertAction(insertpoint,self.action_disconnect)
+        self.menu_file.insertAction(insertpoint, self.action_disconnect)
         self.menu_file.insertSeparator(insertpoint)
 
         #:
@@ -143,35 +148,37 @@ class PostgresMainWindow(PlugableMainWindow):
         if self._known_session_params is None:
             self._known_session_params = []
             try:
-                conf_dir = str(QtCore.QSettings().value(
-                    "connection_conf_dir").toString())
-
-                LOGGER.debug(
+                for conf_dir in self.CONNECTION_CONFDIRS:
+                    LOGGER.debug(
                     "checking %s for connection config files"% conf_dir)
+                    for root, dir_, files in os.walk(conf_dir):
+                        for file_ in sorted(files):
+                            filepath = os.path.join(root, file_)
+                            LOGGER.debug("checking %s for config"% filepath)
 
-                for root, dir_, files in os.walk(conf_dir):
-                    for file_ in sorted(files):
-                        filepath = os.path.join(root, file_)
-                        LOGGER.debug("checking %s for config"% filepath)
+                            conn_data = ConnectionData()
+                            conn_data.get_password = self.get_password
+                            conn_data.from_conf_file(filepath)
 
-                        conn_data = ConnectionData()
-                        conn_data.get_password = self.get_password
-                        conn_data.from_conf_file(filepath)
-
-                        LOGGER.info("loaded connection %s"% conn_data)
-                        self._known_session_params.append(conn_data)
+                            LOGGER.info("loaded connection %s"% conn_data)
+                            self._known_session_params.append(conn_data)
             except Exception:
                 LOGGER.exception("error getting known_session_params")
-
+            LOGGER.info("%s connections found"% 
+                len(self._known_session_params))
+                    
         return self._known_session_params
 
-    def get_password(self, prompt):
+    def get_password(self, conn_data):
         '''
         raise a dialog to get a password
         '''
         password, result = QtGui.QInputDialog.getText(self,
-        _("password required"), prompt, QtGui.QLineEdit.Password)
-        if result is None:
+        _("password required"), u"%s '%s'"% (
+        _("Please enter the postgres login password for user"), 
+        conn_data.user), 
+        QtGui.QLineEdit.Password)
+        if not result:
             logging.WARNING("password dialog cancelled by user")
         return unicode(password)
 
@@ -268,8 +275,6 @@ class PostgresMainWindow(PlugableMainWindow):
         return a tuple of (result, user, password)
         '''
         LOGGER.debug("%s.get_user_pass %s"% (__file__, dbname))
-        if dbname == "openmolar_demo":
-            return (True, "om_demo", "password")
         dl = UserPasswordDialog(self)
         return dl.exec_(), dl.name, dl.password
 
@@ -298,16 +303,18 @@ class PostgresMainWindow(PlugableMainWindow):
 
 def _test():
     import logging
-    import lib_openmolar.client
+    import lib_openmolar.client #to install the LOGGER and SETTINGS objects
     LOGGER.setLevel(logging.DEBUG)
 
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
-    settings.setValue("connection_conf_dir",
-        "/etc/openmolar/client/connections")
-
+    settings_dir = os.path.join(
+        os.getenv("HOME"), ".openmolar2", "client", "connections")
+    
     mw = PostgresMainWindow()
+    mw.CONNECTION_CONFDIRS = [settings_dir]
     mw.show()
+    
     app.exec_()
 
 if __name__ == "__main__":

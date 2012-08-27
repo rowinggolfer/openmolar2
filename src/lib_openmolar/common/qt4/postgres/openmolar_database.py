@@ -23,9 +23,9 @@
 '''
 provides 3 classes.
 ConnectionError - a custom python exception, raised if connection times out
-SchemaError - a custom python exception, raised if connection times out
 OpenmolarDatabase - a custom class inheriting from Pyqt4.QSql.QSqlDatabase
 '''
+
 import logging
 
 from PyQt4 import QtSql, QtGui, QtCore
@@ -116,9 +116,10 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
             connected = self.open()
         connection_in_progress = False
         self._wait_cursor(False)
+        
         if not connected:
-            raise ConnectionError(
-            "<pre font='courier'>%s</pre>"% self.lastError().text())
+            self.connection_data.reset()
+            raise ConnectionError(u"%s"% self.lastError().text())
         else:
             self.subscribeToNotifications()
 
