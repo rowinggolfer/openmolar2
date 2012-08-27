@@ -20,8 +20,9 @@
 ##                                                                           ##
 ###############################################################################
 
-import pickle
 import logging
+import os
+import pickle
 import sys
 from PyQt4 import QtGui, QtCore
 
@@ -43,7 +44,12 @@ from lib_openmolar.client.qt4.interfaces import PatientInterface
 from lib_openmolar.client.qt4.interfaces import DiaryInterface
 
 ##TODO for windows version... this will need to be tweaked.
-CONF_DIR = "/etc/openmolar/client/connections"
+settings_dir = os.path.join(
+    os.getenv("HOME"), ".openmolar2", "client", "connections")
+if not os.path.isdir(settings_dir):
+    os.makedirs(settings_dir)
+
+CONNECTION_CONFDIRS = [settings_dir, "/etc/openmolar/client/connections"]
 
 class ClientMainWindow(PostgresMainWindow):
 
@@ -51,6 +57,8 @@ class ClientMainWindow(PostgresMainWindow):
 
     #:customise the base class
     CONN_CLASS = ClientConnection
+
+    CONNECTION_CONFDIRS = CONNECTION_CONFDIRS
 
     ALLOW_MULTIPLE_SESSIONS = False
 
@@ -153,10 +161,6 @@ class ClientMainWindow(PostgresMainWindow):
 
         self.connect(self.status_widget, QtCore.SIGNAL("user2 changed"),
             self.user2_changed)
-
-    def loadSettings(self):
-        PostgresMainWindow.loadSettings(self)
-        QtCore.QSettings().setValue("connection_conf_dir", CONF_DIR)
 
     def closeEvent(self, event=None):
         '''
