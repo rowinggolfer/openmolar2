@@ -192,10 +192,15 @@ if INSTALL_COMMON:
                     'lib_openmolar.common.qt4.plugin_tools',
                     ],
         data_files=[
-                        ('/etc/openmolar/connections-available',
-                        ['src/config_files/demo.conf']),
-                        ('/etc/openmolar/connections230-available',
-                        ['src/config_files/localhost.conf']),
+                    ('/etc/openmolar/connections-available',
+                        ['src/config_files/demo.conf']
+                        ),
+                    ('/etc/openmolar/connections230-available',
+                        ['src/config_files/localhost.conf']
+                        ),
+                    ('/usr/share/openmolar/',
+                        ['src/config_files/demo.conf']
+                        ),                        
                    ],
         )
 
