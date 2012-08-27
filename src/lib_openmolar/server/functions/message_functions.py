@@ -369,6 +369,7 @@ class MessageFunctions(object):
             <button id="add_pg_user" type="submit">
                 %s
             </button>
+            <br />
             <button id="remove_pg_user_button" 
             formaction="drop_pg_user" type="submit">
                 %s
