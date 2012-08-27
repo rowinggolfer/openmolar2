@@ -20,6 +20,7 @@
 ##                                                                           ##
 ###############################################################################
 
+import os
 import re
 import sys
 from xmlrpclib import Fault as ServerFault
@@ -48,7 +49,13 @@ from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
 ##TODO for windows version... this will need to be tweaked.
-CONF_DIR = "/etc/openmolar/admin/connections"
+settings_dir = os.path.join(
+    os.getenv("HOME"), ".openmolar2", "admin", "connections")
+
+if not os.path.isdir(settings_dir):
+    os.makedirs(settings_dir)
+
+CONNECTION_CONFDIRS = [settings_dir, "/etc/openmolar/admin/connections"]
 
 def require_session(func):
     '''
@@ -70,6 +77,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
     log = LOGGER
 
     CONN_CLASS = AdminConnection
+    CONNECTION_CONFDIRS = CONNECTION_CONFDIRS
 
     def __init__(self, parent=None):
         PostgresMainWindow.__init__(self, parent)
@@ -275,17 +283,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.display_proxy_message()
 
-    def set_permissions(self, database):
-        '''
-        alters permissions on a known database
-        '''
-        dl = NewUserPasswordDialog(self)
-        result, user, password = dl.getValues()
-        message = "TODO - enable set_permissions for %s, %s"% (user, "****")
-        self.advise(message, 1)
-        if result:
-            LOGGER.info(message)
-
     @property
     def chosen_pg_session(self):
         if len(self.session_widgets) == 1:
@@ -388,10 +385,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         else:
             self.advise(_("operation cancelled"), 1)
 
-    def loadSettings(self):
-        PostgresMainWindow.loadSettings(self)
-        QtCore.QSettings().setValue("connection_conf_dir", CONF_DIR)
-
     def show_about(self):
         '''
         raise a dialog showing version info etc.
@@ -478,13 +471,14 @@ _("Version"), SETTINGS.VERSION,
         raise a dialog and get a username and password to add as a postgres 
         user
         '''
-        dl = UserPasswordDialog(self)
+        dl = NewUserPasswordDialog(self)
         dl.set_label_text(
           _("Please enter a username and password for the new postgres user")
             )
-       
-        if dl.exec_():
-            self.add_postgres_user(dl.name, dl.password)
+        
+        result, user, password = dl.getValues()        
+        if result:
+            self.add_postgres_user(user, password)
     
     def remove_pg_user(self):
         '''

@@ -57,9 +57,7 @@ class ServerFunctionDialog(ExtendableDialog):
             if not dl.exec_():
                 break
             
-            name = dl.name
-            psword = dl.password
-            user = ProxyUser(name, psword)
+            user = ProxyUser(dl.name, dl.password)
             self.proxy_client.set_user(user)
             try:
                 if self.proxy_client.server is not None:
@@ -70,7 +68,7 @@ class ServerFunctionDialog(ExtendableDialog):
             
             self.proxy_client.use_default_user()                
             QtGui.QMessageBox.warning(self, _("error"), 
-               u"%s '%s'"% (_("no connection established for user"), name))
+               u"%s '%s'"% (_("no connection established for user"), dl.name))
         
         return result
 
