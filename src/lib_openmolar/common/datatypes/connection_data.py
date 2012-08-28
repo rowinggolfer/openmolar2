@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -81,7 +81,7 @@ class ConnectionData(object):
     def reset(self):
         '''
         perhaps the user got the password wrong?
-        calling this puts it back to state  
+        calling this puts it back to state
         '''
         if self.conf_file is None:
             LOGGER.error(
@@ -121,7 +121,7 @@ class ConnectionData(object):
     def password(self):
         if type(self._password) in types.StringTypes:
             return self._password
-        if (inspect.ismethod(self._password) or 
+        if (inspect.ismethod(self._password) or
         inspect.isfunction(self._password)):
             try:
                 ps_word = self._password.__call__(self)

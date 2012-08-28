@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -50,7 +50,7 @@ class MultipleDatabaseWidget(QtGui.QWidget):
         self.layout = QtGui.QVBoxLayout(self)
         self.layout.addWidget(self.toplabel)
         self.layout.addWidget(frame)
-        
+
         self._load_connections()
         self._connect_signals()
 

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -37,7 +37,7 @@ class ConnectionError(Exception):
     a custom Exception
     '''
     pass
-    
+
 
 class OpenmolarDatabase(QtSql.QSqlDatabase):
     '''
@@ -48,7 +48,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
     within 10 seconds
     '''
     _schema_version = None
-    
+
     class SchemaVersionError(Exception):
         pass
 
@@ -65,10 +65,10 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         self.setUserName(connection_data.user)
         self.setPassword(connection_data.password)
         self.setDatabaseName(connection_data.db_name)
-        
+
         if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
             self.setConnectOptions("requiressl=1;")
-        
+
         self.driver().notification.connect(self.notification_received)
 
     def _wait_cursor(self, waiting=False):
@@ -91,7 +91,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         self._schema_version = None
 
         logging.debug("OpenmolarDatabase connecting")
-        
+
         self._wait_cursor()
         connection_in_progress = True
         def time_out():
@@ -116,7 +116,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
             connected = self.open()
         connection_in_progress = False
         self._wait_cursor(False)
-        
+
         if not connected:
             self.connection_data.reset()
             raise ConnectionError(u"%s"% self.lastError().text())
@@ -158,8 +158,8 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         '''
         return u"%s %s:%s"% (
             self.databaseName(), self.hostName(), self.port())
-            
-    
+
+
     @property
     def schema_version(self):
         '''
@@ -174,7 +174,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
             else:
                 self._schema_version = q_query.value(0).toString()
         return self._schema_version
-    
+
 def _test():
     logging.basicConfig(level=logging.DEBUG)
 
@@ -191,14 +191,14 @@ def _test():
         message += 'Schema Version %s'% db.schema_version
         db.emit_notification("hello")
         db.close()
-    
+
     except ConnectionError as e:
         message = u"connection error<hr />%s"% e
         app.restoreOverrideCursor()
     message += "</body>"
 
     QtGui.QMessageBox.information(parent, "result", message)
-    
+
     app.closeAllWindows()
 
 if __name__ == "__main__":

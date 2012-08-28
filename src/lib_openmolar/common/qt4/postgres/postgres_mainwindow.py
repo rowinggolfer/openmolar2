@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -21,7 +21,7 @@
 ###############################################################################
 
 '''
-provides a class PostgresMainWindow for common functionality between 
+provides a class PostgresMainWindow for common functionality between
 the admin and client applications
 '''
 
@@ -34,7 +34,7 @@ from lib_openmolar.common.qt4.widgets import RestorableApplication
 from lib_openmolar.common.qt4.widgets import Preference
 
 from lib_openmolar.common.qt4.plugin_tools import PlugableMainWindow
-    
+
 from connect_dialog import ConnectDialog
 from openmolar_database import ConnectionError, OpenmolarDatabase
 from manage_databases_widget import ManageDatabasesWidget
@@ -49,10 +49,9 @@ class PostgresMainWindow(PlugableMainWindow):
     _central_widget = None
     _preferences_dialog = None
     _connection_dialog = None
-    _known_session_params = None
-    CONN_CLASS = OpenmolarDatabase
-    CONNECTION_CONF_DIRS = []
     
+    CONN_CLASS = OpenmolarDatabase
+
     #: True if more than one pg session is allowed (False for client)
     ALLOW_MULTIPLE_SESSIONS = True
 
@@ -144,30 +143,36 @@ class PostgresMainWindow(PlugableMainWindow):
         '''
         parse the allowed locations for connections.
         returns a list of :doc:`ConnectionData`
-        '''
-        if self._known_session_params is None:
-            self._known_session_params = []
-            try:
-                for conf_dir in self.CONNECTION_CONFDIRS:
-                    LOGGER.debug(
-                    "checking %s for connection config files"% conf_dir)
-                    for root, dir_, files in os.walk(conf_dir):
-                        for file_ in sorted(files):
-                            filepath = os.path.join(root, file_)
-                            LOGGER.debug("checking %s for config"% filepath)
+        '''        
+        def parse_conf(filepath):
+            try:        
+                LOGGER.debug("checking %s for config"% filepath)
 
-                            conn_data = ConnectionData()
-                            conn_data.get_password = self.get_password
-                            conn_data.from_conf_file(filepath)
+                conn_data = ConnectionData()
+                conn_data.get_password = self.get_password
+                conn_data.from_conf_file(filepath)
 
-                            LOGGER.info("loaded connection %s"% conn_data)
-                            self._known_session_params.append(conn_data)
-            except Exception:
-                LOGGER.exception("error getting known_session_params")
-            LOGGER.info("%s connections found"% 
-                len(self._known_session_params))
+                LOGGER.info("loaded connection %s"% conn_data)
+                known_session_params.append(conn_data)
+                
+            except Exception as exc:
+                LOGGER.exception("error loading %s"% filepath)
+                message = "%s '%s'<pre>%s</pre>" % (_("Bad Config file"),
+                    filepath, exc.message)
+                self.advise(message, 2)
+        
+        known_session_params = []
+        for conf_dir in SETTINGS.CONNECTION_CONFDIRS:
+            LOGGER.debug(
+            "checking %s for connection config files"% conf_dir)
+            for root, dir_, files in os.walk(conf_dir):
+                for file_ in sorted(files):
+                    parse_conf(os.path.join(root, file_))
                     
-        return self._known_session_params
+        LOGGER.info(
+            "%s connections found"% len(known_session_params))
+
+        return known_session_params
 
     def get_password(self, conn_data):
         '''
@@ -175,8 +180,8 @@ class PostgresMainWindow(PlugableMainWindow):
         '''
         password, result = QtGui.QInputDialog.getText(self,
         _("password required"), u"%s '%s'"% (
-        _("Please enter the postgres login password for user"), 
-        conn_data.user), 
+        _("Please enter the postgres login password for user"),
+        conn_data.user),
         QtGui.QLineEdit.Password)
         if not result:
             logging.WARNING("password dialog cancelled by user")
@@ -212,7 +217,7 @@ class PostgresMainWindow(PlugableMainWindow):
                 except session.SchemaVersionError as error:
                     self.advise(u"%s<hr /><pre>%s</pre>"% (
                         _("Schema is out of date"), error), 2)
-                    LOGGER.exception("Schema Version Error") 
+                    LOGGER.exception("Schema Version Error")
                 finally:
                     break
         self.update_session_status()
@@ -233,7 +238,7 @@ class PostgresMainWindow(PlugableMainWindow):
             self.advise(u"%s<hr /><pre>%s</pre>"% (
                 _("Connection Error"), error), 2)
             LOGGER.exception("Connection Error")
-            
+
         return False
 
     def end_pg_sessions(self):
@@ -308,13 +313,10 @@ def _test():
 
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
-    settings_dir = os.path.join(
-        os.getenv("HOME"), ".openmolar2", "client", "connections")
     
     mw = PostgresMainWindow()
-    mw.CONNECTION_CONFDIRS = [settings_dir]
     mw.show()
-    
+
     app.exec_()
 
 if __name__ == "__main__":

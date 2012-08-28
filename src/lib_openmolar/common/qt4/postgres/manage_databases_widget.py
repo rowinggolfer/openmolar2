@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -32,10 +32,10 @@ class ManageDatabasesWidget(MultipleDatabaseWidget):
         MultipleDatabaseWidget.__init__(self, parent)
 
         self.toplabel.setText(_("Known connections"))
-        
+
         self.grid_layout.addWidget(self.list_widget, 0, 0)
         self.grid_layout.addWidget(self.details_browser,0, 1)
-        
+
     def sizeHint(self):
         return QtCore.QSize(500,300)
 

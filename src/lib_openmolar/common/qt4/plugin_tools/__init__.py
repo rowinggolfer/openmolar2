@@ -1,4 +1,4 @@
-from plugin import Plugin 
+from plugin import Plugin
 from plugin_handler import PluginHandler
 from plugins_directory_dialog import PluginsDirectoryDialog
 from plugin_options_widget import PluginOptionsWidget

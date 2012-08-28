@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -26,7 +26,7 @@ from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.qt4.plugin_tools import PluginsDirectoryDialog
 from lib_openmolar.common.qt4.plugin_tools.plugin_download_window \
      import PluginDownloadWindow
-                                                  
+
 class PluginOptionsWidget(QtGui.QWidget):
     '''
     a widget to display and manage plugins
@@ -159,7 +159,7 @@ class PluginOptionsWidget(QtGui.QWidget):
     def open_browser(self):
         self.new_window = PluginDownloadWindow(self.parent())
         self.new_window.show()
-        
+
     def enable_checking(self, enable=True):
         if enable:
             self.listwidget.itemChanged.connect(self._item_changed)

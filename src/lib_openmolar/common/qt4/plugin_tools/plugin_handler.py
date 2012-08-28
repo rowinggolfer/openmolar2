@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -145,7 +145,7 @@ class PluginHandler(object):
             else:
                 LOGGER.debug(".. NOT ACTIVATING %s"% plugin.unique_id)
         LOGGER.info("%d plugin(s) activated"% i)
-    
+
     def de_activate_plugins(self):
         '''
         iterates over the activated plugins and de-activates them.
@@ -159,7 +159,7 @@ class PluginHandler(object):
                 self.deactivate_plugin(plugin)
                 i += 1
         LOGGER.info("%d plugin(s) de-activated"% i)
-    
+
     def activate_plugin(self, plugin):
         LOGGER.info("..Activating %s '%s'"% (plugin.__module__, plugin.name))
         try:

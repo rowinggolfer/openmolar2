@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -44,7 +44,7 @@ class PlugableMainWindow(BaseMainWindow):
 
     def __init__(self, parent=None):
         BaseMainWindow.__init__(self, parent)
-        
+
         icon = QtGui.QIcon(":icons/plugins.png")
         plugin_action = QtGui.QAction(icon, _("Plugins"), self)
 
@@ -54,12 +54,12 @@ class PlugableMainWindow(BaseMainWindow):
         '''
         self.plugin_toolbar.setObjectName("plugins toolbar")
         self.plugin_toolbar.toggleViewAction().setText(_("Plugins Toolbar"))
-        
+
         self.plugin_toolbar.addAction(plugin_action)
-        
+
         self.addToolBar(self.plugin_toolbar)
         self.loadSettings()
-        
+
         plugin_action.triggered.connect(self.plugin_action_triggered)
 
     def loadSettings(self):
@@ -154,7 +154,7 @@ class PlugableMainWindow(BaseMainWindow):
         '''
         LOGGER.debug("show_preferences_dialog")
         self.preferences_dialog().exec_()
-        
+
     def plugin_action_triggered(self):
         '''
         dummy function. should probably be overwritten
@@ -162,7 +162,7 @@ class PlugableMainWindow(BaseMainWindow):
         LOGGER.debug("plugin action triggered")
         self.preferences_dialog().select_preference(_("Plugins"))
         self.preferences_dialog().exec_()
-        
+
 def _test():
     from lib_openmolar import client
     SETTINGS.PLUGIN_DIRS = ["../../../../plugins/admin"]

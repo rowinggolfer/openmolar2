@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -73,13 +73,13 @@ class ProxyClient(object):
 
         assert type(connection230_data) == Connection230Data, \
         "ProxyClient must be initiated with a Connection230Data object"
-        
+
         self.connection230_data = connection230_data
         if user is None:
             self.use_default_user()
         else:
             self.set_user(user)
-            
+
     def __repr__(self):
         return "%s"% self.name
 
@@ -90,7 +90,7 @@ class ProxyClient(object):
         self.user = user
         self._server = None
         self._is_connecting = False
-        
+
     def use_default_user(self):
         user = ProxyUser()
         self.set_user(user)
@@ -110,23 +110,23 @@ class ProxyClient(object):
             self.use_default_user()
 
         location = 'https://%s:{PASSWORD}@%s:%d'% (
-                    self.user.name, 
-                    self.connection230_data.host, 
+                    self.user.name,
+                    self.connection230_data.host,
                     self.connection230_data.port
                     )
-                    
+
         if not self.user.psword:
             location = location.replace(":{PASSWORD}", "")
-        
+
         LOGGER.debug("attempting connection to %s"%
             location.replace("{PASSWORD}", "*"*len(self.user.psword)))
-        
+
         location = location.replace("{PASSWORD}", self.user.psword)
 
         self._is_connecting = True
         try:
             _server = xmlrpclib.ServerProxy(location)
-            socket.setdefaulttimeout(1) 
+            socket.setdefaulttimeout(1)
             _server.ping()
             LOGGER.debug("connected to OMServer as user '%s'"% self.user.name)
             self._server = _server
@@ -138,19 +138,19 @@ class ProxyClient(object):
         except socket.timeout:
             message = ('OMServer Connection Timeout - ' +
             'Is the host %s running and accepting connections on port %d?'% (
-            self.connection230_data.host, self.connection230_data.port))           
+            self.connection230_data.host, self.connection230_data.port))
             LOGGER.error(message)
             raise self.ConnectionError(message)
         except socket.error as exc:
             message = "Unable to connect to '%s':'%d'? %s"% (
-                self.connection230_data.host, 
+                self.connection230_data.host,
                 self.connection230_data.port,
-                exc)    
-            LOGGER.error(message)            
+                exc)
+            LOGGER.error(message)
             raise self.ConnectionError(message)
-        
+
         finally:
-            socket.setdefaulttimeout(100) 
+            socket.setdefaulttimeout(100)
             self._is_connecting = False
 
     @property
@@ -194,50 +194,50 @@ class ProxyClient(object):
     @property
     def host(self):
         return self.connection230_data.host
-    
+
     def get_pg_user_list(self):
         '''
         get a list of users know to the pg server
         '''
         payload = self.call("login_roles")
         return payload.payload
-    
+
     def get_pg_user_perms(self, user, dbname):
         '''
         get a list of users know to the pg server
         '''
         payload = self.call("get_user_permissions", user, dbname)
         return payload.payload
-    
+
     def grant_pg_user_perms(
     self, user, dbname, admin=False, client=False):
         '''
         add user to group
         '''
-        payload = self.call("grant_user_permissions", user, dbname, 
+        payload = self.call("grant_user_permissions", user, dbname,
         admin, client)
 
         return payload.payload
-        
+
     def get_management_functions(self):
         '''
-        get a list of management functions from the omserver 
-        (ie server side functions performed by user openmolar 
+        get a list of management functions from the omserver
+        (ie server side functions performed by user openmolar
         such as drop db, truncate db etc..)
         these are passed to a dialog for user interaction.
         '''
         payload = self.call("management_functions")
         return payload.payload
-    
+
     def pre_execution_warning(self, func_name):
         payload = self.call("pre_execution_warning", func_name)
-        return payload.payload        
-    
+        return payload.payload
+
     def call(self, func, *args):
         '''
         a wrapper to call server functions.
         this is useful as it automatically unpickles the payloads
-        
+
         this is the equivalent of self.server.func(*args)
         returns an object of type lib_openmolar.server.misc.payload.PayLoad
         (or a DuckType thereof)
@@ -246,24 +246,24 @@ class ProxyClient(object):
             duck_payload = DuckPayload()
             duck_payload.error_message = "%s '%s':'%d'?"% (
                 _("Unable to connect to"),
-                self.connection230_data.host,  
-                self.connection230_data.port) 
+                self.connection230_data.host,
+                self.connection230_data.port)
             return duck_payload
-        
+
         try:
             pickled_payload = getattr(self.server, func).__call__(*args)
             return self._unpickle(pickled_payload)
         except xmlrpclib.Fault:
             LOGGER.exception("xmlrpc error")
             return DuckPayload()
-        
+
     def _unpickle(self, pickled_payload):
         '''
         XMLRPC can not pass python objects, so they are pickled by the server
         and unpickled here.
         '''
         payload = pickle.loads(pickled_payload)
-            
+
         if not payload.permission:
             raise self.PermissionError
         if payload.exception:
@@ -291,7 +291,7 @@ class ProxyClient(object):
         if self._server is not None:
             payload = self.call("message_link", url_text)
             message = payload.payload
-        
+
         else:
             message = '''<h1>No connection</h1>%s<br />
             <a href='Retry_230_connection'>%s</a>'''% (
@@ -312,14 +312,14 @@ def _test():
 
     pc = _test_instance()
     LOGGER.debug("Ping Function Test %s"% pc.server.ping())
-    
+
     LOGGER.debug("getting last backup")
     payload = pc.call("last_backup")
     if payload.error_message:
         LOGGER.error(payload.error_message)
     else:
         LOGGER.debug("last backup %s"% payload.payload)
-        
+
     LOGGER.debug(pc.html)
     LOGGER.debug(pc.get_management_functions())
     #LOGGER.debug(pc.call("dropdb", "openmolar_demo"))
@@ -332,5 +332,5 @@ if __name__ == "__main__":
     import logging
     logging.basicConfig(level = logging.DEBUG)
     LOGGER = logging.getLogger("test")
-    
+
     _test()

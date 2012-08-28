@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -46,10 +46,15 @@ def singleton(cls):
         return instances[cls]
     return getinstance
 
+# this can't be a "singleton" because we inherit from it
+# classes which inherit from it should be though!
 class CommonSettings(object):
 
     #: where the users settings and stylesheets reside
     LOCALFOLDER = os.path.join(os.environ.get("HOME", ""), ".openmolar2")
+
+    #: root writable settings directory.
+    ROOT_FOLDER = "/etc/openmolar/"
 
     #: the system dictionary
     DICT_LOCATION = "/usr/share/dict/words"
@@ -139,7 +144,7 @@ class CommonSettings(object):
         self._pydate_format = None
         self._qdate_format = None
         self._rev_toothgrid_shortnames = {}
-        
+
         if not os.path.exists(self.LOCALFOLDER):
             os.makedirs(self.LOCALFOLDER)
 
@@ -158,7 +163,7 @@ class CommonSettings(object):
             data = resource.data()
 
         default_loc = os.path.join(self.LOCALFOLDER, "proxy.css")
-        
+
         try:
             f = open(default_loc, "r")
             css_data = f.read()
@@ -168,7 +173,7 @@ class CommonSettings(object):
                 return
         except IOError:
             pass
-    
+
         print "initiating a new css file - %s"% default_loc
         f = open(default_loc, "w")
         f.write(data)
@@ -254,7 +259,7 @@ class CommonSettings(object):
     @property
     def PROCEDURE_CATEGORIES(self):
         return self.PROCEDURE_CODES.CATEGORIES
-    
+
     @property
     def PROXY_CSS(self):
         css_files = ("custom_proxy.css", "proxy.css")
@@ -263,35 +268,39 @@ class CommonSettings(object):
             if os.path.isfile(fp):
                 LOGGER.debug("using %s for proxy_css"% fp)
                 return fp
-    
+
         return ""
-    
+
     @property
     def schema_versions(self):
         '''
         this is where I set the range of supported schema versions.
         '''
         return ("0.1",)
-        
 
-@singleton
-class CommonSettingsInstance(CommonSettings):
-    '''
-    this will always return an instance of CommonSettings
-    '''
-    pass
+
+    @property
+    def USER_CONNECTIONS_AVAILABLE_FOLDER(self):
+        folder = os.path.join(self.LOCALFOLDER, "connections-available")
+        if not os.path.isdir(folder):
+            os.makedirs(folder)
+        return folder
 
 if __name__ == "__main__":
+    import logging
+    logging.basicConfig()
+    LOGGER = logging.getLogger("test")
 
-    C_SETTINGS = CommonSettingsInstance()
-    print C_SETTINGS
+    C_SETTINGS = CommonSettings()
+    LOGGER.debug(C_SETTINGS)
 
-    print C_SETTINGS.OM_TYPES
-    print C_SETTINGS.PY_DATE_FORMAT
-    print C_SETTINGS.QDATE_FORMAT
+    LOGGER.debug(C_SETTINGS.OM_TYPES)
+    LOGGER.debug(C_SETTINGS.PY_DATE_FORMAT)
+    LOGGER.debug(C_SETTINGS.QDATE_FORMAT)
 
+    converts = []
     for tooth in ("UR8", "UL1", "urd", "LL8"):
-        print C_SETTINGS.convert_tooth_shortname(tooth),
-    print "should read 1,9,66,17"
+        converts.append(C_SETTINGS.convert_tooth_shortname(tooth))
+    LOGGER.debug("%s should read [1,9,66,17]"% converts)
 
     print C_SETTINGS.PROCEDURE_CODES

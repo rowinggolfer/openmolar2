@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -32,10 +32,10 @@ class UserPasswordDialog(BaseDialog):
         self.setWindowTitle(_("Input Required"))
         frame = QtGui.QFrame()
         form = QtGui.QFormLayout(frame)
-        
+
         self.label = QtGui.QLabel(_("Please enter a username and Password"))
         self.label.setAlignment(QtCore.Qt.AlignCenter)
-        
+
         self.name_lineEdit = QtGui.QLineEdit()
         self.pass_lineEdit = QtGui.QLineEdit()
 

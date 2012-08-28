@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -57,7 +57,7 @@ class PostgresSessionWidget(QtGui.QWidget):
     def set_session(self, session):
         assert OpenmolarDatabase in session.__class__.__mro__
         self.pg_session = session
-        
+
     def get_session_status(self):
         '''
         returns a tuple, (brief, verbose)
@@ -111,11 +111,12 @@ def _test():
     app.exec_()
 
 if __name__ == "__main__":
+    import __builtin__
     import logging
-    LOGGER = logging.getLogger()
+    __builtin__.LOGGER = logging.getLogger()
 
-    from lib_openmolar.common.settings import CommonSettingsInstance
-    SETTINGS = CommonSettingsInstance()
+    from lib_openmolar.common.settings import CommonSettings
+    SETTINGS = CommonSettings()
 
     import gettext
     gettext.install("openmolar")

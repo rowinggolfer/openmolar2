@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -86,9 +86,9 @@ class PreferencesDialog(QtGui.QDialog, Advisor):
             if item.text() == preference:
                 self.listwidget.setCurrentItem(item)
                 return
-        QtGui.QMessageBox.warning(self, "error", 
+        QtGui.QMessageBox.warning(self, "error",
             "couldn't find prefence %s"% preference)
-        
+
     def minimumSizeHint(self):
         return QtCore.QSize(400, 400)
 
