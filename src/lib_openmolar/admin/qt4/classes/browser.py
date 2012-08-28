@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -42,32 +42,32 @@ class Browser(QtWebKit.QWebView):
     A browser which is aware of some of the shortcuts offered by the server.
     '''
     shortcut_clicked = QtCore.pyqtSignal(object)
-    
+
     css_link = False
 
     def __init__(self, parent=None):
         QtWebKit.QWebView.__init__(self, parent)
-        
+
         self._page = _WebPage()
         self.setPage(self._page)
-       
+
         self.setFocusPolicy(QtCore.Qt.NoFocus)
         self.linkClicked.connect(self._link_clicked)
         try:
             QtCore.QUrl.isLocalFile
-            css_url = QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS)            
+            css_url = QtCore.QUrl.fromLocalFile(SETTINGS.PROXY_CSS)
             self.settings().setUserStyleSheetUrl(css_url)
         except AttributeError:
             #QUrl was handled differently in older pyqts (lucid)
             css_url = QtCore.QUrl("file://" + SETTINGS.PROXY_CSS)
             self.css_link = True
-        
+
     def setHtml(self, html):
         # a hack so that lucid qt works...
         if self.css_link:
             html = html.replace("</head>",
-            '''<link rel="stylesheet" type="text/css" 
-            href="file://%s" rel="text/css" /> 
+            '''<link rel="stylesheet" type="text/css"
+            href="file://%s" rel="text/css" />
             </head>'''% SETTINGS.PROXY_CSS)
 
         QtWebKit.QWebView.setHtml(self, html)
@@ -79,7 +79,7 @@ class Browser(QtWebKit.QWebView):
 
 if __name__ == "__main__":
     import lib_openmolar.admin # for LOGGER
-    
+
     def sig_catcher(*args):
         print (args)
 
@@ -103,5 +103,5 @@ if __name__ == "__main__":
     mw.setCentralWidget(browser)
 
     mw.show()
-    
+
     app.exec_()

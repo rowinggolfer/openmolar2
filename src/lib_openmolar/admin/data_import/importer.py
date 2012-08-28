@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -46,7 +46,7 @@ class Importer(object):
 
     #:
     ImportWarning = _ImportWarning
-        
+
     def __init__(self):
         self.om2_session = None
         self._import_directory = os.path.curdir
@@ -175,31 +175,31 @@ class Importer(object):
         LOGGER.info("importing %s"% table_name)
         time.sleep(1)
         self.register_progress("import_patients", 100)
-        
+
     def import_static_charts(self):
         table_name = "static charts"
         LOGGER.info("importing %s"% table_name)
         time.sleep(1)
         self.register_progress("import_static_charts", 100)
-        
+
     def import_clerical_memos(self):
         table_name = "clerical memos"
         LOGGER.info("importing %s"% table_name)
         time.sleep(1)
         self.register_progress("import_clerical_memos", 100)
-        
+
     def import_addresses(self):
         table_name = "addresses"
         LOGGER.info("importing %s"% table_name)
         time.sleep(1)
         self.register_progress("import_addresses", 100)
-        
+
     def import_clinical_memos(self):
         table_name = "clinical memos"
         LOGGER.info("importing %s"% table_name)
         time.sleep(1)
         self.register_progress("import_clinical_memos", 100)
-        
+
     def import_appointments(self):
         table_name = "appointments from aslot"
         LOGGER.info("importing %s"% table_name)
@@ -281,7 +281,7 @@ class Importer(object):
                     row.toprettyxml(),
                     psql_query.lastError().text()))
                 errors_encountered = True
-        
+
         LOGGER.debug(self.USER_DICT)
         if errors_encountered:
             raise self.ImportWarning
@@ -333,7 +333,7 @@ class Importer(object):
 
             except self.ImportWarning as exc:
                 warnings.append(func.__name__)
-        
+
             except Exception as e:
                 LOGGER.exception(
                     "UNHANDLED EXCEPTION! in function\n\t%s"% func)
@@ -343,45 +343,45 @@ class Importer(object):
         LOGGER.info ("          import_all function finished")
         LOGGER.info ("="*60)
         self.log_errors(warnings, tracebacks)
-        
+
     def log_errors(self, warnings, tracebacks):
         '''
         output any warnings captured during import all
-        '''    
+        '''
         if (warnings,tracebacks) == ([],[]):
             LOGGER.info ("No warnings raised by the import process")
             return
-    
+
         if warnings:
             LOGGER.warning("#"*60)
             LOGGER.warning("# The following functions gave warnings:")
             for warning in warnings:
                 LOGGER.warning("#    %s"% warning)
             LOGGER.warning("#"*60)
-                    
+
         if tracebacks:
             LOGGER.error("!"*60)
             LOGGER.error("! The following functions gave exceptions:")
             for tb in tracebacks:
                 LOGGER.error("#    %s"% tb)
             LOGGER.error("!"*60)
-    
+
     def run(self):
         '''
         calls import_all
         '''
         self.import_all()
-    
+
     def emit_finished_signal(self):
         self.emit_(QtCore.SIGNAL("Import Finished"))
-    
+
     def register_progress(self, func, percentage):
         '''
         feedback on how the import is going
         '''
         #LOGGER.debug("progress %s - %s"% (key, percentage))
         self.emit_(QtCore.SIGNAL("import progress"), func, percentage)
-        
+
     def emit_(self, *args):
         '''
         emit signals but be wary of case when there is no gui
@@ -391,8 +391,8 @@ class Importer(object):
         if QtCore.QCoreApplication.instance() is None:
             return
         QtCore.QCoreApplication.instance().emit(*args)
-            
-    
+
+
 
 if __name__ == "__main__":
     from lib_openmolar.admin.connect import DemoAdminConnection

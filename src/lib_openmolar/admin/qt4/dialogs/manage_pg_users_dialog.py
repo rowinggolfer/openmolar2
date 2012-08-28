@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -33,13 +33,13 @@ class ManagePGUsersDialog(ServerFunctionDialog):
         ServerFunctionDialog.__init__(self, dbname, proxy_client, parent)
 
         header = u"%s %s"% (_("Manage User Permissions for database"), dbname)
-        
+
         self.setWindowTitle(header)
 
         header_label = QtGui.QLabel("<b>%s</b>"% header)
         header_label.setWordWrap(True)
         header_label.setAlignment(QtCore.Qt.AlignCenter)
-        
+
         help_label = QtGui.QLabel(u"<p>%s</p><p>%s</p><hr /><em>%s</em>" % (
             _('The supported way of setting permissions is by adding '
             'a user to the one of the predefined permission groups.'),
@@ -58,17 +58,17 @@ class ManagePGUsersDialog(ServerFunctionDialog):
 
         self.privileged_cbs = {}
         self.standard_cbs = {}
-        
+
         layout = QtGui.QGridLayout(frame)
-        
+
         label = QtGui.QLabel(u"<b>%s</b>"% _("User"))
-        label.setAlignment(QtCore.Qt.AlignCenter)        
+        label.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(label, 0, 0)
-        
+
         label = QtGui.QLabel(u"<b>%s</b>"% _("Privilege Level"))
         label.setAlignment(QtCore.Qt.AlignCenter)
         layout.addWidget(label, 0, 1, 1, 2)
-        
+
         label = QtGui.QLabel(u"<b>%s</b>"% _("Full"))
         label.setAlignment(QtCore.Qt.AlignRight)
         layout.addWidget(label, 1, 1)
@@ -76,16 +76,16 @@ class ManagePGUsersDialog(ServerFunctionDialog):
         label = QtGui.QLabel(u"<b>%s</b>"% _("Standard"))
         label.setAlignment(QtCore.Qt.AlignLeft)
         layout.addWidget(label, 1, 2)
-        
+
 
         self.users = self.proxy_client.get_pg_user_list()
         for i, user in enumerate(self.users):
             row = i+2
-            
+
             label = QtGui.QLabel(user)
             label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
             layout.addWidget(label, row, 0)
-            
+
             if user in SUPERUSERS:
                 label.setEnabled(False)
                 su_label = QtGui.QLabel("N/A - superuser")
@@ -93,30 +93,30 @@ class ManagePGUsersDialog(ServerFunctionDialog):
                 su_label.setEnabled(False)
                 layout.addWidget(su_label, row, 1, 1, 2)
                 continue
-            
+
             perms = self.proxy_client.get_pg_user_perms(user, self.dbname)
-            
+
             cb1 = QtGui.QCheckBox()
             cb1.setLayoutDirection(QtCore.Qt.RightToLeft)
             cb1.setChecked(perms.get("admin", False))
             self.privileged_cbs[user] = cb1
-            
+
             cb2 = QtGui.QCheckBox()
             cb2.setChecked(perms.get("client", False))
             self.standard_cbs[user] = cb2
-            
+
             layout.addWidget(cb1, row, 1)
             layout.addWidget(cb2, row, 2)
-            
+
             cb1.toggled.connect(self._enable)
             cb2.toggled.connect(self._enable)
-    
+
     def sizeHint(self):
         return QtCore.QSize(300,300)
-    
+
     def _enable(self):
         self.enableApply(True)
-        
+
     def accept(self):
         attempting = True
         result = None
@@ -126,7 +126,7 @@ class ManagePGUsersDialog(ServerFunctionDialog):
                 result = self.apply_changes()
                 attempting = False
             except ProxyClient.PermissionError:
-                LOGGER.info("user '%s' can not alter postgres groups"% 
+                LOGGER.info("user '%s' can not alter postgres groups"%
                     self.proxy_client.user.name)
                 self.waiting.emit(False)
                 attempting = self.switch_to_admin_user()
@@ -134,7 +134,7 @@ class ManagePGUsersDialog(ServerFunctionDialog):
                 self.waiting.emit(False)
         if result is not None:
             LOGGER.debug(result)
-            QtGui.QMessageBox.information(self, _("Result"), 
+            QtGui.QMessageBox.information(self, _("Result"),
                 _("Changes Applied"))
         ServerFunctionDialog.accept(self)
         self.function_completed.emit()
@@ -147,17 +147,17 @@ class ManagePGUsersDialog(ServerFunctionDialog):
             client = self.standard_cbs[user].isChecked()
             self.proxy_client.grant_pg_user_perms(
                 user, self.dbname, admin, client)
-            
+
         return True
-        
+
 def _test():
     app = QtGui.QApplication([])
     from lib_openmolar.common.connect.proxy_client import _test_instance
     proxy_client = _test_instance()
     dl = ManagePGUsersDialog("openmolar_demo", proxy_client)
-    
+
     result = dl.exec_()
-            
+
 if __name__ == "__main__":
     import lib_openmolar.admin # set up LOGGER
     from gettext import gettext as _

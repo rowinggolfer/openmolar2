@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -47,14 +47,14 @@ class KnownServerWidget(QtGui.QFrame):
 
     def __init__(self, parent=None):
         QtGui.QFrame.__init__(self, parent)
-                
+
         self.list_widget = QtGui.QListWidget()
         self.browser = Browser()
 
         label = QtGui.QLabel(
             _("The following OM Servers are configured for use."))
         label.setWordWrap(True)
-        
+
         r_button = QtGui.QPushButton(_("Refresh"))
         r_button.setToolTip(
             _("Poll all configured OMServers for status and refresh the page"))
@@ -65,11 +65,11 @@ class KnownServerWidget(QtGui.QFrame):
         left_frame = QtGui.QFrame()
         left_layout = QtGui.QVBoxLayout(left_frame)
         left_layout.setMargin(0)
-        left_layout.addWidget(label)        
+        left_layout.addWidget(label)
         left_layout.addWidget(self.list_widget)
         left_layout.addWidget(r_button)
         left_layout.addWidget(h_button)
-        
+
 
         splitter = QtGui.QSplitter(self)
         splitter.addWidget(left_frame)
@@ -82,7 +82,7 @@ class KnownServerWidget(QtGui.QFrame):
 
         r_button.clicked.connect(self.call_refresh)
         h_button.clicked.connect(self.view_html)
-        
+
         self.list_widget.currentRowChanged.connect(self._server_chosen)
 
         self.browser.shortcut_clicked.connect(self.browser_shortcut_clicked)
@@ -93,7 +93,7 @@ class KnownServerWidget(QtGui.QFrame):
     def clear(self):
         self._servers = []
         self.list_widget.clear()
-        
+
     def refresh(self):
         '''
         update the status of all the clients
@@ -111,20 +111,20 @@ class KnownServerWidget(QtGui.QFrame):
             item.setIcon(icon)
             item.setText(item_text)
             item.setToolTip(proxy_client.name)
-        
+
     def add_proxy_client(self, proxy_client):
         '''
         add a :doc:`ProxyClient`
         '''
         self._servers.append(proxy_client)
-        
+
         item_text = proxy_client.brief_name
 
         item = QtGui.QListWidgetItem(item_text, self.list_widget)
         if self.list_widget.currentItem() is None:
             self.list_widget.setCurrentRow(0)
         self.refresh()
-        
+
     def set_html(self, html):
         '''
         update the html on the embedded browser
@@ -149,7 +149,7 @@ class KnownServerWidget(QtGui.QFrame):
         dl.set_accept_button_text(_("Ok"))
         dl.enableApply()
         dl.exec_()
-            
+
     def _server_chosen(self, row):
         '''
         private function called by a gui interaction

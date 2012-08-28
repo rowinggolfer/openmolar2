@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -44,7 +44,7 @@ class LogWidget(QtGui.QFrame, Advisor):
         self.text_browser.setTextColor(QtGui.QColor(QtCore.Qt.white))
         self.text_browser.setFont(QtGui.QFont("courier", 10))
         self.text_browser.setLineWrapMode(QtGui.QTextEdit.NoWrap)
-        
+
         verbosity_box = QtGui.QComboBox(self)
         verbosity_box.addItems([
             _("Verbosity"), "DEBUG (%s)"%_("maximum"),
@@ -86,7 +86,7 @@ class LogWidget(QtGui.QFrame, Advisor):
         self.clear_button.clicked.connect(self.clear)
         save_button.clicked.connect(self.save)
         print_button.clicked.connect(self.print_)
-    
+
         #use the signal/slot mechanism to ensure thread safety.
         self.connect(self, QtCore.SIGNAL("LOG"), self._log)
         self.connect(self, QtCore.SIGNAL("EXC"), self._exc)
@@ -105,29 +105,29 @@ class LogWidget(QtGui.QFrame, Advisor):
         'msg', 'name', 'pathname', 'process', 'processName',
         'relativeCreated', 'thread', 'threadName'
         '''
-        
+
         #if record.threadName != "MainThread":
         #    message = "Thread : "
         if record.exc_info:
-            self.emit(QtCore.SIGNAL("EXC"), 
+            self.emit(QtCore.SIGNAL("EXC"),
             "EXCEPTION:\n%s"% (traceback.format_exc()))
         else:
             message = "%s %s"% (
                 record.levelname.ljust(8), record.getMessage())
             self.emit(QtCore.SIGNAL("LOG"), message)
-        
+
         self.dirty = self.dirty or dirty
-        
+
     def _log(self, message):
         self.text_browser.append(message)
         vsb = self.text_browser.verticalScrollBar()
         vsb.setValue(vsb.maximum())
-    
+
     def _exc(self, message):
         self.text_browser.setTextColor(QtGui.QColor(QtCore.Qt.red))
         self._log(message)
         self.text_browser.setTextColor(QtGui.QColor(QtCore.Qt.white))
-        
+
     def set_verbosity(self, level):
         '''
         alters the level of the logger
@@ -199,14 +199,14 @@ def _test():
             1/0 # this line will purposefully produce an exception
         except ZeroDivisionError as exc:
             obj.logger.exception(exc)
-        
-    app = QtGui.QApplication([]) 
+
+    app = QtGui.QApplication([])
     mw = QtGui.QMainWindow()
     obj = LogWidget()
 
     but = QtGui.QPushButton("send info to the log")
     but.clicked.connect(log_stuff)
-    
+
     err_but = QtGui.QPushButton("raise an exception")
     err_but.clicked.connect(raise_stuff)
 

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -51,10 +51,10 @@ class ImportProgressDialog(BaseDialog):
         self.apply_but.hide()
         self.dirty = False
         self.set_check_on_cancel(True)
-        
-        self.connect(QtCore.QCoreApplication.instance(), 
+
+        self.connect(QtCore.QCoreApplication.instance(),
             QtCore.SIGNAL("Import Finished"), self.finished)
-        
+
         self.connect(QtGui.QApplication.instance(),
             QtCore.SIGNAL("import progress"), self.progress)
 
@@ -65,7 +65,7 @@ class ImportProgressDialog(BaseDialog):
         if __name__ == "__main__":
             print args
         self.emit(QtCore.SIGNAL("Advise"), *args)
-    
+
     def finished(self):
         if self.successful_import:
             QtGui.QMessageBox.information(self, _("Success"),
@@ -74,7 +74,7 @@ class ImportProgressDialog(BaseDialog):
         else:
             QtGui.QMessageBox.warning(self, _("Error"),
                 _("Some errors were encountered, please check the log"))
-    
+
             self.apply_but.show()
             self.apply_but.setText(_("Finish"))
             self.enableApply()
@@ -86,7 +86,7 @@ class ImportProgressDialog(BaseDialog):
         for progress_widget in self.progress_widgets.values():
             success = success and progress_widget.value() == 100
         return success
-    
+
     def progress(self, att, percentage):
         current_pb = self.progress_widgets[att]
         current_pb.setValue(percentage)

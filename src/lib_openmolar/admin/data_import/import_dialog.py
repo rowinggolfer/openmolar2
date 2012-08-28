@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -29,7 +29,7 @@ from lib_openmolar.admin.data_import.importer import Importer
 
 
 class ImportDialog(ExtendableDialog):
-    
+
     importer = None
     def __init__(self, parent=None):
         ExtendableDialog.__init__(self, parent)
@@ -67,11 +67,11 @@ class ImportDialog(ExtendableDialog):
         _('Import data into the current database'),
         self.importer.om2_session.databaseName())
         self.label.setText(message)
-        
+
         if not ExtendableDialog.exec_(self):
             return False
         return self.start_()
-        
+
     def start_import(self):
         '''
         creates a thread for the database population
@@ -82,16 +82,16 @@ class ImportDialog(ExtendableDialog):
             self.importer.run()
         except Exception:
             LOGGER.exception("Unhandled error thrown by the importer")
-        
+
         self.importer.emit_finished_signal()
-        
+
     def start_(self):
         '''
         raise a progress dialog, and start the thread.
         '''
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()
-        
+
         FUNCS = self.importer.IMPORT_FUNCTIONS
         prog_dl = ImportProgressDialog(FUNCS, self.parent())
         if not prog_dl.exec_():
@@ -99,7 +99,7 @@ class ImportDialog(ExtendableDialog):
                 LOGGER.error("you quitted!")
                 self.work_thread.terminate()
                 return False
-            
+
         return True
 
 def _test():
@@ -107,16 +107,16 @@ def _test():
 
     from lib_openmolar.admin.connect import DemoAdminConnection
     from lib_openmolar.admin.data_import.importer import Importer
-    
+
     mw = QtGui.QMainWindow()
     mw.setWindowTitle("Mock Parent")
-    
+
     dc = DemoAdminConnection()
     dc.connect()
 
     im = Importer()
     im.set_session(dc)
-    
+
     dl = ImportDialog(mw)
     dl.set_importer(im)
     dl.exec_()

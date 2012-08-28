@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -37,10 +37,10 @@ class DemoGenerator(object):
         if q_query.first():
             self.min_patient_id = q_query.value(0).toInt()[0]
             self.max_patient_id = q_query.value(1).toInt()[0]
-            
+
         else:
             self.min_patient_id, self.max_patient_id = 0,0
-        
+
         self.length = (self.max_patient_id - self.min_patient_id) * 24
         if self.length > 100:
             self.length = 100
@@ -57,7 +57,7 @@ class DemoGenerator(object):
             pt_id = randint(self.min_patient_id, self.max_patient_id)
             root = randint(1,32)
             unique_roots.add((pt_id, root))
-        
+
         for pt_id, root in unique_roots:
             self.record.clearValues()
             #set values, or allow defaults

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -42,7 +42,7 @@ def install(level=logging.INFO):
         "\tTHIS SHOULD NOT HAPPEN!!\n"
         "\tperhaps code is being imported from both admin and client?"
         )
-    except NameError:    
+    except NameError:
         import __builtin__
         __builtin__.LOGGER = get_logger(level)
 

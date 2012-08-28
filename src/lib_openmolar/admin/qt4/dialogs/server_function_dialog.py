@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -31,32 +31,32 @@ from lib_openmolar.common.connect.proxy_client import ProxyClient
 class ServerFunctionDialog(ExtendableDialog):
 
     waiting = QtCore.pyqtSignal(object)
-    function_completed = QtCore.pyqtSignal()    
+    function_completed = QtCore.pyqtSignal()
 
     def __init__(self, dbname, proxy_client, parent=None):
         ExtendableDialog.__init__(self, parent)
 
         self.dbname = dbname
         self.proxy_client = proxy_client
-    
+
     def switch_to_admin_user(self):
         '''
         try and elevate to admin user of the proxy-server
         '''
         LOGGER.debug("switch_to_admin_user called")
-        QtGui.QMessageBox.information(self, _("info"), 
+        QtGui.QMessageBox.information(self, _("info"),
             _("you do not have permission to perform this function"))
         dl = UserPasswordDialog(self)
         dl.set_label_text(
     _("Please enter the password for the admin user of this OpenMolar Server"))
         dl.set_name("admin")
-        
+
         result = False
-        
+
         while not result:
             if not dl.exec_():
                 break
-            
+
             user = ProxyUser(dl.name, dl.password)
             self.proxy_client.set_user(user)
             try:
@@ -65,11 +65,11 @@ class ServerFunctionDialog(ExtendableDialog):
                     break
             except ProxyClient.ConnectionError:
                 pass
-            
-            self.proxy_client.use_default_user()                
-            QtGui.QMessageBox.warning(self, _("error"), 
+
+            self.proxy_client.use_default_user()
+            QtGui.QMessageBox.warning(self, _("error"),
                u"%s '%s'"% (_("no connection established for user"), dl.name))
-        
+
         return result
 
 def _test():
@@ -78,7 +78,7 @@ def _test():
     proxy_client = _test_instance()
     dl = ServerFunctionDialog("openmolar_demo", proxy_client)
     dl.switch_to_admin_user()
-            
+
 if __name__ == "__main__":
     import lib_openmolar.admin # set up LOGGER
     from gettext import gettext as _

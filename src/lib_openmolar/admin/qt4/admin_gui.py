@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -48,14 +48,6 @@ from lib_openmolar.admin.qt4.classes import (
 from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
     PostgresMainWindow
 
-##TODO for windows version... this will need to be tweaked.
-settings_dir = os.path.join(
-    os.getenv("HOME"), ".openmolar2", "admin", "connections")
-
-if not os.path.isdir(settings_dir):
-    os.makedirs(settings_dir)
-
-CONNECTION_CONFDIRS = [settings_dir, "/etc/openmolar/admin/connections"]
 
 def require_session(func):
     '''
@@ -77,7 +69,6 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
     log = LOGGER
 
     CONN_CLASS = AdminConnection
-    CONNECTION_CONFDIRS = CONNECTION_CONFDIRS
 
     def __init__(self, parent=None):
         PostgresMainWindow.__init__(self, parent)
@@ -163,7 +154,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         SETTINGS.main_ui = self
         SETTINGS.load_plugins("admin")
         SETTINGS.activate_plugins()
-        
+
     def connect_signals(self):
         '''
         set up signals/slots
@@ -179,7 +170,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         self.action_new_database.triggered.connect(self.create_new_database)
         self.action_populate_demo.triggered.connect(self.populate_demo)
-        
+
         self.connect(self.central_widget, QtCore.SIGNAL("end_pg_sessions"),
             self.end_pg_sessions)
 
@@ -226,12 +217,12 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         self.known_server_widget.setEnabled(True)
         self.wait(False)
         self.advise(u"....%s"% _("Done!"))
-        
+
     def om_disconnect(self):
         ProxyManager.om_disconnect(self)
         self.known_server_widget.clear()
         self.known_server_widget.setEnabled(False)
-    
+
     def show_log(self):
         '''
         toggle the state of the log dock window
@@ -252,7 +243,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
             if self.central_widget.closeAll():
                 PostgresMainWindow.end_pg_sessions(self)
         self.update_session_status()
-    
+
     def create_new_database(self):
         '''
         raise a dialog, then create a database with the chosen name
@@ -312,7 +303,7 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         dl.waiting.connect(self.wait)
         dl.function_completed.connect(self.display_proxy_message)
         dl.exec_()
-            
+
     def manage_pg_users(self, dbname):
         '''
         raise a dialog, and provide database management tools
@@ -321,7 +312,14 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
         dl.waiting.connect(self.wait)
         dl.function_completed.connect(self.display_proxy_message)
         dl.exec_()
-                    
+
+    def configure_db(self, dbname):
+        '''
+        raise a dialog, and provide database management tools
+        '''
+        dl = ConfigureDatabaseDialog(dbname, self.selected_client , self)
+        dl.exec_()
+
     def closeEvent(self, event=None):
         '''
         re-implement the close event of QtGui.QMainWindow, and check the user
@@ -451,6 +449,9 @@ _("Version"), SETTINGS.VERSION,
         elif url == "install_demo":
             LOGGER.debug("Install demo called via shortcut")
             self.create_demo_database()
+        elif re.match("configure_.*", url):
+            dbname = re.match("configure_(.*)", url).groups()[0]
+            self.configure_db(dbname)
         elif re.match("manage_.*", url):
             dbname = re.match("manage_(.*)", url).groups()[0]
             self.manage_db(dbname)
@@ -460,35 +461,35 @@ _("Version"), SETTINGS.VERSION,
         elif url == 'add_pg_user':
             self.add_pg_user()
         elif url == 'drop_pg_user':
-            self.remove_pg_user()            
+            self.remove_pg_user()
         else:
             if not self.message_link(url):
                 self.advise(
                 "%s<hr />%s"% (_("Shortcut not found"), url), 2)
-    
+
     def add_pg_user(self):
         '''
-        raise a dialog and get a username and password to add as a postgres 
+        raise a dialog and get a username and password to add as a postgres
         user
         '''
         dl = NewUserPasswordDialog(self)
         dl.set_label_text(
           _("Please enter a username and password for the new postgres user")
             )
-        
-        result, user, password = dl.getValues()        
+
+        result, user, password = dl.getValues()
         if result:
             self.add_postgres_user(user, password)
-    
+
     def remove_pg_user(self):
         '''
         ask for confirmation, then remove the user
         '''
         dl = DropPGUserDialog(self.selected_client , self)
-        
+
         if dl.exec_():
             self.display_proxy_message()
-    
+
     def message_link(self, url_text):
         LOGGER.debug("message_link function with text %s"%url_text)
         message = self.selected_client.message_link(url_text)

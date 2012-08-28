@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -33,21 +33,21 @@ class DropPGUserDialog(ServerFunctionDialog):
         ServerFunctionDialog.__init__(self, None, proxy_client, parent)
 
         header = _("Drop Postgres Users")
-        
+
         self.setWindowTitle(header)
 
         header_label = QtGui.QLabel("<b>%s</b>"% header)
         header_label.setWordWrap(True)
         header_label.setAlignment(QtCore.Qt.AlignCenter)
-        
-        label = QtGui.QLabel(u"<em>%s?</em>"% 
+
+        label = QtGui.QLabel(u"<em>%s?</em>"%
             _("Which user do you wish to remove"))
         label.setWordWrap(True)
         label.setAlignment(QtCore.Qt.AlignCenter)
-        
+
         self.insertWidget(header_label)
         self.insertWidget(label)
-        
+
         frame = QtGui.QFrame()
         self.insertWidget(frame)
         self.set_advanced_but_text(_("Help"))
@@ -55,21 +55,21 @@ class DropPGUserDialog(ServerFunctionDialog):
 
         self.privileged_cbs = {}
         self.standard_cbs = {}
-        
+
         for user in self.proxy_client.get_pg_user_list():
             if user in SUPERUSERS:
                 continue
             but = QtGui.QPushButton(user)
             self.insertWidget(but)
             but.clicked.connect(self.but_clicked)
-       
+
         advanced_label = QtGui.QLabel("no advanced features available")
 
         self.add_advanced_widget(advanced_label)
 
         self.cancel_but.setText(_("Close"))
         self.apply_but.hide()
-       
+
     def but_clicked(self):
         but = self.sender()
         user = unicode(but.text())
@@ -78,7 +78,7 @@ class DropPGUserDialog(ServerFunctionDialog):
             QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
             QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Cancel:
             return
-        
+
         attempting = True
         result = None
         while attempting:
@@ -87,7 +87,7 @@ class DropPGUserDialog(ServerFunctionDialog):
                 result = self.proxy_client.call("drop_user", user)
                 attempting = False
             except ProxyClient.PermissionError:
-                LOGGER.info("user '%s' can not drop a postgres user"% 
+                LOGGER.info("user '%s' can not drop a postgres user"%
                     self.proxy_client.user.name)
                 self.waiting.emit(False)
                 attempting = self.switch_to_admin_user()
@@ -95,7 +95,7 @@ class DropPGUserDialog(ServerFunctionDialog):
                 self.waiting.emit(False)
         if result is not None:
             if result.payload == True:
-                message = u"%s '%s'"% (_("Successfully removed user"), user) 
+                message = u"%s '%s'"% (_("Successfully removed user"), user)
                 mess_func = QtGui.QMessageBox.information
             else:
                 message = u"%s '%s'<hr />%s"% (
@@ -103,7 +103,7 @@ class DropPGUserDialog(ServerFunctionDialog):
                     _("For information, please check the server log")
                     )
                 mess_func = QtGui.QMessageBox.warning
-                
+
             mess_func(self, _("Result"), message)
 
             LOGGER.info(message)
@@ -115,9 +115,9 @@ def _test():
     from lib_openmolar.common.connect.proxy_client import _test_instance
     proxy_client = _test_instance()
     dl = DropPGUserDialog(proxy_client)
-    
+
     result = dl.exec_()
-            
+
 if __name__ == "__main__":
     import lib_openmolar.admin # set up LOGGER
     from gettext import gettext as _

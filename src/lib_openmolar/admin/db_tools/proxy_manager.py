@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -146,7 +146,7 @@ class ProxyManager(object):
             return self._proxy_clients[self.selected_index]
         except IndexError:
             return None
-            
+
     @property
     def selected_server(self):
         '''
@@ -276,7 +276,7 @@ class ProxyManager(object):
                 _("Operation failed"), payload.error_message), 2)
 
         self.display_proxy_message()
-                
+
     @user_perms
     def add_postgres_user(self, username, password):
         '''
@@ -284,7 +284,7 @@ class ProxyManager(object):
         this is for test purposes eg. demo database or import only
         '''
         payload = self.selected_client.call("create_user", username, password)
-        
+
         if payload.payload:
             self.advise(u"%s %s"% (
                 _("Sucessfully added postgres user"), username), 1)
@@ -293,7 +293,7 @@ class ProxyManager(object):
                 _("Operation failed"), payload.error_message), 2)
 
         self.display_proxy_message()
-    
+
 
 def _test():
     import lib_openmolar.admin
@@ -302,7 +302,7 @@ def _test():
     from lib_openmolar.common.connect import ProxyUser
 
     #LOGGER is in the namespace due to lib_openmolar.admin import
-    
+
     LOGGER.setLevel(logging.DEBUG)
     gettext.install("openmolar")
     pm = ProxyManager()

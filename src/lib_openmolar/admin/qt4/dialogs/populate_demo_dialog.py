@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -129,9 +129,9 @@ _("continuing may corrupt/overwrite any existing data in the database named"),
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()
 
-        dl = DemoProgressDialog(self.connection, 
+        dl = DemoProgressDialog(self.connection,
             self.ommisions, self.parent())
-        
+
         if not dl.exec_():
             if self.work_thread.isRunning():
                 LOGGER.error("you quitted!")
