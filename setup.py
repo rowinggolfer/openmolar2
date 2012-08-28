@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -156,7 +156,7 @@ if INSTALL_COMMON:
         import lib_openmolar
     except ImportError:
         logging.warning("please install openmolar-namespace before this package")
-    
+
     logging.info("running common setup")
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
@@ -198,9 +198,9 @@ if INSTALL_COMMON:
                     ('/etc/openmolar/connections230-available',
                         ['src/config_files/localhost.conf']
                         ),
-                    ('/usr/share/openmolar/',
-                        ['src/config_files/demo.conf']
-                        ),                        
+                    ('/usr/share/openmolar/templates',
+                        ['src/config_files/conf.sample']
+                        ),
                    ],
         )
 
@@ -214,7 +214,7 @@ if INSTALL_ADMIN:
         import lib_openmolar
     except ImportError:
         logging.warning("please install openmolar-namespace before this package")
-    
+
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -267,7 +267,7 @@ if INSTALL_CLIENT:
         import lib_openmolar
     except ImportError:
         logging.warning("please install openmolar-namespace before this package")
-    
+
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -328,7 +328,7 @@ if INSTALL_SERVER:
         import lib_openmolar
     except ImportError:
         logging.warning("please install openmolar-namespace before this package")
-        
+
     if os.path.isfile("MANIFEST"):
         os.unlink("MANIFEST")
 
@@ -368,7 +368,7 @@ if INSTALL_SERVER:
                    'misc/server/openmolar-fuzzymatch',],
         data_files=[
                     ('/etc/init.d', ['misc/server/openmolar']),
-                    
+
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
                          'misc/server/blank_schema.sql',

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -24,10 +24,10 @@
 This module is used as a "hook" for mercurial so that revision updates occur
 whenever an update or commit is performed on the repo (or nested sub repo).
 
-Openmolar uses standard major.minor.point versioning. 
+Openmolar uses standard major.minor.point versioning.
 This is stored in version_number.py
 
-the majority of the code in this module is taken from 
+the majority of the code in this module is taken from
 https://bitbucket.org/dowski/mercurial-version-info-plugin
 
 '''
@@ -48,10 +48,10 @@ f = open(os.path.join(cur_dir, "setup.cnf"))
 data = f.read()
 f.close()
 
-new_data = re.sub("version = \d+\.\d+\.\d+", 
-    "version = %s"% VERSION_NUMBER, 
+new_data = re.sub("version = \d+\.\d+\.\d+",
+    "version = %s"% VERSION_NUMBER,
     data)
-    
+
 if data != new_data:
     print ("Updated Major Version Numbering")
     f = open(os.path.join(os.path.dirname(__file__), "setup.cnf"), "w")
@@ -107,7 +107,7 @@ def _load_config(ui):
                 '[hgversioninfo] config section.')
         raise util.Abort(msg)
     return conf
-    
+
 def main():
     from mercurial import ui, hg
     from mercurial.error import RepoError
@@ -119,8 +119,8 @@ def main():
             repo = hg.repository(ui.ui(), repo_path)
             hook(repo.ui, repo)
         except RepoError:
-            print ("WARNING skipping subrepo %s - not found"% 
+            print ("WARNING skipping subrepo %s - not found"%
                 os.path.abspath(repo_path))
-    
+
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 import ConfigParser
 import os
@@ -21,5 +21,5 @@ if package == "namespace":
     sys.exit(0)
 
 rev_no =  parser.getint(package, "revision_number")
-        
+
 print ("%s+hg%03d"% (version, rev_no))

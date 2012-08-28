@@ -1,4 +1,4 @@
-#! /usr/bin/env python 
+#! /usr/bin/env python
 
 '''
 read a changelog, and get the package name
@@ -13,7 +13,7 @@ output is "openmolar-namespace_2.0.5+hg007"
 
 
 import os
-import re 
+import re
 import sys
 
 curdir = os.path.dirname(os.path.abspath(__file__))
@@ -26,9 +26,9 @@ try:
     f.close()
 
     matches = re.match("(.*) \((.*)-", data).groups()
-    
+
     debname = "%s_%s"% (matches[0], matches[1])
-    
+
     print (debname)
 
 except:

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -60,7 +60,7 @@ class DebMakerGui(QtGui.QDialog):
 
         nightly_but = QtGui.QPushButton("nightly build")
         nightly_but.clicked.connect(self.insert_text)
-        
+
         upstream_but = QtGui.QPushButton("upstream release")
         upstream_but.clicked.connect(self.insert_text)
 
@@ -152,7 +152,7 @@ def main():
         "%s-(.*)\.tar\.gz$"% options.package, chosen).groups()[0]
 
     new_changes = new_changelog(options.package, version,
-        "Neil Wallace <rowinggolfer@googlemail.com>", 0)
+        "Neil Wallace <neil@openmolar.com>         ", 0)
 
     changelog = "%s\n\n%s"% (new_changes, changelog)
 

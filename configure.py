@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -71,21 +71,21 @@ class OMConfig(ConfigParser.RawConfigParser):
             try:
                 if att not in ("namespace", "lang"):
                     # this is the equiv of
-                    # from admin import version 
+                    # from admin import version
                     logging.debug("getting version for %s"% att)
                     version = __import__("lib_openmolar.%s.version"% att, fromlist=["version"])
                     self.set(att, "revision_number", version.revision_number)
                     self.set(att, "revision_id", version.revision_id)
                     try:
                         __builtin__.__dict__.pop("LOGGER")
-                        __builtin__.__dict__.pop("SETTINGS")                        
+                        __builtin__.__dict__.pop("SETTINGS")
                     except KeyError:
                         pass
             except ImportError:
                 logging.exception(
                 "IMPORT ERROR - hg generated version files not present for package %s"% att)
                 sys.exit("version files not present. Unable to proceed")
-                
+
     def write(self, f):
         '''
         re-implement write so that our header is included

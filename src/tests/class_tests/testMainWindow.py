@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -22,7 +22,7 @@
 
 import os, sys
 
-lib_openmolar_path = os.path.abspath("../../") 
+lib_openmolar_path = os.path.abspath("../../")
 if not lib_openmolar_path == sys.path[0]:
     sys.path.insert(0, lib_openmolar_path)
 
@@ -30,15 +30,15 @@ from lib_openmolar.common.qt4.widgets import BaseMainWindow
 
 import unittest
 from PyQt4 import QtGui
-        
+
 class TestCase(unittest.TestCase):
     def setUp(self):
         self.app = QtGui.QApplication([])
-    
+
     def tearDown(self):
         self.app.closeAllWindows()
         self.app = None
-                
+
     def test_mainwindow(self):
         mw = BaseMainWindow()
         mw.show()

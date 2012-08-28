@@ -1,0 +1,60 @@
+################################################################################
+#                                                                              #
+# Postgres Connection Conf file for Openmolar                                  #
+#                                                                              #
+################################################################################
+
+# to use this file, put sane values to replace 
+# DESCRIPTION, HOST, PORT, DBNAME, USERNAME
+#
+# if you wish to store the password in this file,
+# set auth=supplied_password and replace PASSWORD with your password
+# be wary of who can read this file if you do this!
+#
+
+[CONNECTION]
+
+# the name you use to identify this connection (ie. a human
+# readable name which can be, be need not be
+# the actual database name)
+# eg name = openmolar_database
+
+name = DESCRIPTION
+
+# information use to specify the connection type.
+# values can be TCP/IP or UNIX_SOCKET
+
+#type = TCP/IP
+#type = UNIX_SOCKET
+
+type = TCP/IP
+
+
+# now supply params.
+# the following fields are required for connection to a postgres database
+# if auth is prompt for password, the password line can be commented out.
+
+host = HOST
+port = PORT
+db_name = DBNAME
+user = USERNAME
+
+
+# authorisation. the default is to include the password in this file.
+# openmolar will not accept this unless this file is read only for the current
+# user.
+# for hightened security, you can specify here that is is prompted for instead.
+#
+
+
+#auth = supplied_password
+#auth = prompt_for_password
+
+auth = prompt_for_password
+
+#password = PASSWORD
+
+
+
+
+
