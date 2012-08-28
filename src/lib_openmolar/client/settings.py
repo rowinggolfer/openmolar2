@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -24,7 +24,7 @@ import __builtin__
 import logging
 import os
 
-from lib_openmolar.common.settings import CommonSettings
+from lib_openmolar.common.settings import singleton, CommonSettings
 from lib_openmolar.common.db_orm import TeethPresentDecoder
 from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 
@@ -46,13 +46,13 @@ class SettingsError(Exception):
     def __str__(self):
         return repr(self.value)
 
-
-class Settings(CommonSettings, PluginHandler):
+@singleton
+class ClientSettings(CommonSettings, PluginHandler):
     #: an html image tag showing a pencil
     PENCIL = '<img class="pencil" alt ="edit" src="qrc:/icons/pencil.png" />'
 
     _notes_css, _details_css = None, None
-    
+
     def __init__(self):
         CommonSettings.__init__(self)
 
@@ -115,7 +115,7 @@ class Settings(CommonSettings, PluginHandler):
 
     def init_css(self):
         '''
-        # ensure that css files are up to date.we have a css file.. 
+        # ensure that css files are up to date.we have a css file..
         # otherwise the layout will be awful!
         '''
         CommonSettings.init_css(self)
@@ -127,7 +127,7 @@ class Settings(CommonSettings, PluginHandler):
                 data = resource.data()
 
             default_loc = os.path.join(self.LOCALFOLDER, "%s.css"% css)
-            
+
             try:
                 f = open(default_loc, "r")
                 css_data = f.read()
@@ -137,12 +137,12 @@ class Settings(CommonSettings, PluginHandler):
                     continue
             except IOError:
                 pass
-        
+
             print "initiating a new css file - %s"% default_loc
             f = open(default_loc, "w")
             f.write(data)
             f.close()
-        
+
 
     @property
     def VERSION(self):
@@ -175,9 +175,9 @@ class Settings(CommonSettings, PluginHandler):
             if os.path.isfile(fp):
                 LOGGER.debug("using %s for notes_css"% fp)
                 return fp
-                
+
         return ""
-   
+
     @property
     def DETAILS_CSS(self):
         '''
@@ -194,9 +194,9 @@ class Settings(CommonSettings, PluginHandler):
             if os.path.isfile(fp):
                 LOGGER.debug("using %s for details_css"% fp)
                 return fp
-    
+
         return ""
-   
+
     @property
     def users(self):
         if self._users is None:
@@ -307,20 +307,28 @@ class Settings(CommonSettings, PluginHandler):
         TODO - populate this list!!
         '''
         return []
+    
+    @property
+    def CONNECTION_CONFDIRS(self):
+        '''
+        directories where conf files are found.
+        '''
+
+        user_dir = os.path.join(self.LOCALFOLDER, "client", "connections")
+        root_dir = os.path.join(self.ROOT_FOLDER, "client", "connections")
+
+        if not os.path.isdir(user_dir):
+            os.makedirs(user_dir)
+
+        return [user_dir, root_dir]
+
 
 def install():
     '''
     make an instance of this object acessible in the global namespace
     '''
-    try:
-        SETTINGS
-        LOGGER.warning(
-        "\n\tAbandoned a second attempt to install SETTINGS into globals\n"
-        "\tTHIS SHOULD NOT HAPPEN!!"
-        )
-    except NameError:    
-        __builtin__.SETTINGS = Settings()
-    
+    __builtin__.SETTINGS = ClientSettings()
+
 if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
 

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -30,11 +30,11 @@ class StaffAvatarWidget(QtSvg.QSvgWidget):
     '''
     A QtSvg.QSvgWidget, which appears differently if it :attr:`is_active`
     '''
-    
+
     def __init__(self, parent=None):
         QtSvg.QSvgWidget.__init__(self, parent)
         #self.setMouseTracking(True)
-        
+
         #:
         self.is_active = False
         self.setMaximumSize(self.sizeHint())

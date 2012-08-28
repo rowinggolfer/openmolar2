@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -33,7 +33,7 @@ class StatusBarWidget(QtGui.QWidget):
     a layout of comboBoxes for seting the current users
     and "mode" which determines
     whether to default to the surgery or reception page on load
-    
+
     .. emits signals::
         self.emit(QtCore.SIGNAL("user1 changed"), cb_index)
         self.emit(QtCore.SIGNAL("user2 changed"), cb_index)

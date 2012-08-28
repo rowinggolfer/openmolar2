@@ -13,7 +13,7 @@ try:
         Abandoned a second attempt to install LOGGER into globals
         THIS SHOULD NOT HAPPEN!!
         perhaps code is being imported from both admin and client?''')
-except NameError:    
+except NameError:
     LOGGER = logging.getLogger("openmolar-client")
     __builtin__.LOGGER = LOGGER
 

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
 
 
-    
+
 
     app = QtGui.QApplication([])
 

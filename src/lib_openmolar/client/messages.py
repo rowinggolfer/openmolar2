@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -25,7 +25,7 @@ import re
 
 class Messages(object):
     '''
-    this is simply a holder for a few translatable messages displayed to the 
+    this is simply a holder for a few translatable messages displayed to the
     user.
     It's a class so to ensure that gettext is initiated before the messages
     are constructed.
@@ -55,5 +55,5 @@ class Messages(object):
 messages = Messages()
 
 if __name__ == "__main__":
-    
+
     print messages.welcome_html()

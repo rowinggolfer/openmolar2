@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -116,13 +116,13 @@ class BPEWidget(QtGui.QGroupBox):
         self.emit(QtCore.SIGNAL("Show BPE"))
 
 if __name__ == "__main__":
-    
+
 
     def sig_catcher(*args):
         print args, cp.sender()
 
-    
-    
+
+
     app = QtGui.QApplication([])
     dl = QtGui.QDialog()
     layout = QtGui.QVBoxLayout(dl)

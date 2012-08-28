@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -57,8 +57,6 @@ class ClientMainWindow(PostgresMainWindow):
 
     #:customise the base class
     CONN_CLASS = ClientConnection
-
-    CONNECTION_CONFDIRS = CONNECTION_CONFDIRS
 
     ALLOW_MULTIPLE_SESSIONS = False
 

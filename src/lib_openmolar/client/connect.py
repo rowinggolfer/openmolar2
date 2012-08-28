@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -48,8 +48,8 @@ class ClientConnection(OpenmolarDatabase):
             raise self.SchemaVersionError, (
         "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
             self.schema_version, SETTINGS.schema_versions))
-        
-        
+
+
         SETTINGS.psql_conn = self
 
     @property

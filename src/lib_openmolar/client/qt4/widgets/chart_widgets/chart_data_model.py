@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2010, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2010-2012, Neil Wallace <neil@openmolar.com>                   ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -53,7 +53,7 @@ class ChartDataModel(object):
         '''
         register all widgets which are attached to this model, so that
         when "endResetModel" is called, they get notified
-        
+
         .. note::
             widgets registered this way must have a method model_changed()
 
