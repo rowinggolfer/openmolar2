@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -44,7 +44,7 @@ class VerifyingServer(SimpleXMLRPCServer):
     an extension of SimpleXMLPRCServer
     which enforces user authentication
     '''
-    
+
     USERDICT = {"default":md5("eihjfosdhvpwi").hexdigest()}
 
     registered_instance = None
@@ -77,7 +77,7 @@ class VerifyingServer(SimpleXMLRPCServer):
     "the registered instance does not have special function _remember_user")
 
         SimpleXMLRPCServer.register_instance(self, klass)
-        
+
     def add_user(self, user, hash):
         '''
         add a user to the userdict
@@ -86,14 +86,14 @@ class VerifyingServer(SimpleXMLRPCServer):
         LOGGER.debug("adding user %s with hashed pass %s"% (user, hash))
         self.USERDICT[user] = hash
         LOGGER.debug("current user list is %s"% sorted(self.USERDICT.keys()))
-        
-        
+
+
 class VerifyingServerSSL(VerifyingServer):
     '''
     an extension of SimpleXMLPRCServer
     which enforces ssl connection, and user authentication
     '''
-    
+
     def __init__(self, addr, KEYFILE, CERTFILE):
         SimpleXMLRPCDispatcher.__init__(self)
 
@@ -189,7 +189,7 @@ def _test_ssl():
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level = logging.DEBUG)
-    
+
     LOGGER = logging.getLogger("test")
     #_test()
     _test_ssl()

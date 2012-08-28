@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -29,7 +29,7 @@ class PayLoad(object):
         self.permission = False
         self._payload = None
         self._exception = None
-        
+
     def __repr__(self):
         return "PAYLOAD - permission='%s', method='%s', payload_type=%s"% (
             self.permission, self.method, type(self.payload))
@@ -49,13 +49,13 @@ class PayLoad(object):
     @property
     def exception(self):
         return self._exception
-    
+
     @property
     def exception_message(self):
         if self.exception:
             return str(self._exception)
         return None
-    
+
     @property
     def error_message(self):
         if self.exception_message is not None:
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     from gettext import gettext as _
     import logging
     logging.basicConfig(level = logging.DEBUG)
-    
+
     LOGGER = logging.getLogger("test")
-    
+
     _test()

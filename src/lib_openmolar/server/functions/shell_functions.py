@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -37,7 +37,7 @@ class ShellFunctions(object):
     '''
     A class whose functions will be inherited by the server
     '''
-    
+
     @log_exception
     def install_fuzzymatch(self, dbname):
         '''
@@ -68,5 +68,5 @@ if __name__ == "__main__":
     import logging
     logging.basicConfig(level=logging.DEBUG)
     LOGGER = logging.getLogger("openmolar_server")
-    
+
     _test()

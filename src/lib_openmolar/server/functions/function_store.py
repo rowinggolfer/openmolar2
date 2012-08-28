@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -37,16 +37,16 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
     SimpleXMLServer.register_instance is allowed.
     '''
     _user = None
-    
+
     def __init__(self):
         self.config = OMServerConfig()
         DBFunctions.__init__(self)
-    
+
     @property
     def MASTER_PWORD(self):
         return self.config.postgres_pass
 
-    
+
     def last_backup(self):
         '''
         returns a iso formatted datetime string showing when the
@@ -55,7 +55,7 @@ class FunctionStore(DBFunctions, ShellFunctions, MessageFunctions):
         import datetime
         return datetime.datetime.now().isoformat()
 
-    
+
 def _test():
     '''
     test the FunctionStore class
@@ -65,13 +65,13 @@ def _test():
 
     print (dir(sf))
     print (sf.message_link("random_url_text"))
-    
+
     sf.backup_db("openmolar_demo")
     sf.backup_db("openmolar_demo", schema_only=True)
-    
+
     print (sf.get_update_script("/home/neil/tmp/openmolar_demo/orig.sql",
                         "/home/neil/tmp/openmolar_demo/new.sql" ))
-        
+
 if __name__ == "__main__":
     import __builtin__
     import logging

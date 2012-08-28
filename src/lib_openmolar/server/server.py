@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -90,7 +90,7 @@ class OMServer(Service):
             "listening for ssl connections %s port %d"% (readable_loc, port))
         LOGGER.debug("using cert %s"% cert)
         LOGGER.debug("using key %s"% key)
-        
+
         # daemonise the process and write to /var/run
         self.start_(stderr=logger.LOCATION)
 

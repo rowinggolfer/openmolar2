@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -33,7 +33,7 @@ LOGNAME = "%s_%s"% (BASE, APPLICATION)
 LOCATION = "/var/log/%s/%s.log"% (BASE, APPLICATION)
 
 LOGDIR = os.path.dirname(LOCATION)
-    
+
 def setup(level=logging.DEBUG):
     """
     initiates the logger.

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -250,6 +250,6 @@ def _test():
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level = logging.DEBUG)
-    
+
     LOGGER = logging.getLogger("test")
     _test()

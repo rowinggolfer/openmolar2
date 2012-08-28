@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -33,7 +33,7 @@ from signal import SIGTERM
 PIDFILE = "/var/run/openmolar/server.pid"
 
 class Service(object):
-    
+
     def write_pidfile(self):
         dirname = os.path.dirname(PIDFILE)
         try:
@@ -68,7 +68,7 @@ class Service(object):
         '''
         if self.is_running:
             LOGGER.warning("openmolar-server is already started")
-            
+
         self.daemonise(stdin, stdout, stderr)
         return self.write_pidfile()
 
@@ -155,7 +155,7 @@ class Service(object):
         true is the process already exists.
         '''
         return os.path.isfile(PIDFILE)
-            
+
 
 def _test():
     sd = Service()
@@ -173,5 +173,5 @@ if __name__ == "__main__":
     import logging
     logging.basicConfig(level=logging.DEBUG)
     LOGGER = logging.getLogger("test")
-    
+
     _test()

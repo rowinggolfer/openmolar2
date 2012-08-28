@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -51,14 +51,14 @@ def get_footer():
         except ImportError:
             VERSION = "Unknown"
             LOGGER.exception("unable to parse for server versioning")
-    
+
         try:
             f = open("/etc/openmolar/manager_password.txt", "r")
             PASSWORD='''
                 <em>Your admin password on this server is %s</em>
                     '''% re.search("PASSWORD = (.*)", f.read()).groups()[0]
             f.close()
-            
+
         except IOError:
             PASSWORD="admin password file unreadable. Good!"
 
@@ -124,11 +124,11 @@ class MessageFunctions(object):
         </div>'''% (
             _("Connected to Openmolar-Server"),
             _("on host"), socket.gethostname(),
-            _("providing remote procedure calls for"), 
+            _("providing remote procedure calls for"),
             _("the admin and client applications."))
 
         return header
-    
+
     @log_exception
     def get_schema_version(self, dbname):
         '''
@@ -186,49 +186,49 @@ class MessageFunctions(object):
         %s
         %s
         <div class="main">
-            
-            <h4>%s</h4>            
+
+            <h4>%s</h4>
             {SERVER_INFO}
 
             <h4>%s</h4>
             {DATABASE TABLE}
         %s
         '''% (
-            HEADER, 
+            HEADER,
             self.location_header,
             _("Postgresql Server Information"),
             _("Openmolar Databases"),
             get_footer())
 
         return html
-    
+
     def admin_welcome(self):
         '''
         the html shown on startup to the admin application
         '''
         dbs = self.available_databases()
-        
+
         if dbs == "EXCEPTION CAUGHT":
             message = self.postgres_error_message()
         elif dbs == []:
             message = self.admin_welcome_template()
-            
+
             message = message.replace("{SERVER_INFO}", self.pg_server_table)
 
             message = message.replace("{USERS}", self.user_html)
 
             message = message.replace("{DATABASE TABLE}",
                 self.no_databases_message)
-            
+
         else:
             message = self.admin_welcome_template()
-            
+
             message = message.replace("{SERVER_INFO}", self.pg_server_table)
 
             message = message.replace("{USERS}", self.user_html)
-            
+
             message = message.replace("{DATABASE TABLE}", self.db_table(dbs))
-        return message 
+        return message
 
     @property
     def no_databases_message(self):
@@ -239,7 +239,7 @@ class MessageFunctions(object):
         </p>
         '''% (
         _("You do not appear to have any openmolar databases installed."),
-        _("To install a demo database now"), 
+        _("To install a demo database now"),
         _("Click Here")
         )
 
@@ -250,7 +250,7 @@ class MessageFunctions(object):
         <b>%s</b>
         <br />
         %s <a href="show server log">%s</a>
-        
+
         </p>
         <br />
         %s'''%(HEADER, self.location_header,
@@ -259,26 +259,26 @@ class MessageFunctions(object):
         _("Server Log File"),
         get_footer())
 
-    
+
     def message_link(self, url):
         '''
         the "url" here will be text of a link that has been displayed as
         part of the html from the server.
         '''
-        
+
         if url == "show server log":
             f = open("/var/log/openmolar/server.log", "r")
             data = f.read()
             f.close()
             return "<html><body><pre>%s</pre></body></html>"% data
-        
+
         return None
-    
+
     @log_exception
     def login_roles(self):
         '''
         get a list of roles allowed to login to postgres.
-        
+
         note - om_client_group and om_admin_group roles are non-login roles
         '''
         roles = []
@@ -291,12 +291,12 @@ class MessageFunctions(object):
             conn.close()
             for user in users:
                 roles.append(user[0])
-        
+
         except Exception as exc:
             LOGGER.exception("Serious Error")
-        
+
         return sorted(roles)
-        
+
     @log_exception
     def list_sessions(self, db_name):
         '''
@@ -306,7 +306,7 @@ class MessageFunctions(object):
             conn = psycopg2.connect(self.__conn_atts())
             cursor = conn.cursor()
             cursor.execute(
-                '''select usename, client_addr, application_name 
+                '''select usename, client_addr, application_name
                 from pg_catalog.pg_stat_activity where datname = '%s'
                 '''% db_name)
             sessions = cursor.fetchall()
@@ -315,14 +315,14 @@ class MessageFunctions(object):
                 yield (user, address, application)
         except Exception as exc:
             LOGGER.exception("Serious Error")
-        
+
     @log_exception
     def pg_server_info(self):
         '''
         returns (postgres_version, listen_addresses, port)
         '''
-        query = '''select current_setting('server_version') as version, 
-        current_setting('listen_addresses') as addresses, 
+        query = '''select current_setting('server_version') as version,
+        current_setting('listen_addresses') as addresses,
         current_setting('port') as port'''
         try:
             conn = psycopg2.connect(self.__conn_atts())
@@ -333,7 +333,7 @@ class MessageFunctions(object):
             return values
         except Exception as exc:
             LOGGER.exception("Serious Error")
-    
+
     @property
     def pg_server_table(self):
         '''
@@ -349,15 +349,15 @@ class MessageFunctions(object):
                     <th>%s</th>
                     <th>%s</th>
                     <th>%s</th>
-                </tr>            
+                </tr>
                 '''% (
-                    _("Version"), 
-                    _("Listen Addresses"), 
-                    _("Port"), 
+                    _("Version"),
+                    _("Listen Addresses"),
+                    _("Port"),
                     _("Users"),
                     _("Manage")
                     )
-            
+
             html +='''
                     <tr class="even">
                         <td>%s</td>
@@ -370,7 +370,7 @@ class MessageFunctions(object):
                 %s
             </button>
             <br />
-            <button id="remove_pg_user_button" 
+            <button id="remove_pg_user_button"
             formaction="drop_pg_user" type="submit">
                 %s
             </button>
@@ -382,11 +382,11 @@ class MessageFunctions(object):
                  (_("Add a Postgres User"), _("Remove a Postgres User") )
                 )
             return html
-         
+
         except Exception:
             LOGGER.exception("error in MessageFunctions.pg_server_table")
             return "Unable to get server info, check the log"
-    
+
     def db_table(self, dbs):
         '''
         gets html showing available databases
@@ -400,12 +400,12 @@ class MessageFunctions(object):
                     <th>%s</th>
                     <th>%s</th>
                     <th>%s</th>
-                    <th>%s</th>                
+                    <th>%s</th>
                 </tr>
-                '''% (  
-                    _("Database Name"), 
+                '''% (
+                    _("Database Name"),
                     _("Active Sessions"),
-                    _("Schema Version"), 
+                    _("Schema Version"),
                     _("Server Side Functions"),
                     _("Local Functions")
                     )
@@ -418,14 +418,14 @@ class MessageFunctions(object):
                     html += '<tr class="odd">'
                 html += '''
                         <td><b>%s</b></td>
-                        <td class="list">{SESSIONS}</td> 
+                        <td class="list">{SESSIONS}</td>
                         <td>%s</td>
                         <td>
                             <form action="manage_%s" method="get">
                                 <button class="manageDBbut" type="submit">
                                     %s
                                 </button>
-                                <button class="manageDBbut" 
+                                <button class="manageDBbut"
                                 formaction="user_manage_%s" type="submit">
                                     %s
                                 </button>
@@ -439,12 +439,12 @@ class MessageFunctions(object):
                             </form>
                         </td>
                     </tr>
-                '''% (  db, s_v, 
-                        db, _("Database"), 
-                        db, _("User Permissions"), 
+                '''% (  db, s_v,
+                        db, _("Database"),
+                        db, _("User Permissions"),
                         db, _("Configure Sessions")
                     )
-            
+
                 ses_html = '                <table class="sessions">'
                 for session in self.list_sessions(db):
                     ses_html += '''
@@ -454,14 +454,14 @@ class MessageFunctions(object):
                             <td>%s</td>
                         </tr>'''% session
                 ses_html += "</table>"
-                
+
                 if not "<td>" in ses_html:
                     ses_html = _("No Sessions")
 
                 html = html.replace("{SESSIONS}", ses_html)
-                
+
             return  html + "</table>"
-            
+
         except Exception:
             LOGGER.exception("unable to format db_table")
             return "unable to create db_table information, check the log"
@@ -476,12 +476,12 @@ class MessageFunctions(object):
             for user in self.login_roles():
                 html += "<li>%s</li>"% user
             html += "</ul>"
-            
+
             return html
         except Exception:
             LOGGER.exception("unable to create user_html")
             return "unable to create user_html, check the log"
-            
+
 def _test():
     '''
     test the ShellFunctions class
@@ -490,7 +490,7 @@ def _test():
     LOGGER.debug(sf.admin_welcome())
     LOGGER.debug(sf.no_databases_message())
     LOGGER.debug(sf.postgres_error_message())
-    
+
     dbname = "openmolar_demo"
     for user, address, application in sf.list_sessions(dbname):
         print (
@@ -502,14 +502,14 @@ def _test():
 
     for val in sf.pg_server_info():
         print (val)
-    
+
     print sf.pg_server_table
-    
+
 if __name__ == "__main__":
     from gettext import gettext as _
     import logging
     logging.basicConfig(level = logging.DEBUG)
-    
+
     LOGGER = logging.getLogger("test")
-    
+
     _test()

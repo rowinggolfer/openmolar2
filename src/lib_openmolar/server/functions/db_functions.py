@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -212,17 +212,17 @@ class DBFunctions(object):
                 LOGGER.info("role '%s' removed"% user_group)
             else:
                 return False
-            
+
         if dbname == "openmolar_demo":
             LOGGER.warning("removing role (if exists) om_demo")
             self._execute('drop user if exists om_demo')
-        
+
         #clean up the permission groups.
         for group in ('admin', 'client'):
             groupname = "om_%s_group_%s"% (group, dbname)
             LOGGER.warning("attempting to remove role '%s'"% groupname)
             self._execute("drop role if exists %s;\n"% groupname)
-            
+
         return "Dropped Database %s"% dbname
 
     @log_exception
@@ -246,7 +246,7 @@ class DBFunctions(object):
         return False
 
     @log_exception
-    def grant_user_permissions(self, user, dbname, admin=True, 
+    def grant_user_permissions(self, user, dbname, admin=True,
     client=True):
         '''
         grant/revoke permissions for a user to database dbname
@@ -262,7 +262,7 @@ class DBFunctions(object):
             SQL += "GRANT om_client_group_%s to %s;\n"% (dbname, user)
         else:
             SQL += "REVOKE om_client_group_%s from %s;\n"% (dbname, user)
-            
+
         try:
             self._execute(SQL, dbname)
             return True
@@ -282,13 +282,13 @@ class DBFunctions(object):
         conn = psycopg2.connect(self.__conn_atts(dbname))
         cursor = conn.cursor()
         cursor.execute('''
-        select rolname from pg_user 
-        join pg_auth_members on (pg_user.usesysid=pg_auth_members.member) 
-        join pg_roles on (pg_roles.oid=pg_auth_members.roleid) 
+        select rolname from pg_user
+        join pg_auth_members on (pg_user.usesysid=pg_auth_members.member)
+        join pg_roles on (pg_roles.oid=pg_auth_members.roleid)
         where pg_user.usename=%s'''
         , (user,))
         perms = {}
-        
+
         for rolname in cursor.fetchall():
             for group in ["admin","client"]:
                 if re.match("om_%s_group_%s"% (group, dbname), rolname[0]):
@@ -352,9 +352,9 @@ class DBFunctions(object):
         resets the patient serialno index
         '''
         LOGGER.warning("removing all data from %s"% dbname)
-        
+
         exceptions = ("settings", "procedure_codes")
-        
+
         for tablename in self._tables(dbname):
             if tablename not in exceptions:
                 LOGGER.info("... truncating '%s'"% tablename)
@@ -364,7 +364,7 @@ class DBFunctions(object):
             self._execute("select setval('%s', 1, false)"% sequence,
                 dbname)
         return True
-    
+
     @log_exception
     def backup_db(self, dbname, schema_only=False):
         '''
@@ -374,41 +374,41 @@ class DBFunctions(object):
         LOGGER.info("backing up %s"% dbname)
 
         opts = ["-s", dbname] if schema_only else [dbname]
-        
+
         proc = subprocess.Popen(
-            ["pg_dump", "-h", "127.0.0.1", 
+            ["pg_dump", "-h", "127.0.0.1",
             "-U", "openmolar", "-W"] + opts,
             stdin = subprocess.PIPE,
             stdout=subprocess.PIPE)
-        
+
         proc.stdin.write(self.MASTER_PWORD)
         proc.stdin.flush()
-            
+
         stdout, stderr = proc.communicate()
-        
+
         if stderr:
             LOGGER.warning("Errors were thrown %s"% stderr)
-        
+
         try:
             BACKUP_DIR = BackupConfig().backup_dir
         except IOError:
             BACKUP_DIR = "/usr/share/openmolar/backups/"
-        
+
         backup_dir = os.path.join(BACKUP_DIR, dbname)
-        
+
         if not os.path.isdir(backup_dir):
             os.makedirs(backup_dir)
-        
+
         filename = "schema"% now if schema_only else "backup"
-        
+
         filename += datetime.now().strftime("%Y%m%d_%H%M%S") + ".sql"
-            
+
         filepath = os.path.join(backup_dir, filename)
-        
+
         f = open(filepath, "w")
         f.write(stdout)
         f.close()
-        
+
         LOGGER.info("file saved as %s"% filepath)
 
     @log_exception
@@ -421,23 +421,23 @@ class DBFunctions(object):
         proc = subprocess.Popen(
             ["apgdiff", "--ignore-start-with", original, current],
             stdout=subprocess.PIPE)
-        
+
         stdout, stderr = proc.communicate()
-        
+
         if stderr:
             LOGGER.warning("Errors were thrown %s"% stderr)
-        
+
         if not stdout:
             return ""
-        return stdout 
-        
+        return stdout
+
 def _test():
     '''
     test the DBFunctions class
     '''
     sf = DBFunctions()
     sf._user = "test_user"
-    
+
     dbname = "openmolar_demo"
     #LOGGER.debug(sf.newDB_sql(dbname))
     #sf.drop_db(dbname)
@@ -445,9 +445,9 @@ def _test():
     #sf.create_db(dbname)
     #sf.create_demo_user()
     #sf.truncate_all_tables(dbname)
-    
+
     print sf.get_user_permissions("om_demo", dbname)
-    
+
 if __name__ == "__main__":
     import __builtin__
     import logging

@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2012, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2012, Neil Wallace <neil@openmolar.com>                        ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -30,7 +30,7 @@ from lib_openmolar.server.misc.payload import PayLoad
 
 
 ## if you want a method to be displayed by the admin application's
-## ManageDatabaseDialog.. include the method in 
+## ManageDatabaseDialog.. include the method in
 ## PermissionDispatcher.management_functions (below)
 
 MANAGER_METHODS = ( 'drop_db',
@@ -42,7 +42,7 @@ MANAGER_METHODS = ( 'drop_db',
 
 class PermissionDispatcher(FunctionStore):
     '''
-    wraps all the calls and checks if the user has permissions to run 
+    wraps all the calls and checks if the user has permissions to run
     that method
     '''
     _user = None
@@ -51,7 +51,7 @@ class PermissionDispatcher(FunctionStore):
     def __init__(self):
         FunctionStore.__init__(self)
         self._init_permissions()
-        
+
     def _init_permissions(self):
         '''
         parse the tuples above into a dictionary of lists
@@ -71,17 +71,17 @@ class PermissionDispatcher(FunctionStore):
             permission = True
         message = "permission for user '%s' for method '%s' - %s "% (
             self.user, method, "Granted" if permission else "Unauthorised")
-        
+
         LOGGER.debug(message)
         return permission
-        
+
     def _dispatch(self, method, params):
         '''
         overwrite the special _dispatch function which is a wrapper
         around all functions.
         returns a pickled object of type ..doc `Payload`
         '''
-        
+
         LOGGER.debug("_dispatch called for method %s"% method)
         pl = PayLoad(method)
         pl.permission = self._get_permission(method)
@@ -96,10 +96,10 @@ class PermissionDispatcher(FunctionStore):
 
         LOGGER.debug("returning (pickled) %s"% pl)
         return pickle.dumps(pl)
-        
+
     @property
     def user(self):
-        return self._user        
+        return self._user
 
     def _remember_user(self, user):
         '''
@@ -117,7 +117,7 @@ class PermissionDispatcher(FunctionStore):
             ("truncate_all_tables", _("Remove All Data from this database")),
             ("backup_db", _("Backup this database")),
             )
-        
+
     def pre_execution_warning(self, func_name):
         '''
         see if any warning needs to be confirmed before execution
@@ -131,15 +131,15 @@ class PermissionDispatcher(FunctionStore):
             _("Are you sure you want to remove All Data from this database?"),
             _("This action cannot be undone"))
                     }
-                    
+
         return warnings.get(func_name, None)
-        
+
 def _test():
     '''
     test the DispatchServer class
     '''
     pd = PermissionDispatcher()
-    
+
 if __name__ == "__main__":
     import __builtin__
     import logging

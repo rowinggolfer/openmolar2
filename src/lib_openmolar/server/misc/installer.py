@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -75,7 +75,7 @@ class Installer(object):
         "openmolar-init-master-user",
         "openmolar-alter-master-user"
         ):
-        
+
             LOGGER.info("calling script %s"% script)
 
             p = subprocess.Popen([script],

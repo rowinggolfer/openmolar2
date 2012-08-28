@@ -3,7 +3,7 @@
 
 ###############################################################################
 ##                                                                           ##
-##  Copyright 2011, Neil Wallace <rowinggolfer@googlemail.com>               ##
+##  Copyright 2011-2012,  Neil Wallace <neil@openmolar.com>                  ##
 ##                                                                           ##
 ##  This program is free software: you can redistribute it and/or modify     ##
 ##  it under the terms of the GNU General Public License as published by     ##
@@ -64,11 +64,11 @@ class BackupConfig(ConfigParser.SafeConfigParser):
         except ConfigParser.NoSectionError as exc:
             LOGGER.info("no backup location found in backup.conf")
             raise IOError("misconfigured or missing backup file")
-        
+
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level = logging.DEBUG)
-    
+
     LOGGER = logging.getLogger("test")
     bc = BackupConfig()
     LOGGER.info(bc.backup_dir)
