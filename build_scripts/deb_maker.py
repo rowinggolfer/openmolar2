@@ -152,7 +152,7 @@ def main():
         "%s-(.*)\.tar\.gz$"% options.package, chosen).groups()[0]
 
     new_changes = new_changelog(options.package, version,
-        "Neil Wallace <neil@openmolar.com>         ", 0)
+        "Neil Wallace <rowinggolfer@googlemail.com>", 0)
 
     changelog = "%s\n\n%s"% (new_changes, changelog)
 

@@ -4,19 +4,11 @@
 ======================================================================
 NEW ISSUES
 ======================================================================
+2012_08_29 - admin app session toolbar.
+    move to the session tab! will be much more intuitive.
 
 2012_08_22 - server log is doubling up
     fix it!
-
-2012_08_22 - get configuration link working for admin app
-    suggest that at the very least this shows the text which needs to be
-    saved as a config file, and suggests a name etc.
-    
-2012_08_22 - add server function "user permissions" to the management dialog
-    this should show the users and their current groups, and allow removal and addition to those groups.
-    
-2012_08_22 - admin app should allow addition of postgres users.
-    add a login user to postgres, and control where they can login from ?
 
 2012_08_01 - use apgdiff.
     when the server package is installed, database template should be updated and dumped to 
@@ -41,6 +33,21 @@ NEW ISSUES
 ======================================================================
 FIXED ISSUES
 ======================================================================
+2012_08_22 - get configuration link working for admin app
+    suggest that at the very least this shows the text which needs to be
+    saved as a config file, and suggests a name etc.
+    DONE 2012_08_29
+
+
+2012_08_22 - admin app should allow addition of postgres users.
+    add a login user to postgres, and control where they can login from ?
+    DONE 2012_08_29
+
+2012_08_22 - add server function "user permissions" to the management dialog
+    this should show the users and their current groups, and allow removal and addition to those groups.
+    DONE 2012_08_29
+
+
 2012_08_12 - add a save html button to the admin browser
     (this will speed development of css etc)
     DONE 2012_08_21
