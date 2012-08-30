@@ -184,7 +184,7 @@ class PostgresMainWindow(PlugableMainWindow):
         conn_data.user),
         QtGui.QLineEdit.Password)
         if not result:
-            logging.WARNING("password dialog cancelled by user")
+            LOGGER.WARNING("password dialog cancelled by user")
         return unicode(password)
 
     @property

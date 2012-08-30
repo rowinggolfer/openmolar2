@@ -180,6 +180,9 @@ class ConnectionData(object):
             self.user,
             "************",
             self.db_name)
+        if self.conf_file:
+            html = u"%s <hr />%s<br /><em>'%s'</em>"% (html, 
+                _("From Configuration file"), self.conf_file)
         return html
 
     def __repr__(self):
@@ -187,10 +190,9 @@ class ConnectionData(object):
 
     def __cmp__(self, other):
         def str_atts(obj):
-            return "%s%s%s%s%s%s%s"% (
+            return "%s%s%s%s%s%s"% (
             obj.connection_name,
             obj.user,
-            obj.password,
             obj.host,
             obj.port,
             obj.db_name,
@@ -206,7 +208,8 @@ def _test():
     obj.demo_connection()
 
     obj2 = ConnectionData()
-    obj2.from_conf_file("/home/neil/.openmolar2/connections-available/demo.conf")
+    obj2.from_conf_file(
+        "/home/neil/.openmolar2/connections-available/demo.conf")
 
     print obj == obj2
     print obj.to_html()
