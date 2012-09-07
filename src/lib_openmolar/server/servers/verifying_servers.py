@@ -36,7 +36,7 @@ def ping():
     '''
     A trivial function given to all servers for testing purposes
     '''
-    LOGGER.info("server has been pinged")
+    #LOGGER.debug("server has been pinged")
     return True
 
 class VerifyingServer(SimpleXMLRPCServer):
