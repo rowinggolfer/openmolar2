@@ -27,6 +27,8 @@ class MultipleDatabaseWidget(QtGui.QWidget):
     A widget which provides enough information for a user to select from a
     number of connections.
     '''
+    connection_chosen = QtCore.pyqtSignal(object)
+
     _connections = []
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
@@ -106,7 +108,7 @@ class MultipleDatabaseWidget(QtGui.QWidget):
             message = conn_data.to_html()
 
         self.details_browser.setText(message)
-        self.emit(QtCore.SIGNAL("connection chosen"), conn_data)
+        self.connection_chosen.emit(conn_data)
 
 if __name__ == "__main__":
     import gettext

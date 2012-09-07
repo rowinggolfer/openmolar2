@@ -57,8 +57,7 @@ class ConnectDialog(ExtendableDialog):
         self.set_advanced_but_text(_("other databases"))
 
     def _connect_signals(self):
-        self.connect(self.multiple_db_widg, QtCore.SIGNAL("connection chosen"),
-            self.alternate_chosen)
+        self.multiple_db_widg.connection_chosen.connect(self.alternate_chosen)
 
     @property
     def known_connections(self):
@@ -113,12 +112,16 @@ class ConnectDialog(ExtendableDialog):
     def sizeHint(self):
         return QtCore.QSize(400,150)
 
-    def alternate_chosen(self, connection):
-        self._chosen_index = self.known_connections.index(connection)
+    def alternate_chosen(self, conn_data):
+        if QtGui.QMessageBox.question(self, _("Confirm"),
+            u"%s %s" %(_("use connection"), conn_data.brief_name),
+            QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
+            QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
+            self._chosen_index = self.known_connections.index(conn_data)
 
-        self.set_label()
-        self.multiple_db_widg.setEnabled(False)
-        QtCore.QTimer.singleShot(2000, self.more_but.click)
+            self.set_label()
+            self.multiple_db_widg.setEnabled(False)
+            QtCore.QTimer.singleShot(500, self.more_but.click)
 
     @property
     def chosen_connection(self):
