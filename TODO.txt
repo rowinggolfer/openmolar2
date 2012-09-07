@@ -7,16 +7,13 @@ NEW ISSUES
 2012_08_29 - admin app session toolbar.
     move to the session tab! will be much more intuitive.
 
-2012_08_22 - server log is doubling up
-    fix it!
-
 2012_08_01 - use apgdiff.
-    when the server package is installed, database template should be updated and dumped to 
+    when the server package is installed, database template should be updated and dumped to
     /var/lib/openmolar/schema_dump_VERSION.sql
     apgdiff can then be called on ny schema to check if it conforms.
 
 2012_08_01 - More functionality for openmolar-server?
-    examples 
+    examples
 
     openmolar_server --create_demo
     openmolar_server --create_user neil
@@ -25,7 +22,7 @@ NEW ISSUES
 
 2012_08_01 - Fix FuzzyMatch Shell script
     uses version 8.4 :(
-    
+
 2012_08_01 - Icons.
     om_admin uses a lot of icons fromTheme... see it running under e17 to
     understand the problem. Ideally I need to provide a backup theme.
@@ -33,6 +30,11 @@ NEW ISSUES
 ======================================================================
 FIXED ISSUES
 ======================================================================
+
+2012_08_22 - server log is doubling up
+    fix it!
+    DONE 2012_08_30
+
 2012_08_22 - get configuration link working for admin app
     suggest that at the very least this shows the text which needs to be
     saved as a config file, and suggests a name etc.
@@ -61,9 +63,9 @@ FIXED ISSUES
 
 2012_08_01 - Run om_sphinx and postgresql_autodoc
     DONE! 2012_08_14
-    
+
 2012_08_01 - New Design for ManageDatabaseDialog
-    this should get a list of functions from the server, 
+    this should get a list of functions from the server,
     and offer them to the user.
 
     1.  give the server a new function - "admin_options". this function
