@@ -116,6 +116,8 @@ class PermissionDispatcher(FunctionStore):
             ("drop_db", _("Drop this database")),
             ("truncate_all_tables", _("Remove All Data from this database")),
             ("backup_db", _("Backup this database")),
+            ("update_pt_index",
+                _("Update Patient index (after import)")),
             )
 
     def pre_execution_warning(self, func_name):

@@ -313,6 +313,23 @@ class DBFunctions(object):
             return True
         return False
 
+    @log_exception
+    def update_pt_index(self):
+        '''
+        if data has been imported into the patient's table,
+        the next serialno will be out of step causing a failure
+        when adding a new patient.
+        '''
+        query = '''
+            select setval('patients_ix_seq', select max(ix) from patients)
+            '''
+        if self._execute(query):
+            LOGGER.info("successfully updating patient index")
+            return True
+        LOGGER.info("error updating patient index")
+        return False
+
+
     def _tables(self, dbname):
         '''
         returns all the table names in schema dbname
