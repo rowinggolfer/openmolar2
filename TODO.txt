@@ -4,6 +4,49 @@
 ======================================================================
 NEW ISSUES
 ======================================================================
+
+2012_09_08 - Client Needs Some love.
+    time to get the client functionality up towards om1 functionality.
+
+
+2012_09_08 - Client Save changes.
+    changes are being noticed correctly, but not applied.
+    Address changes, notes etc.
+
+2012_09_08 - Client Alter/set regular clinicians.
+
+2012_09_08 - Client update clinial memo:
+    this throws an AttributeError
+    'lib_openmolar/client/qt4/interfaces/patient_interface.py', line 450 in load_patient
+    if not self.ok_to_leave_record:
+
+    NB clerical memo works fine!
+
+    "close without saving" doesn't seem to work either!
+
+2012_09_08 - Client and Admin:
+    Plugin Directories.
+    Let's just go for /etc/share/openmolar/plugins and ~/.openmolar2
+    or suchlike.
+    each plugin enabled should be saved with qsettings?
+
+2012_09_08 - Client:
+    Set User1 and User2.
+
+2012_09_08 - Client - BPE
+    query needs tweaking.. it doesn't always get the most recent
+
+2012_09_08 - Client - TM and AT
+    these throw an error 'ChartLineEdit' object has no attribute 'finished_edit'
+
+2012_09_08 - Client - Reception Page
+    let's throw up dialogs for take payment and make appointment.
+
+2012_09_08 - Client - Summary Page
+    hygienist and examination dialogs act differently.
+    hygienist treatment doesn't recognise the clinician set.
+
+
 2012_08_29 - admin app session toolbar.
     move to the session tab! will be much more intuitive.
 
@@ -30,6 +73,12 @@ NEW ISSUES
 ======================================================================
 FIXED ISSUES
 ======================================================================
+
+2012_09_08 - Client Save New Patient.
+    getting key errors. this used to work.
+
+    FIXED 2012_09_11 - the issue was import function doesn't update the patients_ix_seq. 
+    not possible to do this with the importer user as insufficient perms, so added a server function to do this.
 
 2012_08_22 - server log is doubling up
     fix it!
