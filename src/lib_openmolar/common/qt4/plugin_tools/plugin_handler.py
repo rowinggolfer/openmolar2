@@ -31,21 +31,16 @@ from lib_openmolar.common.qt4.plugin_tools import Plugin
 
 from PyQt4.QtCore import QResource, QString
 
+
 class PluginHandler(object):
     '''
     A class to verify and install plugins
     '''
-    #: locations of directories where plugins reside
-    PLUGIN_DIRS = []
-
-    #: locations of directories where naked plugins reside
-    NAKED_PLUGIN_DIRS = []
+    _plugins = []
+    _fee_scales = []
 
     #:
     ACTIVE_PLUGINS = set([])
-
-    _plugins = []
-    _fee_scales = []
 
     def get_pluggable_classes(self, module, target=None):
         '''
@@ -84,14 +79,15 @@ class PluginHandler(object):
 
             if file_.endswith(".py"):
                 LOGGER.debug("found module '%s'"% full_path)
-                if plugin_dir in self.NAKED_PLUGIN_DIRS:
+                if (plugin_dir == SETTINGS.PLUGIN_DIRS[-1] and
+                SETTINGS.ALLOW_NAKED_PLUGINS):
                     LOGGER.info("NAKED PLUGIN FOUND '%s'"% full_path)
                     module = file_.replace('.py','')
                     mod = __import__(module)
                     yield mod
                 else:
                     LOGGER.info(
-            'IGNORING because %s is not a known store for naked plugins'%
+        "IGNORING because only zipped plugins can be run from directory '%s'"%
                     plugin_dir)
             elif zipfile.is_zipfile(full_path):
                 LOGGER.info("POSSIBLE PLUGIN FOUND '%s'"% full_path)
@@ -119,7 +115,7 @@ class PluginHandler(object):
         this function is called by the client application to load plugins
         '''
         LOGGER.info ("loading plugins...")
-        for plugin_dir in self.PLUGIN_DIRS:
+        for plugin_dir in SETTINGS.PLUGIN_DIRS:
             LOGGER.info ("="*80)
             LOGGER.info ("looking for plugins in directory %s"% plugin_dir)
             LOGGER.info ("="*80)
@@ -220,16 +216,6 @@ if __name__ == "__main__":
     import lib_openmolar.client
     logging.basicConfig(level = logging.DEBUG)
     ph = PluginHandler()
-    ph.PLUGIN_DIRS = [
-            "/home/neil/openmolar/hg_openmolar/plugins/src/import_om1",
-            #"/home/neil/openmolar/hg_openmolar/plugins/src"
-            ]
-    ph.NAKED_PLUGIN_DIRS = [
-            "/home/neil/openmolar/hg_openmolar/plugins/src/import_om1",
-            ]
-    ph.ACTIVE_PLUGINS = set([QString(
-    "import_om1_plugin:/home/neil/openmolar/hg_openmolar/plugins/src/import_om1"
-            )])
-    ph.load_plugins("admin")
+    ph.load_plugins("client")
     ph.activate_plugins()
     ph.de_activate_plugins()

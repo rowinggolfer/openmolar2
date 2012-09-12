@@ -98,10 +98,9 @@ class PlugableMainWindow(BaseMainWindow):
                 logging.exception(
                  "exception caught loading python settings...")
 
-        SETTINGS.PLUGIN_DIRS = list(qsettings.value(
-            "plugin_dirs").toStringList())
-        SETTINGS.NAKED_PLUGIN_DIRS = list(qsettings.value(
-            "naked_plugin_dirs").toStringList())
+        SETTINGS.ALLOW_NAKED_PLUGINS = qsettings.value(
+            "allow_naked_plugins_in_home_dir")
+
         SETTINGS.ACTIVE_PLUGINS = set(qsettings.value(
             "active_plugins").toStringList())
 
@@ -127,10 +126,8 @@ class PlugableMainWindow(BaseMainWindow):
         pickled_dict = pickle.dumps(SETTINGS.PERSISTANT_SETTINGS)
         qsettings.setValue("settings_dict", pickled_dict)
 
-        qsettings.setValue("plugin_dirs",
-            QtCore.QStringList(SETTINGS.PLUGIN_DIRS))
-        qsettings.setValue("naked_plugin_dirs",
-            QtCore.QStringList(SETTINGS.NAKED_PLUGIN_DIRS))
+        qsettings.setValue("allow_naked_plugins_in_home_dir",
+            SETTINGS.ALLOW_NAKED_PLUGINS)
         qsettings.setValue("active_plugins",
             QtCore.QStringList(list(SETTINGS.ACTIVE_PLUGINS)))
 
@@ -165,7 +162,6 @@ class PlugableMainWindow(BaseMainWindow):
 
 def _test():
     from lib_openmolar import client
-    SETTINGS.PLUGIN_DIRS = ["../../../../plugins/admin"]
 
     app = QtGui.QApplication([])
     app.setOrganizationName("om_test")

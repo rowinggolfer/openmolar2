@@ -134,6 +134,9 @@ class CommonSettings(object):
     #: meaning these survive a log out!
     PERSISTANT_SETTINGS = {}
 
+    _PLUGIN_DIRS = None
+    ALLOW_NAKED_PLUGINS = False
+
     def __init__(self):
 
         #: a pointer to the instance of :doc:`OMTypes`
@@ -285,6 +288,23 @@ class CommonSettings(object):
         if not os.path.isdir(folder):
             os.makedirs(folder)
         return folder
+
+    @property
+    def PLUGIN_DIRS(self):
+        '''
+        where plugins can be stored.
+        '''
+        if self._PLUGIN_DIRS is None:
+            folder = os.path.join(self.LOCALFOLDER, "plugins")
+            if not os.path.isdir(folder):
+                os.makedirs(folder)
+
+            self._PLUGIN_DIRS = ["/usr/share/openmolar/plugins", folder]
+            for folder in self._PLUGIN_DIRS:
+                if not os.path.isdir(folder):
+                    self._PLUGIN_DIRS.remove(folder)
+
+        return self._PLUGIN_DIRS
 
 if __name__ == "__main__":
     import logging

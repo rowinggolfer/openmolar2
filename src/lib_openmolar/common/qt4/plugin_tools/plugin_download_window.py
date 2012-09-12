@@ -22,7 +22,8 @@
 
 from PyQt4 import QtGui, QtCore
 
-from lib_openmolar.common.qt4.plugin_tools.online_plugins_widget import OnlinePluginsWidget
+from lib_openmolar.common.qt4.plugin_tools.online_plugins_widget \
+    import OnlinePluginsWidget
 
 class PluginDownloadWindow(QtGui.QMainWindow):
     '''

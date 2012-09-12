@@ -28,7 +28,6 @@ class _directory_model(QtCore.QAbstractTableModel):
     def __init__(self, parent=None):
         QtCore.QAbstractTableModel.__init__(self, parent)
         self.icon = QtGui.QIcon.fromTheme("folder")
-        self.delete_icon = QtGui.QIcon(":icons/eraser.png")
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         dirname = SETTINGS.PLUGIN_DIRS[index.row()]
@@ -38,13 +37,12 @@ class _directory_model(QtCore.QAbstractTableModel):
             if role == QtCore.Qt.DecorationRole:
                 return self.icon
         if index.column() == 1:
-            if role == QtCore.Qt.DecorationRole:
-                return self.delete_icon
-        if index.column() == 2:
+            if dirname != SETTINGS.PLUGIN_DIRS[-1]:
+                return None
             if role == QtCore.Qt.DisplayRole:
                 return _("allow")
             if role == QtCore.Qt.CheckStateRole:
-                if dirname in SETTINGS.NAKED_PLUGIN_DIRS:
+                if SETTINGS.ALLOW_NAKED_PLUGINS:
                     return QtCore.Qt.Checked
                 else:
                     return QtCore.Qt.Unchecked
@@ -56,61 +54,43 @@ class _directory_model(QtCore.QAbstractTableModel):
             if index == 0:
                 return _("Directory")
             elif index == 1:
-                return _("Remove")
-            elif index == 2:
                 return _("Naked Plugins")
 
     def rowCount(self, index):
         return len(SETTINGS.PLUGIN_DIRS)
 
     def columnCount(self, index):
-        return 3 if self.advanced else 2
+        return 2 if self.advanced else 1
 
 class _TableView(QtGui.QTableView):
     '''
     a clickable table view allowing editing of the directories
     '''
     updated = QtCore.pyqtSignal()
-    warning_given = False
     def __init__(self, parent=None):
         QtGui.QTableView.__init__(self, parent)
 
         self.clicked.connect(self.handle_click)
 
     def handle_click(self, index):
-        dirname = SETTINGS.PLUGIN_DIRS[index.row()]
         if index.column() == 1:
-            self.confirm_delete(dirname)
-        if index.column() == 2:
-            self.toggle_naked(dirname)
-
-    def confirm_delete(self, dirname):
-        if QtGui.QMessageBox.question(self, _("confirm"),
-        u"%s<br /><b>%s</b> ?" %(
-        _("no longer load plugins from directory") , dirname),
-        QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
-        QtGui.QMessageBox.Ok) == QtGui.QMessageBox.Ok:
-            for s_list in (SETTINGS.PLUGIN_DIRS, SETTINGS.NAKED_PLUGIN_DIRS):
-                try:
-                    s_list.remove(dirname)
-                except ValueError:
-                    pass
-        self.updated.emit()
+            dirname = SETTINGS.PLUGIN_DIRS[index.row()]
+            if dirname == SETTINGS.PLUGIN_DIRS[-1]:
+                self.toggle_naked(dirname)
 
     def toggle_naked(self, dirname):
-        if dirname not in SETTINGS.NAKED_PLUGIN_DIRS:
-            if not self.warning_given:
-                QtGui.QMessageBox.warning(self, _("are you sure"),
+        if not SETTINGS.ALLOW_NAKED_PLUGINS:
+            SETTINGS.ALLOW_NAKED_PLUGINS = (
+            QtGui.QMessageBox.warning(self, _("are you sure"),
                 u"%s %s<hr />%s"% (
                 _("allowing unsigned code to run is a security risk"),
                 _("but can be useful for plugin developers."),
     _("Only enable this feature if you are sure you know what you are doing")
-            ))
-                self.warning_given = True
-                return
-            SETTINGS.NAKED_PLUGIN_DIRS.append(dirname)
+            ), QtGui.QMessageBox.Cancel|QtGui.QMessageBox.Ok,
+            QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok)
+
         else:
-            SETTINGS.NAKED_PLUGIN_DIRS.remove(dirname)
+            SETTINGS.ALLOW_NAKED_PLUGINS = False
         self.updated.emit()
 
 class PluginsDirectoryDialog(ExtendableDialog):
@@ -125,13 +105,10 @@ class PluginsDirectoryDialog(ExtendableDialog):
 
         self.model = _directory_model()
 
-        button = QtGui.QPushButton(_("add a directory"))
         list_view = _TableView()
 
         self.insertWidget(self.label)
         self.insertWidget(list_view)
-        self.insertWidget(button)
-        button.clicked.connect(self.add_directory)
 
         self.apply_but.hide()
         self.set_reject_button_text(_("Close"))
@@ -156,13 +133,6 @@ class PluginsDirectoryDialog(ExtendableDialog):
         self.model.reset()
         self.label.setText(message)
 
-    def add_directory(self):
-        new_dir = QtGui.QFileDialog.getExistingDirectory()
-        if new_dir == "":
-            return
-        SETTINGS.PLUGIN_DIRS.append(new_dir)
-        self._update()
-
     def sizeHint(self):
         return QtCore.QSize(400,400)
 
@@ -172,7 +142,6 @@ class PluginsDirectoryDialog(ExtendableDialog):
 
 def _test():
     from lib_openmolar import client
-    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
 
     app = QtGui.QApplication([])
     dl = PluginsDirectoryDialog()

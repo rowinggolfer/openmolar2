@@ -171,9 +171,6 @@ def _test():
     import logging
     from lib_openmolar import client
     LOGGER.setLevel(logging.DEBUG)
-    SETTINGS.PLUGIN_DIRS = ["../../../../../plugins/client"]
-    SETTINGS.ACTIVE_PLUGINS = set([
-        'hello_world:/home/neil/openmolar/hg_openmolar/plugins/client',])
     SETTINGS.load_plugins()
 
     app = QtGui.QApplication([])
