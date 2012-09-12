@@ -30,6 +30,8 @@ NEW ISSUES
     or suchlike.
     each plugin enabled should be saved with qsettings?
 
+    DONE 2012_09_12 ... needs testing.
+
 2012_09_08 - Client:
     Set User1 and User2.
 

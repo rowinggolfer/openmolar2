@@ -256,6 +256,11 @@ rpm:
 	touch $(RPM_BUILDS_DIR)rpm_result
 	
 	
+update_pbuilder:
+	$(foreach dist, $(DEBDISTS), \
+		sudo DIST=${dist} ARCH=amd64 pbuilder --update --architecture amd64 \
+		--distribution ${dist} --http-proxy http://localhost:3142 ; \
+	)
 	
 test:
 	@echo "chosen package $(PACKAGE)"
