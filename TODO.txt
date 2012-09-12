@@ -36,9 +36,6 @@ NEW ISSUES
 2012_09_08 - Client - BPE
     query needs tweaking.. it doesn't always get the most recent
 
-2012_09_08 - Client - TM and AT
-    these throw an error 'ChartLineEdit' object has no attribute 'finished_edit'
-
 2012_09_08 - Client - Reception Page
     let's throw up dialogs for take payment and make appointment.
 
@@ -73,11 +70,14 @@ NEW ISSUES
 ======================================================================
 FIXED ISSUES
 ======================================================================
+2012_09_08 - Client - TM and AT
+    these throw an error 'ChartLineEdit' object has no attribute 'finished_edit'
+    DONE 2012_09_12
 
 2012_09_08 - Client Save New Patient.
     getting key errors. this used to work.
 
-    FIXED 2012_09_11 - the issue was import function doesn't update the patients_ix_seq. 
+    FIXED 2012_09_11 - the issue was import function doesn't update the patients_ix_seq.
     not possible to do this with the importer user as insufficient perms, so added a server function to do this.
 
 2012_08_22 - server log is doubling up
