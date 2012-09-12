@@ -26,6 +26,13 @@ class NavigateFrame(QtGui.QWidget):
     '''
     provides buttons for common static chart editing by mouse
     '''
+
+    nav_signal = QtCore.pyqtSignal(object)
+    '''
+    this is a signal emitted when user clicks on of the buttons
+    argument will be ("next", "prev" or "stay")
+    '''
+
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
@@ -38,7 +45,7 @@ class NavigateFrame(QtGui.QWidget):
 
         self.add_button = QtGui.QPushButton("&&")
         self.add_button.setFocusPolicy(QtCore.Qt.NoFocus)
-        self.add_button.setToolTip(_(u"commit"))
+        self.add_button.setToolTip(_(u"commit & stay on this tooth"))
 
         self.next_button = QtGui.QPushButton(next_icon, "")
         self.next_button.setFocusPolicy(QtCore.Qt.NoFocus)
@@ -59,13 +66,13 @@ class NavigateFrame(QtGui.QWidget):
         return QtCore.QSize(200,30)
 
     def emit_next(self):
-        self.emit(QtCore.SIGNAL("Navigate"), "next")
+        self.nav_signal.emit("next")
 
     def emit_add(self):
-        self.emit(QtCore.SIGNAL("Navigate"), "stay")
+        self.nav_signal.emit("stay")
 
     def emit_prev(self):
-        self.emit(QtCore.SIGNAL("Navigate"), "prev")
+        self.nav_signal.emit("prev")
 
 if __name__ == "__main__":
 
@@ -75,12 +82,9 @@ if __name__ == "__main__":
         print args
 
     app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    layout = QtGui.QVBoxLayout(dl)
-    obj1 = NavigateFrame(dl)
+    obj = NavigateFrame()
 
-    dl.connect(obj1, QtCore.SIGNAL('Navigate'), sig_catcher)
+    obj.nav_signal.connect(sig_catcher)
 
-    layout.addWidget(obj1)
-
-    dl.exec_()
+    obj.show()
+    app.exec_()

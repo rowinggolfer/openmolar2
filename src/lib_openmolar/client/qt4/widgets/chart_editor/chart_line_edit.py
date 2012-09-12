@@ -29,8 +29,15 @@ class ChartLineEdit(QtGui.QLineEdit):
     and is self aware when verification is needed
     override the keypress event for up and down arrow keys.
     '''
+
+    edit_finished = QtCore.pyqtSignal(object)
+    '''
+    this is a signal emitted when user has finished entering an item.
+    argument will be ("next", "prev" or "stay")
+    '''
+
     def __init__(self, parent=None):
-        super(ChartLineEdit, self).__init__(parent)
+        QtGui.QLineEdit.__init__(self, parent)
 
     def clear(self):
         '''
@@ -47,7 +54,7 @@ class ChartLineEdit(QtGui.QLineEdit):
         overrides QWidget's keypressEvent
         '''
         if event.key() == QtCore.Qt.Key_Space:
-            self.emit(QtCore.SIGNAL("Navigate"), "stay")
+            self.edit_finished.emit("stay")
         elif self.text() == "" and event.key() in (
         QtCore.Qt.Key_Left, QtCore.Qt.Key_Right,
         QtCore.Qt.Key_Down, QtCore.Qt.Key_Up):
@@ -55,9 +62,9 @@ class ChartLineEdit(QtGui.QLineEdit):
         elif event.key() in (
             QtCore.Qt.Key_Down,
             QtCore.Qt.Key_Return):
-                self.emit(QtCore.SIGNAL("Navigate"), "next")
+                self.edit_finished.emit("next")
         elif event.key() == QtCore.Qt.Key_Up:
-            self.emit(QtCore.SIGNAL("Navigate"), "prev")
+            self.edit_finished.emit("prev")
         else:
             inputT = event.text().toAscii()
             if re.match("[a-z]", inputT):
@@ -72,8 +79,8 @@ if __name__ == "__main__":
         print "signal caught", args
 
     app = QtGui.QApplication([])
-    object = ChartLineEdit()
-    app.connect(object, QtCore.SIGNAL("Navigate"), sig_catcher)
+    obj = ChartLineEdit()
+    obj.edit_finished.connect(sig_catcher)
 
-    object.show()
+    obj.show()
     app.exec_()

@@ -103,6 +103,9 @@ class ToothDataEditor(QtGui.QWidget):
         layout.setMargin(0)
         layout.addWidget(self.tooth_label)
         layout.addWidget(splitter)
+        spacer = QtGui.QSpacerItem(0, 0,
+            QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        layout.addItem(spacer)
 
         self.connect(self.static_buttons, QtCore.SIGNAL("Shortcut"),
             self.shortcut_received)
@@ -153,12 +156,14 @@ class ToothDataEditor(QtGui.QWidget):
         '''
         if shortcut == "TM":
             self.emit(QtCore.SIGNAL("toggle_tooth_present"))
+            self.line_edit.edit_finished.emit("next")
         elif shortcut == "AT":
             self.advise("AT doesn't work yet")
+            self.emit(QtCore.SIGNAL("toggle_tooth_present"))
+            self.line_edit.edit_finished.emit("next")
         else:
             self.line_edit.setText(shortcut)
-
-        self.line_edit.finished_edit()
+            self.line_edit.edit_finished.emit("stay")
 
     def keyPressEvent(self, event):
         self.line_edit.keyPressEvent(event)
@@ -347,11 +352,9 @@ class ToothDataEditor(QtGui.QWidget):
         self.crowns_combo_box.currentIndexChanged.connect(
             self.add_crown_property_to_current_tooth)
 
-        self.connect(self.line_edit,
-            QtCore.SIGNAL("Navigate"), self.navigate)
+        self.line_edit.edit_finished.connect(self.navigate)
 
-        self.connect(self.navigate_buttons,
-            QtCore.SIGNAL("Navigate"), self.navigate)
+        self.navigate_buttons.nav_signal.connect(self.navigate)
 
         self.connect(self.line_edit,
             QtCore.SIGNAL("Nav_key"), self.nav_key)
@@ -368,11 +371,11 @@ if __name__ == "__main__":
     tooth = teeth.ChartTooth(1, model)
 
     app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    obj = ToothDataEditor(dl)
+    mw = QtGui.QMainWindow()
+    obj = ToothDataEditor(mw)
     obj.setTooth(tooth)
 
-    dl.connect(obj, QtCore.SIGNAL("Code Selected"), sig_catcher)
+    mw.connect(obj, QtCore.SIGNAL("Code Selected"), sig_catcher)
 
     static_button = QtGui.QRadioButton("static")
     static_button.setChecked(True)
@@ -385,10 +388,14 @@ if __name__ == "__main__":
     layout.addWidget(static_button)
     layout.addWidget(planning_button)
 
-    layout = QtGui.QVBoxLayout(dl)
+    main_widget = QtGui.QWidget()
+    layout = QtGui.QVBoxLayout(main_widget)
     layout.addWidget(obj)
     layout.addWidget(toggle_frame)
-    dl.exec_()
+
+    mw.setCentralWidget(main_widget)
+    mw.show()
+    app.exec_()
 
 
 if __name__ == "__main__":
