@@ -536,7 +536,6 @@ if __name__ == "__main__":
 
     cc = DemoClientConnection()
 
-    SETTINGS.PLUGIN_DIRS = QtCore.QSettings().value("plugin_dirs").toStringList()
     SETTINGS.load_plugins()
 
     pi = PatientInterface(mw)

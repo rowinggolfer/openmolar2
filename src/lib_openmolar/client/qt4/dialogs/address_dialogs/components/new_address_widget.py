@@ -96,8 +96,6 @@ class NewAddressWidget(QtGui.QWidget):
 
 if __name__ == "__main__":
 
-
-
     app = QtGui.QApplication([])
 
     from lib_openmolar.client.connect import DemoClientConnection

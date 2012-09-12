@@ -101,9 +101,6 @@ class ClientSettings(CommonSettings, PluginHandler):
         #: a reference to the :doc:`ClientMainWindow` for plugin use
         self.mainui = None
 
-        #: locations of directories where plugins reside
-        self.PLUGIN_DIRS = []
-
         self._fee_scales = []
         self._current_patient = None
         self._current_practitioner = None
