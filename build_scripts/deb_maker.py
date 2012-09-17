@@ -58,10 +58,10 @@ class DebMakerGui(QtGui.QDialog):
         layout.addWidget(label2, 1,0)
         layout.addWidget(self.text_edit, 1,1)
 
-        nightly_but = QtGui.QPushButton("nightly build")
+        nightly_but = QtGui.QPushButton("&nightly build")
         nightly_but.clicked.connect(self.insert_text)
 
-        upstream_but = QtGui.QPushButton("upstream release")
+        upstream_but = QtGui.QPushButton("&upstream release")
         upstream_but.clicked.connect(self.insert_text)
 
         comment_frame = QtGui.QFrame()

@@ -25,7 +25,6 @@ this module puts the "lib_openmolar" package onto the python path,
 and starts the client gui
 '''
 
-
 import os, sys
 
 def run():
