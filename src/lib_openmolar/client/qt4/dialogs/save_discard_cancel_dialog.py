@@ -51,11 +51,11 @@ class SaveDiscardCancelDialog(ExtendableDialog):
     def sizeHint(self):
         return QtCore.QSize(400,100)
 
-    def clicked(self, but):
+    def _clicked(self, but):
         if but == self.discard_but:
             self.discard()
             return
-        ExtendableDialog.clicked(self, but)
+        ExtendableDialog._clicked(self, but)
 
     def discard(self):
         if QtGui.QMessageBox.question(self,_("Confirm"),
@@ -74,10 +74,9 @@ class SaveDiscardCancelDialog(ExtendableDialog):
 
 
 if __name__ == "__main__":
+    from gettext import gettext as _
     def changes():
         return ["Sname","Fname"]
-
-
 
     app = QtGui.QApplication([])
     message = "You have unsaved changes"

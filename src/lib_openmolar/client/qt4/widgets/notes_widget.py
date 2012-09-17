@@ -134,24 +134,31 @@ class NotesWidget(QtGui.QWidget):
     def _link_clicked(self, qurl):
         url = qurl.toString()
         show_clinical, show_clerical = False, False
-        if url.startsWith("edit_clinical_note"):
-            m = re.match("edit_clinical_note_(\d+)", url)
-            ix = int(m.groups()[0])
-            if ix != 0:
-                print "edit existing uncommitted clinical note %d"% ix
-                self._clinical_edit_note = SETTINGS.current_patient.notes.clinical_by_id(ix)
-            else:
-                self._clinical_edit_note = SETTINGS.current_patient.notes.new_clinical
-            show_clinical = True
-        elif url.startsWith("edit_clerical_note"):
-            m = re.match("edit_clerical_note_(\d+)", url)
-            ix = int(m.groups()[0])
-            if ix != 0:
-                print "edit existing uncommitted clerical_note %d"% ix
-                self._clerical_edit_note = SETTINGS.current_patient.notes.clerical_by_id(ix)
-            else:
-                self._clerical_edit_note = SETTINGS.current_patient.notes.new_clerical
-            show_clerical = True
+
+        m = re.match("edit(.*)_note_(\d+)", url)
+        if m:
+            ix = int(m.groups()[1])
+            if m.groups()[0] == "_clinical" or self.type == self.CLINICAL:
+                if ix != 0:
+                    LOGGER.debug(
+                        "edit existing uncommitted clinical note %d"% ix)
+                    self._clinical_edit_note = \
+                    SETTINGS.current_patient.notes.clinical_by_id(ix)
+                else:
+                    self._clinical_edit_note = \
+                    SETTINGS.current_patient.notes.new_clinical
+                show_clinical = True
+
+            elif m.groups()[0] == "_clerical" or self.type == self.RECEPTION:
+                if ix != 0:
+                    LOGGER.debug(
+                        "edit existing uncommitted clerical_note %d"% ix)
+                    self._clerical_edit_note = \
+                    SETTINGS.current_patient.notes.clerical_by_id(ix)
+                else:
+                    self._clerical_edit_note = \
+                    SETTINGS.current_patient.notes.new_clerical
+                show_clerical = True
 
         elif url =="new_clinical_note":
             self._clinical_edit_note = SETTINGS.current_patient.notes.new_clinical
@@ -162,8 +169,10 @@ class NotesWidget(QtGui.QWidget):
             show_clerical = True
 
         else:
-            print "bad url in notes page?", url
+            QtGui.QMessageBox.warning(self, "error",
+                "bad url in notes page? '%s'"% url)
             return
+
         try:
             self.clinical_editor.set_text(
                 self._clinical_edit_note.value("line").toString())

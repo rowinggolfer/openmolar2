@@ -59,8 +59,8 @@ class PerioBpeDB(object):
         #: the underlying list of QSqlRecords
         self.record_list = []
 
-        query = '''select checked_date, values, comment, checked_by
-        from %s where patient_id=? order by checked_date desc'''% TABLENAME
+        query = '''select checked_date, values, comment, checked_by from %s
+        where patient_id=? order by checked_date desc, ix desc'''% TABLENAME
 
         q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
@@ -105,12 +105,11 @@ if __name__ == "__main__":
     obj = PerioBpeDB(1)
     bpes = obj.records
 
-    print "%d records"% len(obj.records)
+    no_records = 0
 
     for record in obj.records:
-        print record.value("checked_date").toString(),
-        print record.value("checked_by").toString(),
-        print record.value("values").toString(),
-        print record.value("comments").toString()
+        record
+        no_records += 1
+    print "%d records"% no_records
 
     print obj.current_bpe

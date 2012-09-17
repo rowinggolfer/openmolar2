@@ -112,7 +112,7 @@ class PatientInterface(QtGui.QWidget):
 
     @property
     def is_dirty(self):
-        return self.ok_to_leave_record
+        return self.ok_to_leave_record()
 
     @property
     def find_dialog(self):
@@ -402,7 +402,7 @@ class PatientInterface(QtGui.QWidget):
         '''
         user has called for a clearing of the current record
         '''
-        if not self.ok_to_leave_record:
+        if not self.ok_to_leave_record():
             return
 
         self.clear()
@@ -447,7 +447,7 @@ class PatientInterface(QtGui.QWidget):
         load patient with id patient_id
         if optional 2nd arg is passed, this means don't alter the history list
         '''
-        if not self.ok_to_leave_record:
+        if not self.ok_to_leave_record():
             return
         self.clear()
 
@@ -485,13 +485,18 @@ class PatientInterface(QtGui.QWidget):
 
         QtGui.QApplication.instance().restoreOverrideCursor()
 
-    @property
+    #@property
     def ok_to_leave_record(self):
+        LOGGER.debug("checking state before leaving record")
         if self.pt is None:
             return True
+        LOGGER.debug("pt is not none")
         self.update_patient()
+        LOGGER.debug("updated patient charts")
         if self.pt.is_dirty:
-            if not self.save_patient(True):
+            result = self.save_patient(True)
+            LOGGER.debug("save patient - %s"% result)
+            if not result:
                 return False
         return True
 

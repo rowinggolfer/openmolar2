@@ -33,6 +33,8 @@ TABLENAME = "clinical_memos"
 
 class MemoClinicalDB(InsertableRecord):
     def __init__(self, patient_id):
+
+        self.tablename = TABLENAME
         #:
         self.patient_id = patient_id
 

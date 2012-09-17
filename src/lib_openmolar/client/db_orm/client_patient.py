@@ -123,6 +123,7 @@ class PatientDB(QtSql.QSqlRecord):
     def commit_changes(self):
         if not self.is_dirty:
             return
+        LOGGER.debug("Commiting changes to %s"% self)
         changes, values = "", []
         for i in range(self.count()):
             if self.field(i) != self.orig.field(i):
@@ -260,19 +261,20 @@ class NewPatientDB(PatientDB, InsertableRecord):
 
 if __name__ == "__main__":
 
+    app = QtCore.QCoreApplication([])
     from lib_openmolar.client.connect import DemoClientConnection
     cc = DemoClientConnection()
     cc.connect()
 
-    object = PatientDB(1)
+    obj = PatientDB(1)
 
-    print object.details_html()
-    for i in range(object.count()):
-        field = object.field(i)
+    print obj.details_html()
+    for i in range(obj.count()):
+        field = obj.field(i)
         print u"%s:%s"% (field.name(), field.value().toString())
 
-
-    print object.full_name
-    print "dirty object?", object.is_dirty
-    object.setValue('title', 'Ms')
-    print "dirty object?", object.is_dirty
+    print obj.full_name
+    print "dirty object?", obj.is_dirty
+    obj.setValue('title', 'MISS')
+    print "dirty object?", obj.is_dirty
+    obj.commit_changes()

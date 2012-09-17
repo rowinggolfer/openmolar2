@@ -233,16 +233,19 @@ where patient_id = ?'''
         '''
         push all changes to the database
         '''
+        LOGGER.debug("Committing treament item changes")
+
         if not self.is_dirty:
             return
         result = True
         for item in self.treatment_items:
             if not item.in_database:
                 result = result and self.commit_item(item)
+
         for item in self.deleted_items:
             #sliently drop any items which never got committed
             if item.in_database:
-                print "remove", item, "from database"
+                LOGGER.debug("remove %s from database"% item)
         return result
 
     def commit_item(self, item):

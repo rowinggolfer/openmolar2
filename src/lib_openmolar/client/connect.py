@@ -255,7 +255,7 @@ class ClientConnection(OpenmolarDatabase):
         '''
         if error.isValid():
             print "emiting error", error.text()
-            QtGui.QApplication.instance().emit(
+            QtCore.QCoreApplication.instance().emit(
                 QtCore.SIGNAL("db error"), error.text())
 
 class DemoClientConnection(ClientConnection):
