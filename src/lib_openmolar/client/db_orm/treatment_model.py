@@ -76,7 +76,7 @@ class TreatmentModel(object):
     def get_records(self):
         '''
         pulls all treatment items in the database
-        (for the patient with the id specified at class initiation)
+        (for the patient with the id specified during load_patient function)
         '''
         ## long query - only time will tell if this is a performance hit
 
@@ -84,7 +84,7 @@ class TreatmentModel(object):
             return
 
         query =  '''select
-treatments.ix, patient_id, parent_id, om_code, description,
+treatments.ix, patient_id, om_code, description,
 completed, comment, px_clinician, tx_clinician, tx_date, added_by
 from treatments
 left join procedure_codes on procedure_codes.code = treatments.om_code
@@ -131,6 +131,7 @@ where patient_id = ?'''
         add a :doc:`TreatmentItem` Object
         returns True if the TreatmentItem is valid, else False
         '''
+        LOGGER.debug("adding treatment item to Treatment Model")
         if treatment_item.is_valid:
             self._treatment_items.append(treatment_item)
 
@@ -258,15 +259,14 @@ if __name__ == "__main__":
     logging.basicConfig(level = logging.DEBUG)
 
     from lib_openmolar.client.connect import DemoClientConnection
-    from lib_openmolar.client.db_orm import PatientModel
 
     cc = DemoClientConnection()
     cc.connect()
 
-    pt = PatientModel(1)
+    obj = TreatmentModel()
+    obj.load_patient(1)
 
-    obj = pt.treatment_model
-
+    print obj
     for record in obj.treatment_items:
         print record
         print record.metadata

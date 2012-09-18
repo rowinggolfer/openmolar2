@@ -95,6 +95,7 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
     '''
     def __init__(self, parent=None):
         QtCore.QAbstractItemModel.__init__(self, parent)
+        self.setupModelData()
 
     def columnCount(self, parent=None):
         if parent and parent.isValid():
@@ -179,6 +180,7 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
             LOGGER.debug("TreatmentTreeModel - no patient")
             treatment_items = []
         else:
+            LOGGER.debug("loading patient's treatment model")
             model = SETTINGS.current_patient.treatment_model
             treatment_items = sorted(model.treatment_items)
         for treatment_item in treatment_items:
@@ -194,16 +196,18 @@ class TreatmentTreeModel(QtCore.QAbstractItemModel):
             parentItem.appendChild(newItem)
         self.endResetModel()
 
-class _TestDialog(QtGui.QDialog):
+class _TestDialog(QtGui.QMainWindow):
     def __init__(self, model, parent=None):
-        super(_TestDialog, self).__init__(parent)
+        QtGui.QMainWindow.__init__(self, parent)
 
         self.tree_view = QtGui.QTreeView(self)
         self.tree_view.setModel(model)
         self.tree_view.setAlternatingRowColors(True)
 
-        layout = QtGui.QVBoxLayout(self)
-        layout.addWidget(self.tree_view)
+        self.setCentralWidget(self.tree_view)
+
+    def sizeHint(self):
+        return QtCore.QSize(800,300)
 
 
 if __name__ == "__main__":
@@ -222,5 +226,6 @@ if __name__ == "__main__":
 
     model = TreatmentTreeModel()
 
-    dl = _TestDialog(model)
-    dl.exec_()
+    mw = _TestDialog(model)
+    mw.show()
+    app.exec_()
