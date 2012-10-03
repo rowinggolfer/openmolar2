@@ -37,6 +37,9 @@ from lib_openmolar.client.qt4.widgets import TreatmentTreeModel
 
 
 class TreatmentModel(object):
+    class ItemError(Exception):
+        pass
+
     def __init__(self):
         '''
         instanciates with no params
@@ -141,11 +144,12 @@ where patient_id = ?'''
             self.tree_model.update_treatments()
             return True
 
-        LOGGER.debug(treatment_item.errors)
+        LOGGER.error(treatment_item.errors)
 
         if treatment_item.in_database:
-            raise IOError, "invalid treatment in database treatments id=%s"% (
-                treatment_item.id.toInt()[0])
+            raise self.ItemError, \
+                "invalid treatment in database treatments id=%s error(s)=%s"% (
+                treatment_item.id.toInt()[0], treatment_item.errors)
 
         return False
 
