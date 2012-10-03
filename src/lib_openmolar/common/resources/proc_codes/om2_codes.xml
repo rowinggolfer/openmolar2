@@ -149,7 +149,6 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Fissure Sealant</description>
   </Code>
 
-
   <Code type="tooth">
     <id>C60</id>
     <shortcut>ST</shortcut>
@@ -1120,7 +1119,7 @@ either simple, tooth, fill, crown, root, prosthetic or teeth
     <description>Fluoride Application</description>
   </Code>
 
-  <Code type="teeth">
+  <Code type="simple">
     <id>Z04</id>
     <description>Treatment of sensitivity</description>
   </Code>
