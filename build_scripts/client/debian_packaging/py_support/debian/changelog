@@ -1,3 +1,10 @@
+openmolar-client (2.0.905+hg033-0~__DIST__0) __DIST__; urgency=low
+
+  * upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Tue, 18 Sep 2012 20:59:19 +0100
+
+
 openmolar-client (2.0.905+hg032-0~__DIST__0) __DIST__; urgency=low
 
   * nightly build

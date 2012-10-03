@@ -5,6 +5,14 @@
 NEW ISSUES
 ======================================================================
 
+2012_10_02 - OM1 import plugin
+    needs to be modded to reflect the new diary schema
+    (tough one)
+
+2012_10_02 - ADP imported record 184 (and several others) won't load.
+    treatment model being very pedantic
+    (rightly so... fix the importer plugin)
+
 2012_09_08 - Client Needs Some love.
     time to get the client functionality up towards om1 functionality.
 
@@ -60,6 +68,11 @@ NEW ISSUES
 ======================================================================
 FIXED ISSUES
 ======================================================================
+
+2012_10_02 - OM1 import plugin
+    needs to be modded to reflect the daybook fixes applied.
+    DONE 2012_10_01
+
 2012_09_08 - Client update clinial memo:
     this throws an AttributeError
     'lib_openmolar/client/qt4/interfaces/patient_interface.py', line 450 in load_patient
