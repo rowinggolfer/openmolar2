@@ -69,6 +69,7 @@ class ProxyClient(object):
         :param:host(string)
         :param:port(int)
         :param:user :doc:`ProxyUser` or None
+
         '''
 
         assert type(connection230_data) == Connection230Data, \
@@ -237,9 +238,10 @@ class ProxyClient(object):
         '''
         a wrapper to call server functions.
         this is useful as it automatically unpickles the payloads
+        this is the equivalent of self.server.func(args)
 
-        this is the equivalent of self.server.func(*args)
-        returns an object of type lib_openmolar.server.misc.payload.PayLoad
+        returns an object of type
+        :doc:`PayLoad`
         (or a DuckType thereof)
         '''
         if not self.is_connected:
