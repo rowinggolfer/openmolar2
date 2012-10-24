@@ -28,6 +28,17 @@ if not os.path.exists(KLASS_OUTDIR):
 if not os.path.exists(KLASS_SUBDIR):
     os.mkdir(KLASS_SUBDIR)
 
+def remove_null_klass_rst_files():
+    print "REMOVING ALL NULL rst files from class_headings directory"
+    headings_path = os.path.join(technical_path, "class_headings")
+    for root, dir_, files in os.walk(technical_path):
+        for file_ in files:
+            filepath = os.path.abspath(os.path.join(root, file_))
+            if os.stat(filepath).st_size == 0:
+                print "removing %s"% filepath
+                os.remove(filepath)
+    print "Done\n"
+
 def klass_rst(module, klass):
     '''
     returns file contents understood by sphinx.
@@ -225,6 +236,7 @@ def main():
 
 if __name__ == "__main__":
 
+    remove_null_klass_rst_files()
     if len(sys.argv)<2:
         sys.exit('Usage: %s <folder>' % sys.argv[0])
 

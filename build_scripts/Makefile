@@ -86,7 +86,7 @@ ifeq ($(OMSUFFIXES), )
 endif
 
 ifeq ($(DEBDISTS), )
-	DEBDISTS = unstable testing stable precise lucid
+	DEBDISTS = unstable testing stable quantal precise lucid
 endif
 
 
@@ -229,7 +229,7 @@ debsigns:
 pushdeb:
 	cd ~/www/repos/apt/debian ;\
 	reprepro include $(DIST) $(HEAD)builds/$(OMSUFFIX)/debs/$(DIST)/$(CHANGES_FILE) ; \
-	
+	reprepro export
 
 pushdebs:
 	@echo "updating the local repo"

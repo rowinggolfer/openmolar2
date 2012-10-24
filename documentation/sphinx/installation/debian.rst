@@ -11,12 +11,15 @@ is well supported (and hopefully painless!).
 
 I have a repos for debian ::
 
+	STABLE(SQUEEZE)
 	deb http://openmolar.com/debian stable main
 	deb-src http://openmolar.com/debian stable main
 	
+	TESTING(WHEEZY)
 	deb http://openmolar.com/debian testing main
 	deb-src http://openmolar.com/debian testing main
-	 
+	
+	UNSTABLE(SID)
 	deb http://openmolar.com/debian unstable main
 	deb-src http://openmolar.com/debian unstable main
 	 
@@ -28,6 +31,10 @@ The repo is signed by my key, which is available ::
 	
 
 Once you have enabled the repo of your choice, get whichever components you require. ::
- 
-    ~# apt-get install openmolar-server openmolar-admin openmolar-client
- 
+	
+	OPENMOLAR2
+	~# apt-get install openmolar-server openmolar-admin openmolar-client
+	
+	OPENMOLAR1 (deprecated)
+	~# apt-get install openmolar-orig
+
