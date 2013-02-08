@@ -43,7 +43,8 @@ class DiaryDayData(object):
         self._sessions = {}
 
     def __repr__(self):
-        return "Daydata for %s" % self.date
+        return "Daydata for %s Contains %d Diaries" % (
+        self.date.toString("yyyy-MM-dd"), len(self._diaries))
 
     def clear(self):
         self.sessions_loaded = False

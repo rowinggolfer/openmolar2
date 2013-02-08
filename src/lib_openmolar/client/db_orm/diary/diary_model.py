@@ -43,7 +43,12 @@ class DiaryDataModel(_DiarySettings):
         data_repr = ""
         for key in self._data:
             data_repr += "%s:%s\n"% (key, self._data[key])
-        return "DiaryDataModel\ndb=%s\nstart=%s\nend=%s\n%s"% (
+        return '''DiaryDataModel
+        db     = %s
+        start  = %s
+        end    = %s
+        =========   DATA STARTS   ==============\n%s
+        =========   DATA ENDS     =============='''% (
             SETTINGS.psql_conn.databaseName(),
             self.start_date,
             self.end_date,
@@ -214,4 +219,8 @@ if __name__ == "__main__":
     model = DiaryDataModel()
     model.load()
 
-    print model
+    today = QtCore.QDate.currentDate()
+    for i in range(7):
+        model.data(today.addDays(i))
+
+    print (model)
