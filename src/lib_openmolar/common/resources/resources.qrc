@@ -10,11 +10,11 @@
          <file>images/header_fade.png</file>
          <file>images/footer_fade.png</file>
          <file>images/om_db.png</file>
-	 <file>images/log.png</file>
+         <file>images/log.png</file>
 
          <file>proc_codes/om2_codes.xml</file>
 
-          <file>css/proxy.css</file>
+         <file>css/proxy.css</file>
 
       </qresource>
    </RCC>
