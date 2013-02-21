@@ -42,40 +42,8 @@ class DemoGenerator(object):
         '''
         return a list of queries to populate a demo database
         '''
-        for name in (u"MISS HANNAH ABBOTT",
-        u"MISS BATHILDA BAGSHOT", u"MISS KATIE BELL",
-        u"MISS SUSAN BONES",
-        u"MISS MANDY BROCKLEHURST", u"MISS LAVENDER BROWN",
-        u"MISS MILLICENT BULSTRODE",
-        u"MISS DORIS CROCKFORD",
-        u"MRS PETUNIA DURSLEY",
-        u"THE FAT LADY",
-        u"MISS MIRANDA GOSHAWK",
-        u"MISS HERMIONE GRAINGER",
-        u"MISS ANGELINA JOHNSON",
-        u"PROFESSOR MINERVA MCGONAGALL",
-        u"MRS LILY POTTER",
-        u"MISS ALICIA SPINNET", u"MISS PHYLLIDA SPORE",
-        u"MISS EMERIC SWITCH",
-        u"MISS LISA TURPIN", u"MISS GINNY WEASLEY",
-        u"MRS MOLLY WEASLEY", u"MISS BLAISE ZABINI"):
-            self.record.clearValues()
-            title, fname, sname = name.split(" ")
-            self.record.setValue("title", title)
-            self.record.setValue("first_name", fname)
-            self.record.setValue("last_name", sname)
-            self.record.setValue("sex", 'F')
-            dob = QtCore.QDate(randint(1930,2010), randint(1,12), randint(1,28))
-            self.record.setValue("dob", dob)
-            self.record.setValue("status", "active")
-            if name in ("MRS LILY POTTER"):
-                self.record.setValue("status", "deceased")
-            self.record.setValue("modified_by", "demo_installer")
-
-            yield self.record.insert_query
-
-
-        for name in (u"MR SIRIUS BLACK",
+        for name in (u"MR HARRY POTTER",
+        u"MR SIRIUS BLACK",
         u"MR BLOODY BARON", u"MR TERRY BOOT",
         u"MR VINCENT CRABBE",
         u"MR DEDALUS DIGGLE",
@@ -90,7 +58,7 @@ class DemoGenerator(object):
         u"MR DRACO MALFOY",
         u"MR NEVILLE LONGBOTTOM", u"MR NEARLY-HEADLESS NICK",
         u"MR PIERS POLKISS",
-        u"MR HARRY POTTER", u"MR JAMES POTTER", u"MR ADRIAN PUCEY",
+        u"MR JAMES POTTER", u"MR ADRIAN PUCEY",
         u"PROFESSOR SEVERUS SNAPE", u"MR DEAN THOMAS", u"MR TOM THE-BARTENDER",
         u"MR QUENTIN TRIMBLE",
         u"MR VINDICTUS VIRIDIAN",
@@ -113,6 +81,40 @@ class DemoGenerator(object):
             self.record.setValue("modified_by", "demo_installer")
 
             yield self.record.insert_query
+
+        for name in (u"MISS HANNAH ABBOTT",
+            u"MISS BATHILDA BAGSHOT", u"MISS KATIE BELL",
+            u"MISS SUSAN BONES",
+            u"MISS MANDY BROCKLEHURST", u"MISS LAVENDER BROWN",
+            u"MISS MILLICENT BULSTRODE",
+            u"MISS DORIS CROCKFORD",
+            u"MRS PETUNIA DURSLEY",
+            u"THE FAT LADY",
+            u"MISS MIRANDA GOSHAWK",
+            u"MISS HERMIONE GRAINGER",
+            u"MISS ANGELINA JOHNSON",
+            u"PROFESSOR MINERVA MCGONAGALL",
+            u"MRS LILY POTTER",
+            u"MISS ALICIA SPINNET", u"MISS PHYLLIDA SPORE",
+            u"MISS EMERIC SWITCH",
+            u"MISS LISA TURPIN", u"MISS GINNY WEASLEY",
+            u"MRS MOLLY WEASLEY", u"MISS BLAISE ZABINI"):
+                self.record.clearValues()
+                title, fname, sname = name.split(" ")
+                self.record.setValue("title", title)
+                self.record.setValue("first_name", fname)
+                self.record.setValue("last_name", sname)
+                self.record.setValue("sex", 'F')
+                dob = QtCore.QDate(randint(1930,2010), randint(1,12), randint(1,28))
+                self.record.setValue("dob", dob)
+                self.record.setValue("status", "active")
+                if name in ("MRS LILY POTTER"):
+                    self.record.setValue("status", "deceased")
+                self.record.setValue("modified_by", "demo_installer")
+
+                yield self.record.insert_query
+
+
 
 
 if __name__ == "__main__":
