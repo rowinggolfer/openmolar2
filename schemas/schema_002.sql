@@ -1,0 +1,1129 @@
+/*--
+
+###############################################################################
+##                                                                           ##
+##  Copyright 2010-2012, Neil Wallace <rowinggolfer@googlemail.com>          ##
+##                                                                           ##
+##  This program is free software: you can redistribute it and/or modify     ##
+##  it under the terms of the GNU General Public License as published by     ##
+##  the Free Software Foundation, either version 3 of the License, or        ##
+##  (at your option) any later version.                                      ##
+##                                                                           ##
+##  This program is distributed in the hope that it will be useful,          ##
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of           ##
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the            ##
+##  GNU General Public License for more details.                             ##
+##                                                                           ##
+##  You should have received a copy of the GNU General Public License        ##
+##  along with this program.  If not, see <http://www.gnu.org/licenses/>.    ##
+##                                                                           ##
+###############################################################################
+
+
+
+###############################################################################
+##   This schema is a work in progress, and subject to change                ##
+##   A version number is put into table settings                             ##
+##   search this fle for 'schema_version'                                    ##
+###############################################################################
+
+--*/
+
+
+-- TYPES
+
+
+CREATE TYPE root_description_type AS ENUM (
+	'normal',
+	'UNKNOWN',
+	'TM',
+	'RT',
+	'CA',
+	'UE',
+	'PE',
+	'AP',
+	'IMPACT_H',
+	'IMPACT_V',
+	'IMPACTED',
+	'FRAG_BURIED',
+	'FRAG_EXPOSED',
+	'OD',
+	'HEMI',
+	'IM',
+	'IM_OT',
+	'OT');
+
+CREATE TYPE procedure_info_type AS ENUM (
+	'any_tooth',
+	'multi_teeth',
+	'any_deciduous_tooth',
+	'any_adult_tooth',
+	'any_quadrant',
+	'any_sextant',
+	'posterior_sextant',
+	'anterior_sextant');
+
+CREATE TYPE clinician_type AS ENUM (
+	'dentist',
+	'hygienist',
+	'therapist',
+	'technition',
+	'orthodontist',
+	'endodontist',
+	'implantologist',
+	'ohi_instructor',
+	'dentist|hygienist',
+	'dentist|therapist',
+	'dentist|hygienist|therapist',
+	'hygienist|therapist');
+
+CREATE TYPE notes_clerical_type AS ENUM (
+	'observation',
+	'payment',
+	'printing',
+	'invoice',
+	'appointment');
+
+CREATE TYPE fee_type AS ENUM (
+	'treatment',
+	'sundries',
+	'deposit',
+	'fta_charge',
+	'other');
+
+CREATE TYPE telephone_type AS ENUM (
+	'home',
+	'work',
+	'mobile',
+	'other');
+
+CREATE TYPE crown_type AS ENUM (
+	'PJ',
+	'PV',
+	'V1',
+	'V2',
+	'GO',
+	'A1',
+	'A2',
+	'TEMP',
+	'SS',
+	'LAVA',
+	'OPAL',
+	'FORT',
+	'E-MAX',
+	'EVER',
+	'SR',
+	'OT');
+
+CREATE TYPE sex_type AS ENUM (
+	'M',
+	'F');
+
+CREATE TYPE pt_status_type AS ENUM (
+	'unknown',
+	'active',
+	'banned',
+	'bad_debt',
+	'casual',
+	'deceased',
+	'moved away');
+
+CREATE TYPE practitioner_type AS ENUM (
+	'dentist',
+	'hygienist',
+	'therapist');
+
+CREATE TYPE address_type AS ENUM (
+	'home',
+	'work',
+	'holiday',
+	'care_of',
+	'student_accomodation',
+	'other');
+
+CREATE TYPE fill_material_type AS ENUM (
+	'AM',
+	'CO',
+	'GL',
+	'GO',
+	'PO',
+	'SI',
+	'FS',
+	'DR',
+	'PR',
+	'OT');
+
+CREATE TYPE mailing_pref_type AS ENUM (
+	'default',
+	'dont_use',
+	'duplicate',
+	'other');
+
+CREATE TYPE notes_clinical_type AS ENUM (
+	'observation',
+	'diagnosis',
+	'recommendation',
+	'treatment');
+
+CREATE TYPE tooth_tx_type AS ENUM (
+	'abutment',
+	'pontic',
+	'wing',
+	'filling');
+
+CREATE TYPE tx_chart_type AS ENUM (
+	'root',
+	'tooth');
+
+CREATE TYPE diary_entry_type as ENUM (
+	'free',
+	'busy',
+	'appointment',
+	'lunch',
+	'out of office',
+	'emergency'
+	);
+
+
+/*-- TABLES --*/
+
+-- settings table is a simple key/value store 
+-- this should be useable by database owner only
+
+CREATE TABLE settings (
+
+	ix SERIAL,
+	key  VARCHAR(80),
+	data TEXT,
+	CONSTRAINT pk_settings PRIMARY KEY (ix)
+	);
+	
+
+CREATE TABLE text_fields (
+
+	key  VARCHAR(20),
+	data TEXT,
+	CONSTRAINT pk_text_fields PRIMARY KEY (key)
+
+	);
+
+
+
+CREATE TABLE procedure_codes (
+
+	ix SERIAL,
+	category int not NULL default 1,
+	code VARCHAR(8),
+	description VARCHAR(140),
+	CONSTRAINT pk_procedure_codes PRIMARY KEY (ix),
+	CONSTRAINT unique_procedure_codes UNIQUE (code)
+
+	);
+
+
+CREATE TABLE avatars (
+
+	ix SERIAL NOT NULL,
+	description VARCHAR(50) NOT NULL,
+	svg_data TEXT,
+	CONSTRAINT pk_avatars PRIMARY KEY (ix)
+
+	);
+
+
+CREATE TABLE users (                  --users of the system
+
+	ix SERIAL NOT NULL,               -- unique autogenerated ID
+	abbrv_name VARCHAR(20) NOT NULL,  -- initials - for notes
+	role VARCHAR(20),                 -- nurse, receptionist, cleaner etc
+	title VARCHAR(20) NOT NULL,       -- Mr, Dr, Prof etc 
+	last_name VARCHAR(30) NOT NULL,
+	middle_name VARCHAR(30),
+	first_name VARCHAR(30) NOT NULL,
+	qualifications VARCHAR(30) NOT NULL,
+	registration VARCHAR(240),        -- eg. in the UK the GDC no
+	correspondence_name VARCHAR(60),  -- for correspondence
+	sex sex_type NOT NULL,
+	dob DATE NOT NULL,
+	status VARCHAR(20) NOT NULL,       -- active, retired etc
+	comments VARCHAR(255) DEFAULT NULL,
+	avatar_id INTEGER,
+	display_order INTEGER,
+	modified_by VARCHAR(20) NOT NULL,
+	time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT pk_users PRIMARY KEY (ix),
+	CONSTRAINT unique_abbrv_name UNIQUE (abbrv_name)
+	
+	);
+
+/*--
+    data on patients
+--*/
+
+CREATE TABLE patients (
+
+	ix SERIAL NOT NULL , --unique autogenerated ID
+	title VARCHAR(20) NOT NULL , -- Mr, Dr, Prof etc 
+	last_name VARCHAR(30) NOT NULL,
+	first_name VARCHAR(30) NOT NULL,
+	qualifications VARCHAR(30) , -- eg OBE 
+	preferred_name VARCHAR(30) , --for verbal comminication
+	correspondence_name VARCHAR(60) , --for correspondence
+	sex sex_type NOT NULL,
+	dob DATE NOT NULL,
+	status pt_status_type NOT NULL , --active, deceased etc
+	modified_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT pk_patient PRIMARY KEY (ix),
+	CONSTRAINT chk_title_case CHECK (title = upper(title)),
+	CONSTRAINT chk_title_len CHECK (length(title) > 1),
+	CONSTRAINT chk_last_name_case CHECK (last_name = upper(last_name)),
+	CONSTRAINT chk_last_name_len CHECK (length(last_name) > 1),
+	CONSTRAINT chk_first_name_case CHECK (first_name = upper(first_name)),
+	CONSTRAINT chk_first_name_len CHECK (first_name <> '')
+
+	);
+
+CREATE TABLE teeth_present (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	dent_key BIGINT NOT NULL DEFAULT 281474976645120, -- adult teeth present
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_teeth_present PRIMARY KEY (ix)
+
+	);
+
+/*--
+    data for known fillings present in the patients mouth
+--*/
+
+CREATE TABLE static_fills (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	surfaces VARCHAR(5) NOT NULL,
+	material fill_material_type NOT NULL,
+	comment VARCHAR(80),
+	date_charted DATE NOT NULL DEFAULT CURRENT_DATE,
+	CONSTRAINT pk_static_fills PRIMARY KEY (ix),
+	CONSTRAINT static_fills_surface_rule CHECK (surfaces~'^[MODBL]*$')
+
+	);
+
+/*--
+    data for known crowns present in the patients mouth
+--*/
+
+CREATE TABLE static_crowns (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	type crown_type NOT NULL,
+	technition VARCHAR(30),
+	comment VARCHAR(80),
+	date_charted DATE NOT NULL DEFAULT CURRENT_DATE,
+	CONSTRAINT pk_static_crowns PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE static_roots (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	description root_description_type,
+	comment VARCHAR(80),
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_static_roots PRIMARY KEY (ix)
+
+	);
+
+/*--
+    data storage for comments on individual teeth
+--*/
+
+CREATE TABLE static_comments (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	comment VARCHAR(255),
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_static_comments PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE static_supernumerary (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	mesial_neighbour SMALLINT,
+	distal_neighbour SMALLINT,
+	is_erupted BOOL NOT NULL DEFAULT FALSE,
+	comment VARCHAR(240),
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_static_supernumerary PRIMARY KEY (ix)
+
+	);
+
+/*--
+    storage for telephone numbers
+--*/
+
+CREATE TABLE telephone (
+
+	ix SERIAL NOT NULL,
+	number VARCHAR(30) NOT NULL,
+	sms_capable Bool DEFAULT FALSE,
+	checked_date DATE DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_telephone PRIMARY KEY (ix),
+	CONSTRAINT telephone_nos_rule CHECK (number~'^[\d+ \+]*')
+
+	);
+
+/*--
+    links the unique id of an telephone number to the unique id of a patient,
+along with some other information (home, work, mobile etc..)
+allowing a many-to-many relationship
+--*/
+
+CREATE TABLE telephone_link (
+
+	ix SERIAL NOT NULL,
+	tel_cat telephone_type NOT NULL DEFAULT 'home',
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tel_id INTEGER NOT NULL REFERENCES telephone(ix),
+	comment VARCHAR(240),
+	CONSTRAINT pk_telephone_link PRIMARY KEY (ix)
+
+	);
+
+/*--
+    storage for ALL addresses in the database,
+for patients, clinicians, suppliers etc...
+--*/
+
+CREATE TABLE addresses (
+
+	ix SERIAL NOT NULL,
+	addr1 VARCHAR(60) NOT NULL,
+	addr2 VARCHAR(60) DEFAULT NULL,
+	addr3 VARCHAR(60) DEFAULT NULL,
+	city VARCHAR(60) NOT NULL,
+	county VARCHAR(30) DEFAULT NULL,
+	country VARCHAR(30) DEFAULT NULL,
+	postal_cd VARCHAR(30) NOT NULL,
+	modified_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT pk_address PRIMARY KEY (ix),
+	CONSTRAINT ck_addr1 CHECK (addr1 = upper(addr1)),
+	CONSTRAINT ck_addr2 CHECK (addr2 = upper(addr2)),
+	CONSTRAINT ck_addr3 CHECK (addr3 = upper(addr3)),
+	CONSTRAINT ck_city CHECK (city = upper(city)),
+	CONSTRAINT ck_county CHECK (county = upper(county)),
+	CONSTRAINT ck_country CHECK (country = upper(country)),
+	CONSTRAINT ck_postal_cd CHECK (postal_cd = upper(postal_cd))
+
+	);
+
+/*--
+    links the unique id of an address to the unique id of a patient,
+along with some other information (home, work etc..)
+allowing a many-to-many relationship for addresses
+--*/
+
+CREATE TABLE address_link (
+
+	ix SERIAL NOT NULL,
+	address_cat address_type NOT NULL DEFAULT 'home',
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	address_id INTEGER NOT NULL REFERENCES addresses(ix),
+	from_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	to_date DATE,
+	mailing_pref mailing_pref_type , --custom enum type
+	comments VARCHAR(255),
+	CONSTRAINT pk_address_link PRIMARY KEY (ix)
+
+	);
+
+/*--
+    data on all known clinics
+--*/
+
+CREATE TABLE practices (
+
+	ix SERIAL NOT NULL , --Multiple Practices Allowed
+	name VARCHAR(50) NOT NULL,
+	address_ix INTEGER REFERENCES addresses(ix),
+	website VARCHAR(50) DEFAULT NULL,
+	email1 VARCHAR(30) DEFAULT NULL,
+	email2 VARCHAR(30) DEFAULT NULL,
+	tel1 VARCHAR(30) DEFAULT NULL,
+	tel2 VARCHAR(30) DEFAULT NULL,
+	tel3 VARCHAR(30) DEFAULT NULL,
+	fax VARCHAR(30) DEFAULT NULL,
+	CONSTRAINT pk_practices PRIMARY KEY (ix)
+
+	);
+
+/*--
+    data on known practitioners.
+--*/
+
+CREATE TABLE practitioners (
+
+	ix SERIAL NOT NULL , --unique autogenerated ID
+	user_id INTEGER references users(ix),
+	type practitioner_type NOT NULL , --dentist, hygienist etc
+	speciality VARCHAR(20),
+	status VARCHAR(20) NOT NULL , --active, retired etc
+	comments VARCHAR(255) NULL,
+	modified_by VARCHAR(20) NOT NULL,
+	time_stamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT pk_practitioners PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE notes_clinical (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	open_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	type notes_clinical_type NOT NULL DEFAULT 'observation',
+	line TEXT DEFAULT NULL,
+	author INTEGER NOT NULL REFERENCES users(ix),
+	co_author INTEGER REFERENCES users(ix),
+	committed bool NOT NULL DEFAULT false,
+	CONSTRAINT pk_notes_clinical PRIMARY KEY (ix)
+
+	);
+
+/*--
+    storage for admin style notes payments, correspondence etc.
+--*/
+
+CREATE TABLE notes_clerical (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	open_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	commit_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	type notes_clerical_type NOT NULL DEFAULT 'observation',
+	line TEXT DEFAULT NULL,
+	author INTEGER REFERENCES users(ix),
+	CONSTRAINT pk_notes_clerical PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE clinical_memos (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	memo VARCHAR(255) NOT NULL DEFAULT '',
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_clinical_memos PRIMARY KEY (ix),
+	CONSTRAINT unique_clinical_memos UNIQUE (patient_id)
+
+	);
+
+/*--
+    a 255 character field displayed prominently on the reception page
+--*/
+
+CREATE TABLE clerical_memos (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	memo VARCHAR(255) NOT NULL DEFAULT '',
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_clerical_memos PRIMARY KEY (ix),
+	CONSTRAINT unique_clerical_memos UNIQUE (patient_id)
+
+	);
+
+/*--
+    base table for treatments planned or completed
+--*/
+
+CREATE TABLE treatments (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	om_code VARCHAR(5) NOT NULL  , -- REFERENCES PROCEDURE CODES????
+	completed BOOL NOT NULL DEFAULT FALSE,
+	px_clinician INTEGER NOT NULL REFERENCES practitioners(ix),
+	px_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	tx_clinician INTEGER REFERENCES practitioners(ix),
+	tx_date DATE,
+	added_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	comment VARCHAR(240),
+	CONSTRAINT pk_treatments PRIMARY KEY (ix),
+	CONSTRAINT completed_treatment_rule CHECK (NOT completed or tx_clinician is NOT NULL),
+	CONSTRAINT completed_treatment_rule2 CHECK (NOT completed or tx_date is NOT NULL)
+
+	);
+
+/*--
+    extension table for treatments - teeth
+--*/
+
+CREATE TABLE treatment_teeth (
+
+	ix serial,
+	treatment_id INTEGER REFERENCES treatments(ix),
+	tooth SMALLINT NOT NULL,
+	tx_type tooth_tx_type,
+	CONSTRAINT pk_treatment_teeth PRIMARY KEY (ix)
+
+	);
+
+/*--
+    extension table for treatments - fillings
+--*/
+
+CREATE TABLE treatment_fills (
+
+	ix serial,
+	tooth_tx_id INTEGER REFERENCES treatment_teeth(ix),
+	surfaces VARCHAR(5) NOT NULL,
+	material fill_material_type , -- CAN BE NULL !!
+	CONSTRAINT treatment_fills_surface_rule CHECK (surfaces~'^[MODBL]*$'),
+	CONSTRAINT pk_treatment_fills PRIMARY KEY (ix)
+
+	);
+
+/*--
+    extension table for treatments - crowns
+--*/
+
+CREATE TABLE treatment_crowns (
+
+	ix serial,
+	tooth_tx_id INTEGER REFERENCES treatment_teeth(ix),
+	type crown_type NOT NULL,
+	technition VARCHAR(30),
+	CONSTRAINT pk_treatment_crowns PRIMARY KEY (ix)
+
+	);
+
+/*--
+    treatment chart items - unimportant duplicate data
+--*/
+
+CREATE TABLE treatment_chart (
+
+	ix serial,
+	tooth_id INTEGER REFERENCES treatment_teeth(ix),
+	type tx_chart_type NOT NULL default 'tooth' , -- which box to draw in 
+	draw_text VARCHAR(12),
+	svg VARCHAR(30),
+	CONSTRAINT pk_treatment_chart PRIMARY KEY (ix),
+	CONSTRAINT treatment_chart_data CHECK (draw_text is NOT NULL or svg is NOT NULL)
+
+	);
+
+CREATE table calendar (
+
+	date_id DATE,
+	event VARCHAR(255) NOT NULL DEFAULT '',
+	CONSTRAINT pk_diary_calendar PRIMARY KEY (date_id)
+
+	);
+
+-- the parent table - "diaries" this represents the diary of a person
+
+create table diaries (
+	ix serial,
+	user_id integer NOT NULL REFERENCES users(ix),
+	book_start DATE NOT NULL,
+	book_end DATE NOT NULL,
+	comment text,
+	active bool NOT NULL default True,
+	CONSTRAINT pk_diary_settings PRIMARY KEY (ix),
+	CONSTRAINT ck_diary_limits CHECK (book_start<book_end)
+	);
+
+-- now onto "entries" these are "events" in the diary.
+
+create table diary_entries (
+	ix serial,
+	diary_id integer NOT NULL REFERENCES diaries(ix),
+	start timestamp with time zone,
+	finish timestamp with time zone,
+	comment text,
+	etype diary_entry_type NOT NULL default 'free',
+	CONSTRAINT pk_diary_entries PRIMARY KEY (ix),
+	CONSTRAINT ck_entries CHECK (start<=finish) -- must be zero or positive in length
+	);
+
+-- next we need to show work hours.
+
+create table diary_in_office (
+	ix serial,
+	diary_id integer NOT NULL REFERENCES diaries(ix),
+	start timestamp with time zone,
+	finish timestamp with time zone,
+	comment text not NULL default '',
+	CONSTRAINT pk_diary_in_office PRIMARY KEY (ix),
+	CONSTRAINT ck_sessions CHECK (start<=finish)
+	);
+
+create table appointments (
+	ix serial,
+	patient_id integer NOT NULL REFERENCES patients(ix),
+	trt1 text NOT NULL,
+	trt2 text NOT NULL default '',
+	len integer not NULL default 0,
+	memo text NOT NULL default '',
+	preferred_practitioner integer REFERENCES practitioners(ix),
+	diary_entry_id integer REFERENCES diary_entries(ix),
+	CONSTRAINT pk_appointments PRIMARY KEY (ix)
+	);
+
+CREATE TABLE perio_recession (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	values VARCHAR(6),
+	comment VARCHAR(80),
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_perio_recession PRIMARY KEY (ix),
+	CONSTRAINT recession_patient_tooth_date UNIQUE (patient_id, tooth, checked_date),
+	CONSTRAINT recession_values_rule CHECK (values~'^[0-9A-F]{6}$')
+
+	);
+
+CREATE TABLE perio_pocketing (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	values VARCHAR(6),
+	comment VARCHAR(80),
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_perio_pocketing PRIMARY KEY (ix),
+	CONSTRAINT pocketing_patient_tooth_date UNIQUE (patient_id, tooth, checked_date),
+	CONSTRAINT pocketing_values_rule CHECK (values~'^[ 0-9A-F]{6}$')
+
+	);
+
+CREATE TABLE perio_plaque (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	values VARCHAR(6),
+	comment VARCHAR(80),
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_perio_plaque PRIMARY KEY (ix),
+	CONSTRAINT plaque_patient_tooth_date UNIQUE (patient_id, tooth, checked_date),
+	CONSTRAINT plaque_values_rule CHECK (values~'^[YN]{6}$')
+
+	);
+
+CREATE TABLE perio_bleeding (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	tooth SMALLINT NOT NULL,
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	values VARCHAR(6),
+	comment VARCHAR(80),
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_perio_bleeding PRIMARY KEY (ix),
+	CONSTRAINT bleeding_patient_tooth_date UNIQUE (patient_id, tooth, checked_date),
+	CONSTRAINT bleeding_values_rule CHECK (values~'^[YN]{6}$')
+
+	);
+
+CREATE TABLE perio_bpe (
+
+	ix SERIAL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	checked_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	values CHAR(6),
+	comment VARCHAR(80),
+	checked_by VARCHAR(20) NOT NULL DEFAULT CURRENT_USER,
+	CONSTRAINT pk_perio_bpe PRIMARY KEY (ix),
+	CONSTRAINT bpe_values_rule CHECK (values~'^[01234\*\-]{6}$')
+
+	);
+
+/*--
+    links a patient to their regular practitioner
+--*/
+
+CREATE TABLE contracted_practitioners (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	practitioner_id INTEGER NOT NULL REFERENCES practitioners(ix),
+	contract_type VARCHAR(20),
+	start_date DATE NOT NULL DEFAULT CURRENT_DATE,
+	end_date DATE,
+	comments VARCHAR(255),
+	CONSTRAINT pk_contracted_practitioners PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE invoice_status (
+
+	ix SERIAL NOT NULL,
+	status VARCHAR(80) NOT NULL , --open, paid, cancelled, disputed etc
+	CONSTRAINT pk_invoice_status PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE invoices (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	status_id INTEGER NOT NULL REFERENCES invoice_status(ix),
+	date_issued DATE NOT NULL DEFAULT CURRENT_DATE,
+	date_paid DATE,
+	total_fees DECIMAL(10,2) NOT NULL DEFAULT 0,
+	discount DECIMAL(10,2) NOT NULL DEFAULT 0,
+	amount_payable DECIMAL(10,2) NOT NULL DEFAULT 0,
+	other_details VARCHAR(240),
+	CONSTRAINT pk_invoices PRIMARY KEY (ix)
+
+	);
+
+CREATE TABLE fees (
+
+	ix SERIAL NOT NULL,
+	patient_id INTEGER NOT NULL REFERENCES patients(ix),
+	fee DECIMAL(10,2) NOT NULL DEFAULT 0,
+	type fee_type NOT NULL DEFAULT 'other',
+	comment VARCHAR(240),
+	time_stamp TIMESTAMP NOT NULL DEFAULT NOW(),
+	CONSTRAINT pk_fees PRIMARY KEY (ix)
+
+	);
+
+
+/*-- VIEWS --*/
+
+CREATE OR REPLACE VIEW view_practitioners as
+	select practitioners.ix as practitioner_id, user_id,
+	abbrv_name, type, title, last_name,
+	first_name, middle_name, qualifications, registration, correspondence_name,
+	sex, dob, avatar_id, svg_data, practitioners.status, speciality, display_order
+	from practitioners left join users on practitioners.user_id = users.ix
+	left join avatars on avatars.ix = avatar_id order by display_order;
+
+
+CREATE OR REPLACE VIEW view_addresses as select
+	a.ix, addr1, addr2, addr3, city, county, country, postal_cd,
+	address_cat, l.address_id, patient_id, present, known_residents,
+	from_date, to_date,  mailing_pref, comments
+	from (addresses a join address_link l on a.ix= l.address_id )
+	join (select  address_id, (from_date<=current_date
+	and (to_date>=current_date or to_date is NULL)) as present ,  count(address_id)
+	as known_residents from address_link group by address_id, present )
+	as t2 on a.ix = t2.address_id;
+
+
+CREATE OR REPLACE RULE rule_update_view_addresses
+	as on update to view_addresses do instead (
+	update addresses set addr1 = NEW.addr1, addr2 = NEW.addr2, addr3 = NEW.addr3, city=NEW.city,
+	county = NEW.county, country = NEW.country, postal_cd = NEW.postal_cd,
+	modified_by = CURRENT_USER, time_stamp = NOW() where ix=OLD.ix;
+	update address_link  set address_cat = NEW.address_cat, from_date = NEW.from_date, to_date = NEW.to_date,
+	mailing_pref = NEW.mailing_pref, comments = NEW.comments where address_link.ix=OLD.ix);
+
+CREATE or REPLACE VIEW before_sessions as
+	select distinct on (diary_id) diary_id, to_timestamp(0) as start, start as finish from diary_in_office order by diary_id, start 
+	;
+
+CREATE or REPLACE VIEW after_sessions as
+	select distinct on (diary_id) diary_id, finish as start, to_timestamp('30000101', 'YYYYMMDD') as finish from diary_in_office order by diary_id, diary_in_office.finish desc 
+	;
+
+CREATE or REPLACE VIEW extremity_appointments as
+	select * from before_sessions natural full outer join after_sessions;
+
+
+CREATE or REPLACE VIEW diary_out_of_office as
+	select diary_id, start, finish from extremity_appointments
+	natural full outer join 
+	(
+	select a.diary_id, a.finish as start, b.start as finish from 
+	(select diary_id, row_number() over (order by diary_id, start) as row_, start, finish from diary_in_office) as a join 
+	(select diary_id, row_number() over (order by diary_id, start) as row_, start, finish from diary_in_office) as b 
+	on a.diary_id = b.diary_id and b.row_ = a.row_ +1) as reversed_in_office
+	order by diary_id, start
+	;
+
+CREATE or REPLACE VIEW diary_work as
+	select diary_id, start, finish, etype from diary_entries 
+	natural full outer join 
+	diary_out_of_office
+	order by diary_id, start
+	;
+
+-- this view gets all the adjacent entries in the diary, showing the time gap between them.
+
+CREATE or REPLACE VIEW diary_adjacent_entries as 
+	SELECT appts.diary_id, appts.start as start, 
+	appts.finish as finish, (next.start - appts.finish) as gap, 
+	next.start as next_appt from
+	(select diary_id, row_number() over (order by diary_id, start) as row_,
+		start, finish from diary_entries) as appts,
+	(select diary_id, row_number() over (order by diary_id, start) as row_,
+		start from diary_entries) as next
+	WHERE next.row_ = appts.row_+1 and next.diary_id =appts.diary_id
+	;
+
+-- same idea, but after inserting a pseudo appt running from yesterday finish to today start
+
+CREATE or REPLACE VIEW diary_adjacent_in_office_entries as 
+	SELECT appts.diary_id, appts.start as start, 
+	appts.finish as finish, (next.start - appts.finish) as gap, 
+	next.start as next_appt from
+	(select diary_id, row_number() over (order by diary_id, start) as row_,
+		start, finish from diary_work) as appts,
+	(select diary_id, row_number() over (order by diary_id, start) as row_,
+		start from diary_work) as next
+	WHERE next.row_ = appts.row_+1 and next.diary_id =appts.diary_id
+	;
+
+CREATE or REPLACE VIEW diary_multi_day_entries as
+	SELECT * from diary_entries where date(start) != date(finish);
+
+/*-- FUNCTIONS --*/
+
+CREATE FUNCTION generate_dates(dt1 date, dt2 date, n integer) 
+	RETURNS SETOF date AS
+	'SELECT $1 + n FROM generate_series(0, $2 - $1, $3) n'
+	LANGUAGE SQL
+	;
+
+-- a table only to be used by the following functions to format their output
+
+CREATE TABLE diary_slots (
+	start timestamp with time zone,
+	length interval
+	);
+
+
+CREATE FUNCTION get_available_slots(t1 timestamp with time zone, t2 timestamp with time zone, id integer) -- date and diary_id
+	RETURNS SETOF diary_slots AS
+	'SELECT finish as start, gap from diary_adjacent_entries where finish >= $1 and next_appt <= $2 and diary_id=$3 and gap > ''00:00:00'' '
+	LANGUAGE SQL
+	;
+
+CREATE FUNCTION get_available_in_office_slots(t1 timestamp, t2 timestamp, id integer) -- date and diary_id
+	RETURNS SETOF diary_slots AS
+	'SELECT finish as start, gap from diary_adjacent_in_office_entries where finish >= $1 and next_appt <= $2 and diary_id=$3 and gap > ''00:00:00'' '
+	LANGUAGE SQL
+	;
+
+
+
+/*-- DATA --*/
+
+INSERT INTO settings (key, data) VALUES ('created', 'today');
+INSERT INTO settings (key, data) VALUES ('schema_version', '0.2');
+
+INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A01', 'Exam (Routine)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A02', 'Exam (Extensive)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A03', 'Full Case Assessment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A10', 'Consultation');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('1', 'A11', 'Telephone Consultation');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B01', 'Small xray');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B02', 'Bitewings (set)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B03', 'Medium xray');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B04', 'Large xray');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B05', 'Panoral xray');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B20', 'Photo');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B30', 'Study Models');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B31', 'Study Models (Duplicate)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B32', 'Articulation of Models');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('2', 'B33', 'Diagnostic Wax Up');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C01', 'Oral hygiene instruction');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C10', 'Minimal Scaling (Debridement)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C11', 'Scale & Polish');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C12', 'Extended Scale & Polish');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C13', 'Multi visit non surgical therapy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C20', 'Custom Periodontal Therapy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C30', 'Periodontal Splinting');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C40', 'Periodontal Surgery');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C50', 'Fissure Sealant');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('3', 'C60', 'Recountouring Tooth to Prevent Food Trapping');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D01', 'Amalgam 1 surface');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D02', 'Amalgam 2 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D03', 'Amalgam 3 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D04', 'Amalgam 4 or more surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D10', 'Composite 1 surface');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D11', 'Composite 2 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D12', 'Composite 3 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D13', 'Composite 4 or more surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D20', 'Glass Ionomer 1 surface');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D21', 'Glass Ionomer 2 or more surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D30', 'Other 1 surface');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D31', 'Other 2 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D32', 'Other 3 surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D33', 'Other 4 or more surfaces');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D40', 'Preventive Resin Restoration');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D50', 'Tunnel Restoration (mesial)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D51', 'Tunnel Restoration (distal)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D60', 'Dressing');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('4', 'D70', 'Pin Retention');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E00', 'Other Endodontics');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E01', 'Root Canal');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E20', 'Pulp Extirpation');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E30', 'Retrograde Root Filling');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E40', 'Pulpotomy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E41', 'Pulpectomy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E50', 'Removal of fractured instrument');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('5', 'E51', 'Removal of fractured post');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F00', 'Other Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F01', 'PJC');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F02', 'Porcelain/Precious Metal');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F03', 'Porcelain/Non-Precious Metal');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F10', 'Gold Shell');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F11', 'Gold 3/4 Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F12', 'Gold reverse 3/4 Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F15', 'Precious Metal Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F16', 'Non-Precious Metal Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F20', 'Resin Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F30', 'Opalite Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F32', '3M Lava Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F33', 'Ivoclar e-max Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F34', 'Fortress Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F40', 'Stainless Steel Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F50', 'Temporary Crown');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F51', 'Crown Recement');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F60', 'Cast Precious Post');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F61', 'Cast Non-Precious Post');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F62', 'Chairside Post (metal)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F63', 'Chairside Post (other)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F70', 'Core build up');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F71', 'Crown Repair');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('6', 'F72', 'Crown unfinished');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G00', 'Other Inlay/Onlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G10', 'Gold Inlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G11', 'Gold Onlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G20', 'Porcelain Inlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G21', 'Porcelain Onlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G30', 'Composite Inlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G31', 'Composite Onlay');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G40', 'Porcelain Veneer');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('7', 'G50', 'Composite Veneer');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H00', 'Full/Full Acrylic Dentures');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H01', 'Full Upper Acrylic Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H02', 'Full Lower Acrylic Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H10', 'Full/Full metal-based Dentures');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H11', 'Full Upper metal-based Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H12', 'Full Lower metal-based Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H20', 'Partial Upper Acrylic Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H21', 'Partial Lower Acrylic Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H30', 'Partial Upper metal-based Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H31', 'Partial Lower metal-based Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H40', 'Partial Upper Flexible Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H41', 'Partial Lower Flexible Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H60', 'Addition of teeth');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H61', 'Addition of clasp');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H66', 'Repair of existing denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H65', 'Adjustment of existing denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H70', 'Soft Lining');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H71', 'Hard Lining');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H72', 'ID Marking');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H80', 'Other Upper Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H81', 'Other Lower Denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H90', 'Special Tray');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H91', 'Occlusal Registration');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H92', 'Try-in of denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('8', 'H93', 'Repeat Try-in of denture');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I00', 'Other BridgeWork');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I10', '2 Unit Porcelain/Metal Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I11', '3 Unit Porcelain/Metal Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I12', '4 Unit Porcelain/Metal Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I13', '5 Unit Porcelain/Metal Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I14', 'Multi-Unit Porcelain/Metal Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I20', '2 Unit Gold Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I21', '3 Unit Gold Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I22', '4 Unit Gold Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I23', '5 Unit Gold Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I24', 'Multi-Unit Gold Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I30', '2 Unit Ceramic Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I31', '3 Unit Ceramic Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I32', '4 Unit Ceramic Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I33', '5 Unit Ceramic Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I34', 'Multi-Unit Ceramic Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I40', 'Resin Retained Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I60', 'Temporary Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I70', 'Bridge Recement');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I72', 'Bridge Repair');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('9', 'I80', 'Sectioning of Bridge');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J00', 'Other implant');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J10', 'Assessment for Implants');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J11', 'Implant Planning');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J20', 'Implant (Titanium)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J21', 'Ankylos implant');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J30', 'Healing Cap');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J31', 'Healing Abutment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J40', 'Final Abutment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J41', 'Ball Abutment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('10', 'J50', 'Implant Bar');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K00', 'Other Surgery');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K10', 'Extraction');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K11', 'Extraction with root dissection');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K12', 'Surgical Extraction');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K13', 'Extraction of Supernumerary');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K14', 'Hemisection');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K15', 'Trisection');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K16', 'Partial Extraction (fractured tooth)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K20', 'Gingivectomy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K21', 'Apicectomy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K22', 'Re-implantation of root');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K30', 'Soft tissue excision');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K31', 'Fraenectomy');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K32', 'Incision of Abscess');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K33', 'Arrest of Haemorrhage');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K34', 'Infected Socket');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K35', 'Removal of Sutures');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('11', 'K50', 'swab or tissue sample for lab report');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('12', 'L00', 'Removable Appliance');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('12', 'L10', 'Adjustment to Removable Appliance');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z00', 'Other Treatment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z01', 'Time Unit');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z02', 'prescription');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z03', 'Fluoride Application');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z04', 'Treatment of sensitivity');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z05', 'Occlusal Equilibration');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z06', 'Soft Occlusal Splint');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z07', 'Hard Occlusal Splint');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z10', 'Bleaching (single tooth)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z11', 'Home Bleaching (Upper Arch)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z12', 'Home Bleaching (Lower Arch)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z13', 'Home Bleaching (Both Arches)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z18', 'Bleaching (Unknown Arch)');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z20', 'Acute Condition');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z30', 'Oral Sedation');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z31', 'IV Sedation');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z40', 'Mouthguard');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z41', 'Out of hours treatment');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z42', 'Domicilliary Visit');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z50', 'Stoning');
+INSERT INTO procedure_codes (category, code, description)  VALUES ('13', 'Z51', 'Overdenture Preparation');
+
+
+INSERT INTO text_fields  VALUES ('trt1','exam,hyg,sp,fill,prep,rct,imps,pain,review,undetermined');
+INSERT INTO text_fields VALUES ('trt2','sp,fill,prep,rct,imps,pain,review');

@@ -1,6 +1,13 @@
 ### this file is neil's todo list for the application
 ### it is by no means complete.
 
+CURRENT FOCUS
+PatientDiaryWidget
+PatientDiaryModel.
+
+
+
+
 ======================================================================
 NEW ISSUES
 ======================================================================
