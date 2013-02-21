@@ -38,6 +38,10 @@ from lib_openmolar.common.datatypes import *
 
 from PyQt4 import QtCore
 
+# IMPORTANT
+SCHEMA_VERSIONS = ("0.2",)
+#
+
 def singleton(cls):
     instances = {}
     def getinstance():
@@ -279,7 +283,8 @@ class CommonSettings(object):
         '''
         this is where I set the range of supported schema versions.
         '''
-        return ("0.1",)
+        LOGGER.debug("Polling settings for allowed schema versions")
+        return SCHEMA_VERSIONS
 
 
     @property

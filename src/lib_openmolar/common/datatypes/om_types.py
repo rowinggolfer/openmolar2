@@ -241,13 +241,13 @@ class OMTypes(object):
         new_type.set_default("any_tooth")
         self["procedure_info"] = new_type
 
-        new_type = OMType("diary_type")
-        new_type.allow(u'free time', _('Free Time'))
+        new_type = OMType("diary_entry_type")
+        new_type.allow(u'free', _('Free'))
         new_type.allow(u'out of office', _('Out of Office'))
         new_type.allow(u'emergency', _('Emergency'))
         new_type.allow(u'lunch', _('Lunch'))
         new_type.allow(u'appointment', _('Appointment'))
-        self["diary"] = new_type
+        self["diary_entry"] = new_type
 
         new_type = OMType("clinician_type")
         new_type.allow(u'dentist', _('Dentist'))
