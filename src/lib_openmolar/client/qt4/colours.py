@@ -96,8 +96,20 @@ class Colours(object):
     def BOLD_TEXT(self):
         return QtGui.QColor("red")
 
+    @property
+    def PT_DIARY_TODAY(self):
+        return QtGui.QColor("red")
 
-colours = Colours()
+    @property
+    def PT_DIARY_PAST(self):
+        return QtGui.QColor("gray")
+
+    @property
+    def PT_DIARY_TBA(self):
+        return QtGui.QColor("red")
+
+
+COLOURS = Colours()
 
 if __name__ == "__main__":
     pass

@@ -28,8 +28,6 @@ from lib_openmolar.common.qt4.dialogs import ExtendableDialog
 from lib_openmolar.common.qt4.widgets.upper_case_lineedit import \
     UpperCaseLineEdit
 
-from lib_openmolar.client.qt4.colours import colours
-
 from lib_openmolar.client.db_orm.client_patient import NewPatientDB
 
 import find_patient_dialog
@@ -71,7 +69,7 @@ class NewPatientDialog(ExtendableDialog):
         self.value_store = {}
 
         palette = QtGui.QPalette(self.palette())
-        brush = QtGui.QBrush(colours.REQUIRED_FIELD)
+        brush = QtGui.QBrush(SETTINGS.COLOURS.REQUIRED_FIELD)
         palette.setBrush(QtGui.QPalette.Base, brush)
 
         for editable_field in self.patient.editable_fields:

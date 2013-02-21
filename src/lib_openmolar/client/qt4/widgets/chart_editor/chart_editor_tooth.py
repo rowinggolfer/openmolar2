@@ -25,7 +25,6 @@ from PyQt4 import QtCore, QtGui
 
 
 
-from lib_openmolar.client.qt4.colours import colours
 
 class ToothEditor(QtGui.QWidget):
     def __init__(self,parent=None):
@@ -142,9 +141,9 @@ class ToothWidget(QtGui.QWidget):
     def clear(self):
         self.filledSurfaces = ""
         if self.isBacktooth:
-            self.fillcolour = colours.AMALGAM
+            self.fillcolour = SETTINGS.COLOURS.AMALGAM
         else:
-            self.fillcolour = colours.COMPOSITE
+            self.fillcolour = SETTINGS.COLOURS.COMPOSITE
         self.update()
 
     def setFillColour(self, colour, text):
@@ -322,7 +321,7 @@ class ToothWidget(QtGui.QWidget):
         painter = QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
         painter.setPen(QtGui.QColor("gray"))
-        painter.setBrush(colours.IVORY)
+        painter.setBrush(SETTINGS.COLOURS.IVORY)
         painter.drawRect(self.toothRect)
         painter.drawRect(self.innerRect)
 
@@ -360,7 +359,7 @@ class ToothWidget(QtGui.QWidget):
         if "P" in self.filledSurfaces:
                 painter.drawPolygon(self.palatal)
 
-        painter.setBrush(colours.TRANSPARENT)
+        painter.setBrush(SETTINGS.COLOURS.TRANSPARENT)
 
         if self.mouseOverSurface!=None:
             painter.setPen(QtGui.QColor("red"))

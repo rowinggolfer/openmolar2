@@ -38,7 +38,7 @@ class PractitionerListModel(QtCore.QAbstractListModel):
         self.practitioners = practitioners
 
     def rowCount(self, index):
-        return len(self.practitioners)
+        return len(list(self.practitioners))
 
     def data(self, index, role=QtCore.Qt.DisplayRole):
         if role == QtCore.Qt.DisplayRole:
@@ -197,9 +197,11 @@ class Practitioners(object):
         '''
         a list of ACTIVE practitioner names
         '''
+        practitioners = []
         for practitioner in self:
             if practitioner.is_active:
-                yield practitioner
+                practitioners.append(practitioner)
+        return practitioners
 
     @property
     def active_dentist_list(self):
@@ -231,7 +233,7 @@ class Practitioners(object):
         a model for use in 1 dimensional views (eg comboboxes)
         '''
         if self._model is None:
-            self._model = PractitionerListModel(self)
+            self._model = PractitionerListModel(self.active_practitioners)
         return self._model
 
     @property
@@ -240,7 +242,8 @@ class Practitioners(object):
         a model for use in 1 dimensional views (eg comboboxes)
         '''
         if self._dentists_model is None:
-            self._dentists_model = PractitionerListModel(self.active_dentist_list)
+            self._dentists_model = PractitionerListModel(
+                self.active_dentist_list)
         return self._dentists_model
 
     def keys(self):
@@ -272,7 +275,7 @@ if __name__ == "__main__":
     cc = DemoClientConnection()
     cc.connect()
 
-    practitioners = Practitioners(cc)
+    practitioners = Practitioners()
     for practitioner in practitioners:
         print practitioner.full_name
         #print practitioner.toHtml()

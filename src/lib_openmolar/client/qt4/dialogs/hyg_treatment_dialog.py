@@ -121,8 +121,6 @@ class HygTreatmentDialog(BaseDialog):
 
 if __name__ == "__main__":
 
-
-
     app = QtGui.QApplication([])
     from lib_openmolar.client.connect import DemoClientConnection
 

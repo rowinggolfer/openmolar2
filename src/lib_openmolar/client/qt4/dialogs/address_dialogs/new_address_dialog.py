@@ -27,8 +27,6 @@ from lib_openmolar.common.datatypes import OMTypes
 from lib_openmolar.common.qt4.dialogs import BaseDialog
 from lib_openmolar.common.qt4.widgets.upper_case_lineedit import UpperCaseLineEdit
 
-from lib_openmolar.client.qt4.colours import colours
-
 from lib_openmolar.client.qt4.dialogs.address_dialogs.select_address \
     import AddressSelectionDialog
 
@@ -73,7 +71,7 @@ class NewAddressDialog(BaseDialog):
         self.ommissions = []
 
         palette = QtGui.QPalette(self.palette())
-        brush = QtGui.QBrush(colours.REQUIRED_FIELD)
+        brush = QtGui.QBrush(SETTINGS.COLOURS.REQUIRED_FIELD)
         palette.setBrush(QtGui.QPalette.Base, brush)
 
         standard_fields, advanced_fields = self.address_record.editable_fields

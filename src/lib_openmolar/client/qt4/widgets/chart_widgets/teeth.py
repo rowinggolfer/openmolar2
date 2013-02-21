@@ -28,7 +28,6 @@ import re
 from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.client.classes import Tooth
-from lib_openmolar.client.qt4.colours import colours
 
 
 class ChartTooth(Tooth):
@@ -311,15 +310,15 @@ class ChartTooth(Tooth):
 
             #--set filling color
             if material in ("CO", "FS"):
-                brush = colours.COMPOSITE
+                brush = SETTINGS.COLOURS.COMPOSITE
             elif material == "GL":
-                brush = colours.GLASS
+                brush = SETTINGS.COLOURS.GLASS
             elif material == "GO":
-                brush = colours.GOLD
+                brush = SETTINGS.COLOURS.GOLD
             elif material == "PO":
-                brush = colours.PORCELAIN
+                brush = SETTINGS.COLOURS.PORCELAIN
             elif material == "AM":
-                brush = colours.AMALGAM
+                brush = SETTINGS.COLOURS.AMALGAM
             else:
                 print "unhanded material colour", material
 
@@ -480,7 +479,7 @@ class ChartTooth(Tooth):
             xpad, ypad = 6, 6
 
             painter.save()
-            painter.setBrush(colours.IVORY)
+            painter.setBrush(SETTINGS.COLOURS.IVORY)
             painter.drawRoundedRect(self.rect, xpad, ypad)
             painter.drawRect(self.innerRect)
 
@@ -515,7 +514,7 @@ class ChartTooth(Tooth):
             for shape, brush in self.fill_shapes:
                 painter.save()
                 #--put an outline around the filling
-                painter.setPen(QtGui.QPen(colours.FILL_OUTLINE, 1))
+                painter.setPen(QtGui.QPen(SETTINGS.COLOURS.FILL_OUTLINE, 1))
                 if brush:
                     painter.setBrush(brush)
                 painter.drawPolygon(shape)

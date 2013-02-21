@@ -105,11 +105,7 @@ class EditPatientDialog(BaseDialog):
             print args
         self.emit(QtCore.SIGNAL("Advise"), *args)
 
-
-
 if __name__ == "__main__":
-
-
 
     app = QtGui.QApplication([])
 

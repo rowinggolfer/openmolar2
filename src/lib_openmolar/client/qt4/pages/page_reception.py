@@ -24,9 +24,7 @@
 from PyQt4 import QtCore, QtGui, QtWebKit
 from lib_openmolar.client.messages import messages
 from lib_openmolar.client.qt4.widgets import NotesWidget
-
-from lib_openmolar.client.db_orm.table_models.patient_diary_model import \
-    PatientDiaryModel
+from lib_openmolar.client.qt4.widgets import PtDiaryWidget
 
 class ReceptionPage(QtGui.QWidget):
     def __init__(self, parent = None):
@@ -43,25 +41,18 @@ class ReceptionPage(QtGui.QWidget):
         self.action_payment = QtGui.QAction(icon, "Take Payment", self)
         self.menu_bar.addAction(self.action_payment)
 
-        self.action_new_appointment = QtGui.QAction(icon, "New Appointment", self)
-        self.menu_bar.addAction(self.action_new_appointment)
-
-        self.appointment_model = PatientDiaryModel()
-
-        appointment_table = QtGui.QTableView()
-        appointment_table.setModel(self.appointment_model)
-
-
         right_widget =  QtGui.QLabel("Placeholder", self)
         right_widget.setMinimumWidth(100)
         right_widget.setMaximumWidth(150)
+
+        self.pt_diary_widget = PtDiaryWidget()
 
         layout = QtGui.QGridLayout(self)
         layout.setMargin(3)
         layout.setSpacing(3)
         layout.addWidget(self.notes_widget, 0, 0)
         layout.addWidget(right_widget, 0, 1)
-        layout.addWidget(appointment_table, 1, 0, 1, 2)
+        layout.addWidget(self.pt_diary_widget, 1, 0, 1, 2)
         layout.addWidget(self.menu_bar, 2, 0, 1, 2)
 
         self.connect_signals()
@@ -73,42 +64,42 @@ class ReceptionPage(QtGui.QWidget):
 
     def connect_signals(self):
         self.action_payment.triggered.connect(self.payment_action)
-        self.action_new_appointment.triggered.connect(self.new_appointment_action)
 
     def clear(self):
         self.notes_widget.clear()
-        self.appointment_model.set_patient(0)
+        self.pt_diary_widget.clear()
 
     def load_patient(self):
         patient = SETTINGS.current_patient
         self.notes_widget.load_patient()
-        self.appointment_model.set_patient(SETTINGS.current_patient.patient_id)
+        self.pt_diary_widget.load_patient()
 
     def payment_action(self):
         print "todo payment"
         self.Advise("take payment")
 
-    def new_appointment_action(self):
-        self.emit(QtCore.SIGNAL("db notify"), "todays_book_changed")
-        self.Advise("new appointment")
-
     def send_save_request(self):
         print "todo save clerical note"
         self.emit(QtCore.SIGNAL("Save Requested"))
 
-
 if __name__ == "__main__":
 
     from lib_openmolar.client.connect import DemoClientConnection
+    from lib_openmolar.client.db_orm import PatientModel
+
     app = QtGui.QApplication([])
 
     cc = DemoClientConnection()
     cc.connect()
+    pt = PatientModel(1)
+    SETTINGS.set_current_patient(pt)
 
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(400,200)
-    layout = QtGui.QVBoxLayout(dl)
+    mw = QtGui.QMainWindow()
+    mw.setMinimumSize(400,200)
 
-    csw = ReceptionPage(dl)
-    layout.addWidget(csw)
-    dl.exec_()
+    page_widget = ReceptionPage()
+    mw.setCentralWidget(page_widget)
+    mw.show()
+    page_widget.load_patient()
+
+    app.exec_()

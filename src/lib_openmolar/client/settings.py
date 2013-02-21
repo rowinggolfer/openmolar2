@@ -28,12 +28,14 @@ from lib_openmolar.common.settings import singleton, CommonSettings
 from lib_openmolar.common.db_orm import TeethPresentDecoder
 from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 
-from lib_openmolar.client.qt4.colours import colours
+from lib_openmolar.client.qt4.colours import COLOURS
 
 from lib_openmolar.client.db_orm import TreatmentModel
 from lib_openmolar.client.db_orm.client_practitioner import Practitioners
 from lib_openmolar.client.db_orm.client_staff_members import StaffMembers
 from lib_openmolar.client.db_orm.client_users import Users
+from lib_openmolar.client.db_orm.client_text_fields import TextFieldsDB
+
 
 from PyQt4 import QtCore
 
@@ -55,6 +57,8 @@ class ClientSettings(CommonSettings, PluginHandler):
 
     def __init__(self):
         CommonSettings.__init__(self)
+
+        self.COLOURS = COLOURS
 
         #: a reference to a :doc:`TeethPresentDecoder`
         self.tooth_decoder = TeethPresentDecoder()
@@ -90,12 +94,12 @@ class ClientSettings(CommonSettings, PluginHandler):
 
         #: colours for fillings
         self.fill_materials = (
-            ("?", colours.UNKNOWN),
-            ("AM", colours.AMALGAM),
-            ("CO", colours.COMPOSITE),
-            ("GL", colours.GLASS),
-            ("PO", colours.PORCELAIN),
-            ("GO", colours.GOLD)
+            ("?",  self.COLOURS.UNKNOWN),
+            ("AM", self.COLOURS.AMALGAM),
+            ("CO", self.COLOURS.COMPOSITE),
+            ("GL", self.COLOURS.GLASS),
+            ("PO", self.COLOURS.PORCELAIN),
+            ("GO", self.COLOURS.GOLD)
             )
 
         #: a reference to the :doc:`ClientMainWindow` for plugin use
@@ -109,6 +113,7 @@ class ClientSettings(CommonSettings, PluginHandler):
         self._staff = None
         self._users = None
         self._last_known_address = None
+        self._text_fields = None
 
     def init_css(self):
         '''
@@ -139,7 +144,6 @@ class ClientSettings(CommonSettings, PluginHandler):
             f = open(default_loc, "w")
             f.write(data)
             f.close()
-
 
     @property
     def VERSION(self):
@@ -193,6 +197,16 @@ class ClientSettings(CommonSettings, PluginHandler):
                 return fp
 
         return ""
+
+    @property
+    def TEXT_FIELDS(self):
+        '''
+        A dictionary of text fields, pulled from the database when required
+        For example SETTINGS.text_fields["trt1"] == 'exam, sp, fill" etc.
+        '''
+        if self._text_fields is None:
+            self._text_fields = TextFieldsDB()
+        return self._text_fields
 
     @property
     def users(self):
@@ -304,7 +318,7 @@ class ClientSettings(CommonSettings, PluginHandler):
         TODO - populate this list!!
         '''
         return []
-    
+
     @property
     def CONNECTION_CONFDIRS(self):
         '''
