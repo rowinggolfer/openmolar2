@@ -370,7 +370,7 @@ class DBFunctions(object):
         '''
         LOGGER.warning("removing all data from %s"% dbname)
 
-        exceptions = ("settings", "procedure_codes")
+        exceptions = ("settings", "procedure_codes", "text_fields")
 
         for tablename in self._tables(dbname):
             if tablename not in exceptions:
