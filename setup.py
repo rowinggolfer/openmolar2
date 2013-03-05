@@ -118,7 +118,7 @@ def get_version(name):
     return major_version
 
 ###############################################################################
-##                        "namespace" setup starts                              ##
+##                        "namespace" setup starts                           ##
 ###############################################################################
 
 if INSTALL_NAMESPACE:
@@ -371,8 +371,8 @@ if INSTALL_SERVER:
 
                     ('/usr/share/openmolar/',
                         ['misc/server/master_schema.sql',
-                         'misc/server/blank_schema.sql',
-                         'misc/server/permissions.sql',
+                         'misc/server/schemas/latest_schema.sql',
+                         'misc/server/schemas/latest_permissions.sql',
                          'misc/server/privatekey.pem',
                          'misc/server/cert.pem']),
                    ],

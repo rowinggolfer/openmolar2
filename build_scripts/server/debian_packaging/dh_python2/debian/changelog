@@ -1,3 +1,17 @@
+openmolar-server (2.0.906+hg041-0~__DIST__0) __DIST__; urgency=low
+
+  * upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 25 Feb 2013 13:56:18 +0000
+
+
+openmolar-server (2.0.905+hg041-0~__DIST__0) __DIST__; urgency=low
+
+  * upstream release
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sat, 23 Feb 2013 10:03:45 +0000
+
+
 openmolar-server (2.0.905+hg040-0~__DIST__1) __DIST__; urgency=low
 
   * quantal build

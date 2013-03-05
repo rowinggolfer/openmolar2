@@ -6,7 +6,8 @@ PatientDiaryWidget
 PatientDiaryModel.
 
 
-
+2013_03_04
+    PatientDiaryModel.AppointmentTreeItem.__repr__ is lacking somewhat
 
 ======================================================================
 NEW ISSUES
