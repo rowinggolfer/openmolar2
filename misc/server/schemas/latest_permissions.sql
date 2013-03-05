@@ -11,7 +11,7 @@ GRANT INSERT, UPDATE, SELECT ON calendar                  TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON diaries                   TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON diary_entries             TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON diary_in_office           TO ADMIN_GROUP;
-GRANT INSERT, UPDATE, SELECT ON appointments              TO ADMIN_GROUP;
+GRANT INSERT, UPDATE, SELECT, DELETE ON appointments      TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON fees                      TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON invoice_status            TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON invoices                  TO ADMIN_GROUP;
@@ -39,6 +39,7 @@ GRANT INSERT, UPDATE, SELECT ON treatment_fills           TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON treatment_teeth           TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON treatments                TO ADMIN_GROUP;
 GRANT INSERT, UPDATE, SELECT ON users                     TO ADMIN_GROUP;
+GRANT INSERT, UPDATE, SELECT ON text_fields               TO ADMIN_GROUP;
 
 
 /*-- locked tables --*/
@@ -50,15 +51,17 @@ GRANT SELECT ON procedure_codes           TO ADMIN_GROUP;
 GRANT SELECT ON diary_slots                                 TO ADMIN_GROUP;
 
 GRANT SELECT ON after_sessions                              TO ADMIN_GROUP;
-GRANT SELECT ON  before_sessions                            TO ADMIN_GROUP;
-GRANT SELECT ON  diary_adjacent_entries                     TO ADMIN_GROUP;
-GRANT SELECT ON  diary_adjacent_in_office_entries           TO ADMIN_GROUP;
-GRANT SELECT ON  diary_multi_day_entries                    TO ADMIN_GROUP;
-GRANT SELECT ON  diary_out_of_office                        TO ADMIN_GROUP;
-GRANT SELECT ON  diary_work                                 TO ADMIN_GROUP;
-GRANT SELECT ON  extremity_appointments                     TO ADMIN_GROUP;
-GRANT SELECT ON  view_addresses                             TO ADMIN_GROUP;
-GRANT SELECT ON  view_practitioners                         TO ADMIN_GROUP;
+GRANT SELECT ON before_sessions                            TO ADMIN_GROUP;
+GRANT SELECT ON diary_adjacent_entries                     TO ADMIN_GROUP;
+GRANT SELECT ON diary_adjacent_in_office_entries           TO ADMIN_GROUP;
+GRANT SELECT ON diary_multi_day_entries                    TO ADMIN_GROUP;
+GRANT SELECT ON diary_out_of_office                        TO ADMIN_GROUP;
+GRANT SELECT ON diary_work                                 TO ADMIN_GROUP;
+GRANT SELECT ON extremity_appointments                     TO ADMIN_GROUP;
+GRANT SELECT ON view_addresses                             TO ADMIN_GROUP;
+GRANT SELECT ON view_practitioners                         TO ADMIN_GROUP;
+GRANT SELECT ON view_addresses                  TO ADMIN_GROUP;
+GRANT SELECT ON view_practitioners              TO ADMIN_GROUP;
 
 
 /*-- sequences --*/
@@ -102,7 +105,5 @@ GRANT USAGE ON treatment_teeth_ix_seq          TO ADMIN_GROUP;
 GRANT USAGE ON treatments_ix_seq               TO ADMIN_GROUP;
 GRANT USAGE ON users_ix_seq                    TO ADMIN_GROUP;
 
-GRANT SELECT ON view_addresses                  TO ADMIN_GROUP;
-GRANT SELECT ON view_practitioners              TO ADMIN_GROUP;
 
 

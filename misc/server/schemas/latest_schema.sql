@@ -935,6 +935,32 @@ CREATE FUNCTION get_available_in_office_slots(t1 timestamp, t2 timestamp, id int
 	;
 
 
+/*-- TRIGGERS --*/
+CREATE OR REPLACE FUNCTION notify_appointment() RETURNS trigger AS $$
+DECLARE
+BEGIN
+  PERFORM pg_notify('appointments_changed', CAST(NEW.patient_id AS text));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION notify_appointment_deleted() RETURNS trigger AS $$
+DECLARE
+BEGIN
+  PERFORM pg_notify('appointments_changed', CAST(OLD.patient_id AS text));
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER new_appointment_trigger 
+AFTER INSERT ON appointments FOR EACH ROW EXECUTE PROCEDURE notify_appointment();
+
+CREATE TRIGGER modify_appointment_trigger 
+AFTER UPDATE ON appointments FOR EACH ROW EXECUTE PROCEDURE notify_appointment();
+
+CREATE TRIGGER delete_appointment_trigger 
+AFTER DELETE ON appointments FOR EACH ROW EXECUTE PROCEDURE notify_appointment_deleted();
+
 
 /*-- DATA --*/
 

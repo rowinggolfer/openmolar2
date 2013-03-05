@@ -1,1 +1,0 @@
-schema_002.sql
