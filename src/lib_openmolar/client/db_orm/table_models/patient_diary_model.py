@@ -65,12 +65,25 @@ class _TreeItem(object):
     def append_child(self, child):
         self.children.append(child)
 
-class _AppointmentTreeItem(_TreeItem):
+class AppointmentTreeItem(_TreeItem):
+    '''
+    this is the item which will be returned to the user when accessed via the
+    model
+    note - the underlying QSqlRecord can be accessed via
+    AppointmentTreeItem.appointment
+    '''
     is_appointment = True
     def __init__(self, appointment, parent):
         _TreeItem.__init__(self, parent)
         self.appointment = appointment
         self.date_ = self.appointment.value("start").toDate()
+
+    @property
+    def apptix(self):
+        '''
+        the ix field from the appointments table
+        '''
+        return self.appointment.value("apptix").toInt()[0]
 
     @property
     def is_today(self):
@@ -85,27 +98,51 @@ class _AppointmentTreeItem(_TreeItem):
     def is_unscheduled(self):
         return self.date_.isNull()
 
+    @property
+    def memo(self):
+        return self.appointment.value("memo").toString()
+
+    @property
+    def trt1(self):
+        return self.appointment.value("trt1").toString()
+
+    @property
+    def trt2(self):
+        return self.appointment.value("trt2").toString()
+
+    @property
+    def length_text(self):
+        value, result = self.appointment.value("len").toInt()
+        if result:
+            return u"%s %s"% (value, _("minutes"))
+
     def data(self, column):
         if column == 0:
             if self.is_unscheduled:
                 return _("TBA")
             return self.appointment.value("start").toDateTime()
         if column == 1:
-            return self.appointment.value("diary_id").toString()
+            if self.appointment.value("diary_id").isNull():
+                return self.appointment.value(
+                    "preferred_practitioner").toString()
+            else:
+                return "%s (orig was %s)" %(
+                self.appointment.value("diary_id").toString(),
+                self.appointment.value("preferred_practitioner").toString()
+                )
         if column == 2:
-            value, result = self.appointment.value("len").toInt()
-            if result:
-                return u"%s %s"% (value, _("minutes"))
+            return self.length_text
         if column == 3:
-            trt1 = self.appointment.value("trt1").toString()
-            trt2 = self.appointment.value("trt2").toString()
-            return u"%s %s"% (trt1, trt2)
+            return u"%s %s"% (self.trt1, self.trt2)
+        #if column == 4:
+        #    return self.appointment.value("preferred_practitioner").toString()
         if column == 4:
-            return self.appointment.value("preferred_practitioner").toString()
-        if column == 5:
-            return self.appointment.value("memo").toString()
+            return self.memo
 
         return QtCore.QVariant()
+
+    def __repr__(self):
+        return "appointment index %s"% self.apptix
 
 class PatientDiaryModel(QtCore.QAbstractItemModel):
     '''
@@ -122,6 +159,10 @@ class PatientDiaryModel(QtCore.QAbstractItemModel):
 
         self.root_item = _TreeItem(None)
         self._past_items = None
+        self.patient_id = None
+
+        QtGui.QApplication.instance().db_signaller.connect(
+            self.receive_db_notification)
 
     @property
     def normal_icon(self):
@@ -130,6 +171,15 @@ class PatientDiaryModel(QtCore.QAbstractItemModel):
             self._normal_icon.addPixmap(QtGui.QPixmap(":/schedule.png"),
                 QtGui.QIcon.Normal, QtGui.QIcon.Off)
         return self._normal_icon
+
+    def receive_db_notification(self, notification, payload):
+        LOGGER.info("PatientDiaryModel.receive_db_signal %s payload %s"% (
+            notification, payload))
+        if notification == "appointments_changed":
+            if payload is None:
+                LOGGER.debug("appointments_changed signal has no payload - "
+                "this should be fixed with qt5")
+            self.refresh()
 
     @property
     def selected_icon(self):
@@ -156,14 +206,15 @@ class PatientDiaryModel(QtCore.QAbstractItemModel):
         item = index.internalPointer()
         if role == QtCore.Qt.DisplayRole:
             return item.data(index.column())
-        if role == QtCore.Qt.ForegroundRole and item.is_appointment:
+        elif role == QtCore.Qt.ForegroundRole and item.is_appointment:
             if item.is_today:
                 return QtGui.QBrush(SETTINGS.COLOURS.PT_DIARY_TODAY)
             if item.is_past:
                 return QtGui.QBrush(SETTINGS.COLOURS.PT_DIARY_PAST)
             if item.is_unscheduled:
                 return QtGui.QBrush(SETTINGS.COLOURS.PT_DIARY_TBA)
-
+        elif role == QtCore.Qt.UserRole:
+            return item if item.is_appointment else None
         return QtCore.QVariant()
 
     def headerData(self, column, orientation, role):
@@ -215,17 +266,32 @@ class PatientDiaryModel(QtCore.QAbstractItemModel):
         self.beginResetModel()
         self.root_item.clear()
         self._past_items = None
+        self.patient_id = None
         self.endResetModel()
 
+    def refresh(self):
+        '''
+        force a reload of the appointment data for this patient
+        '''
+        if self.patient_id is None:
+            LOGGER.warning("PatientDiaryModel.refresh called - no patient")
+            self.clear()
+        else:
+            self.set_patient(self.patient_id)
+
     def set_patient(self, patient_id):
+        self.patient_id = patient_id
         self.beginResetModel()
-        LOGGER.debug("PatientDiaryModel.set_patient(%d)"% patient_id)
+        LOGGER.debug("PatientDiaryModel.set_patient(%d)"% self.patient_id)
         self.root_item.clear()
-        query = '''select * from
+        self._past_items = None
+        query = '''select
+        appointments.ix as apptix, trt1, trt2, len, memo,
+        preferred_practitioner, diary_id, start, finish, comment, etype  from
         appointments left join diary_entries
         on appointments.diary_entry_id = diary_entries.ix
         where patient_id = ?
-        order by start'''
+        order by start, appointments.ix;'''
         q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
         q_query.prepare(query)
         q_query.addBindValue(patient_id)
@@ -246,14 +312,69 @@ class PatientDiaryModel(QtCore.QAbstractItemModel):
                 parent = self.root_item
             else:
                 parent = self.past_items
-            item = _AppointmentTreeItem(record, parent)
+            item = AppointmentTreeItem(record, parent)
             parent.append_child(item)
         self.endResetModel()
 
+    def insert_appointment(self, patient_id, trt1, trt2, len, memo,
+    preferred_practitioner):
+        query = '''insert into appointments
+        (patient_id, trt1, trt2, len, memo, preferred_practitioner)
+        values (?,?,?,?,?,?)
+        returning ix'''
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
+        q_query.prepare(query)
+        q_query.addBindValue(patient_id)
+        q_query.addBindValue(trt1)
+        q_query.addBindValue(trt2)
+        q_query.addBindValue(len)
+        q_query.addBindValue(memo)
+        q_query.addBindValue(preferred_practitioner)
+
+        q_query.exec_()
+        if q_query.lastError().isValid():
+            LOGGER.error(q_query.lastError().text())
+        if q_query.first():
+            return q_query.record().value("ix").toInt()[0]
+
+        return False
+
+    def modify_appointment(self, apptix, trt1, trt2, len, memo,
+    preferred_practitioner):
+        query = '''update appointments
+        set trt1=?, trt2=?, len=?, memo=?, preferred_practitioner=?
+        where ix=?'''
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
+        q_query.prepare(query)
+        q_query.addBindValue(trt1)
+        q_query.addBindValue(trt2)
+        q_query.addBindValue(len)
+        q_query.addBindValue(memo)
+        q_query.addBindValue(preferred_practitioner)
+        q_query.addBindValue(apptix)
+
+        q_query.exec_()
+        if q_query.lastError().isValid():
+            LOGGER.error(q_query.lastError().text())
+            return False
+        return True
+
+    def remove_appointment(self, ix):
+        query = 'delete from appointments where ix=?'
+        q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
+        q_query.prepare(query)
+        q_query.addBindValue(ix)
+
+        result = q_query.exec_()
+        if q_query.lastError().isValid():
+            LOGGER.error(q_query.lastError().text())
+        return result
+
 if __name__ == "__main__":
     from lib_openmolar.client.connect import DemoClientConnection
+    from lib_openmolar.common.qt4.widgets import SignallingApplication
 
-    app = QtGui.QApplication([])
+    app = SignallingApplication("openmolar-test")
 
     cc = DemoClientConnection()
     cc.connect()
@@ -268,8 +389,12 @@ if __name__ == "__main__":
 
 
     model.set_patient(1)
-    model.clear()
-    model.set_patient(1)
+    model.refresh()
 
+    LOGGER.debug("making impointment")
+    ix = model.insert_appointment(1, "test", "", 45, "memo", 1)
+    LOGGER.debug("making appointment returned %s"% ix)
+    result = model.remove_appointment(ix)
+    LOGGER.debug("removing appointment returned %s"% result)
 
     app.exec_()

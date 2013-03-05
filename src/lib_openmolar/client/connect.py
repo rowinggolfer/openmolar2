@@ -245,9 +245,10 @@ class ClientConnection(OpenmolarDatabase):
         postgres can emit signals when the database is changed by another
         client.
         the query is simple
-        NOTIFY new_appointment_made
+        NOTIFY new_appointment_made, 'id'
         '''
-        self.driver().subscribeToNotification("todays_book_changed")
+        LOGGER.debug("adding new_appointment notification")
+        self.driver().subscribeToNotification("appointments_changed")
 
     def emit_caught_error(self, error):
         '''

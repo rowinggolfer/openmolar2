@@ -28,7 +28,7 @@ from lib_openmolar.common.settings import singleton, CommonSettings
 from lib_openmolar.common.db_orm import TeethPresentDecoder
 from lib_openmolar.common.qt4.plugin_tools.plugin_handler import PluginHandler
 
-from lib_openmolar.client.qt4.colours import COLOURS
+from lib_openmolar.client.qt4 import COLOURS
 
 from lib_openmolar.client.db_orm import TreatmentModel
 from lib_openmolar.client.db_orm.client_practitioner import Practitioners
@@ -311,6 +311,10 @@ class ClientSettings(CommonSettings, PluginHandler):
         a pointer to the currently loaded patient
         '''
         return self._current_patient
+
+    @property
+    def current_patient_id(self):
+        return self.current_patient.patient_id
 
     @property
     def connections(self):

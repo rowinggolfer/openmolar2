@@ -29,7 +29,7 @@ from PyQt4 import QtGui, QtCore
 from lib_openmolar.client.connect import ClientConnection
 
 from lib_openmolar.common.qt4.widgets import (
-    RestorableApplication,
+    SignallingApplication,
     Preference)
 
 from lib_openmolar.common.qt4.dialogs import PreferencesDialog
@@ -39,9 +39,9 @@ from lib_openmolar.common.qt4.postgres.postgres_mainwindow import \
 
 from lib_openmolar.client.qt4.widgets import StatusBarWidget
 
-from lib_openmolar.client.qt4.interfaces import ClientSessionWidget
-from lib_openmolar.client.qt4.interfaces import PatientInterface
-from lib_openmolar.client.qt4.interfaces import DiaryInterface
+from lib_openmolar.client.qt4.client_session_widget import ClientSessionWidget
+from lib_openmolar.client.qt4.patient_records import PatientInterface
+from lib_openmolar.client.qt4.diary import DiaryInterface
 
 ##TODO for windows version... this will need to be tweaked.
 settings_dir = os.path.join(
@@ -231,7 +231,7 @@ def main():
     else:
         LOGGER.setLevel(logging.INFO)
 
-    app = RestorableApplication("openmolar-client")
+    app = SignallingApplication("openmolar-client")
     ui = ClientMainWindow()
     ui.show()
     app.exec_()
