@@ -38,7 +38,6 @@ class ConnectionError(Exception):
     '''
     pass
 
-
 class OpenmolarDatabase(QtSql.QSqlDatabase):
     '''
     inherits from PyQt4.QSql.QSqlDatabase
@@ -69,7 +68,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
             self.setConnectOptions("requiressl=1;")
 
-        self.driver().notification.connect(self.notification_received)
+        self.signaller = QtGui.QApplication.instance().db_signaller
 
     def _wait_cursor(self, waiting=False):
         '''
@@ -77,7 +76,8 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         '''
         try:
             if waiting:
-                QtGui.QApplication.instance().setOverrideCursor(QtCore.Qt.WaitCursor)
+                QtGui.QApplication.instance().setOverrideCursor(
+                    QtCore.Qt.WaitCursor)
             else:
                 QtGui.QApplication.instance().restoreOverrideCursor()
         except AttributeError: #no gui
@@ -121,6 +121,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
             self.connection_data.reset()
             raise ConnectionError(u"%s"% self.lastError().text())
         else:
+            self.driver().notification.connect(self.notification_received)
             self.subscribeToNotifications()
 
     def subscribeToNotifications(self):
@@ -129,27 +130,36 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         postgres can emit signals when the database is changed by another
         client.
         the query is simple
-        NOTIFY new_appointment_made
+        NOTIFY appointments_changed
         '''
         logging.warning("classes inheriting from OpenmolarDatabase should "
         "re-implement function subscribeToNotifications")
-        #self.driver().subscribeToNotification("new_appointment_made")
+        self.driver().subscribeToNotification("test_notification")
 
-    def notification_received(self, notification):
+    def notification_received(self, notification, payload=None):
         '''
         the database has emitted a notify signal with text notification
         that we are subscribed to.
         we emit a qt signal, that should be connected by any application.
         '''
-        logging.info("db notification received '%s'"% notification)
+        logging.info("database notification received '%s' payload '%s'"% (
+            notification, payload))
 
-        QtGui.QApplication.instance().emit(
-            QtCore.SIGNAL("db notification"), notification)
+        self.signaller.emit(notification, payload)
+        #QtGui.QApplication.instance().emit(
+        #    QtCore.SIGNAL("db_signal"), notification)
 
     def emit_notification(self, notification):
+        '''
+        send a notify query to the database so that clients can communicate.
+        NB - notification events are more likely to come via triggers in the
+        database itself.
+        '''
         q_query = QtSql.QSqlQuery("NOTIFY %s"% notification, self)
+
         if q_query.lastError().isValid():
-            print "error", q_query.lastError().text()
+            logging.error("OpenmolarDatabase.emit_notification error - %s"% (
+                q_query.lastError().text()))
 
     @property
     def description(self):
@@ -189,8 +199,7 @@ def _test():
         db.connect()
         message += '<h4>connection Ok... </h4>'
         message += 'Schema Version %s'% db.schema_version
-        db.emit_notification("hello")
-        db.close()
+        db.emit_notification("test_notification")
 
     except ConnectionError as e:
         message = u"connection error<hr />%s"% e
@@ -198,6 +207,7 @@ def _test():
     message += "</body>"
 
     QtGui.QMessageBox.information(parent, "result", message)
+    db.close()
 
     app.closeAllWindows()
 

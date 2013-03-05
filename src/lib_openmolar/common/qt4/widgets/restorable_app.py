@@ -21,7 +21,14 @@
 ###############################################################################
 
 import sys
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
+
+class Signaller(QtCore.QObject):
+    notification_signal = QtCore.pyqtSignal(object, object)
+    def __init__(self, parent=None):
+        QtCore.QObject.__init__(self, parent)
+        self.emit = self.notification_signal.emit
+        self.connect = self.notification_signal.connect
 
 class RestorableApplication(QtGui.QApplication):
     '''
@@ -33,7 +40,7 @@ class RestorableApplication(QtGui.QApplication):
         '''
         the name given here is important as is used in saving the settings
         '''
-        super(RestorableApplication, self).__init__(sys.argv)
+        QtGui.QApplication.__init__(self, sys.argv)
         self.setOrganizationName(name)
         self.setApplicationName(name)
 
@@ -44,6 +51,15 @@ class RestorableApplication(QtGui.QApplication):
     def saveState(self, session):
         '''re-implement this method, called on run'''
         pass
+
+class SignallingApplication(RestorableApplication):
+    '''
+    RestorableApplication with an extra attribute db_signaller
+    '''
+    def __init__(self, name='test_signalling_application'):
+        RestorableApplication.__init__(self, name)
+        self.db_signaller = Signaller()
+
 
 if __name__ == "__main__":
     app = RestorableApplication("test_organisation_name")

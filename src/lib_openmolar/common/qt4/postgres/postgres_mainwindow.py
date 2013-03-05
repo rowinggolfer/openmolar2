@@ -30,7 +30,6 @@ from PyQt4 import QtGui, QtCore
 
 from lib_openmolar.common.datatypes import ConnectionData
 
-from lib_openmolar.common.qt4.widgets import RestorableApplication
 from lib_openmolar.common.qt4.widgets import Preference
 
 from lib_openmolar.common.qt4.plugin_tools import PlugableMainWindow
@@ -49,7 +48,7 @@ class PostgresMainWindow(PlugableMainWindow):
     _central_widget = None
     _preferences_dialog = None
     _connection_dialog = None
-    
+
     CONN_CLASS = OpenmolarDatabase
 
     #: True if more than one pg session is allowed (False for client)
@@ -143,9 +142,9 @@ class PostgresMainWindow(PlugableMainWindow):
         '''
         parse the allowed locations for connections.
         returns a list of :doc:`ConnectionData`
-        '''        
+        '''
         def parse_conf(filepath):
-            try:        
+            try:
                 LOGGER.debug("checking %s for config"% filepath)
 
                 conn_data = ConnectionData()
@@ -154,13 +153,13 @@ class PostgresMainWindow(PlugableMainWindow):
 
                 LOGGER.info("loaded connection %s"% conn_data)
                 known_session_params.append(conn_data)
-                
+
             except Exception as exc:
                 LOGGER.exception("error loading %s"% filepath)
                 message = "%s '%s'<pre>%s</pre>" % (_("Bad Config file"),
                     filepath, exc.message)
                 self.advise(message, 2)
-        
+
         known_session_params = []
         for conf_dir in SETTINGS.CONNECTION_CONFDIRS:
             LOGGER.debug(
@@ -168,7 +167,7 @@ class PostgresMainWindow(PlugableMainWindow):
             for root, dir_, files in os.walk(conf_dir):
                 for file_ in sorted(files):
                     parse_conf(os.path.join(root, file_))
-                    
+
         LOGGER.info(
             "%s connections found"% len(known_session_params))
 
@@ -308,12 +307,13 @@ class PostgresMainWindow(PlugableMainWindow):
 
 def _test():
     import logging
+    from lib_openmolar.common.qt4.widgets import RestorableApplication
     import lib_openmolar.client #to install the LOGGER and SETTINGS objects
-    LOGGER.setLevel(logging.DEBUG)
 
+    LOGGER.setLevel(logging.DEBUG)
     app = RestorableApplication("openmolar-test-suite")
     settings = QtCore.QSettings()
-    
+
     mw = PostgresMainWindow()
     mw.show()
 

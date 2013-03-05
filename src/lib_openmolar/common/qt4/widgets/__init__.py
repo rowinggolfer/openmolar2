@@ -3,6 +3,7 @@ make classes under lib_openmolar.common.datatypes easily importable
 '''
 from advisor_notification import Advisor
 from restorable_app import RestorableApplication
+from restorable_app import SignallingApplication
 from dockable_menubar import DockableMenuBar
 from main_window import BaseMainWindow
 from preference import Preference
