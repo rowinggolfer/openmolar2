@@ -57,9 +57,9 @@ class DemoGenerator(object):
         # now an entry for an exam done on patient one yesterday
         # (or previous work day)
         self.record.clearValues()
-        date_ = QtCore.QDate.currentDate().adddays(-1)
-        while date_.dayOfWeek > 6:
-            date_.addDays(-1)
+        date_ = QtCore.QDate.currentDate().addDays(-1)
+        while date_.dayOfWeek() > 6:
+            date_ = date_.addDays(-1)
         start = QtCore.QDateTime(date_, QtCore.QTime(9,0))
         self.record.setValue('diary_id', 1)
         self.record.setValue('start', start)

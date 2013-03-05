@@ -45,7 +45,8 @@ class ServerFunctionDialog(ExtendableDialog):
         '''
         LOGGER.debug("switch_to_admin_user called")
         QtGui.QMessageBox.information(self, _("info"),
-            _("you do not have permission to perform this function"))
+            _("only the admin user can perform this function")
+            )
         dl = UserPasswordDialog(self)
         dl.set_label_text(
     _("Please enter the password for the admin user of this OpenMolar Server"))
