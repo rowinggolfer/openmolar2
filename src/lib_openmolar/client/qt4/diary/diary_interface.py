@@ -22,7 +22,7 @@
 
 from PyQt4 import QtCore, QtGui
 
-from lib_openmolar.client.qt4.widgets import DiaryControl, DiaryWidget
+from components import DiaryControl, DiaryWidget
 
 from lib_openmolar.client.db_orm.diary import DiaryDataModel
 
@@ -58,8 +58,7 @@ class DiaryInterface(QtGui.QWidget):
         '''
         usually called when the database has connected/changed
         '''
-        self.diary_control.refresh_practitioners(SETTINGS.practitioners)
-        self.diary_control.refresh_staff_members(SETTINGS.staff_members)
+        self.diary_control.refresh()
         self.model.load()
         self.diary_control.set_limits(self.model.start_date,
             self.model.end_date)
@@ -71,7 +70,9 @@ class DiaryInterface(QtGui.QWidget):
 
 if __name__ == "__main__":
 
-    app = QtGui.QApplication([])
+    from lib_openmolar.common.qt4.widgets import SignallingApplication
+    app = SignallingApplication("test_application")
+
     mw = QtGui.QMainWindow()
 
     from lib_openmolar.client.connect import DemoClientConnection

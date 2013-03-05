@@ -61,6 +61,8 @@ class PtDiaryWidget(QtGui.QWidget):
             self.raise_appt_prefs_dialog)
 
         self.control_panel.new_signal.connect(self.raise_new_appt_dialog)
+        self.control_panel.modify_signal.connect(self.raise_modify_appt_dialog)
+        self.control_panel.cancel_signal.connect(self.raise_cancel_appt_dialog)
 
     def clear(self):
         self.model.clear()
@@ -69,21 +71,78 @@ class PtDiaryWidget(QtGui.QWidget):
         LOGGER.debug("PtDiaryWidget.load_patient")
         self.model.set_patient(SETTINGS.current_patient.patient_id)
 
+    #@property
+    def selected_appointment(self):
+        index = self.tree_view.currentIndex()
+        if index.isValid():
+            appt = self.model.data(index, role = QtCore.Qt.UserRole)
+            LOGGER.debug(appt)
+            return appt
+        return None
+
     def raise_appt_prefs_dialog(self):
         dl = ApptPrefsDialog(self)
         dl.exec_()
 
     def raise_new_appt_dialog(self):
         dl = NewApptDialog(self)
-        dl.exec_()
+        if dl.exec_():
+            print "insert new appointment"
+            ix = self.model.insert_appointment(
+                SETTINGS.current_patient.patient_id,
+                dl.trt1,
+                dl.trt2,
+                dl.length,
+                dl.memo,
+                dl.selected_clinician_id
+                )
+            self.model.refresh()
+            if dl.schedule_now:
+                print "and schedule appointment where ix='%s' now"% ix
 
+    def raise_modify_appt_dialog(self):
+        appt = self.selected_appointment()
+        if appt is None:
+            return
+        dl = NewApptDialog(self)
+        dl.set_appt_params(appt)
+        if dl.exec_():
+            print "modify appointment", appt
+            result = self.model.modify_appointment(
+                appt.apptix,
+                dl.trt1,
+                dl.trt2,
+                dl.length,
+                dl.memo,
+                dl.selected_clinician_id
+                )
+            self.model.refresh()
+            if not result:
+                raise IOError ("unable to modify appointment")
+            if dl.schedule_now:
+                print "and schedule appointment where ix='%s' now"% ix
+
+    def raise_cancel_appt_dialog(self):
+        appt = self.selected_appointment()
+        if appt is None:
+            pass
+        elif not appt.is_unscheduled:
+            QtGui.QMessageBox.information(self, _("Information"),
+            _("unable to cancel as appointment is scheduled"))
+        elif QtGui.QMessageBox.question(self, _("Confirm"),
+        u"%s %s"% (_("delete appt"), appt),
+        QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,
+        QtGui.QMessageBox.Cancel) == QtGui.QMessageBox.Ok:
+            self.model.remove_appointment(appt.apptix)
+            self.model.refresh()
 
 if __name__ == "__main__":
 
     from lib_openmolar.client.connect import DemoClientConnection
     from lib_openmolar.client.db_orm import PatientModel
 
-    app = QtGui.QApplication([])
+    from lib_openmolar.common.qt4.widgets import SignallingApplication
+    app = SignallingApplication("test_application")
 
     cc = DemoClientConnection()
     cc.connect()

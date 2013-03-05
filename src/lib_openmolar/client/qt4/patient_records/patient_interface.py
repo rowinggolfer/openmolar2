@@ -28,7 +28,7 @@ from lib_openmolar.client.qt4.widgets import (ControlPanel, DetailsBrowser, Note
 from lib_openmolar.client.qt4.widgets.procedures.proc_code_widget \
     import ProcCodeDockWidget
 
-from lib_openmolar.client.qt4 import pages
+from pages import *
 
 from lib_openmolar.client.qt4 import dialogs
 
@@ -50,27 +50,27 @@ class PatientInterface(QtGui.QWidget):
         self.details_browser = DetailsBrowser(self)
         '''a pointer to the :doc:`DetailsBrowser`'''
 
-        self.reception_page = pages.ReceptionPage(self)
+        self.reception_page = ReceptionPage(self)
         '''a pointer to the :doc:`ReceptionPage`'''
 
-        self.charts_page = pages.ChartsPage(self)
+        self.charts_page = ChartsPage(self)
         '''a pointer to the :doc:`ChartsPage`'''
 
-        self.treatment_page = pages.TreatmentPage(self)
+        self.treatment_page = TreatmentPage(self)
         '''a pointer to the :doc:`TreatmentPage`'''
 
         self.notes_page = NotesWidget(self)
         '''a pointer to the :doc:`NotesWidget`'''
 
-        self.estimates_page = pages.EstimatesPage(self)
+        self.estimates_page = EstimatesPage(self)
         '''a pointer to the :doc:`EstimatesPage`'''
 
-        self.history_page = pages.HistoryPage(self)
+        self.history_page = HistoryPage(self)
         '''a pointer to the :doc:`HistoryPage`'''
 
         # summary_page shares the "model" of the static chart
         model = self.charts_page.static.chart_data_model
-        self.summary_page = pages.SummaryPage(model, self)
+        self.summary_page = SummaryPage(model, self)
         '''a pointer to the :doc:`SummaryPage`'''
 
         self.options_widget = PatientInterfaceOptionsWidget(self)
@@ -151,9 +151,6 @@ class PatientInterface(QtGui.QWidget):
             QtCore.SIGNAL("Edit Patient Address"), self.edit_address)
         self.connect(self.details_browser,
             QtCore.SIGNAL("Edit Patient Phone"), self.edit_phone)
-
-        #self.connect(self.reception_page, QtCore.SIGNAL("db notify"),
-        #    SETTINGS.psql_conn.emit_notification)
 
         self.connect(self.summary_page.summary_chart,
             QtCore.SIGNAL("key_press"),
@@ -531,9 +528,9 @@ if __name__ == "__main__":
         dw.show()
         dw.setFloating(True)
 
-    from lib_openmolar.common.qt4.widgets import RestorableApplication
+    from lib_openmolar.common.qt4.widgets import SignallingApplication
 
-    app = RestorableApplication("openmolar-client")
+    app = SignallingApplication("openmolar-client")
     mw = QtGui.QMainWindow()
     mw.setMinimumSize(500,300)
 
