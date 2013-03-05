@@ -97,9 +97,10 @@ class DBFunctions(object):
     def newDB_sql(self, dbname):
         '''
         returns the sql to layout the users and tables in a database.
+        returns the sql to layout the users and tables in a database.
         '''
-        sql_file = "/usr/share/openmolar/blank_schema.sql"
-        perms_file = "/usr/share/openmolar/permissions.sql"
+        sql_file = "/usr/share/openmolar/latest_schema.sql"
+        perms_file = "/usr/share/openmolar/latest_permissions.sql"
 
         LOGGER.info("reading sql from %s"% sql_file)
         LOGGER.info("reading sql from %s"% perms_file)
