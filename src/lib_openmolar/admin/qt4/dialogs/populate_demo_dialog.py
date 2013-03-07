@@ -144,10 +144,6 @@ if __name__ == "__main__":
     import gettext
     gettext.install("")
 
-    class DuckLog(object):
-        def log(self, *args):
-            print args
-
     app = QtGui.QApplication([])
 
     from lib_openmolar.admin.connect import DemoAdminConnection

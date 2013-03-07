@@ -40,15 +40,14 @@ class AdminConnection(OpenmolarDatabase):
     inherits from lib_openmolar.common.connect.OpenmolarDatabase,
     which in turn inherits from PyQt4.QSql.QSqlDatabase
     '''
-    def connect(self):
+    def connect(self, *args):
         self.setConnectOptions("%sapplication_name=openmolar-admin;"%
             self.connectOptions())
-        OpenmolarDatabase.connect(self)
+        OpenmolarDatabase.connect(self, *args)
         if self.schema_version not in SETTINGS.schema_versions:
             raise self.SchemaVersionError, (
         "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
             self.schema_version, SETTINGS.schema_versions))
-
 
     @property
     def admin_modules(self):
@@ -78,8 +77,11 @@ class AdminConnection(OpenmolarDatabase):
 
         for module in ADMIN_MODULES:
             if module in ommitted_modules:
+                LOGGER.info("Ommitting module %s"% module.__name__)
                 continue
             try:
+                if not self.isOpen():
+                    return (False, _("no connection"))
 
                 builder = module.DemoGenerator(self)
                 logged = False
@@ -105,11 +107,12 @@ class AdminConnection(OpenmolarDatabase):
                         break
 
                     number_of_queries_executed += 1
-                    progress = int(number_of_queries_executed /
-                    total_number_of_queries * 100)
-
-                    self.emit_(QtCore.SIGNAL("demo progress"),
-                                module, progress)
+                    progress = int(
+                            number_of_queries_executed /
+                            total_number_of_queries * 100)
+                    if progress % 10 == 0:
+                        self.emit_(QtCore.SIGNAL("demo progress"),
+                                    module, progress)
 
                 else: #some modules have no queries
                     self.emit_(QtCore.SIGNAL("demo progress"), module, 100)
@@ -132,6 +135,7 @@ class AdminConnection(OpenmolarDatabase):
         emit signals but be wary of case when there is no gui
         (ie. when install demo is called from CLI)
         '''
+        LOGGER.debug("AdminConnection.emit_ %s"% str(args))
         if QtGui.QApplication.instance() is None:
             return
         QtGui.QApplication.instance().emit(*args)
@@ -157,3 +161,4 @@ if __name__ == "__main__":
 
     sc = DemoAdminConnection()
     sc.connect()
+    sc.populateDemo()

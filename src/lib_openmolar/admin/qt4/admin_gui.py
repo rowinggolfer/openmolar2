@@ -29,7 +29,7 @@ from PyQt4 import QtGui, QtCore
 from lib_openmolar.common.connect import ProxyClient, ProxyUser
 
 from lib_openmolar.common.datatypes import ConnectionData
-from lib_openmolar.common.qt4.widgets import RestorableApplication
+from lib_openmolar.common.qt4.widgets import SignallingApplication
 
 from lib_openmolar.admin import qrc_resources
 
@@ -501,7 +501,8 @@ _("Version"), SETTINGS.VERSION,
 
 def main():
 
-    app = RestorableApplication("openmolar-admin")
+    app = SignallingApplication("openmolar-admin")
+
     ui = AdminMainWindow()
     ui.show()
     app.exec_()

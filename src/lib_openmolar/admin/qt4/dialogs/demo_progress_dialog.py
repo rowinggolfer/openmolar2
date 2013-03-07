@@ -59,12 +59,8 @@ class DemoProgressDialog(BaseDialog):
     def sizeHint(self):
         return QtCore.QSize(350, 300)
 
-    def Advise(self, *args):
-        if __name__ == "__main__":
-            print args
-        self.emit(QtCore.SIGNAL("Advise"), *args)
-
     def connect_signals(self):
+        LOGGER.debug("listening for signals from the application")
         self.connect(QtGui.QApplication.instance(),
             QtCore.SIGNAL("demo install complete"), self.finished)
 
@@ -94,7 +90,6 @@ class DemoProgressDialog(BaseDialog):
         self.scroll_area.ensureWidgetVisible(current_pb)
 
 if __name__ == "__main__":
-    import time
     import gettext
     gettext.install("")
 
@@ -106,7 +101,6 @@ if __name__ == "__main__":
 
     from lib_openmolar.admin.connect import DemoAdminConnection
     sc = DemoAdminConnection()
-    sc.connect()
 
     dl = DemoProgressDialog(sc, [])
     dl.exec_()
