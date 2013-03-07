@@ -40,6 +40,7 @@ class RestorableApplication(QtGui.QApplication):
         '''
         the name given here is important as is used in saving the settings
         '''
+        #super(RestorableApplication, self).__init__(sys.argv)
         QtGui.QApplication.__init__(self, sys.argv)
         self.setOrganizationName(name)
         self.setApplicationName(name)
@@ -58,9 +59,16 @@ class SignallingApplication(RestorableApplication):
     '''
     def __init__(self, name='test_signalling_application'):
         RestorableApplication.__init__(self, name)
-        self.db_signaller = Signaller()
+        self.db_signaller = Signaller(self)
 
 
 if __name__ == "__main__":
     app = RestorableApplication("test_organisation_name")
+    app.closeAllWindows()
+    def sig_catcher(*args):
+        print (args)
+
+    app = SignallingApplication("test_organisation_name")
+    app.db_signaller.connect(sig_catcher)
+    app.db_signaller.emit("foo", "bar")
     app.closeAllWindows()

@@ -68,7 +68,13 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         if connection_data.CONNECTION_TYPE == connection_data.TCP_IP:
             self.setConnectOptions("requiressl=1;")
 
-        self.signaller = QtGui.QApplication.instance().db_signaller
+        try:
+            self.signaller = QtGui.QApplication.instance().db_signaller
+            LOGGER.info("Event loop has a DB Signaller")
+        except AttributeError:
+            QtGui.QApplication.instance().db_signaller = None
+            self.signaller = None
+            LOGGER.warning("OpenmolarDatabase.signaller is None")
 
     def _wait_cursor(self, waiting=False):
         '''
@@ -144,10 +150,10 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         '''
         logging.info("database notification received '%s' payload '%s'"% (
             notification, payload))
-
-        self.signaller.emit(notification, payload)
-        #QtGui.QApplication.instance().emit(
-        #    QtCore.SIGNAL("db_signal"), notification)
+        if self.signaller:
+            self.signaller.emit(notification, payload)
+        else:
+            LOGGER.warning("OpenmolarDatabase.signaller is None")
 
     def emit_notification(self, notification):
         '''
