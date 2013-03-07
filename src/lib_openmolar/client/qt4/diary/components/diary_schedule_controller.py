@@ -27,9 +27,9 @@ from openmolar.qt4gui.appointment_gui_modules.draggable_list \
 from openmolar.qt4gui.appointment_gui_modules.list_models \
     import SimpleListModel, BlockListModel
 
-from openmolar.qt4gui.dialogs.find_patient_dialog import FindPatientDialog
+from lib_openmolar.client.qt4.dialogs import FindPatientDialog
 
-from openmolar.qt4gui.pt_diary_widget import PtDiaryWidget
+from lib_openmolar.client.qt4.pt_diary_widget import PtDiaryWidget
 
 class DiaryScheduleController(QtGui.QStackedWidget):
     BROWSE_MODE = 0
@@ -512,13 +512,13 @@ class TestWindow(QtGui.QMainWindow):
         "signal emitted %s"% str(args))
 
 if __name__ == "__main__":
-    import gettext
-    gettext.install("openmolar")
+    from lib_openmolar.common.qt4.widgets import SignallingApplication
+    app = SignallingApplication("test_application")
 
-    from openmolar.settings import localsettings
-    localsettings.initiate()
+    from lib_openmolar.client.connect import DemoClientConnection
+    cc = DemoClientConnection()
+    cc.connect()
 
-    app = QtGui.QApplication([])
     obj = TestWindow()
     obj.show()
     app.exec_()
