@@ -140,7 +140,7 @@ class OpenmolarDatabase(QtSql.QSqlDatabase):
         '''
         logging.warning("classes inheriting from OpenmolarDatabase should "
         "re-implement function subscribeToNotifications")
-        self.driver().subscribeToNotification("test_notification")
+        #self.driver().subscribeToNotification("test_notification")
 
     def notification_received(self, notification, payload=None):
         '''
