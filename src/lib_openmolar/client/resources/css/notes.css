@@ -1,0 +1,88 @@
+/*-- stylesheet for openmolar2 notes 
+written by Neil Wallace < rowinggolfer@gmail.com >
+
+################################################################################
+#                                                                              #
+#  THIS FILE IS UPDATED BY THE OPENMOLAR APPLICATION.                          #
+#                                                                              #
+#  ANY CHANGES YOU MAKE TO THIS FILE WILL NOT BE PRESERVED.                    #
+#                                                                              #
+#                                                                              #
+#  IF YOU WOULD LIKE TO USE A CUSTOM CSS FILE                                  #
+#  PLEASE PLACE IT IN THIS FOLDER AND NAME IT                                  #
+#  "custom_notes.css"                                                          #
+#                                                                              #
+#  THE PRESENCE OF SUCH A FILE WILL MEAN THIS FILE IS IGNORED BY               #
+#  THE NOTES BROWSER.                                                          #
+#                                                                              #
+#                                                                              #
+################################################################################
+
+--*/
+
+body{background-color:#eeeeee;}
+
+/*-- DIVS --*/
+div.center{text-align:center;}
+div.new_note_link{text-align:right;}
+
+/* Headings */
+h1{
+    margin:3px;
+    color:#4322a8
+    }
+    
+/*-- LINKS --*/
+a.editable_note{background-color:#ffffff;}
+
+/*-- images --*/
+img.pencil{
+    height:20px;
+    width:20px;
+    float:right; 
+    margin: 2px;}
+
+img.author{
+    height:40px;
+    width:40px;
+    float:left; 
+    margin: 4px;}
+
+img.co_author{
+    height:26px;
+    width:26px;
+    float:right; 
+    margin: 4px;}
+    
+/*-- TABLE -- */
+table{
+    width:100%;
+    border:3px solid #aaaaaa;
+    border-collapse:collapse;
+    }
+
+th
+{
+    background-color: #000000;
+    color:#ffffff;
+    border:3px solid #aaaaaa;
+    border-collapse:collapse;
+}
+
+td{
+    border:2px solid #aaaaaa;
+    border-collapse:collapse;
+    }
+
+tr.clinical{background-color:#eeeeee;}
+tr.clerical{background-color:#dddddd;}
+
+tr.editable_clinical{background-color:#ffeeee;}
+tr.editable_clerical{background-color:#ffdddd;}
+
+td.date{}
+
+td.author{width:100px;}
+
+td.note{text-align:left;}
+

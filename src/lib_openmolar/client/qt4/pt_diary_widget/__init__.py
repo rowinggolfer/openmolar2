@@ -1,0 +1,1 @@
+from pt_diary_widget import PtDiaryWidget
