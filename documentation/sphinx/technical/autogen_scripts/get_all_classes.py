@@ -31,6 +31,7 @@ if not os.path.exists(KLASS_SUBDIR):
 def remove_null_klass_rst_files():
     print "REMOVING ALL NULL rst files from class_headings directory"
     headings_path = os.path.join(technical_path, "class_headings")
+    print headings_path
     for root, dir_, files in os.walk(technical_path):
         for file_ in files:
             filepath = os.path.abspath(os.path.join(root, file_))
@@ -151,7 +152,7 @@ def write_index(rst_files):
     f.write('''Classes
 =======
 
-..note ::
+.. note ::
     Openmolar is almost entirely Object orientated, and so it makes sense to
     structure this documentation by classes, not modules.
 

@@ -1,6 +1,12 @@
 ### this file is neil's todo list for the application
 ### it is by no means complete.
 
+
+CURRENT BIG BUGS
+    multi pg_session not working on the admin app 
+    - incorrect connection being used. 
+
+
 CURRENT FOCUS
 PatientDiaryWidget
 PatientDiaryModel.

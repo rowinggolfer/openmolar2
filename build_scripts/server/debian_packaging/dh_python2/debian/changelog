@@ -1,5 +1,12 @@
 openmolar-server (2.0.906+hg041-0~__DIST__0) __DIST__; urgency=low
 
+  *  trial build
+
+ -- Neil Wallace <rowinggolfer@googlemail.com>  Sun, 24 Nov 2013 15:08:28 +0000
+
+
+openmolar-server (2.0.906+hg041-0~__DIST__0) __DIST__; urgency=low
+
   * upstream release
 
  -- Neil Wallace <rowinggolfer@googlemail.com>  Mon, 25 Feb 2013 13:56:18 +0000

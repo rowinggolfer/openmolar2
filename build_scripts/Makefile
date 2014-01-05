@@ -86,7 +86,7 @@ ifeq ($(OMSUFFIXES), )
 endif
 
 ifeq ($(DEBDISTS), )
-	DEBDISTS = unstable testing stable quantal precise lucid
+	DEBDISTS = unstable testing stable oldstable saucy raring quantal precise
 endif
 
 
@@ -228,7 +228,7 @@ debsigns:
 
 pushdeb:
 	cd ~/www/repos/apt/debian ;\
-	reprepro include $(DIST) $(HEAD)builds/$(OMSUFFIX)/debs/$(DIST)/$(CHANGES_FILE) ; \
+	reprepro include $(DIST) $(CHANGES_FILE) ; \
 	reprepro export
 
 pushdebs:
@@ -255,10 +255,15 @@ rpm:
 	mkdir -p $(RPM_BUILDS_DIR)
 	touch $(RPM_BUILDS_DIR)rpm_result
 	
-	
 update_pbuilder:
 	$(foreach dist, $(DEBDISTS), \
 		sudo DIST=${dist} ARCH=amd64 pbuilder --update --architecture amd64 \
+		--distribution ${dist} --http-proxy http://localhost:3142 ; \
+	)
+	
+create_pbuilder:
+	$(foreach dist, $(DEBDISTS), \
+		sudo DIST=${dist} ARCH=amd64 pbuilder --create --architecture amd64 \
 		--distribution ${dist} --http-proxy http://localhost:3142 ; \
 	)
 	
