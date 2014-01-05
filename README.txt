@@ -1,3 +1,3 @@
-This version of openmolar is not yet ready for even trial use.
+This version of openmolar is a complete rewrite of the the application used by the author in his own practise.
+It is experimental in nature, and not yet ready for even trial use.
 
-anticipated release of an alpha is August 2011
