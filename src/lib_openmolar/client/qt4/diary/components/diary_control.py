@@ -71,8 +71,6 @@ class DiaryControl(QtGui.QWidget):
         layout.addWidget(self.diary_schedule_controller)
         layout.addWidget(self.diary_view_controller)
 
-        layout.addStretch()
-
         self.setMaximumWidth(self.calendar.width()+ PADDING*2)
 
         self.calendar.selectionChanged.connect(self.date_change)

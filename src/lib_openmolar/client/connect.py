@@ -49,7 +49,6 @@ class ClientConnection(OpenmolarDatabase):
         "Schema version mismatch schema is at '%s', allowed versions '%s'"% (
             self.schema_version, SETTINGS.schema_versions))
 
-
         SETTINGS.psql_conn = self
 
     @property

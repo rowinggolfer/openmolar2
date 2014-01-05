@@ -41,17 +41,20 @@ class DiaryDataModel(_DiarySettings):
 
     def __repr__(self):
         data_repr = ""
-        for key in self._data:
-            data_repr += "%s:%s\n"% (key, self._data[key])
+        #for key in self._data:
+        #    data_repr += "%s:%s\n"% (key, self._data[key])
+        data_repr = "temporarily disabled this output"
         return '''DiaryDataModel
         db     = %s
         start  = %s
         end    = %s
+        %d active diaries
         =========   DATA STARTS   ==============\n%s
         =========   DATA ENDS     =============='''% (
             SETTINGS.psql_conn.databaseName(),
             self.start_date,
             self.end_date,
+            len(self.active_diaries),
             data_repr)
 
     def load(self):
@@ -139,7 +142,10 @@ class DiaryDataModel(_DiarySettings):
         if style == self.YEAR: #return the number of months.
             i = 0
             start = self.start_date
-            while (start.year(), start.month()) < (self.end_date.year(), self.end_date.month()):
+            while (
+                (start.year(), start.month()) <
+                (self.end_date.year(), self.end_date.month())
+            ):
                 i += 1
                 start = start.addMonths(1)
             return i
@@ -167,7 +173,7 @@ class DiaryDataModel(_DiarySettings):
             return i
         return 1
 
-    def data(self, date, view_style=0):
+    def data(self, date, view_style=_DiarySettings.DAY):
         '''
         returns a 'DayData' object for the date requested
         '''
@@ -192,7 +198,6 @@ class DiaryDataModel(_DiarySettings):
         and specified diary ids
         '''
         return "NEW DATA"
-
 
     def header_data(self, row, style=0):
         if style == self.YEAR:
@@ -221,6 +226,6 @@ if __name__ == "__main__":
 
     today = QtCore.QDate.currentDate()
     for i in range(7):
-        model.data(today.addDays(i))
+        print model.data(today.addDays(i))
 
-    print (model)
+    #print (model)

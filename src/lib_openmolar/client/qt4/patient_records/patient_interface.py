@@ -413,7 +413,7 @@ class PatientInterface(QtGui.QWidget):
 
     def refresh_patient(self):
         '''
-        refresh after internal (possibly non-committed) changes
+        refresh after internal (possibly non-comitted) changes
         '''
         if self.pt:
             self._load_patient()

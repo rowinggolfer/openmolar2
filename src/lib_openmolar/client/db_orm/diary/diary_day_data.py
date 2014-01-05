@@ -43,8 +43,9 @@ class DiaryDayData(object):
         self._sessions = {}
 
     def __repr__(self):
-        return "Daydata for %s Contains %d Diaries" % (
-        self.date.toString("yyyy-MM-dd"), len(self._diaries))
+        return "DiaryDayData %s (%d Diaries), %s, %s" % (
+        self.date.toString("yyyy-MM-dd"), len(self._diaries),
+        self._sessions, self.entries)
 
     def clear(self):
         self.sessions_loaded = False
@@ -92,7 +93,7 @@ class DiaryDayData(object):
         if not self.sessions_loaded:
             self.load_sessions()
         try:
-            return self._sessions.get(diary_id).get("start")
+            return self._sessions.get(diary_id).get("finish")
         except KeyError:
             return None
 
@@ -156,7 +157,7 @@ class DiaryDayData(object):
         '''
         loads all appointments of type "session" for this day
         '''
-        LOGGER.debug("%s load_entries"% self)
+        LOGGER.debug("load_entries for date %s"% self.date)
         q_query = QtSql.QSqlQuery(SETTINGS.psql_conn)
 
         query = '''select diary_id, start, finish, etype, comment
@@ -189,7 +190,7 @@ if __name__ == "__main__":
     cc = DemoClientConnection()
     cc.connect()
 
-    day_data = DiaryDayData(QtCore.QDate(2012,07,02))
+    day_data = DiaryDayData(QtCore.QDate(2013,03,18))
     LOGGER.debug("%s"% day_data)
     LOGGER.debug("public hol - %s %s"% (
         day_data.is_public_hol, day_data.public_hol_text))

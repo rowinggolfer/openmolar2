@@ -141,7 +141,7 @@ class NotesWidget(QtGui.QWidget):
             if m.groups()[0] == "_clinical" or self.type == self.CLINICAL:
                 if ix != 0:
                     LOGGER.debug(
-                        "edit existing uncommitted clinical note %d"% ix)
+                        "edit existing uncomitted clinical note %d"% ix)
                     self._clinical_edit_note = \
                     SETTINGS.current_patient.notes.clinical_by_id(ix)
                 else:
@@ -152,7 +152,7 @@ class NotesWidget(QtGui.QWidget):
             elif m.groups()[0] == "_clerical" or self.type == self.RECEPTION:
                 if ix != 0:
                     LOGGER.debug(
-                        "edit existing uncommitted clerical_note %d"% ix)
+                        "edit existing uncomitted clerical_note %d"% ix)
                     self._clerical_edit_note = \
                     SETTINGS.current_patient.notes.clerical_by_id(ix)
                 else:

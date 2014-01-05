@@ -91,7 +91,7 @@ a view aware editable model of data stored in various notes tables
             foo = foo.replace("<", "&lt;").replace(">", "&gt;").replace(
                 "\n", "<br />")
 
-            editable = not record.value("committed").toBool()
+            editable = not record.value("comitted").toBool()
             if editable:
                 foo = '<a href = "edit_note_%d">%s</a>%s'% (
                     record.value("ix").toInt()[0] , SETTINGS.PENCIL, foo)
@@ -189,7 +189,7 @@ a view aware editable model of data stored in various notes tables
             foo = foo.replace("<", "&lt;").replace(">", "&gt;").replace(
                 "\n", "<br />")
 
-            editable = not record.value("committed").toBool()
+            editable = not record.value("comitted").toBool()
             if editable:
                 foo = '<a href = "edit_note_%d">%s</a>%s'% (
                     record.value("ix").toInt()[0] , SETTINGS.PENCIL, foo)
@@ -275,7 +275,7 @@ a view aware editable model of data stored in various notes tables
             foo = foo.replace("<", "&lt;").replace(">", "&gt;").replace(
                 "\n", "<br />")
 
-            editable = not record.value("committed").toBool()
+            editable = not record.value("comitted").toBool()
             record_type = "clinical" if record.is_clinical else "clerical"
             if editable:
                 foo = '<a href = "edit_%s_note_%d">%s</a>%s'% (

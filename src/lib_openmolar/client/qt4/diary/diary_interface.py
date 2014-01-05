@@ -58,10 +58,12 @@ class DiaryInterface(QtGui.QWidget):
         '''
         usually called when the database has connected/changed
         '''
+        QtGui.QApplication.instance().setOverrideCursor(QtCore.Qt.WaitCursor)
         self.diary_control.refresh()
         self.model.load()
         self.diary_control.set_limits(self.model.start_date,
             self.model.end_date)
+        QtGui.QApplication.instance().restoreOverrideCursor()
 
     def Advise(self, *args):
         if __name__ == "__main__":

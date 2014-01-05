@@ -248,7 +248,7 @@ where patient_id = ?'''
                 result = result and self.commit_item(item)
 
         for item in self.deleted_items:
-            #sliently drop any items which never got committed
+            #sliently drop any items which never got comitted
             if item.in_database:
                 LOGGER.debug("remove %s from database"% item)
         return result

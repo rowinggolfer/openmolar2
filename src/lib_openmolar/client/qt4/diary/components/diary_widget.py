@@ -46,14 +46,16 @@ class DiaryWidget(QtGui.QWidget, _DiarySettings):
         self.date = QtCore.QDate.currentDate()
         self._style = self.DAY
 
-        self.canvas = DiaryCanvas(self.date, self)
+        self.header = _DiaryHeader(self.date, self)
+        self.canvas = _DiaryCanvas(self.date, self)
         self.vscroll_bar = QtGui.QScrollBar()
         self.connect_scrollbars()
 
-        layout = QtGui.QHBoxLayout(self)
+        layout = QtGui.QGridLayout(self)
         layout.setSpacing(2)
-        layout.addWidget(self.canvas)
-        layout.addWidget(self.vscroll_bar)
+        layout.addWidget(self.header,0,0,1,1)
+        layout.addWidget(self.canvas,1,0)
+        layout.addWidget(self.vscroll_bar,1,1)
 
         self.connect(self.canvas, QtCore.SIGNAL("resized"),
             self.set_scroll_values)
@@ -68,9 +70,10 @@ class DiaryWidget(QtGui.QWidget, _DiarySettings):
         else:
             self.vscroll_bar.valueChanged.disconnect(self.vscroll)
 
-    def set_date(self, date):
-        self.date = date
-        self.canvas.set_date(date)
+    def set_date(self, date_):
+        self.date = date_
+        self.canvas.set_date(date_)
+        self.header.set_date(date_)
         self.set_scroll_values()
 
     def set_scroll_values(self):
@@ -103,10 +106,18 @@ class DiaryWidget(QtGui.QWidget, _DiarySettings):
         _DiarySettings.set_style(self, style)
         self.set_scroll_values()
         self.canvas.set_style(style)
+        self.header.set_offset(self.canvas.left_margin.width)
+        self.header.set_style(style)
 
-class DiaryCanvasTopMargin(_DiarySettings):
+    def showEvent(self, event=None):
+        self.header.set_offset(self.canvas.left_margin.width)
+
+    def update(self):
+        QtGui.QWidget.update(self)
+
+class _DiaryCanvasTopMargin(_DiarySettings):
     '''
-    the left hand column of the canvas(if required)
+    the top row of the canvas(if required)
     '''
     def __init__(self, date):
         _DiarySettings.__init__(self)
@@ -115,6 +126,10 @@ class DiaryCanvasTopMargin(_DiarySettings):
         self.calc_height()
         self._rect = None
         self._headers = None
+        self.model = None
+
+    def set_model(self, model):
+        self.model = model
 
     def set_date(self, date):
         self.date = date
@@ -138,7 +153,7 @@ class DiaryCanvasTopMargin(_DiarySettings):
     def headers(self):
         if self._headers == None:
             if self._style == self.DAY:
-                self._headers = [self.date.toString()]
+                self._headers = ["NW", "BW", "HW"]
             elif self._style == self.FOUR_DAY:
                 self._headers = []
                 for i in range(4):
@@ -148,7 +163,8 @@ class DiaryCanvasTopMargin(_DiarySettings):
                 dayno = self.date.dayOfWeek()
                 for i in range(1,8):
                     d = self.date.addDays(i-dayno)
-                    self._headers.append(u"%s %s"% (d.shortDayName(i), d.toString("d/MM")))
+                    self._headers.append(u"%s %s"% (d.shortDayName(i),
+                        d.toString("d/MM")))
             elif self._style in (self.FORTNIGHT, self.MONTH):
                 self._headers = []
                 for i in range(1,8):
@@ -187,7 +203,7 @@ class DiaryCanvasTopMargin(_DiarySettings):
         self.calc_height()
         self._headers = None
 
-class DiaryCanvasLeftMargin(_DiarySettings):
+class _DiaryCanvasLeftMargin(_DiarySettings):
     '''
     the left hand column of the canvas(if required)
     '''
@@ -200,6 +216,10 @@ class DiaryCanvasLeftMargin(_DiarySettings):
         self.calc_width()
         self._months = None
         self._rect = None
+        self.model = None
+
+    def set_model(self, model):
+        self.model = model
 
     def calc_width(self):
         if self._style == self.YEAR:
@@ -252,7 +272,8 @@ class DiaryCanvasLeftMargin(_DiarySettings):
             option = QtGui.QTextOption(QtCore.Qt.AlignCenter)
             for i in range(12):
                 month = self.model.header_data(scroll_value+i, self.YEAR)
-                rect = QtCore.QRectF(0, i * cell_height, self.width, cell_height)
+                rect = QtCore.QRectF(0, i * cell_height,
+                    self.width, cell_height)
                 painter.drawText(rect, month, option)
 
         elif self._style in (self.TASKS, self.AGENDA):
@@ -289,7 +310,7 @@ class DayCell(QtCore.QRectF, _DiarySettings):
     def has_time_data(self):
         return self.time_cells != []
 
-class DiaryCanvas(QtGui.QWidget, _DiarySettings):
+class _DiaryCanvas(QtGui.QWidget, _DiarySettings):
     '''
     The Canvas of the diary
     '''
@@ -300,8 +321,8 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
             QtGui.QSizePolicy.Expanding))
         self.date = date
         self.model = None
-        self.left_margin = DiaryCanvasLeftMargin()
-        self.top_margin = DiaryCanvasTopMargin(date)
+        self.left_margin = _DiaryCanvasLeftMargin()
+        self.top_margin = _DiaryCanvasTopMargin(date)
         self.apply_style()
         self.mouse_pos = QtCore.QPointF()
         self.setMouseTracking(True)
@@ -309,6 +330,9 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
         self.scroll_value = 0
         self.painter_offset_y = 0
         self.is_resized = True
+
+    def set_model(self, model):
+        self.model = model
 
     def sizeHint(self):
         return QtCore.QSize(400, 400)
@@ -434,7 +458,8 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
 
     def setModel(self, model):
         self.model = model
-        self.left_margin.model = model
+        self.top_margin.set_model(model)
+        self.left_margin.set_model(model)
 
     @property
     def row_count(self):
@@ -503,13 +528,16 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
         palette = self.palette()
         painter = QtGui.QPainter(self)
 
-        painter.fillRect(self.rect(), palette.base().color())
+        # start with a blank canvas!
+        painter.fillRect(self.rect(), palette.base())
 
-        year_rect = QtCore.QRectF(0, 0,
+        # top left corner has to be filled in
+        ## TODO this could be a point for user interaction
+        spare_rect = QtCore.QRectF(0, 0,
             self.left_margin.width, self.top_margin.height)
+        painter.fillRect(spare_rect, palette.alternateBase())
 
-        painter.fillRect(year_rect, palette.highlight().color())
-
+        # highlight the top margin
         painter.save()
         painter.translate(self.left_margin.width, 0)
         painter.fillRect(self.top_margin.rect, palette.highlight())
@@ -521,12 +549,6 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
             painter.fillRect(self.left_margin.rect, palette.highlight())
         else:
             painter.fillRect(self.left_margin.rect, palette.alternateBase())
-        painter.restore()
-
-        painter.save()
-        painter.setPen(palette.highlightedText().color())
-        painter.drawText(year_rect, str(self.date.year()),
-            QtGui.QTextOption(QtCore.Qt.AlignCenter))
         painter.restore()
 
         #top header texts  (never scrolls)
@@ -546,7 +568,7 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
             painter.setClipRect(self.canvas_rect)
             self.painter_offset_y = self.top_margin.height-self.scroll_value
             painter.translate(0, self.painter_offset_y)
-            self.left_margin.draw_headers(painter, 0)#self.scroll_value)
+            self.left_margin.draw_headers(painter, 0)
 
             for cell in self.day_cells:
                 self.draw_date_cell(cell, painter)
@@ -772,30 +794,135 @@ class DiaryCanvas(QtGui.QWidget, _DiarySettings):
             painter.fillRect(entry.rect, APPOINTMENT_COLOUR)
             painter.drawText(entry.rect, entry.message)
 
-if __name__ == "__main__":
+class _DiaryHeader(QtGui.QWidget, _DiarySettings):
+    '''
+    The Header
+    '''
+    def __init__(self, date_, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        _DiarySettings.__init__(self)
+        self.date = date_
+        self.apply_style()
+        self._offset = 0
+        self._headers = None
 
-    app = QtGui.QApplication([])
-    dl = QtGui.QDialog()
-    dl.setMinimumSize(500,300)
+    def sizeHint(self):
+        return QtCore.QSize(300,50)
+
+    def set_date(self, date_):
+        self.date = date_
+        self._headers = None
+        self.update()
+
+    def apply_style(self):
+        self._headers = None
+        if self._style == self.DAY:
+            self.no_main_cols = 1
+        elif self._style == self.FOUR_DAY:
+            self.no_main_cols = 4
+        elif self._style == self.WEEK:
+            self.no_main_cols = 7
+        elif self._style == self.FORTNIGHT:
+            self.no_main_cols = 7
+        elif self._style == self.MONTH:
+            self.no_main_cols = 7
+        elif self._style == self.YEAR:
+            self.no_main_cols = 37
+        elif self._style in  (self.AGENDA, self.TASKS):
+            self.no_main_cols = 1
+
+    def set_style(self, style):
+        '''
+        set the style as day, fourday, week, fortnight, month or year
+        '''
+        _DiarySettings.set_style(self, style)
+        self.apply_style()
+        self.update()
+
+    @property
+    def headers(self):
+        if self._headers == None:
+            if self._style == self.DAY:
+                self._headers = [self.date.toString()]
+            elif self._style == self.FOUR_DAY:
+                self._headers = []
+                for i in range(4):
+                    self._headers.append(self.date.addDays(i).toString())
+            elif self._style == self.WEEK:
+                self._headers = []
+                dayno = self.date.dayOfWeek()
+                for i in range(1,8):
+                    d = self.date.addDays(i-dayno)
+                    self._headers.append(
+                    u"%s %s"% (d.shortDayName(i), d.toString("d/MM")))
+            elif self._style in (self.FORTNIGHT, self.MONTH):
+                self._headers = []
+                for i in range(1,8):
+                    self._headers.append(self.date.shortDayName(i))
+            elif self._style == self.YEAR:
+                labels = []
+                for i in range(1,8):
+                    labels.append(self.date.shortDayName(i)[0])
+                self._headers = (labels * 6)[:37]
+            elif self._style == self.AGENDA:
+                self._headers = [_("Agenda")]
+            elif self._style == self.TASKS:
+                self._headers = [_("Tasks")]
+            else:
+                self._headers = ["whoops!"]
+
+        return self._headers
+
+
+    def set_offset(self, offset):
+        self._offset = offset
+
+    def paintEvent(self, event=None):
+        option = QtGui.QTextOption(QtCore.Qt.AlignCenter)
+        palette = self.palette()
+        painter = QtGui.QPainter(self)
+
+        x = self._offset
+        top_y = self.rect().top()
+        bottom_y = self.rect().bottom()-1
+        colwidth = (self.width() - self._offset - 1) / self.no_main_cols
+        for col in range(self.no_main_cols):
+            rect = QtCore.QRectF(x, top_y, colwidth, bottom_y)
+            painter.drawText(rect, self.headers[col], option)
+            painter.drawRect(rect)
+            x += colwidth
+
+        year_rect = QtCore.QRectF(0, 0, self._offset, bottom_y)
+        painter.drawText(year_rect, str(self.date.year()), option)
+
+
+if __name__ == "__main__":
 
     from lib_openmolar.client.db_orm.diary import DiaryDataModel
     from lib_openmolar.client.connect import DemoClientConnection
+    app = QtGui.QApplication([])
+
     cc = DemoClientConnection()
     cc.connect()
     model = DiaryDataModel()
     model.load()
 
-    obj = DiaryWidget(dl)
+    mw = QtGui.QMainWindow()
+
+    obj = DiaryWidget()
     obj.setModel(model)
+    obj.set_date(QtCore.QDate.currentDate().addDays(1))
 
     cb = QtGui.QComboBox()
     cb.addItems(["Day","4 day", "week", "fortnight", "month",
         "year", "agenda", "tasks"])
     cb.currentIndexChanged.connect(obj.setViewStyle)
 
-    layout = QtGui.QVBoxLayout(dl)
-    layout.setMargin(0)
+    frame = QtGui.QFrame()
+    layout = QtGui.QVBoxLayout(frame)
     layout.addWidget(obj)
     layout.addWidget(cb)
 
-    dl.exec_()
+    mw.setCentralWidget(frame)
+    mw.show()
+    app.exec_()
