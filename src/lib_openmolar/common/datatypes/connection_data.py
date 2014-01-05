@@ -86,7 +86,8 @@ class ConnectionData(object):
         if self.conf_file is None:
             LOGGER.error(
             "Cannot reset connection data which has no associated conf file")
-        self.from_conf_file(self.conf_file)
+        else:
+            self.from_conf_file(self.conf_file)
 
     def from_conf_file(self, conf_file):
         '''

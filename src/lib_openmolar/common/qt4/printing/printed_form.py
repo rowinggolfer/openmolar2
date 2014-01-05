@@ -24,6 +24,7 @@
 Provides a Class for printing on an A4 Sheet
 '''
 
+from __future__ import division
 from PyQt4 import QtCore, QtGui
 
 class PrintedForm(object):
@@ -42,9 +43,10 @@ class PrintedForm(object):
 
         self.printer = QtGui.QPrinter()
         self.printer.setPageSize(QtGui.QPrinter.A4)
-        self.printer.setPaperSource(QtGui.QPrinter.Middle)  #set bin 2
+        self.printer.setFullPage(True)
+        self.printer.setResolution(96)
 
-    def setOffset(self, x, y):
+    def set_offset(self, x, y):
         '''
         offsets all printing by x,y
         '''
@@ -89,22 +91,30 @@ class PrintedForm(object):
             painter.restore()
 
         painter.translate(self.off_set)
-
-        if self.testing_mode:
+        
+        print "translating form by %s"% self.off_set
+        
+        if self.testing_mode: #outline the boxes
             painter.save()
-            painter.setPen(QtGui.QPen(QtCore.Qt.black,1))
+            
+            painter.translate(self.off_set)
+            painter.setPen(QtGui.QPen(QtCore.Qt.black, 1))
             for rect in self.rects.values():
                 painter.drawRect(rect)
+
             painter.restore()
 
         return painter
 
 if __name__ == "__main__":
+    import os
+    os.chdir(os.path.expanduser("~")) # for print to file
+    
     app = QtGui.QApplication([])
     form = PrintedForm()
     form.testing_mode = True
 
-    form.rects = {"test":QtCore.QRect(600,1000,100,10)}
+    form.rects = {"test":QtCore.QRect(100,100,100,100)}
 
     form.controlled_print()
 

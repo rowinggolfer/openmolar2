@@ -54,7 +54,7 @@ class PluginOptionsWidget(QtGui.QWidget):
         self.config_button = QtGui.QPushButton(icon2, _("&Configure Plugin"),
             self)
         self.config_button.setEnabled(False)
-
+        
         spacer = QtGui.QSpacerItem(0, 0, QtGui.QSizePolicy.Expanding,
             QtGui.QSizePolicy.Minimum)
 
@@ -78,14 +78,19 @@ class PluginOptionsWidget(QtGui.QWidget):
             self)
 
         self.add_button = QtGui.QPushButton(icon2, _("Add &Plugins"), self)
+        
+        reload_button = QtGui.QPushButton(icon2, _("Reload Plugins"), self)
 
         dir_button = QtGui.QPushButton(icon2, _("Plugin directories"))
         dir_button.clicked.connect(self.show_directory_dialog)
+        
+        reload_button.clicked.connect(self.reload_plugins)
 
         layout = QtGui.QVBoxLayout(frame_right)
         layout.addWidget(self.web_button)
         layout.addWidget(self.add_button)
         layout.addStretch()
+        layout.addWidget(reload_button)
         layout.addWidget(dir_button)
 
         self.show_plugins()
@@ -166,6 +171,17 @@ class PluginOptionsWidget(QtGui.QWidget):
         else:
             self.listwidget.itemChanged.disconnect(self._item_changed)
 
+
+    def reload_plugins(self):
+        self.enable_checking(False)
+        for plugin in SETTINGS.plugins:
+            SETTINGS.deactivate_plugin(plugin)
+        SETTINGS._plugins = []
+        SETTINGS.load_plugins()
+        self.show_plugins()
+        self.enable_checking()
+        
+        
 
 def _test():
     import logging

@@ -26,11 +26,11 @@ from lib_openmolar.common.datatypes import ConnectionData
 from openmolar_database import ConnectionError, OpenmolarDatabase
 
 class PostgresSessionWidget(QtGui.QWidget):
-    #:
-    pg_session = None
-
+    
     def __init__(self, parent = None):
         QtGui.QWidget.__init__(self, parent)
+        self.pg_session = None
+        '''pointer to the QtSqlQDatabase'''
         self.setup_ui()
 
     def setup_ui(self):

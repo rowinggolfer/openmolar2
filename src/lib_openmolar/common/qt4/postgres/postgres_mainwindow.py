@@ -214,13 +214,20 @@ class PostgresMainWindow(PlugableMainWindow):
                     if self._attempt_connection(session):
                         self.add_session(session)
                 except session.SchemaVersionError as error:
-                    self.advise(u"%s<hr /><pre>%s</pre>"% (
-                        _("Schema is out of date"), error), 2)
+                    self.handle_schema_version_error(session, error)
                     LOGGER.exception("Schema Version Error")
                 finally:
                     break
         self.update_session_status()
-
+        
+    def handle_schema_version_error(self, session, error):
+        '''
+        If, on connection to a database, the schema version is found to be
+        unsupported by the application, this function is called.
+        '''
+        self.advise(u"%s<hr /><pre>%s</pre>"% (
+            _("Schema is out of date"), error), 2)
+                    
     def _attempt_connection(self, session):
         '''
         attempt to open session (ie call :doc:`OpenmolarDatabase` .connect() )
