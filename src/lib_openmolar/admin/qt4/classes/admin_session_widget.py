@@ -32,13 +32,15 @@ from lib_openmolar.admin.qt4.classes.database_table import (
     RelationalDatabaseTableViewer)
 
 class AdminSessionWidget(PostgresSessionWidget):
-    sql_tools = []
-
     #:
     query_error = QtCore.pyqtSignal(object)
 
     #:
     query_sucess = QtCore.pyqtSignal(object)
+
+    def __init__(self, parent=None):
+        self.sql_tools = []
+        PostgresSessionWidget.__init__(self, parent)
 
     def setup_ui(self):
         layout = QtGui.QVBoxLayout(self)
@@ -126,6 +128,7 @@ class AdminSessionWidget(PostgresSessionWidget):
         self.set_session(self.pg_session)
 
     def set_session(self, session):
+        LOGGER.debug("AdminSessionWidget.set_session(%s)"% session)
         PostgresSessionWidget.set_session(self, session)
         for tool in self.sql_tools:
             tool.set_connection(session)

@@ -80,7 +80,7 @@ class DemoGenerator(object):
 
             self.record.setValue('open_time', t_stamp)
             self.record.setValue('commit_time', t_stamp)
-            self.record.setValue('committed', True)
+            self.record.setValue('comitted', True)
 
             yield self.record.insert_query
 

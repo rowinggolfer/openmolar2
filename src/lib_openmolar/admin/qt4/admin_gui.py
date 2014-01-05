@@ -203,6 +203,14 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
         return admin_session_widget
 
+    def handle_schema_version_error(self, session, error):
+        '''
+        re-implement PostgresMainwindows.handle_schema_version_error function
+        '''
+        self.advise(_("Warning - schema is out of date"), 1)
+        #self.advise(_("Do you wish to upgrade the database?"), 1)
+        self.add_session(session)
+        
     def _init_proxies(self):
         '''
         called at startup, and by the om_connect action
@@ -276,11 +284,17 @@ class AdminMainWindow(PostgresMainWindow, ProxyManager):
 
     @property
     def chosen_pg_session(self):
+        '''
+        if multiple postgres sessions are in progress, this should
+        select the current session.
+        '''
         if len(self.session_widgets) == 1:
             i = 0
         else:
             i = self.central_widget.currentIndex()-1
-
+        LOGGER.debug(
+            "AdminMainWindow.chosen_pg_session - returning session %s"% i)
+        
         pg_session = self.session_widgets[i].pg_session
         return pg_session
 

@@ -67,10 +67,11 @@ class ManageHistoryDialog(BaseDialog):
 
 class SqlQueryTable(QtGui.QWidget):
     pg_session = None
-    name = _("SqlQuery Tool")
+    name = "SqlQuery Tool"
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
+        self.name = _(self.name)
         self.query_editor = Qsci.QsciScintilla()
 
         self.query_editor.setLexer(Qsci.QsciLexerSQL())

@@ -88,9 +88,10 @@ class ImportProgressDialog(BaseDialog):
         return success
 
     def progress(self, att, percentage):
-        current_pb = self.progress_widgets[att]
-        current_pb.setValue(percentage)
-        self.scroll_area.ensureWidgetVisible(current_pb)
+        current_pb = self.progress_widgets.get(att)
+        if current_pb:
+            current_pb.setValue(percentage)
+            self.scroll_area.ensureWidgetVisible(current_pb)
 
 
 if __name__ == "__main__":

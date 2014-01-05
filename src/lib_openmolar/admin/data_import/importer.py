@@ -317,7 +317,7 @@ class Importer(object):
         time.sleep(1)
         self.register_progress("import_tx_completed", 100)
 
-    def import_all(self, *args):
+    def import_all(self, omitted_functions = []):
         '''
         go to work
 
@@ -326,11 +326,15 @@ class Importer(object):
         '''
         LOGGER.info ("running import_all function")
         warnings, tracebacks = [], []
-        for func in self.IMPORT_FUNCTIONS:
+        for func in self.IMPORT_FUNCTIONS:        
             try:
                 sys.stdout.flush()
-                func()
-
+                if func in omitted_functions:
+                    LOGGER.warning("ommitting function %s"% func.__name__)
+                    self.register_progress(func.__name__, 100)
+                    
+                else:
+                    func()
             except self.ImportWarning as exc:
                 warnings.append(func.__name__)
 
@@ -366,11 +370,11 @@ class Importer(object):
                 LOGGER.error("#    %s"% tb)
             LOGGER.error("!"*60)
 
-    def run(self):
+    def run(self, omitted_functions = []):
         '''
         calls import_all
         '''
-        self.import_all()
+        self.import_all(omitted_functions)
 
     def emit_finished_signal(self):
         self.emit_(QtCore.SIGNAL("Import Finished"))
@@ -381,7 +385,7 @@ class Importer(object):
         '''
         #LOGGER.debug("progress %s - %s"% (key, percentage))
         self.emit_(QtCore.SIGNAL("import progress"), func, percentage)
-
+        
     def emit_(self, *args):
         '''
         emit signals but be wary of case when there is no gui

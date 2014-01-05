@@ -27,6 +27,44 @@ from lib_openmolar.admin.qt4.dialogs import ImportProgressDialog
 
 from lib_openmolar.admin.data_import.importer import Importer
 
+class _AdvancedPanel(QtGui.QWidget):
+    def __init__(self, functions, parent = None):
+        QtGui.QWidget.__init__(self, parent)
+        label = QtGui.QLabel(_("Only perform the following functions"))
+        check_master = QtGui.QCheckBox(_('check / uncheck all'))
+        check_master.setChecked(True)
+        check_master.toggled.connect(self.check_all)
+
+        frame = QtGui.QFrame(self)
+        f_layout = QtGui.QVBoxLayout(frame)
+        self.function_dict = {}
+        for function in functions:
+            cb = QtGui.QCheckBox(function.__name__)
+            cb.setChecked(True)
+            f_layout.addWidget(cb)
+            self.function_dict[function] = cb
+
+        scroll_area = QtGui.QScrollArea(self)
+        scroll_area.setWidget(frame)
+
+        layout = QtGui.QVBoxLayout(self)
+        layout.addWidget(label)
+        layout.addWidget(scroll_area)
+        layout.addWidget(check_master)
+
+    def check_all(self, i):
+        for cb in self.function_dict.values():
+            cb.setChecked(i)
+
+    @property
+    def omitted_functions(self):
+        omitted = []
+        for function in self.function_dict.keys():
+            cb = self.function_dict[function]
+            if not cb.isChecked():
+                omitted.append(function)
+        return omitted
+
 
 class ImportDialog(ExtendableDialog):
 
@@ -54,6 +92,9 @@ class ImportDialog(ExtendableDialog):
         '''
         assert isinstance(importer, Importer)
         self.importer = importer
+        self.function_select_widget = _AdvancedPanel(
+            importer.IMPORT_FUNCTIONS, self)
+        self.add_advanced_widget(self.function_select_widget)
 
     def no_importer_message(self):
         return QtGui.QMessageBox.warning(self.parent(), _("error"),
@@ -79,7 +120,7 @@ class ImportDialog(ExtendableDialog):
         '''
         LOGGER.debug("start importing now!!")
         try:
-            self.importer.run()
+            self.importer.run(self.function_select_widget.omitted_functions)
         except Exception:
             LOGGER.exception("Unhandled error thrown by the importer")
 
@@ -92,8 +133,12 @@ class ImportDialog(ExtendableDialog):
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()
 
-        FUNCS = self.importer.IMPORT_FUNCTIONS
-        prog_dl = ImportProgressDialog(FUNCS, self.parent())
+        funcs = []
+        omitted_functions = self.function_select_widget.omitted_functions
+        for func in self.importer.IMPORT_FUNCTIONS:
+            if func not in omitted_functions:
+                funcs.append(func)
+        prog_dl = ImportProgressDialog(funcs, self.parent())
         if not prog_dl.exec_():
             if self.work_thread.isRunning():
                 LOGGER.error("you quitted!")
@@ -110,7 +155,7 @@ def _test():
 
     mw = QtGui.QMainWindow()
     mw.setWindowTitle("Mock Parent")
-
+    
     dc = DemoAdminConnection()
     dc.connect()
 

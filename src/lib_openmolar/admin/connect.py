@@ -62,7 +62,7 @@ class AdminConnection(OpenmolarDatabase):
         '''
         return self.tables()
 
-    def populateDemo(self, ommitted_modules=[]):
+    def populateDemo(self, omitted_modules=[]):
         '''
         checks connection is to openmolar_demo, and if so,
         adds demo data to the tables.
@@ -76,7 +76,7 @@ class AdminConnection(OpenmolarDatabase):
         ## order is important (foreign keys etc)
 
         for module in ADMIN_MODULES:
-            if module in ommitted_modules:
+            if module in omitted_modules:
                 LOGGER.info("Ommitting module %s"% module.__name__)
                 continue
             try:

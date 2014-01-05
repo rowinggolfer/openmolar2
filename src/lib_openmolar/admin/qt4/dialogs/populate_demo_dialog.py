@@ -56,13 +56,13 @@ class _AdvancedPanel(QtGui.QWidget):
             cb.setChecked(i)
 
     @property
-    def ommitted_modules(self):
-        ommitted = []
+    def omitted_modules(self):
+        omitted = []
         for module in self.module_dict.keys():
             cb = self.module_dict[module]
             if not cb.isChecked():
-                ommitted.append(module)
-        return ommitted
+                omitted.append(module)
+        return omitted
 
 class PopulateDemoDialog(ExtendableDialog):
     def __init__(self, connection, parent=None):
@@ -124,7 +124,7 @@ _("continuing may corrupt/overwrite any existing data in the database named"),
         '''
         adds the hogwarts dental practice to the demo
         '''
-        self.ommisions = self.adv_widg.ommitted_modules
+        self.ommisions = self.adv_widg.omitted_modules
 
         self.work_thread.start()
         self.dirty = self.work_thread.isRunning()

@@ -46,7 +46,7 @@ class DemoGenerator(object):
             self.record.clearValues()
             self.record.setValue('user_id', id)
             self.record.setValue('book_start', QtCore.QDate(year, 1, 1))
-            self.record.setValue('book_end', QtCore.QDate(year+3, 1, 1))
+            self.record.setValue('book_end', QtCore.QDate(year+2, 1, 1))
             self.record.setValue('comment', 'demo diary')
             yield self.record.insert_query
 
