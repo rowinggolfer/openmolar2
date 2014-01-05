@@ -1,0 +1,22 @@
+<!DOCTYPE RCC>
+   <RCC version="1.0">
+      <qresource>
+         <file>icons/openmolar-server.png</file>
+         <file>icons/database.png</file>
+         <file>avatars/demo_blondie.svg</file> 
+         <file>avatars/demo_iceman.svg</file>    
+         <file>avatars/demo_me.svg</file>
+         <file>avatars/demo_frog.svg</file>
+         <file>avatars/demo_jellyman.svg</file>  
+         <file>avatars/demo_negro.svg</file>
+         <file>avatars/demo_andi.svg</file>
+         <file>avatars/demo_neil.svg</file>
+         <file>avatars/demo_helen.svg</file>
+         <file>avatars/demo_nattress.svg</file>
+         <file>avatars/demo_lucy.svg</file>
+         <file>avatars/demo_ja.svg</file>
+         <file>avatars/demo_sally.svg</file>
+         
+      </qresource>
+   </RCC>
+
