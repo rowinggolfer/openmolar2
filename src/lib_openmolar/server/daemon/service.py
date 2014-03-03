@@ -139,15 +139,18 @@ class Service(object):
         LOGGER.info('checking status of openmolar-server process')
         try:
             pidfile = open(PIDFILE)
-            pid = pidfile.readline()
+            pid = pidfile.readline().strip()
             os.kill(int(pid), 0)
         except OSError:
-            LOGGER.warning('openmolar-server process not running')
+            message = 'openmolar-server process not running'
+            LOGGER.warning(message)
         except IOError:
-            LOGGER.warning('openmolar-server process not running')
+            message = 'openmolar-server process not running'
+            LOGGER.warning(message)
         else:
-            LOGGER.info(
-                'openmolar-server process is running with PID: %s'% pid)
+            message = 'openmolar-server process is running with PID: %s'% pid
+            LOGGER.info(message)
+        print (message)
 
     @property
     def is_running(self):
