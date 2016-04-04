@@ -266,5 +266,7 @@ if __name__ == "__main__":
 
     advisor = Advisor()
     advisor.show()
+    advisor.advise("hello world")
+    advisor.advise("hello world",1)
     advisor.advise("hello world",2)
     app.exec_()
